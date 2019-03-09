@@ -1,0 +1,306 @@
+{% extends 'base.html'%}
+
+{% load bootstrap3 %}
+
+{# Display a form #}
+
+{%block content%}
+<form method="post" action="#">
+
+	{% csrf_token %}
+	{{	atributo_formset.management_form	}}
+	{{ 	talla_formset.management_form	}}
+	{{	productos_relacionados_formset.management_form	}}
+	{{	rel_producto_categoria_formset.management_form	}}
+	{{ 	img_producto_formset.management_form	}}
+	<h1 class="base-h1">
+		Producto
+	</h1>
+	<br>	
+	<div class="row">
+		<div class="col-xs-12 cls_form">			
+			{% bootstrap_field form.nombre %}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-12 cls_form">
+			{% bootstrap_field form.desc_producto%}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-6 cls_form">
+			{%bootstrap_field form.precio%}
+		</div>
+		<div class="col-xs-6 cls_form">
+			{% bootstrap_field form.descuento %}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-6 cls_form">
+			<label>Proveedor</label>
+			{% bootstrap_field form.id_proveedor show_label=False%}
+		</div>
+		<div class="col-xs-6 cls_form">
+			{% bootstrap_field form.marca %}
+		</div>
+	
+	</div>
+	<div class="row">
+		<div class="col-xs-6 cls_form">
+			<label>Clave Producto (Proveedor)</label>
+			{% bootstrap_field form.clave_prod_proveedor show_label=False %}
+		</div>
+	</div>
+	<br>
+	<br>
+	<div class="row">
+	<div class="col-xs-12 col-sm-6 cls_form">
+		<h2 class="page-header">Atributos</h2>
+		<br>
+		<table class="table_atributo table">
+			<thead>
+				<th>
+				</th>
+				<th>Atributo</th>
+				<th>Valor Atributo</th>
+			</thead>
+			<tbody>    				
+				{% for form in atributo_formset %}
+					<tr>
+						<td>{% bootstrap_field form.id %}</td>
+						<td>{% bootstrap_field form.atributo  show_label=False%}
+							{%bootstrap_form_errors form %}
+						</td>
+						
+						<td>{% bootstrap_field form.valor_atributo  show_label=False%}</td>
+						<td>{%bootstrap_field form.DELETE %}</td>
+						
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		<div style="width:100%;text-align:right">
+				<button id="add-item-atributo" type="button">{%bootstrap_icon "plus"%}</button>
+		</div>
+		
+	</div>
+	
+	
+		<div class="col-xs-12 col-sm-6 cls_form">
+		<h2 class="page-header">Tallas</h2>
+		<br>
+			<table class="table_talla table">
+				<thead>
+					<th>					
+					</th>
+					<th>
+						Tallas
+					</th>
+				</thead>
+				<tbody>
+					{%for form in talla_formset %}
+					<tr>
+						<td>{% bootstrap_field form.id  %}</td>
+						<td>
+							{%bootstrap_field form.talla show_label=False%}
+							{%bootstrap_form_errors form %}	
+						</td>
+						<td>
+							{% bootstrap_field form.DELETE %}
+						</td>
+						
+					</tr>
+					{%endfor%}
+				</tbody>
+			</table>
+				
+			<div style="width:100%;text-align:right">
+					<button id="add-item-talla" type="button">{%bootstrap_icon "plus"%}</button>
+			</div>
+			
+		</div>
+		
+	</div>
+	<br>
+	<br>
+	<div class="row">
+		<div class="col-xs-12 col-sm-6">
+			<h2 class="page-header">Productos Relacionados</h2>
+			<br>			
+			<table class="table_Productos_Relacionados table">
+				<thead>
+					<th>
+						
+					</th>
+					<th>
+						Producto
+					</th>
+				</thead>		
+				<tbody>
+					
+					{%for form in productos_relacionados_formset %}
+						<tr >						
+							<td>
+								{{form.id}}
+							</td>
+							<td>
+								<!--{{ form.as_ul }}-->								
+								
+								{% bootstrap_field form.id_producto_relacionado show_label=False %}
+								{% bootstrap_form_errors form layout='inline' %}
+								
+							</td>							
+							<td>
+								{% bootstrap_field form.DELETE %}
+							</td>
+						</tr>
+					{%endfor%}
+				</tbody>
+			</table>			
+			<div style="width:100%;text-align:right">
+					<button id="add-item-prod-relacionado" type="button">{%bootstrap_icon "plus"%}</button>
+			</div>
+		</div>	
+		<div class="col-xs-12 col-sm-6">
+			<h2 class="page-header">Categorias</h2>
+			<br>
+			<table class="table_categorias table">
+				<thead>
+					<th></th>
+					<th>Categoria</th>
+					<th></th>
+				</thead>
+				<tbody>
+					{% for form in rel_producto_categoria_formset %}
+					<tr>
+						<td>{{form.id}}</td>
+						<td>
+							{% bootstrap_field form.id_categoria show_label=False %}
+							{% bootstrap_form_errors form  %}						
+						</td>
+						<td>
+							{%bootstrap_field form.DELETE %}
+						</td>
+					</tr>
+					{%endfor%}
+				</tbody>
+			</table>
+			<div style="width:100%;text-align:right">
+					<button id="add-item-categoria" type="button">{%bootstrap_icon "plus"%}</button>
+			</div>
+		</div>
+	</div>
+	<br><br>
+	<div class="row">
+			<div class="col-xs-12 col-sm-6">
+				<h2 class="page-header">
+					Estatus
+				</h2>
+				<br>
+				{%bootstrap_field form.id_estatus show_label=False%}
+			</div>
+			<div class="col-xs-12 col-sm-6">
+				<h2 class="page-header">Imagenes</h2>
+				<br>
+				<table class="table table_imagenes">
+					<thead >
+						<th></th>
+						<th>Nom Imagen</th>
+						<th>orden</th>
+					</thead>
+					<tbody>
+						{% for img in img_producto_formset %}
+						<tr>
+							<td>
+								{{img.id}}
+							</td>
+							<td>
+								{% bootstrap_field img.nom_img show_label=False %}
+							</td>
+							<td>
+								{%  bootstrap_field img.orden show_label=False  %}
+							</td>
+							<td>
+								{%bootstrap_field img.DELETE %}
+							</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+				<div style="width:100%;text-align:right">
+					<button id="add-item-imagen" type="button">{%bootstrap_icon "plus"%}</button>
+			</div>
+			</div>
+		</div>
+	
+	<br><br>
+	<div class="row">	
+		<div class="col-xs-12 " style="text-align:center">
+			<button class="btn btn-primary btn-lg">Guardar</button>
+		</div>
+	</div>
+	
+	
+</form>
+
+<script>
+
+
+	
+	$(document).ready(
+		function()
+		{	
+			/*$(".remove_prod_rel").click(				
+					function()
+					{
+						event.preventDefault();
+						$(this).closest('tr').remove();
+						cont=$("#id_producto-TOTAL_FORMS").val()-1;
+						$("#id_producto-TOTAL_FORMS").val(cont);
+						
+					}
+				
+			);*/
+		
+			$("#add-item-atributo").click(
+				function ()
+				{
+					addItem("table_atributo","id_atributos_set-TOTAL_FORMS");
+				}
+			);
+			
+			$("#add-item-talla").click(
+				function ()
+				{
+						addItem("table_talla","id_tallas_set-TOTAL_FORMS");
+				}
+			);
+			$("#add-item-prod-relacionado").click(
+				function()
+				{
+					addItem("table_Productos_Relacionados","id_producto-TOTAL_FORMS");
+				}
+			);
+			$("#add-item-categoria").click(
+				function()
+				{
+					addItem("table_categorias","id_rel_producto_categoria_set-TOTAL_FORMS");
+				}
+			);
+			
+			$("#add-item-imagen").click(
+				function()
+				{
+					addItem("table_imagenes","id_img_producto_set-TOTAL_FORMS");
+				}
+			);
+			
+			
+			
+		}
+	)
+	
+</script>
+{%endblock%}
+
+

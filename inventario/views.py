@@ -1,12 +1,163 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.shortcuts import render
-from .models import Productos,Atributos,Tallas,Img_Producto,Estatus,Productos_Relacionados,Carrito_Compras,Municipio,Estado,Pais,Direccion_Envio
-from .models import Rel_Producto_Categoria,Categorias,Venta,Detalle_Venta,Direccion_Envio_Venta
+from .models import Productos,Atributos,Tallas,Img_Producto,Estatus,Productos_Relacionados,Municipio,Estado,Pais
+from .models import Rel_Producto_Categoria,Categorias,Proveedor
 from django.http import QueryDict
 from django.db.models import Sum
+from .forms import Productos_Form,Proveedores_Form,Busqueda_Producto_Form,Busca_Proveedores_Form
+from .forms import Categorias_Form,Busca_X_Clave_Prod_Prov_Form
 import decimal
+from django.forms.models import inlineformset_factory
+from django.template import RequestContext as ctx
+from django.http.response import HttpResponseRedirect
+from django.urls import reverse
+from django.contrib.auth import authenticate
 
+#formulario de busqueda de producto
+def busca_producto(request):	
+	if not request.user.is_authenticated:	
+		return HttpResponseRedirect(reverse('seguridad:login'))
+		
+	if request.method=="POST":		
+		if request.POST.get("id_proveedor")=='':
+			proveedor=0
+		else:
+			proveedor=int(request.POST.get("id_proveedor"))
+			
+		if request.POST.get("id_estatus")=='':
+			estatus=0
+		else:
+			estatus=int(request.POST.get("id_estatus"))
+			
+		if proveedor==0 and estatus==0:
+			producto=Productos.objects.all()
+		if proveedor>0 and estatus==0:
+			producto=Productos.objects.filter(id_proveedor=proveedor)
+		if estatus>0 and proveedor==0:
+			producto=Productos.objects.filter(id_estatus=estatus)
+		if proveedor>0 and estatus>0:
+			producto=Productos.objects.filter(id_proveedor=proveedor,id_estatus=estatus)						
+		form=Busqueda_Producto_Form(request.POST)			
+	else:
+		producto=Productos.objects.all()
+		form=Busqueda_Producto_Form()	
+	return render(request,'inventario/busca_producto.html',locals())
+
+def busca_proveedor(request):
+	if not request.user.is_authenticated:	
+		return HttpResponseRedirect(reverse('seguridad:login'))
+		
+	if request.method=="POST":
+		proveedor=request.POST.get("nombre_proveedor")
+		proveedor=Proveedor.objects.filter(proveedor__icontains=proveedor)
+		form=Busca_Proveedores_Form(request.POST)
+	else:
+		proveedor=Proveedor.objects.all()
+		form=Busca_Proveedores_Form()
+	return render(request,'inventario/busca_proveedor.html',locals())
+
+def busca_categoria(request):
+	categoria=Categorias.objects.all()
+	return render(request,'inventario/busca_categoria.html',locals())
+	
+#formulario alta de proveedores
+def proveedores_edicion_registro(request,id_proveedor=None):
+	if not request.user.is_authenticated:	
+		return HttpResponseRedirect(reverse('seguridad:login'))
+		
+	if id_proveedor:
+		proveedor=Proveedor.objects.get(id=id_proveedor)
+	else:
+		proveedor=Proveedor()	
+		
+	if request.method=="POST":
+		form=Proveedores_Form(request.POST,instance=proveedor)
+		if form.is_valid():
+			form.save()
+			return HttpResponseRedirect(reverse('inventario:busca_proveedor'))
+	else:
+		form=Proveedores_Form(instance=proveedor)
+	return render(request,'inventario/proveedor.html',locals())	
+
+def categoria_edicion_registro(request,id_categoria=None):
+	if not request.user.is_authenticated:	
+		return HttpResponseRedirect(reverse('seguridad:login'))
+	if id_categoria:
+		categoria=Categorias.objects.get(id=id_categoria)
+	else:
+		categoria=Categorias()
+	if request.method=="POST":
+		form=Categorias_Form(request.POST,instance=categoria)
+		if form.is_valid():
+			form.save()
+			return HttpResponseRedirect(reverse('inventario:busca_categoria'))
+	else:
+		form=Categorias_Form(instance=categoria)
+	return render(request,'inventario/categoria.html',locals())
+	
+#formulario de alta de producto
+def registro_edicion_producto(request,id_producto=None):
+	if not request.user.is_authenticated:	
+		return HttpResponseRedirect(reverse('seguridad:login'))
+
+	if id_producto:
+		producto=Productos.objects.get(id=id_producto)
+	else:
+		producto=Productos()			
+		
+	#creamos los formsets	
+	Atributo_Formset=inlineformset_factory(Productos,Atributos,fields=["atributo","valor_atributo",],extra=1,can_delete=True)		
+	Talla_Formset=inlineformset_factory(Productos,Tallas,fields=["talla",],extra=1,max_num=10,can_delete=True)
+	#imagenes_formset=inlineformset_factory(Productos,Img_Producto,fields=["nom_img","orden",],extra=2,can_delete=False)
+	Productos_Relacionados_Formset=inlineformset_factory(Productos,Productos_Relacionados,fields=["id_producto_relacionado",],fk_name="id_producto",extra=1,can_delete=True)	
+	Rel_Producto_Categoria_Formset=inlineformset_factory(Productos,Rel_Producto_Categoria,fields=["id_producto","id_categoria",],fk_name="id_producto",extra=1,can_delete=True)
+	Img_Producto_Formset=inlineformset_factory(Productos,Img_Producto,fields=["nom_img",'orden',],fk_name="id_producto",extra=1,can_delete=True)
+	if request.method=="POST":	
+		form=Productos_Form(request.POST,instance=producto)
+		atributo_formset=Atributo_Formset(request.POST,instance=producto)
+		talla_formset=Talla_Formset(request.POST,instance=producto)
+		productos_relacionados_formset=Productos_Relacionados_Formset(request.POST,instance=producto)		
+		rel_producto_categoria_formset=Rel_Producto_Categoria_Formset(request.POST,instance=producto)
+		img_producto_formset=Img_Producto_Formset(request.POST,instance=producto)
+		if form.is_valid() and atributo_formset.is_valid() and talla_formset.is_valid() and productos_relacionados_formset.is_valid() and rel_producto_categoria_formset.is_valid() and img_producto_formset.is_valid():
+			form.save()
+			atributo_formset.save()
+			talla_formset.save()
+			productos_relacionados_formset.save()
+			rel_producto_categoria_formset.save()			
+			img_producto_formset.save()
+			return HttpResponseRedirect(reverse('inventario:busca_producto'))
+	else:	
+		form=Productos_Form(instance=producto)
+		atributo_formset=Atributo_Formset(instance=producto)
+		talla_formset=Talla_Formset(instance=producto)
+		#imagenes_formset=imagenes_formset(instance=producto)
+		productos_relacionados_formset=Productos_Relacionados_Formset(instance=producto)
+		rel_producto_categoria_formset=Rel_Producto_Categoria_Formset(instance=producto)			
+		img_producto_formset=Img_Producto_Formset(instance=producto)
+	return render(request,'inventario/producto.html',locals())
+	
+def edicion_existencias(request,id_producto=None):		
+	if not request.user.is_authenticated:	
+		return HttpResponseRedirect(reverse('seguridad:login'))
+
+	if id_producto:
+		producto=Productos.objects.get(id=id_producto)
+	else:
+		producto=Productos()			
+	Talla_Formset=inlineformset_factory(Productos,Tallas,fields=["talla","entrada","salida"],extra=0,can_delete=True)
+	if request.method=="POST":
+		form=Productos_Form(request.POST,instance=producto)
+		tallas_formset=Talla_Formset(request.POST,instance=producto)
+		if tallas_formset.is_valid():
+			tallas_formset.save()
+			return HttpResponseRedirect(reverse('inventario:busca_producto'))
+	else:
+		form=Productos_Form(instance=producto)
+		tallas_formset=Talla_Formset(instance=producto)
+	return render(request,'inventario/entrada_producto.html',locals())
+	
 #esta api se usara sobre todo en la consulta del producto,
 #parametro:
 #	id: REcibe el id del producto que desea consultar.
@@ -23,7 +174,7 @@ def api_consulta_producto(request):
 		
 		#print(request.GET.get("id_producto"))
 		
-		id_producto=request.GET.get("id_producto")
+		id_producto=int_clave(request.GET.get("id_producto"))
 		#..		
 		
 		est=Estatus.objects.get(id=1)
@@ -74,100 +225,56 @@ def api_consulta_producto(request):
 	except Exception as e:
 		print(e)	
 	return Response(producto)
-	
-
-#esta api, regresa los productos que estan en el carrito de compras de de la sessionq ue recibe como parametro
-#parametros
-#	Session
-@api_view(['GET','POST','DELETE'])
-def api_consulta_carrito_compras(request):
-	if request.method=="GET":
-		carrito=[]
-		session=request.GET.get("session")
 		
-		#obtenemos los productos que estan en el carrito de compras.
-		c_c=Carrito_Compras.objects.filter(session=session)
+#esta api busca los productos dependiendo de los parametros que se indiquen
+#parametros:
+#	tipo_busqueda: 
+#					1=indica que se buscara por la categoria (id_categoria)	
+#					2= indica que se recibira una palabra y se buscaran los productos que contengan esa palabra en sus atributos			
+@api_view(['GET'])
+def api_busqueda_productos(request):
+	productos=[]
+	muestra_descuento=0
+	if request.method=="GET":				
+		tipo_busqueda=request.GET.get("tipo_busqueda")
+		est=Estatus.objects.get(id=1)#obtenemos el estatus "activo" del catalogo		
+		if tipo_busqueda=="1":#busqueda por categoria.
+			id=request.GET.get("param1")		
+			try:
+				id_categoria=Categorias.objects.get(id=id)			
+			except Exception as e:
+				print (e)#si la categoria no existe, pues no encontramos productos.			
+				return Response(productos)	
+			p_e=Rel_Producto_Categoria.objects.filter(id_categoria=id_categoria)
 
-		if c_c.exists():
+		if tipo_busqueda=="2":#busqueda por palabra		
+			text_busqueda=request.GET.get("param1")										
+			print(text_busqueda)
+			prod=Productos.objects.filter(desc_producto__icontains=str(text_busqueda))							
+			p_e=Rel_Producto_Categoria.objects.filter(id_producto__in=prod)
 			
-			for cc in c_c:
+		if p_e.exists():
+			for p in p_e:
 				try:
-					ip=Img_Producto.objects.get(id_producto=cc.id_producto,orden=1)
-					nom_img=ip.nom_img
+					tallas_entrada=Tallas.objects.filter(id_producto=p.id_producto).aggregate(Sum('entrada'))
+					tallas_salida=Tallas.objects.filter(id_producto=p.id_producto).aggregate(Sum('salida'))
+					cont=int(tallas_entrada["entrada__sum"])-(tallas_salida["salida__sum"])
 				except:
-					print("el producto no tiene imagen con valor 1 en el campo orden")
-					nom_img=""				
-				if cc.id_producto.descuento!=0:
-					#obtenemos el precio sin iva
-					sub_total=decimal.Decimal(cc.id_producto.precio)/decimal.Decimal(1.16)
-					#obtenemos el subtotal con descuento
-					sub_total_con_desc=decimal.Decimal(sub_total)-(decimal.Decimal(sub_total)*(decimal.Decimal(cc.id_producto.descuento/100.00)))
-					#una vez que tenemos el precio con descuento, le agregamos el iva
-					sub_total_con_iva=decimal.Decimal(sub_total_con_desc)*decimal.Decimal(1.16)
-					precio_desc=sub_total_con_iva
-				else:
-					precio_desc=cc.id_producto.precio
-				carrito.append({'id':cc.id,'id_producto':cc.id_producto.id,'precio':precio_desc,'nombre':cc.id_producto.nombre,'nom_img':nom_img,'cantidad':cc.cantidad,'talla':cc.talla.talla})					
-		return Response(carrito)
-	if request.method=="POST":
-		error=[]
-		try:			
-			#parametros
-			id_producto=request.POST.get("id_producto")
-			session=request.POST.get("session")
-			cantidad=int(request.POST.get("cantidad"))
-			id_talla=request.POST.get("id_talla")
-			#parametros
-			try:
-				producto=Productos.objects.get(id=id_producto)
-			except Exception as e:
-				print(e)				
-				error.append({'estatus':0,'msj':'El producto no existe.'})
-				return Response(error)
-			
-			try:
-				talla=Tallas.objects.get(id=id_talla)
-			except Exception as e:
-				print(e)
-				error.append({'estatus':0,'msj':'Erro al encontrar la talla solicitada.'})				
-				return Response(error)
-			try:
-				#en caso de que exista ya un registro en el carrito que cumpla con la session, producto y talla
-				#ya no crea nuevo registro, solo incrementa su existencia.
-				cc=Carrito_Compras.objects.get(session=session,id_producto=producto,talla=talla)
-				cc.cantidad=int(cc.cantidad)+int(cantidad)
-				cc.save()
-			except Exception as e:
-				#en caso de que no existe el registro en el carrito que cumpla con la session, producto y talla
-				#se crea uno nuevo.
-				print(e)
-				Carrito_Compras.objects.create(session=session,id_producto=producto,cantidad=cantidad,talla=talla)			
+					cont=0
 				
-			
-			error.append({'estatus':1,'msj':'El producto se agrego correctamente.'})
-		except Exception as e:
-			print(e)
-			error.append({'estatus':0,'msj':'Error al agregar el producto, intente nuevamente.'})
-		return Response(error)
-
-#al parecer django no soporta el metodo delete, por lo tanto eliminar un producto del carrito
-# se ara atravez de una url diferente por el metodo post
-@api_view(['POST'])		
-def api_elimina_carrito_compras(request):
-	if request.method=="POST":
-		error=[]
-		try:			
-			print(request.POST.get("id"))
-			#parametros
-			id_carrito=request.POST.get("id")			
-			#parametros
-			Carrito_Compras.objects.get(id=id_carrito).delete()
-			error.append({"estatus":1,"msj":""})
-		except Exception as e:
-			print(e)
-			error.append({"estatus":0,"msj":"Error al eliminar el producto del carrito, intente nuevamente."})
-		return Response(error)
-
+				if cont>0:
+					print("entro")
+					if p.id_producto.id_estatus==est:#validamos que el producto este activo
+						#imagen=Img_Producto.objects.get(id_producto=p.id_producto,orden=1)
+						#precio_desc=decimal.Decimal(p.id_producto.precio)*decimal.Decimal((decimal.Decimal(p.id_producto.descuento)/100.00))
+						precio_desc=p.id_producto.precio-(p.id_producto.precio*(decimal.Decimal(p.id_producto.descuento/100.00)))
+						if p.id_producto.descuento>0:
+							muestra_descuento=1
+						else:
+							muestra_descuento=0
+						productos.append({"precio_antes":p.id_producto.precio,"id":p.id_producto.id,'str_id':str_clave(p.id_producto.id),"nombre":p.id_producto.nombre,"precio":precio_desc,'muestra_descuento':muestra_descuento})				
+	return Response(productos)	
+	
 #api para consultar el catalogo de municipios
 @api_view(['GET'])
 def api_get_municipios(request):
@@ -179,180 +286,22 @@ def api_get_municipios(request):
 	except Exception as e:	
 		print(e)
 	return Response(cat_municipio)
-	
-#api para administrar la direccion de envio
-@api_view(['POST','GET'])
-def api_direccion_envio(request):
-	if request.method=="POST":
-		direccion_envio=[]
-		estatus=[]
-		try:
-			#parametros
-			session=request.POST.get("session")
-			nombre=request.POST.get("nombre")
-			apellido_p=request.POST.get("apellido_p")
-			apellido_m=request.POST.get("apellido_m")
-			telefono=request.POST.get("telefono")
-			calle=request.POST.get("calle")
-			cp=request.POST.get("cp")
-			municipio=request.POST.get("municipio")
-			estado=request.POST.get("estado")
-			pais=request.POST.get("pais")
-			e_mail=request.POST.get("e_mail")
-			referencia=request.POST.get("referencia")
-			numero=request.POST.get("numero")
-			#parametros			
-			try:
-				#en caso de que la session ya tenga una direccion de envio registrada, solo la actualiza.
-				de=Direccion_Envio.objects.get(session=session)
-				de.nombre=nombre
-				de.apellido_p=apellido_p
-				de.apellido_m=apellido_m
-				de.telefono=telefono
-				de.calle=calle
-				de.cp=cp
-				de.municipio=municipio
-				de.estado=estado
-				de.pais=pais
-				de.correo_electronico=e_mail
-				de.referencia=referencia
-				de.numero=numero
-				de.save()
-			except Exception as e:		
-				#en caso de que no exista lo crea
-				print(e)
-				Direccion_Envio.objects.create(session=session,nombre=nombre,apellido_p=apellido_p,apellido_m=apellido_m,telefono=telefono,calle=calle,cp=cp,municipio=municipio,estado=estado,pais=pais,correo_electronico=e_mail,referencia=referencia)
-			estatus.append({'estatus':1,'msj':'Se guardo correctamente la direccion de envio'})
-		except Exception as e:
-			print(e)
-			estatus.append({'estatus':0,'msj':'Error al intentar guardar la direccion de envio'})
-		return Response(estatus)		
-	if request.method=="GET":
-		#parametros
-		session=request.GET.get("session")
-		#parametros
-		direccion_envio=[]
-		try:	
-			direccion_envio=Direccion_Envio.objects.filter(session=session).values('nombre','apellido_m','apellido_p','telefono','calle','cp','municipio','estado','pais','correo_electronico','referencia','numero')
-		except Exception as e:
-			print (e)
-		return Response(direccion_envio)
-		
-	
-#esta api busca los productos dependiendo de los parametros que se indiquen
-#parametros:
-#	tipo_busqueda: 
-#					1=indica que se buscara por la categoria (id_categoria)				
-@api_view(['GET'])
-def api_busqueda_productos(request):
-	productos=[]
-	if request.method=="GET":				
-		tipo_busqueda=request.GET.get("tipo_busqueda")
-		id=request.GET.get("id_categoria")
-		est=Estatus.objects.get(id=1)#obtenemos el estatus "activo" del catalogo
-		try:
-			id_categoria=Categorias.objects.get(id=id)			
-		except Exception as e:
-			print (e)#si la categoria no existe, pues no encontramos productos.			
-			return Response(productos)		
-		if tipo_busqueda=="1":#busqueda por categoria.
-			rel_p_c=Rel_Producto_Categoria.objects.filter(id_categoria=id_categoria)			
-			if rel_p_c.exists():
-				for p in rel_p_c:					
-					if p.id_producto.id_estatus==est:#validamos que el producto este activo
-						imagen=Img_Producto.objects.get(id_producto=p.id_producto,orden=1)
-						#precio_desc=decimal.Decimal(p.id_producto.precio)*decimal.Decimal((decimal.Decimal(p.id_producto.descuento)/100.00))
-						precio_desc=p.id_producto.precio-(p.id_producto.precio*(decimal.Decimal(p.id_producto.descuento/100.00)))
-						productos.append({"precio_antes":p.id_producto.precio,"id":p.id_producto.id,"nombre":p.id_producto.nombre,"precio":precio_desc,"nom_img":imagen.nom_img})				
-	return Response(productos)	
-#obtenemos la cantidad de productos que estan en carrito de compras.
-#parametros:
-#	session
-@api_view(['GET'])
-def api_cont_productos_carrito(request):		
-	if request.method=="GET":				
-		contador=[]		
-		session=request.GET.get("session")				
-		#obtenemos los productos que estan en el carrito de compras.
-		c_c=Carrito_Compras.objects.filter(session=session).aggregate(Sum('cantidad'))		
-		contador.append(c_c)		
-		print(c_c)
-		return Response(contador)
-		
-#guardamos la venta, almacenando la direccion de envio 
-#parametros:
-#	session:
-#			Solo recibe este parametro ya que el resto de la informacion esta ya almacenada ligada a esta session.
-@api_view(['POST'])		
-def api_crea_venta(request):
-	if request.method=="POST":
-		folio_venta=[]
-		session=request.POST.get("session")
-		#obtenemos la inormacion guardada en la session
-		c_c=Carrito_Compras.objects.filter(session=session)
-		if c_c.exists():
-			try:
-				d_e=Direccion_Envio.objects.get(session=session)		
-			except:
-				#sillega a la except es porque no tiene capturada la direccion de envio
-				folio_venta.append({"estatus":0,"msj":"No se ha agregado la direccion de envio."})			
-				return Response(folio_venta)
 			
-			#calculamos el total de la venta
-			total=0.00
-			descuento=0.00
-			iva=0.00
-			for cc in c_c:					
-				#calculamos el precio de venta(en caso de tener descuento)					
-				if cc.id_producto.descuento!=0:
-					#obtenemos el precio sin iva
-					sub_total=decimal.Decimal(cc.id_producto.precio)/decimal.Decimal(1.16)
-					#obtenemos el descuento
-					descuento=decimal.Decimal(descuento)+(decimal.Decimal(sub_total)*(decimal.Decimal(cc.id_producto.descuento/100.00)))
-					descuento=decimal.Decimal(descuento)*decimal.Decimal(cc.cantidad)								
-					#obtenemos el subtotal con descuento
-					sub_total_con_desc=decimal.Decimal(sub_total)-(decimal.Decimal(sub_total)*(decimal.Decimal(cc.id_producto.descuento/100.00)))
-					#una vez que tenemos el precio con descuento, le agregamos el iva y lo multiplicamos por la cantidad
-					sub_total_con_iva=(decimal.Decimal(sub_total_con_desc)*decimal.Decimal(1.16))*decimal.Decimal(cc.cantidad)								
-				else:
-					sub_total_con_iva=decimal.Decimal(cc.id_producto.precio)*decimal.Decimal(cc.cantidad)				
-				#total ya con iva
-				total=decimal.Decimal(total)+decimal.Decimal(sub_total_con_iva)
-				#el subtotal es sin iva
-				sub_total=decimal.Decimal(decimal.Decimal(total)/decimal.Decimal(1.16))+decimal.Decimal(descuento)
-				#el iva es la diferencia entre el total y el subtotal
-				#iva=decimal.Decimal(sub_total)*decimal.Decimal(0.16)
-			#CREAMOS LA VENTA
-			iva=decimal.Decimal(decimal.Decimal(sub_total)-decimal.Decimal(descuento))*decimal.Decimal(0.16)
-			v=Venta(total=total,sub_total=sub_total,iva=iva,descuento=descuento)
-			v.save()
-			
-			#recorremos los productos del carrito para crear el detalle d ela venta
-			for cc in c_c:
-				#calculamos el precio de venta(en caso de tener descuento)	
-				precio_unitario=0.00
-				descuento=0.00
-				iva=0.00
-				precio_total=0.00
-				if cc.id_producto.descuento!=0:
-					precio_unitario=decimal.Decimal(cc.id_producto.precio)/decimal.Decimal(1.16)#precio antes de iva
-					descuento=decimal.Decimal(precio_unitario)*(decimal.Decimal(cc.id_producto.descuento)/decimal.Decimal(100))
-					iva=(decimal.Decimal(precio_unitario)-decimal.Decimal(descuento))*decimal.Decimal(0.16)
-					precio_total=(decimal.Decimal(precio_unitario)-decimal.Decimal(descuento)+decimal.Decimal(iva))*decimal.Decimal(cc.cantidad)
-				else:
-					precio_unitario=decimal.Decimal(cc.id_producto.precio)/decimal.Decimal(1.16)
-					iva=decimal.Decimal(precio_unitario)*decimal.Decimal(0.16)
-					precio_total=decimal.Decimal(cc.id_producto.precio)*decimal.Decimal(cc.cantidad)
-				#guardamos el detalle de la venta
-				d=Detalle_Venta(id_venta=v,id_producto=cc.id_producto,cantidad=cc.cantidad,talla=cc.talla,precio_unitario=precio_unitario,descuento=descuento,iva=iva,precio_total=precio_total)				
-				d.save()
-			#agregamos la direccion de envio a la venta.
-			dir_envio=Direccion_Envio_Venta(id_venta=v,nombre_recibe=d_e.nombre,apellido_p=d_e.apellido_p,apellido_m=d_e.apellido_m,calle=d_e.calle,numero=d_e.numero,cp=d_e.cp,municipio=d_e.municipio,estado=d_e.estado,pais=d_e.pais,telefono=d_e.telefono,correo_electronico=d_e.correo_electronico,referencia=d_e.referencia)
-			dir_envio.save()
-			#borramos la informacion de la session del cliente
-			c_c.delete()
-			d_e.delete()
-			folio_venta.append({"estatus":1,"msj":"El folio de su transaccion es: "+str(v.id)})							
-		else:
-			folio_venta.append({"estatus":0,"msj":"No tiene productos agregados al carrito de compras."})
-		return Response(folio_venta)
+def str_clave(id):
+	if len(str(id))==1:
+		return '000000'+str(id)
+	if len(str(id))==2:
+		return '00000'+str(id)		
+	if len(str(id))==3:
+		return '0000'+str(id)
+	if len(str(id))==4:
+		return '000'+str(id)		
+	if len(str(id))==5:
+		return '00'+str(id)		
+	if len(str(id))==6:
+		return '0'+str(id)	
+	if len(str(id))==7:
+		return str(id)
+
+def int_clave(id):
+	return int(id)

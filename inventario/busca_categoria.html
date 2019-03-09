@@ -1,0 +1,23 @@
+{% exteds 'base.html' %}
+{% loads bootstrap3 %}
+
+{% block content %}
+	<table class="table">
+		<thead>
+			<th></th>
+			<th>Categoria</th>
+		</thead>
+		<tbody>
+			{% for cat in categoria %}
+				<tr>
+					<td>
+						<a>{% bootstrap_icon 'pencil' %}</a>
+					</td>
+					<td>
+						{{cat.categoria}}
+					</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% endblock %}

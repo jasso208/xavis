@@ -1,0 +1,147 @@
+
+.base-div-header
+{
+	background-color:#41758f;
+	
+}
+
+.base-header
+{
+	font-family: 'Noto Serif JP', serif;
+	font-weight:bold;
+	font-size:35px;
+	color:#f4dc60;
+	letter-spacing:2px;
+}
+
+.base-header span
+{
+	font-size:15px;
+}
+.base-div-menu-header
+{
+	text-align:right;
+}
+.base-div-menu-header >a
+{
+	color:white;
+	font-family:arial;
+	font-weight:bold;	
+	font-size:10px;
+}
+.base-menu-lateral
+{
+	
+	text-align:left;
+	color:#41758f;
+	
+}
+.base-h1
+{
+	font-family: 'Noto Serif JP', serif;
+	font-size:40px;
+	font-weight:bold;
+	
+}
+.base-h3
+{
+	font-family: 'Noto Serif JP', serif;
+	color:gray;
+	
+}
+.page-header
+{
+	padding:2px;
+	margin:0px;
+}
+
+.base-btn-menu-lateral
+{
+	font-family:'Noto Serif JP', serif;
+	display:block;	
+	text-decoration:none;
+	font-weight:bold;
+	color:gray;
+	letter-spacing:1px;
+}
+
+.base-btn-menu-lateral:hover
+{
+	
+	text-decoration:none;
+	color:#41758f;
+}
+.base-h4
+{
+	font-family: 'Noto Serif JP', serif;
+	color:white;
+	font-weight:bold;
+	letter-spacing:1px;
+	font-size:13px;
+}
+.base-encabezado-menu-lateral
+{
+	background-color:#78adc7;
+}
+
+#menu_lateral
+{
+	max-height:80%;
+	overflow-y:scroll;
+	overflow-x:hidden
+}
+.cls_boton_show_menu
+{
+	text-align:right;	
+	margin-top:27px;
+	
+}
+.cls_boton_show_menu a
+{
+	color:white;	
+	padding-left:10px;
+	padding-right:10px;
+	padding-bottom:3px;	
+	padding-top:3px;	
+	margin-bottom:10px;
+	display:inline-block;
+	border:1px solid white;
+	box-shadow:3px 3px 3px gray;	
+}
+
+/*
+	El resto de los estilos son de bootstrap
+*/
+.table{
+	
+	font-size:12px;
+	
+}
+/*
+	El resto de los estilos son de bootstrap
+*/
+
+
+	#menu_lateral
+	{
+			display:none;
+	}
+	.cls_form
+	{
+		font-size:12px;
+		
+	}
+/*Solo para tablets y cel*/
+@media( min-width: 737px)
+{
+	
+	#menu_lateral
+	{
+			display:block;
+	}
+	
+	.cls_boton_show_menu
+	{
+		display:none;
+	}	
+}

@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load bootstrap3 %}
+{% block content %}
+	
+	<form method="post" action="#">
+		{% csrf_token %}
+		{{ tallas_formset.management_form }}
+		
+		<h2>Entrada Producto</h2>
+		<br>
+		
+		{% for form in tallas_formset %}
+			<div class="row">			
+				{% bootstrap_field form.id %}
+				<div class="col-xs-4">{% bootstrap_field form.talla %}</div>
+				<div class="col-xs-4">{% bootstrap_field form.entrada %}</div>
+				<div class="col-xs-4">{% bootstrap_field form.salida %}</div>
+			</div>
+		{% endfor %}
+		<div class="row">
+			<div class="col-xs-12" style="text-align:center">
+				<button class="btn btn-primary">Guardar</button>
+			</div>
+		</div>
+	
+	</form>
+{% endblock %}

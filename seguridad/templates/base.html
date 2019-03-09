@@ -1,0 +1,174 @@
+{% load static %}
+<html>
+	<head>
+        <title>Django Girls blog</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+        <link href='//fonts.googleapis.com/css?family=Lobster&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+		<link href="https://fonts.googleapis.com/css?family=Pathway+Gothic+One" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css?family=Noto+Serif+JP" rel="stylesheet">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+        <link rel="stylesheet" href="{% static 'css/blog.css' %}">	
+		<link rel="stylesheet" href="{% static 'css/base.css' %}">
+    </head>
+	<body>		
+		
+		<div class="content container">
+			<div class="row base-div-header">
+				<div class="col-xs-12 col-md-12 base-div-menu-header">
+					<a>Bienvenido: Javier Jass Gallegos</a>					
+					<a href="">/ Salir</a>					
+				</div>
+				<div class="col-xs-8 col-md-8">
+					<h1 class="base-header">Xavis <span>Administracion</span></h1>
+				</div>	
+				<div class="col-xs-4 col-md-4 cls_boton_show_menu">
+					<a id="btn_muestra_menu">Menu</a>
+				</div>
+			</div>			
+			<div class="row">					
+					<br>
+				<div class="col-xs-12 col-sm-2  col-md-2" id="menu_lateral" >					
+					<div class="row base-encabezado-menu-lateral">
+						<div class="col-xs-12 ">								
+								<h4 class="base-h4">Catalogos</h4>								
+						</div>
+					</div>					
+					<br>					
+					<div class="row">
+						<div class="col-xs-12">
+							<div class="page-header">
+								<a class="base-btn-menu-lateral"  href="{%url 'inventario:busca_proveedor'%}">
+									Proveedores
+								</a>
+							</div>									
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-12">
+							<div class="page-header">
+								<a class="base-btn-menu-lateral"  href="{%url 'inventario:busca_categoria'%}">
+									Categorias
+								</a>
+							</div>									
+						</div>
+					</div>
+					<br>
+					
+					<div class="row base-encabezado-menu-lateral">
+						<div class="col-xs-12 ">								
+								<h4 class="base-h4">Inventario</h4>								
+						</div>
+					</div>
+					<br>
+					<div class="row">
+						<div class="col-xs-12">
+							<div class="page-header">
+								<a class="base-btn-menu-lateral"  href="{%url 'inventario:busca_producto'%}">Producto</a>
+							</div>									
+						</div>
+					</div>
+					<br>
+					<div class="row base-encabezado-menu-lateral">
+						<div class="col-xs-12 ">								
+								<h4 class="base-h4">Ventas</h4>								
+						</div>
+					</div>
+					<br>
+					
+					<div class="row">
+						<div class="col-xs-12">
+							<div class="page-header">
+								<a class="base-btn-menu-lateral"  href="{%url 'ventas:busca_ventas'%}">Ventas</a>
+							</div>									
+						</div>
+					</div>
+					<br>
+					<div class="row base-encabezado-menu-lateral">
+						<div class="col-xs-12 ">								
+								<h4 class="base-h4">Contenido</h4>								
+						</div>
+					</div>
+					<br>
+					
+					<div class="row">
+						<div class="col-xs-12">
+							<div class="page-header">
+								<a class="base-btn-menu-lateral"  href="{%url 'blog:busqueda_blog'%}">Blog</a>
+							</div>									
+						</div>
+					</div>
+
+					
+				</div>
+				<div class="col-xs-12 col-sm-10 col-md-10" >
+				
+					{% block content %}
+					
+					{% endblock %}
+					
+				</div>
+			</div>
+		</div>
+		<script>
+			var estatus_menu=0;
+			$(document).ready(
+				function()
+				{
+					$("#btn_muestra_menu").click(					
+						function()
+						{
+						
+							if(estatus_menu==0)
+							{
+								$("#menu_lateral").show();
+								$("#btn_muestra_menu").text("X");
+								estatus_menu=1;								
+								return;
+							}
+							
+							if(estatus_menu==1)
+							{
+								$("#menu_lateral").hide();
+								$("#btn_muestra_menu").text("Menu");
+								estatus_menu=0;
+								return;
+							}							
+							
+						}
+					);
+				}
+			);
+			
+			function addItem(tabla,obj) {
+			
+				// Clonamos la ultima fila de la tabla
+				var newElement = $("."+tabla+" tr:last").clone(true);
+				// Necesitamos aumentar en 1 el total de los formularios
+				// por eso obtenemos el total actual, debería ser 4
+				var total = $("#"+obj).val();
+				// Cuando se usan formsets, los elementos del formulario 
+				// son enumerados (id_item-0-rate, id_item-1-rate, etc.)              
+				// entonces necesitamos que el nuevo elemento siga esa 
+				// numeración
+				newElement.find(":input").each(function() {
+					var name = $(this).attr("name").replace("-" + (total-1) + "-", "-" + total + "-");
+					var id = "id_" + name;
+					// Seteamos los atributos y limpiamos los valores
+					$(this).attr({"name": name, "id": id}).val("");
+				});
+				// Aumentamos en 1 la cantidad de formularios en el formset
+				total++;
+				$("#"+obj).val(total);
+				// Insertamos el nueva formulario al final
+				$("."+tabla+" tr:last").after(newElement);
+				// Solo mostramos el botón para quitar si hay mas de un formulario
+				
+			}
+			
+			
+		</script>
+	</body>
+</html>

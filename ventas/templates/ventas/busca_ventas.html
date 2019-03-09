@@ -1,0 +1,64 @@
+{%extends 'base.html'%}
+{% load bootstrap3 %}
+
+{% block content%}
+	<form method="post" action="#">
+		{%csrf_token%}
+		
+		<h2>Ventas</h2>
+		<br>
+		<div class="row">
+			<div class="col-xs-3">
+				<label>Fecha Inicial</label>
+			</div>
+			<div class="col-xs-3">
+				<label>Fecha Final</label>
+			</div>
+			<div class="col-xs-3">
+				<label>Estatus</label>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-3">
+				<input  name="fecha_inicial" class="form-control" type="date" title="" id="id_fecha_inicial">
+			</div>
+			<div class="col-xs-3">
+				<input  name="fecha_final" class="form-control" type="date" title="" id="id_fecha_final">				
+			</div>
+			<div class="col-xs-3">
+				{%bootstrap_field form.id_estatus_venta show_label=False%}				
+			</div>			
+			<div class="col-xs-3">
+				<button class="btn">Consultar</button>
+			</div>
+		</div>
+		<br>
+		<br>
+		<br>
+		<table class="table">
+			<thead>
+				<th>
+				</th>
+				<th>Fecha</th>
+				<th>Sub Total</th>
+				<th>Descuento</th>
+				<th>IVA</th>
+				<th>Total</th>
+				<th>Estatus</th>
+			</thead>
+			<tbody>
+				{% for v in ventas %}
+					<tr>
+						<td><a href="../detalle_venta/{{v.id}}">{% bootstrap_icon 'pencil' %}</a></td>
+						<td>{{v.fecha}}</td>
+						<td>{{v.sub_total}}</td>
+						<td>{{v.descuento}}</td>
+						<td>{{v.iva}}</td>
+						<td>{{v.total}}</td>
+						<td>{{v.id_estatus_venta.estatus_venta}}</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</form>
+{% endblock %}

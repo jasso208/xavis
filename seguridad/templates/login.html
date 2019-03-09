@@ -1,0 +1,31 @@
+{% load bootstrap3 %}
+<html>
+	<head>
+		<meta charset="utf-8"></meta>
+		<title>Login</title>
+		<meta content="width=device-width, initial-scale=1.0" name="viewport"></meta>
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+        
+	</head>
+	<body>
+		<div class="container">
+			<div class="col-md-4 col-md-offset-4">
+				<div class="login-panel panel panel-default">
+					<div class="panel-heading">
+						<h3>
+							Login
+						</h3>
+					</div>
+					<div class="panel-body">
+						<form role="form" method="post" id="form_login">
+							{% csrf_token %}
+							{% bootstrap_form form %}							
+							<button class="btn btn-lg btn-primary btn-block" type="submit" name="login">Login</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

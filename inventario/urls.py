@@ -1,14 +1,24 @@
 from django.conf.urls import include, url
-from .views import api_consulta_producto,api_consulta_carrito_compras,api_elimina_carrito_compras,api_get_municipios,api_direccion_envio
-from .views import api_busqueda_productos,api_cont_productos_carrito,api_crea_venta
+from .views import api_consulta_producto,api_get_municipios
+from .views import api_busqueda_productos
+from inventario import views
+app_name="inventario"
 urlpatterns=[
-	url(r'^detalle_producto/$',api_consulta_producto),	
-	url(r'^carrito_compras/$',api_consulta_carrito_compras),	
-	url(r'^elimina_prod_carrito/$',api_elimina_carrito_compras),		
-	url(r'^direccion_envio/$',api_direccion_envio),	
+	#formularios
+	url(r'^busca_producto/$',views.busca_producto,name="busca_producto"),	
+	url(r'^busca_proveedor/$',views.busca_proveedor,name="busca_proveedor"),
+	url(r'^busca_categoria/$',views.busca_categoria,name="busca_categoria"),	
+	url(r'^productos/new/$',views.registro_edicion_producto,name="producto"),	
+	url(r'^existencias/(?P<id_producto>\d+)/$',views.edicion_existencias,name="existencias"),
+	url(r'^proveedor/new/$',views.proveedores_edicion_registro,name="proveedor"),
+	url(r'^categoria/new/$',views.categoria_edicion_registro,name="categoria"),
+	url(r'^productos_edita/(?P<id_producto>\d+)/$',views.registro_edicion_producto,name="edicion_producto"),
+	url(r'^proveedor_edita/(?P<id_proveedor>\d+)/$',views.proveedores_edicion_registro,name="edicion_proveedor"),
+	url(r'^categoria_edita/(?P<id_categoria>\d+)/$',views.categoria_edicion_registro,name="edicion_categoria"),
+
+	
+	#urls de apis
+	url(r'^detalle_producto/$',api_consulta_producto),		
 	url(r'^busca_productos/$',api_busqueda_productos),		
-	url(r'^cont_prod_carrito/$',api_cont_productos_carrito),		
-	url(r'^guarda_venta/$',api_crea_venta),		
-
-
+	
 ]

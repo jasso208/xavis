@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load bootstrap3 %}
+
+{% block content %}
+	<h2>Categorias</h2>
+	<br><br>
+	<div class="row">
+		<div class="col-xs-9">	
+		</div>
+		<div class="col-xs-3">				
+				<a  href="../categoria/new/">{%bootstrap_icon "plus"%} Agregar Categoria</a>
+				</div>
+		</div>
+	<table class="table">
+		<thead>
+			<th></th>
+			<th>Categoria</th>
+		</thead>
+		<tbody>
+			{% for cat in categoria %}
+				<tr>
+					<td>
+						<a href="/inventario/categoria_edita/{{cat.id}}">{% bootstrap_icon 'pencil' %}</a>
+					</td>
+					<td>
+						{{cat.categoria}}
+					</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% endblock %}

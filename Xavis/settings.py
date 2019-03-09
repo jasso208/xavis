@@ -37,9 +37,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+	'seguridad',
 	'inventario',
+	'ventas',
+	'blog',
 	'rest_framework',
-	'corsheaders',
+	'corsheaders',	
+	'bootstrap3',
+	
 ]
 
 MIDDLEWARE = [
@@ -79,10 +84,11 @@ WSGI_APPLICATION = 'Xavis.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
+PROJECT_DIR = os.path.abspath(os.path.dirname(__file__))
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(PROJECT_DIR, 'Cantora_Qa.db'),
     }
 }
 
@@ -109,7 +115,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-mx'
 
 TIME_ZONE = 'America/Mexico_City'
 
@@ -124,7 +130,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+#STATIC_URL = 'static'
 STATUS_ROOT=os.path.join(BASE_DIR, 'static')
+
 
 
 CORS_ORIGIN_ALLOW_ALL = True

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load bootstrap3 %}
+{% block content %}
+<form method="post" action="#">
+	{%csrf_token%}
+	<h2>Busqueda de Proveedor</h2>
+	<br>
+	<div class="row">
+		<div class="col-xs-3">
+			<label>Proveedor</label>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-6 col-sm-3">
+			{%bootstrap_field form.nombre_proveedor show_label=False%}
+		</div>
+		<div class="col-xs-6 col-sm-3">
+			<button class="btn">
+				Consultar
+			</button>
+		</div>
+		
+	</div>
+	<div class="row">
+		<div class="col-xs-12" style="text-align:right">				
+				<a  href="../productos/new/">{%bootstrap_icon "plus"%} Agregar Producto</a>
+		</div>
+	</div>
+	
+		
+		<br>
+		
+		<br>
+	<table class="table">
+		<thead>
+			<th></th>
+			<th>Nombre Proveedor</th>
+			<th>Estatus</th>
+		</thead>
+		<tbody>
+			{% for prov in proveedor %}
+			<tr>
+				
+				<td>
+					<a href="/inventario/proveedor_edita/{{prov.id}}">{% bootstrap_icon "pencil" %}</a>
+				</td>
+				<td>
+					{{prov.proveedor}}
+				</td>
+				<td>
+					{{prov.id_estatus}}
+				</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+	
+</form>
+{% endblock %}

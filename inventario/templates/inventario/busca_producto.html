@@ -1,0 +1,73 @@
+{%extends 'base.html'%}
+{%load bootstrap3%}
+
+{%block content%}
+	<form method="post" action="#">
+		{%csrf_token%}
+		
+		<h2 >Busqueda</h2>
+		<br>
+		<div class="row">
+			<div class="col-xs-4 col-sm-3">
+				<label>
+					Proveedor
+				</label>
+			</div>
+			<div class="col-xs-4 col-sm-3">
+				<label>
+					Estatus
+				</label>
+			</div>
+		</div>
+		<div class="row">			
+			<div class="col-xs-4 col-sm-3">
+				{% bootstrap_field form.id_proveedor  show_label=False%}
+			</div>
+			<div class="col-xs-4 col-sm-3">
+				{%bootstrap_field form.id_estatus show_label=False%}
+			</div>
+			<div class="col-xs-4 col-sm-3">
+				
+				<button class="btn">Buscar</button>
+			</div>
+			
+		</div>
+		<div class="row">
+			<div class="col-xs-12 " style="text-align:right">				
+					<a  href="../productos/new/">{%bootstrap_icon "plus"%} Agregar Producto</a>
+			</div>
+		</div>
+		<br>
+		
+		<br>
+		<table clasS="table">
+			<thead>
+				<th scope="col">#</th>
+				<th scope="col">Nombre</th>
+				<th scope="col">Precio</th>
+				<th scope="col">Proveedor</th>
+				<th scope="col">Marca</th>
+				<th scope="col">Estatus</th>
+			</thead>
+			<tbody>
+				{%for prod in producto %}
+				<tr>
+					<td>
+						<a href="/inventario/productos_edita/{{prod.id}}/"> {%bootstrap_icon "pencil"%} </a> 												
+						<a href="/inventario/existencias/{{prod.id}}/"> {%bootstrap_icon "plus"%} </a> 												
+					</td>
+					<td>{{prod.nombre}}</td>
+					<td>{{prod.precio}}</td>
+					<td>{{prod.id_proveedor.proveedor}}</td>
+					<td>{{prod.marca}}</td>
+					<td>{{prod.id_estatus}}</td>
+				</tr>
+				
+				{%endfor%}
+			</tbody>
+		
+		</table>
+		
+	</form>
+	
+{%endblock%}

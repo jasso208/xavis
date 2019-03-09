@@ -1,0 +1,69 @@
+{%extends 'base.html'%}
+{% load bootstrap3 %}
+
+{% block content%}
+	<form method="post" action="#">
+		{%csrf_token%}
+		
+		<h2>Blog's</h2>
+		<br>
+		<div class="row">
+			<div class="col-xs-3">
+				<label>Fecha Inicial</label>
+			</div>
+			<div class="col-xs-3">
+				<label>Fecha Final</label>
+			</div>
+			<div class="col-xs-3">
+				<label>Estatus</label>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-3">
+				<input  name="fecha_inicial" class="form-control" type="date" title="" id="id_fecha_inicial">
+			</div>
+			<div class="col-xs-3">
+				<input  name="fecha_final" class="form-control" type="date" title="" id="id_fecha_final">
+				
+			</div>
+			<div class="col-xs-3">
+				{%bootstrap_field form.id_estatus show_label=False %}
+				
+			</div>
+			
+			<div>
+				<button class="btn">Consultar</button>
+			</div>
+		</div>
+		<br>
+		<br>
+		<br>
+		
+		<div class="row">
+			<div class="col-xs-12" style="text-align:right">
+			
+				<a  href="../new/">{%bootstrap_icon "plus"%} Agregar Blog</a>
+				
+			</div>
+		</div>
+		<table class="table">
+			<thead>
+				<th>
+				</th>
+				<th>Fecha</th>
+				<th>Titulo</th>				
+				<th>Estatus</th>
+			</thead>
+			<tbody>
+				{% for b in blog %}
+					<tr>
+						<td><a href="../edita_blog/{{b.id}}">{% bootstrap_icon 'pencil' %}</a></td>
+						<td>{{b.fecha}}</td>
+						<td>{{b.nombre_blog}}</td>
+						<td>{{b.id_estatus}}</td>						
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</form>
+{%endblock%}
