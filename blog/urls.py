@@ -12,6 +12,7 @@ urlpatterns=[
 	
 	#apis
 	url(r'^consulta_blogs/$',views.api_consulta_blogs,name="consulta_blogs"),
+	url(r'^detalle_blog/$',views.api_consulta_detalle_blog,name="detalle_blog"),
 	
 	
 	#apis

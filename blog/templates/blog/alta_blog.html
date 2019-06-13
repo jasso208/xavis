@@ -6,6 +6,7 @@
 		{%csrf_token%}
 		{{productos_relacionados_formset.management_form}}
 		{{blog_relacionados.management_form}}
+		{{contenido_blog_formset.management_form}}
 		<h1>Blog</h1>
 		<div class="row">
 			<div class="col-xs-12">
@@ -13,9 +14,37 @@
 				{% bootstrap_field form.nombre_blog show_label=False %}
 			</div>
 			<div class="col-xs-12">
-				<label>Contenido</label>
-				{% bootstrap_field form.contenido_blog show_label=False %}
+				<label>Parrafos</label>
+				<br>
+				<div class="pure-g">
+					<table class="tabla_contenido_blog table">
+							<thead>
+							</thead>		
+							<tbody>								
+								{%for form in contenido_blog_formset %}
+									<tr >						
+										<td>
+											{{form.id}}
+										</td>
+										<td>
+											{% bootstrap_field form.contenido_blog show_label=False %}										
+										</td>							
+										<td>
+											{% bootstrap_field form.DELETE %}
+										</td>
+									</tr>
+								{%endfor%}
+							</tbody>
+						</table>	
+						<div style="width:100%;text-align:right">
+						<label>Agregar Parrafo<label>
+								<button id="add-item-parrafo-blog" type="button">{%bootstrap_icon "plus"%}</button>
+						</div>						
+				</div>
+				
 			</div>
+			<br>
+			
 			
 			<div class="col-xs-6">
 				<label>Imagen</label>
@@ -61,7 +90,7 @@
 						</div>
 					</div>	
 					
-					<div class="col-xs-12 col-sm-6">
+		<div class="col-xs-12 col-sm-6">
 					<label>Blogs Relacionados</label>
 					<br>			
 					<table class="table_blog_relacionados table">
@@ -94,8 +123,19 @@
 			</div>
 			
 		</div>
-		<div class="row">
-			
+		<div class="row">			
+			<div class="col-xs-12">
+				<label>
+					Autor
+				</label>
+				{% bootstrap_field form.autor show_label=False %}
+			</div>
+			<div class="col-xs-12">
+				<label>
+					Puesto
+				</label>
+				{% bootstrap_field form.puesto_autor show_label=False %}
+			</div>
 		</div>
 		<br>
 		<div class="row" style="text-align:center">
@@ -122,6 +162,16 @@
 						addItem("table_blog_relacionados","id_id_blog-TOTAL_FORMS");
 					}
 				);
+				
+				$("#add-item-parrafo-blog").click(
+					function()
+					{
+						addItem("tabla_contenido_blog","id_blog_contenido-TOTAL_FORMS");
+					}
+				);
+				
+				
+				
 			}
 		);
 	</script>

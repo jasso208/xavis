@@ -4,7 +4,7 @@ from .models import Blog,Estatus_Blog
 class Blog_Form(forms.ModelForm):
 	class Meta:
 		model=Blog
-		fields=("nombre_blog","contenido_blog","id_estatus","imagen_blog",)
+		fields=("nombre_blog","id_estatus","imagen_blog","autor","puesto_autor")
 		
 class Busqueda_Blog_Form(forms.Form):	
 	fecha_inicial=forms.DateTimeField()

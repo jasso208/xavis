@@ -10,15 +10,20 @@ class Estatus_Blog(models.Model):
 		return self.estatus
 	
 class Blog(models.Model):
-	nombre_blog=models.CharField(max_length=200,null=False)
-	contenido_blog=models.TextField(null=False)
+	nombre_blog=models.CharField(max_length=200,null=False)	
 	imagen_blog=models.CharField(max_length=50,null=True)
 	fecha=models.DateTimeField(default=timezone.now)
 	id_estatus=models.ForeignKey(Estatus_Blog,on_delete=models.PROTECT)
+	autor=models.CharField(max_length=50,null=True)
+	puesto_autor=models.CharField(max_length=50,null=True)
 	
 	def __str__(self):
 		return self.nombre_blog
-
+		
+class ContenidoBlog(models.Model):
+	id_blog=models.ForeignKey(Blog,on_delete=models.PROTECT,related_name="blog_contenido")
+	contenido_blog=models.TextField(null=False)
+	
 class Productos_Relacionados(models.Model):
 	id_blog=models.ForeignKey(Blog,on_delete=models.PROTECT,related_name='blog')
 	id_producto_relacionado=models.ForeignKey(Productos,on_delete=models.PROTECT,related_name='id_producto_relacionado')

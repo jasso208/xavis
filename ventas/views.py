@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Detalle_Venta,Direccion_Envio_Venta,Venta,Carrito_Compras,Direccion_Envio
+from .models import Detalle_Venta,Direccion_Envio_Venta,Venta,Carrito_Compras
 from inventario.models import Productos,Tallas,Img_Producto
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -9,7 +9,7 @@ import datetime
 from django.urls import reverse
 from .forms import Busqueda_Venta_Form,Venta_Form
 from django.http.response import HttpResponseRedirect
-
+from seguridad.models import Direccion_Envio_Cliente_Temporal,Clientes_Logueados
 def busca_ventas(request):
 	if not request.user.is_authenticated:	
 		return HttpResponseRedirect(reverse('seguridad:login'))
@@ -38,7 +38,7 @@ def busca_ventas(request):
 		form=Busqueda_Venta_Form(request.POST)
 	else:
 		form=Busqueda_Venta_Form()
-		ventas=Venta.objects.all()[:5]
+		ventas=Venta.objects.all()
 	return render(request,'ventas/busca_ventas.html',locals())
 
 def detalle_venta_form(request,id_venta):	
@@ -150,63 +150,6 @@ def api_elimina_carrito_compras(request):
 		return Response(error)
 
 
-#api para administrar la direccion de envio
-@api_view(['POST','GET'])
-def api_direccion_envio(request):
-	if request.method=="POST":
-		direccion_envio=[]
-		estatus=[]
-		try:
-			#parametros
-			session=request.POST.get("session")
-			nombre=request.POST.get("nombre")
-			apellido_p=request.POST.get("apellido_p")
-			apellido_m=request.POST.get("apellido_m")
-			telefono=request.POST.get("telefono")
-			calle=request.POST.get("calle")
-			cp=request.POST.get("cp")
-			municipio=request.POST.get("municipio")
-			estado=request.POST.get("estado")
-			pais=request.POST.get("pais")
-			e_mail=request.POST.get("e_mail")
-			referencia=request.POST.get("referencia")
-			numero=request.POST.get("numero")
-			#parametros			
-			try:
-				#en caso de que la session ya tenga una direccion de envio registrada, solo la actualiza.
-				de=Direccion_Envio.objects.get(session=session)
-				de.nombre=nombre
-				de.apellido_p=apellido_p
-				de.apellido_m=apellido_m
-				de.telefono=telefono
-				de.calle=calle
-				de.cp=cp
-				de.municipio=municipio
-				de.estado=estado
-				de.pais=pais
-				de.correo_electronico=e_mail
-				de.referencia=referencia
-				de.numero=numero
-				de.save()
-			except Exception as e:		
-				#en caso de que no exista lo crea
-				print(e)
-				Direccion_Envio.objects.create(session=session,nombre=nombre,apellido_p=apellido_p,apellido_m=apellido_m,telefono=telefono,calle=calle,cp=cp,municipio=municipio,estado=estado,pais=pais,correo_electronico=e_mail,referencia=referencia)
-			estatus.append({'estatus':1,'msj':'Se guardo correctamente la direccion de envio'})
-		except Exception as e:
-			print(e)
-			estatus.append({'estatus':0,'msj':'Error al intentar guardar la direccion de envio'})
-		return Response(estatus)		
-	if request.method=="GET":
-		#parametros
-		session=request.GET.get("session")
-		#parametros
-		direccion_envio=[]
-		try:	
-			direccion_envio=Direccion_Envio.objects.filter(session=session).values('nombre','apellido_m','apellido_p','telefono','calle','cp','municipio','estado','pais','correo_electronico','referencia','numero')
-		except Exception as e:
-			print (e)
-		return Response(direccion_envio)
 
 		
 #guardamos la venta, almacenando la direccion de envio 
@@ -218,16 +161,17 @@ def api_crea_venta(request):
 	if request.method=="POST":
 		folio_venta=[]
 		session=request.POST.get("session")
+		c_l=Clientes_Logueados.objects.get(session=session)
+		cliente=c_l.cliente
 		#obtenemos la inormacion guardada en la session
 		c_c=Carrito_Compras.objects.filter(session=session)
 		if c_c.exists():
 			try:
-				d_e=Direccion_Envio.objects.get(session=session)		
+				d_e=Direccion_Envio_Cliente_Temporal.objects.get(session=session)		
 			except:
 				#sillega a la except es porque no tiene capturada la direccion de envio
 				folio_venta.append({"estatus":0,"msj":"No se ha agregado la direccion de envio."})			
-				return Response(folio_venta)
-			
+				return Response(folio_venta)			
 			#calculamos el total de la venta
 			total=0.00
 			descuento=0.00
@@ -254,7 +198,7 @@ def api_crea_venta(request):
 				#iva=decimal.Decimal(sub_total)*decimal.Decimal(0.16)
 			#CREAMOS LA VENTA
 			iva=decimal.Decimal(decimal.Decimal(sub_total)-decimal.Decimal(descuento))*decimal.Decimal(0.16)
-			v=Venta(total=total,sub_total=sub_total,iva=iva,descuento=descuento)
+			v=Venta(total=total,sub_total=sub_total,iva=iva,descuento=descuento,cliente=cliente)
 			v.save()
 			
 			#recorremos los productos del carrito para crear el detalle d ela venta
@@ -277,7 +221,7 @@ def api_crea_venta(request):
 				d=Detalle_Venta(id_venta=v,id_producto=cc.id_producto,cantidad=cc.cantidad,talla=cc.talla,precio_unitario=precio_unitario,descuento=descuento,iva=iva,precio_total=precio_total)				
 				d.save()
 			#agregamos la direccion de envio a la venta.
-			dir_envio=Direccion_Envio_Venta(id_venta=v,nombre_recibe=d_e.nombre,apellido_p=d_e.apellido_p,apellido_m=d_e.apellido_m,calle=d_e.calle,numero=d_e.numero,cp=d_e.cp,municipio=d_e.municipio,estado=d_e.estado,pais=d_e.pais,telefono=d_e.telefono,correo_electronico=d_e.correo_electronico,referencia=d_e.referencia)
+			dir_envio=Direccion_Envio_Venta(id_venta=v,nombre_recibe=d_e.nombre,apellido_p=d_e.apellido_p,apellido_m=d_e.apellido_m,calle=d_e.calle,numero_interior=d_e.numero_interior,numero_exterior=d_e.numero_exterior,cp=d_e.cp,municipio=d_e.municipio,estado=d_e.estado,pais=d_e.pais,telefono=d_e.telefono,correo_electronico=d_e.e_mail,referencia=d_e.referencia)
 			dir_envio.save()
 			#borramos la informacion de la session del cliente
 			c_c.delete()
@@ -302,3 +246,41 @@ def api_cont_productos_carrito(request):
 		
 		return Response(contador)
 		
+
+#obtenemos el listado de ventas del cliente logueado.
+@api_view(['GET'])
+def api_consulta_ventas(request):
+	respuesta=[]
+	try:
+		session=request.GET.get("session")
+		c_l=Clientes_Logueados.objects.get(session=session)
+		cliente=c_l.cliente
+		ventas=Venta.objects.filter(cliente=cliente).order_by('-fecha')
+		for v in ventas:			
+			respuesta.append({"estatus":"1","msj":"","id_venta":v.id,"descuento":v.descuento,"fecha":v.fecha,"sub_total":v.sub_total,"iva":v.iva,"total":v.total,"link_seg":v.link_seguimiento})
+	except Exception as e:
+		print(e)
+		respuesta.append({"estatus":"0","msj":"Error al consultar las ventas, intente refrescar la pagina."})
+	return Response(respuesta)
+
+@api_view(['GET'])	
+def api_consulta_detalle_venta(request):
+	respuesta=[]
+	try:
+		id_venta=request.GET.get("id_venta")
+		venta=Venta.objects.get(id=id_venta)
+		print(venta)
+		d_v=Detalle_Venta.objects.filter(id_venta=venta)
+		
+		for v in d_v:
+			try:
+				ip=Img_Producto.objects.get(id_producto=v.id_producto,orden=1)
+				nom_img=ip.nom_img
+			except Exception as e:
+				print(e)
+				nom_img=""				
+			respuesta.append({"estatus":"1","msj":"","nom_img":nom_img,'nombre':v.id_producto.nombre,"cantidad":v.cantidad,"talla":v.talla.talla,"precio_unitario":v.precio_unitario})
+	except Exception as e:
+		print(e)
+		respuesta.append({"estatus":"0","msj":"Error al consultar el detalle de la venta."})
+	return Response(respuesta)
