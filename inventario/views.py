@@ -246,33 +246,51 @@ def api_busqueda_productos(request):
 				print (e)#si la categoria no existe, pues no encontramos productos.			
 				return Response(productos)	
 			p_e=Rel_Producto_Categoria.objects.filter(id_categoria=id_categoria)
-
+			if p_e.exists():
+				for p in p_e:
+					try:
+						tallas_entrada=Tallas.objects.filter(id_producto=p.id_producto).aggregate(Sum('entrada'))
+						tallas_salida=Tallas.objects.filter(id_producto=p.id_producto).aggregate(Sum('salida'))
+						cont=int(tallas_entrada["entrada__sum"])-(tallas_salida["salida__sum"])
+					except:
+						cont=0
+					
+					if cont>0:
+						print("entro")
+						if p.id_producto.id_estatus==est:#validamos que el producto este activo
+							#imagen=Img_Producto.objects.get(id_producto=p.id_producto,orden=1)
+							#precio_desc=decimal.Decimal(p.id_producto.precio)*decimal.Decimal((decimal.Decimal(p.id_producto.descuento)/100.00))
+							precio_desc=p.id_producto.precio-(p.id_producto.precio*(decimal.Decimal(p.id_producto.descuento/100.00)))
+							if p.id_producto.descuento>0:
+								muestra_descuento=1
+							else:
+								muestra_descuento=0
+							productos.append({"precio_antes":p.id_producto.precio,"id":p.id_producto.id,'str_id':str_clave(p.id_producto.id),"nombre":p.id_producto.nombre,"precio":precio_desc,'muestra_descuento':muestra_descuento})				
 		if tipo_busqueda=="2":#busqueda por palabra		
 			text_busqueda=request.GET.get("param1")										
 			print(text_busqueda)
 			prod=Productos.objects.filter(desc_producto__icontains=str(text_busqueda))							
-			p_e=Rel_Producto_Categoria.objects.filter(id_producto__in=prod)
+			#p_e=Rel_Producto_Categoria.objects.filter(id_producto__in=prod)
 			
-		if p_e.exists():
-			for p in p_e:
-				try:
-					tallas_entrada=Tallas.objects.filter(id_producto=p.id_producto).aggregate(Sum('entrada'))
-					tallas_salida=Tallas.objects.filter(id_producto=p.id_producto).aggregate(Sum('salida'))
-					cont=int(tallas_entrada["entrada__sum"])-(tallas_salida["salida__sum"])
-				except:
-					cont=0
-				
-				if cont>0:
-					print("entro")
-					if p.id_producto.id_estatus==est:#validamos que el producto este activo
-						#imagen=Img_Producto.objects.get(id_producto=p.id_producto,orden=1)
-						#precio_desc=decimal.Decimal(p.id_producto.precio)*decimal.Decimal((decimal.Decimal(p.id_producto.descuento)/100.00))
-						precio_desc=p.id_producto.precio-(p.id_producto.precio*(decimal.Decimal(p.id_producto.descuento/100.00)))
-						if p.id_producto.descuento>0:
-							muestra_descuento=1
-						else:
-							muestra_descuento=0
-						productos.append({"precio_antes":p.id_producto.precio,"id":p.id_producto.id,'str_id':str_clave(p.id_producto.id),"nombre":p.id_producto.nombre,"precio":precio_desc,'muestra_descuento':muestra_descuento})				
+			if prod.exists():
+				for p in prod:
+					try:
+						tallas_entrada=Tallas.objects.filter(id_producto=p).aggregate(Sum('entrada'))
+						tallas_salida=Tallas.objects.filter(id_producto=p).aggregate(Sum('salida'))
+						cont=int(tallas_entrada["entrada__sum"])-(tallas_salida["salida__sum"])
+					except:
+						cont=0
+					
+					if cont>0:						
+						if p.id_estatus==est:#validamos que el producto este activo
+							#imagen=Img_Producto.objects.get(id_producto=p.id_producto,orden=1)
+							#precio_desc=decimal.Decimal(p.id_producto.precio)*decimal.Decimal((decimal.Decimal(p.id_producto.descuento)/100.00))
+							precio_desc=p.precio-(p.precio*(decimal.Decimal(p.descuento/100.00)))
+							if p.descuento>0:
+								muestra_descuento=1
+							else:
+								muestra_descuento=0
+							productos.append({"precio_antes":p.precio,"id":p.id,'str_id':str_clave(p.id),"nombre":p.nombre,"precio":precio_desc,'muestra_descuento':muestra_descuento})				
 	return Response(productos)	
 	
 #api para consultar el catalogo de municipios
