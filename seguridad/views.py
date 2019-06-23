@@ -34,15 +34,11 @@ def bienvenidos(request):
 def api_alta_cliente(request):
 	estatus=[]
 	if request.method=="POST":		
-		try:
-			try:
-				session=request.POST.get("session")
-			except:
-				session=""
-			
-			#obtenemos el cliente logueado con la session.
-			c_l=Clientes_Logueados.objects.get(session=session)
-			print(c_l)
+		try:			
+			session=request.POST.get("session")
+			if session==None:
+				session=""				
+				
 			nombre=request.POST.get("nombre")
 			apellido_p=request.POST.get("apellido_p")
 			apellido_m=request.POST.get("apellido_m")
@@ -50,7 +46,7 @@ def api_alta_cliente(request):
 			e_mail=request.POST.get("e_mail")
 			rfc=request.POST.get("rfc")
 			psw=request.POST.get("psw")
-			
+		
 			numero_interior=request.POST.get("numero_interior")
 			numero_exterior=request.POST.get("numero_exterior")
 			calle=request.POST.get("calle_reg")
@@ -60,14 +56,9 @@ def api_alta_cliente(request):
 			pais=request.POST.get("pais")		
 			referencia=request.POST.get("referencia")
 			
-			#validamos si existe el e mail
-			c=Cliente.objects.filter(e_mail=e_mail).exists()
-			
-			if c and session=="":
-				
-				estatus.append({"estatus":"0","msj":"Ya existe una cuenta con este e_mail."})
-				return Response(estatus)	
-			try:#si existe actualizamos, de lo contraro creamos 
+			#obtenemos el cliente logueado con la session.
+			try:#si existe cliente logueado lo actualizamos
+				c_l=Clientes_Logueados.objects.get(session=session)
 				c=Cliente.objects.get(id=c_l.cliente.id)
 				
 				#c.psw=psw
@@ -78,9 +69,8 @@ def api_alta_cliente(request):
 				#c.e_mail=e_mail
 				c.rfc=rfc
 				c.save()
-				print(c.telefono)
-				try:
-					
+				
+				try:					
 					d_e=Direccion_Envio_Cliente.objects.get(cliente=c)
 					print(d_e)
 					d_e.numero_interior=numero_interior
@@ -97,12 +87,17 @@ def api_alta_cliente(request):
 					
 					d_e.save()
 					print(d_e.numero_interior)
-			except:			
-				c=Cliente(psw=psw,nombre=nombre,apellido_p=apellido_p,apellido_m=apellido_m,telefono=telefono,e_mail=e_mail,rfc=rfc)
-				c.save()			
-				d_e=Direccion_Envio_Cliente(cliente=c,numero_interior=numero_interior,numero_exterior=numero_exterior,calle=calle,cp=cp,municipio=municipio,estado=estado,pais=pais,referencia=referencia)
-				d_e.save()
-			
+			except Exception as e:#de lo contrario creamos registro
+				#validamos si existe el e mail
+				c=Cliente.objects.filter(e_mail=e_mail).exists()
+				if c:
+					estatus.append({"estatus":"0","msj":"Ya existe una cuenta con este e_mail."})
+					return Response(estatus)	
+				else:
+					c=Cliente(psw=psw,nombre=nombre,apellido_p=apellido_p,apellido_m=apellido_m,telefono=telefono,e_mail=e_mail,rfc=rfc)
+					c.save()			
+					d_e=Direccion_Envio_Cliente(cliente=c,numero_interior=numero_interior,numero_exterior=numero_exterior,calle=calle,cp=cp,municipio=municipio,estado=estado,pais=pais,referencia=referencia)
+					d_e.save()			
 			#el estatus 1 indica que se guardo correctamente el cliente.
 			estatus.append({"estatus":"1","msj":""})
 		except Exception as e:
