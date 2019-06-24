@@ -8,6 +8,7 @@ from django.urls import reverse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from seguridad.models import Cliente,Direccion_Envio_Cliente,Clientes_Logueados,Direccion_Envio_Cliente_Temporal
+from seguridad.models import E_Mail_Notificacion
 class Login(FormView):
 	template_name="login.html"
 	form_class=AuthenticationForm
@@ -195,3 +196,20 @@ def api_direccion_envio_temporal(request):
 		estatus.append({"estatus":"0","msj":"Error al guardar la direccion de envio,intente nuevamente."})
 	return Response(estatus)
 			
+@api_view(['POST'])
+def api_e_mail_notificacion(request):
+	estatus=[]
+	try:
+		e_mail=request.POST.get("e_mail")
+		print(e_mail)
+		try:			
+			E_Mail_Notificacion.objects.get(e_mail=e_mail)
+			estatus.append({"estatus":"1","msj":"El E-Mail ya ha sido registrado."})
+		except Exception as e:
+			E_Mail_Notificacion.objects.create(e_mail=e_mail)
+			estatus.append({"estatus":"1","msj":"Te Subscribiste Corecctamente."})
+	except Exception as e:		
+		print(e)
+		estatus.append({"estatus":"0","msj":"Ocurrio un Error al Subcribirte, Intentalo Nueva mente."})
+	return Response(estatus)
+	
