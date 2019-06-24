@@ -50,3 +50,7 @@ class Direccion_Envio_Cliente_Temporal(models.Model):
 	pais=models.CharField(max_length=50,null=False,default="")	
 	referencia=models.CharField(max_length=200,null=False)
 	
+#Aqui se registran los E-Mails para enviar promociones y ofertas	
+class E_Mail_Notificacion(models.Model):
+	e_mail=models.CharField(max_length=50)
+	
