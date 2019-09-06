@@ -265,7 +265,7 @@ def api_busqueda_productos(request):
 								muestra_descuento=1
 							else:
 								muestra_descuento=0
-							productos.append({"precio_antes":p.id_producto.precio,"id":p.id_producto.id,'str_id':str_clave(p.id_producto.id),"nombre":p.id_producto.nombre,"precio":precio_desc,'muestra_descuento':muestra_descuento})				
+							productos.append({"descuento":p.id_producto.descuento,"precio_antes":p.id_producto.precio,"id":p.id_producto.id,'str_id':str_clave(p.id_producto.id),"nombre":p.id_producto.nombre,"precio":precio_desc,'muestra_descuento':muestra_descuento})				
 		if tipo_busqueda=="2":#busqueda por palabra		
 			text_busqueda=request.GET.get("param1")										
 			print(text_busqueda)
@@ -290,7 +290,7 @@ def api_busqueda_productos(request):
 								muestra_descuento=1
 							else:
 								muestra_descuento=0
-							productos.append({"precio_antes":p.precio,"id":p.id,'str_id':str_clave(p.id),"nombre":p.nombre,"precio":precio_desc,'muestra_descuento':muestra_descuento})				
+							productos.append({"descuento":p.descuento,"precio_antes":p.precio,"id":p.id,'str_id':str_clave(p.id),"nombre":p.nombre,"precio":precio_desc,'muestra_descuento':muestra_descuento})				
 	return Response(productos)	
 	
 #api para consultar el catalogo de municipios

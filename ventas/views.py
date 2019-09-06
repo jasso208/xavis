@@ -87,7 +87,7 @@ def api_consulta_carrito_compras(request):
 					precio_desc=sub_total_con_iva
 				else:
 					precio_desc=cc.id_producto.precio
-				carrito.append({'nombre':cc.id_producto.nombre,'id':cc.id,'id_producto':cc.id_producto.id,'precio':precio_desc,'nombre':cc.id_producto.nombre,'nom_img':nom_img,'cantidad':cc.cantidad,'talla':cc.talla.talla})					
+				carrito.append({'nombre':cc.id_producto.nombre,'id':cc.id,'id_producto':cc.id_producto.id,'precio':precio_desc,'id_producto':cc.id_producto.id,'nom_img':nom_img,'cantidad':cc.cantidad,'talla':cc.talla.talla})					
 		return Response(carrito)
 	if request.method=="POST":
 		error=[]
@@ -241,7 +241,8 @@ def api_cont_productos_carrito(request):
 		contador=[]		
 		session=request.GET.get("session")				
 		#obtenemos los productos que estan en el carrito de compras.
-		c_c=Carrito_Compras.objects.filter(session=session).aggregate(Sum('cantidad'))		
+		c_c=Carrito_Compras.objects.filter(session=session).aggregate(Sum('cantidad'))
+		print(c_c)		
 		contador.append(c_c)		
 		
 		return Response(contador)

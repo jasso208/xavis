@@ -115,7 +115,7 @@ def api_login_usuario(request):
 	e_mail=request.POST.get("e_mail")
 	psw=request.POST.get("psw")
 	session=request.POST.get("session")	
-	print(session)
+
 	try:
 		c=Cliente.objects.get(e_mail=e_mail,psw=psw)
 	except Exception as e:
@@ -131,7 +131,10 @@ def api_login_usuario(request):
 		print(w)			
 	try:
 		Clientes_Logueados.objects.create(cliente=c,session=session)
-		cliente.append({"estatus":"1","msj":"Exito","nombre":c.nombre,"apellido_p":c.apellido_p,"apellido_m":c.apellido_m})
+		cliente.append({"estatus":"1","msj":"Exito","nombre":c.nombre,"apellido_p":c.apellido_p,"apellido_m":c.apellido_m})		
+		de=Direccion_Envio_Cliente.objects.get(cliente=c)		
+		Direccion_Envio_Cliente_Temporal.objects.create(session=session,nombre=c.nombre,apellido_p=c.apellido_p,apellido_m=c.apellido_m,telefono=c.telefono,e_mail=c.e_mail,rfc=c.rfc,calle=de.calle,numero_interior=de.numero_interior,numero_exterior=de.numero_exterior,cp=de.cp,municipio=de.municipio,estado=de.estado,pais=de.pais,	referencia=de.referencia)
+		
 		return Response(cliente)
 	except Exception as e:
 		cliente.append({"estatus":"0","msj":"El e_mail/contraseña es incorrecta."})
