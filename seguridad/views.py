@@ -8,7 +8,9 @@ from django.urls import reverse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from seguridad.models import Cliente,Direccion_Envio_Cliente,Clientes_Logueados,Direccion_Envio_Cliente_Temporal
-from seguridad.models import E_Mail_Notificacion
+from seguridad.models import E_Mail_Notificacion,Recupera_pws
+from django.core.mail import EmailMessage
+
 class Login(FormView):
 	template_name="login.html"
 	form_class=AuthenticationForm
@@ -19,13 +21,14 @@ class Login(FormView):
 			return HttpResponseRedirect("/bienvenidos")
 		else:
 			return super(Login,self).dispatch(request,*args,**kwargs)
-	
+
 	def form_valid(self,form):
 		login(self.request,form.get_user())
 		return super(Login,self).form_valid(form)
-	
+
 def bienvenidos(request):
 	return render(request,'seguridad/bienvenidos.html',{})
+
 
 #api para crear cuentas de clientes
 #en caso de ya existir, actualiza la cuenta.
@@ -216,3 +219,75 @@ def api_e_mail_notificacion(request):
 		estatus.append({"estatus":"0","msj":"Ocurrio un Error al Subcribirte, Intentalo Nueva mente."})
 	return Response(estatus)
 	
+#esta api actualiza la contraseña, del cliente
+#	parametros
+#		session: recibe la session para obtener el correo del cliente que intenta cambiar contraseña
+#		contraseña actual: se recibe la contraseña actual para validar que otra persona no pueda cambiar la contraseña
+#		contraseña nueva: es la nueva contraseña
+@api_view(['POST'])
+def api_actualiza_contraseña(request):
+	estatus=[]
+	try:
+		if request.method=="POST":
+
+			session=request.POST.get("session")
+			psw_actual=request.POST.get("psw_actual")
+			psw_nueva=request.POST.get("psw_nueva")
+
+			#buscamos el cliente
+			cliente=Clientes_Logueados.objects.get(session=session)
+
+			#validamos que se identifique correctamente
+			if cliente.cliente.psw==psw_actual:
+				#guardamos la nueva contraseña
+				cliente.cliente.psw=psw_nueva				
+				cliente.cliente.save()
+				estatus.append({"estatus":"1","msj":"Se actualizo correctamente la contraseña"})	
+			else:
+				estatus.append({"estatus":"0","msj":"La contraseña actual no es correcta"})	
+		else:
+			estatus.append({"estatus":"0","msj":"Error al actualizar tu contraseña 2."})	
+
+	except Exception as e:
+		print(e)
+		estatus.append({"estatus":"0","msj":"Error al actualizar tu contraseña."})
+	return Response(estatus)
+
+#en esta api se llena la tabla creando la relacion del token con el email del que se desea recuperar la contraseña,
+#para posteriormente enviar el correo con el link para actualizar la contraseña.
+#parametros
+#		token: es el token unico que nos ayudara a crear el link para cambiar contraseña,
+#				este token se liga al correo
+#		e_mail:	Es el email de la cuenta que se desea cambiar contraseña.
+@api_view(['POST'])
+def api_solicita_recupera_psw(request):
+	estatus=[]
+	try:
+		e_mail=request.POST.get("e_mail")
+		session=request.POST.get("session")
+
+		try:#validamos que exista el email en nuestrs cuentas
+			Cliente.objects.get(e_mail=e_mail)
+		except:
+			#si llega aqui es porque el e_mail no existe.
+			estatus.append({"estatus":0,"msj":"El E-Mail no existe en la base de datos."})
+			return Response(estatus)
+
+		#borramos todas los registros de el email recibido
+		Recupera_pws.objects.filter(e_mail=e_mail).delete()
+
+		#borramos todas los registros de la session recibida
+		Recupera_pws.objects.filter(session=session).delete()
+		
+		Recupera_pws.objects.create(session=session,e_mail=e_mail)
+		
+		#se envia el correo con el codigo de seguridad.		
+		email = EmailMessage('Solicitud Cambio Contraseña', 'Introduce este token en el formulario de cambio de contraseña: '+session, to=[e_mail])
+		email.send()	
+		estatus.append({"estatus":"1","msj":""})
+
+	except Exception as e:
+		print(e)
+		estatus.append({"estatus":"0","msj":"Ocurrio un error, intentelo nuevamente."})
+
+	return Response(estatus)

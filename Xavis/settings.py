@@ -137,6 +137,11 @@ STATUS_ROOT=os.path.join(BASE_DIR, 'static')
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'j.jassdel@gmail.com'
+EMAIL_HOST_PASSWORD = 'Dheli1985'
+EMAIL_PORT = 587
 #CORS_ORIGIN_WHITELIST = (
 #    'localhost:8000',
 #)

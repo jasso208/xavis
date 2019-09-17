@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from django.utils import timezone
 #tabla de clientes
 class Cliente(models.Model):
 	nombre=models.CharField(max_length=20,null=False) #es el nombre de quien recibe
@@ -10,7 +10,6 @@ class Cliente(models.Model):
 	e_mail=models.CharField(max_length=50,unique=True)
 	rfc=models.CharField(max_length=13,null=True)
 	psw=models.CharField(max_length=10)
-	
 	
 class Direccion_Envio_Cliente(models.Model):
 	cliente=models.ForeignKey(Cliente,on_delete=models.PROTECT,default=2)	
@@ -54,3 +53,9 @@ class Direccion_Envio_Cliente_Temporal(models.Model):
 class E_Mail_Notificacion(models.Model):
 	e_mail=models.CharField(max_length=50)
 	
+#en esta tabla se almacen el imail y la session de los que quieren recuperar el password,
+#tendra una vida de 24 horas, despues de ese tiempo, sera borrado por un proceso automatico.
+class Recupera_pws(models.Model):
+	e_mail=models.CharField(max_length=50,null=False)
+	session=models.CharField(max_length=18,null=False)
+	fecha=models.DateField(default=timezone.now)

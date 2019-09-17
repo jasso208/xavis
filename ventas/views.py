@@ -10,6 +10,9 @@ from django.urls import reverse
 from .forms import Busqueda_Venta_Form,Venta_Form
 from django.http.response import HttpResponseRedirect
 from seguridad.models import Direccion_Envio_Cliente_Temporal,Clientes_Logueados
+from django.core.mail import EmailMessage
+
+
 def busca_ventas(request):
 	if not request.user.is_authenticated:	
 		return HttpResponseRedirect(reverse('seguridad:login'))
@@ -87,7 +90,7 @@ def api_consulta_carrito_compras(request):
 					precio_desc=sub_total_con_iva
 				else:
 					precio_desc=cc.id_producto.precio
-				carrito.append({'nombre':cc.id_producto.nombre,'id':cc.id,'id_producto':cc.id_producto.id,'precio':precio_desc,'id_producto':cc.id_producto.id,'nom_img':nom_img,'cantidad':cc.cantidad,'talla':cc.talla.talla})					
+				carrito.append({'marca':cc.id_producto.marca,'nombre':cc.id_producto.nombre,'id':cc.id,'id_producto':cc.id_producto.id,'precio':precio_desc,'id_producto':cc.id_producto.id,'nom_img':nom_img,'cantidad':cc.cantidad,'talla':cc.talla.talla})					
 		return Response(carrito)
 	if request.method=="POST":
 		error=[]
@@ -237,7 +240,10 @@ def api_crea_venta(request):
 #	session
 @api_view(['GET'])
 def api_cont_productos_carrito(request):		
-	if request.method=="GET":				
+	if request.method=="GET":	
+	#	print("entro a enviar correo")
+	#	email = EmailMessage('title', 'body', to=['jasso.gallegos@gmail.com'])
+	#	email.send()			
 		contador=[]		
 		session=request.GET.get("session")				
 		#obtenemos los productos que estan en el carrito de compras.
