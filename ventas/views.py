@@ -61,9 +61,10 @@ def detalle_venta_form(request,id_venta):
 	return render(request,'ventas/ventas.html',locals())
 	
 #esta api, regresa los productos que estan en el carrito de compras de de la sessionq ue recibe como parametro
+#tambien inserta productos al carrito de compras.
 #parametros
 #	Session
-@api_view(['GET','POST','DELETE'])
+@api_view(['GET','POST'])
 def api_consulta_carrito_compras(request):
 	if request.method=="GET":
 		carrito=[]
@@ -117,22 +118,26 @@ def api_consulta_carrito_compras(request):
 				return Response(error)
 			try:
 				#en caso de que exista ya un registro en el carrito que cumpla con la session, producto y talla
-				#ya no crea nuevo registro, solo incrementa su existencia.
-				cc=Carrito_Compras.objects.get(session=session,id_producto=producto,talla=talla)
-				cc.cantidad=int(cc.cantidad)+int(cantidad)
-				cc.save()
+				#envia error ya que todos los productos son pieza unica, y no puede agregar mas de uno.
+				cc=Carrito_Compras.objects.get(session=session,id_producto=producto,talla=talla)				
+				error.append({'estatus':0,'msj':'Este producto es pieza unica y ya lo tienes agregado a tu carrito.'})
+				return Response(error)
+				
+				#cuando se tenga mas de una existencia de un mismo producto, habilitar las lineas de abajo.
+				#cc.cantidad=int(cc.cantidad)+int(cantidad)
+				#cc.save()
 			except Exception as e:
 				#en caso de que no existe el registro en el carrito que cumpla con la session, producto y talla
 				#se crea uno nuevo.
 				print(e)
 				Carrito_Compras.objects.create(session=session,id_producto=producto,cantidad=cantidad,talla=talla)			
-				
-			
 			error.append({'estatus':1,'msj':'El producto se agrego correctamente.'})
 		except Exception as e:
 			print(e)
 			error.append({'estatus':0,'msj':'Error al agregar el producto, intente nuevamente.'})
 		return Response(error)
+
+
 
 #al parecer django no soporta el metodo delete, por lo tanto eliminar un producto del carrito
 # se ara atravez de una url diferente por el metodo post

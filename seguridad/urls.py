@@ -1,7 +1,8 @@
 from django.conf.urls import url
 from seguridad.views import Login,bienvenidos,api_alta_cliente,api_login_usuario,api_esta_logueado
 from seguridad.views import api_direccion_envio_temporal,api_e_mail_notificacion,api_actualiza_contraseña
-from seguridad.views import api_solicita_recupera_psw
+from seguridad.views import api_solicita_recupera_psw,api_cambia_psw_token,api_kill_session
+from seguridad.views import api_reinicia_direccion_temporal
 
 app_name="seguridad"
 
@@ -17,6 +18,9 @@ urlpatterns=[
 	url(r'^e_mail_notificacion/$',api_e_mail_notificacion,name="e_mail_notificacion"),
 	url(r'^actualiza_psw/$',api_actualiza_contraseña,name="actualiza_psw"),
 	url(r'^recupera_psw/$',api_solicita_recupera_psw,name="recupera_psw"),
+	url(r'^cambia_psw_token/$',api_cambia_psw_token,name="cambia_psw_token"),
+	url(r'^kill_session/$',api_kill_session,name="kill_session"),
+	url(r'^reinicia_direccion_envio/$',api_reinicia_direccion_temporal,name="reinicia_direccion_envio"),
 
 
 ]

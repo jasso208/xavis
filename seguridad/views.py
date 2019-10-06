@@ -29,6 +29,15 @@ class Login(FormView):
 def bienvenidos(request):
 	return render(request,'seguridad/bienvenidos.html',{})
 
+#esta api recibe la session y la desvincula de la cuenta logueada,
+#esto con la finalidad de no perder los carritos agregados al carrito de compras.
+@api_view(['POST'])
+def api_kill_session(request):
+	error=[]
+	if request.method=="POST":
+		session=request.POST.get("session")
+		Clientes_Logueados.objects.get(session=session).delete()
+	return Response(error)
 
 #api para crear cuentas de clientes
 #en caso de ya existir, actualiza la cuenta.
@@ -47,7 +56,7 @@ def api_alta_cliente(request):
 			apellido_p=request.POST.get("apellido_p")
 			apellido_m=request.POST.get("apellido_m")
 			telefono=request.POST.get("telefono")				
-			e_mail=request.POST.get("e_mail")
+			e_mail=request.POST.get("e_mail").upper()
 			rfc=request.POST.get("rfc")
 			psw=request.POST.get("psw")
 		
@@ -75,8 +84,7 @@ def api_alta_cliente(request):
 				c.save()
 				
 				try:					
-					d_e=Direccion_Envio_Cliente.objects.get(cliente=c)
-					print(d_e)
+					d_e=Direccion_Envio_Cliente.objects.get(cliente=c)					
 					d_e.numero_interior=numero_interior
 					d_e.numero_exterior=numero_exterior
 					d_e.calle=calle
@@ -98,7 +106,7 @@ def api_alta_cliente(request):
 					estatus.append({"estatus":"0","msj":"Ya existe una cuenta con este e_mail."})
 					return Response(estatus)	
 				else:
-					c=Cliente(psw=psw,nombre=nombre,apellido_p=apellido_p,apellido_m=apellido_m,telefono=telefono,e_mail=e_mail,rfc=rfc)
+					c=Cliente(psw=psw,nombre=nombre,apellido_p=apellido_p,apellido_m=apellido_m,telefono=telefono,e_mail=e_mail.upper(),rfc=rfc)
 					c.save()			
 					d_e=Direccion_Envio_Cliente(cliente=c,numero_interior=numero_interior,numero_exterior=numero_exterior,calle=calle,cp=cp,municipio=municipio,estado=estado,pais=pais,referencia=referencia)
 					d_e.save()			
@@ -115,10 +123,12 @@ def api_alta_cliente(request):
 @api_view(["POST"])
 def api_login_usuario(request):
 	cliente=[]	
-	e_mail=request.POST.get("e_mail")
+	e_mail=request.POST.get("e_mail").upper()
 	psw=request.POST.get("psw")
 	session=request.POST.get("session")	
-
+	print(e_mail)
+	print(psw)
+	print(session)
 	try:
 		c=Cliente.objects.get(e_mail=e_mail,psw=psw)
 	except Exception as e:
@@ -135,7 +145,12 @@ def api_login_usuario(request):
 	try:
 		Clientes_Logueados.objects.create(cliente=c,session=session)
 		cliente.append({"estatus":"1","msj":"Exito","nombre":c.nombre,"apellido_p":c.apellido_p,"apellido_m":c.apellido_m})		
-		de=Direccion_Envio_Cliente.objects.get(cliente=c)		
+		de=Direccion_Envio_Cliente.objects.get(cliente=c)
+		#en caso de existir ya una direccion temporal registrada, la eliminamos y cargamos
+		#la infoamcion que tiene registrada en la cuenta.
+		Direccion_Envio_Cliente_Temporal.objects.filter(session=session).delete()
+		#Insertamos la informacion de la cuenta del cliente, para que sea mostrada por default al momento de terminar la venta,
+		#esta infmormacion podra ser modificada por el cliente.		
 		Direccion_Envio_Cliente_Temporal.objects.create(session=session,nombre=c.nombre,apellido_p=c.apellido_p,apellido_m=c.apellido_m,telefono=c.telefono,e_mail=c.e_mail,rfc=c.rfc,calle=de.calle,numero_interior=de.numero_interior,numero_exterior=de.numero_exterior,cp=de.cp,municipio=de.municipio,estado=de.estado,pais=de.pais,	referencia=de.referencia)
 		
 		return Response(cliente)
@@ -157,7 +172,7 @@ def api_esta_logueado(request):
 		except:
 			print("El cliente no tiene direccion de envio registrada")
 			estatus.append({"estatus":"1","nombre":c_l.cliente.nombre,"apellido_p":c_l.cliente.apellido_p,"apellido_m":c_l.cliente.apellido_m})		
-		estatus.append({"rfc":c_l.cliente.rfc,"e_mail":c_l.cliente.e_mail,"telefono":c_l.cliente.telefono,"estatus":"1","nombre":c_l.cliente.nombre,"apellido_p":c_l.cliente.apellido_p,"apellido_m":c_l.cliente.apellido_m,"calle":dir.calle,"numero_interior":dir.numero_interior,"numero_exterior":dir.numero_exterior,"cp":dir.cp,"municipio":dir.municipio,"estado":dir.estado,"pais":dir.pais,"referencia":dir.referencia})		
+		estatus.append({"rfc":c_l.cliente.rfc,"e_mail":c_l.cliente.e_mail.upper(),"telefono":c_l.cliente.telefono,"estatus":"1","nombre":c_l.cliente.nombre,"apellido_p":c_l.cliente.apellido_p,"apellido_m":c_l.cliente.apellido_m,"calle":dir.calle,"numero_interior":dir.numero_interior,"numero_exterior":dir.numero_exterior,"cp":dir.cp,"municipio":dir.municipio,"estado":dir.estado,"pais":dir.pais,"referencia":dir.referencia})		
 	except Exception as e:
 		#no se pudo identificar si el cliente ya eta logueado
 		estatus.append({"estatus":"0"})
@@ -177,7 +192,7 @@ def api_direccion_envio_temporal(request):
 			apellido_p=request.POST.get("apellido_p")
 			apellido_m=request.POST.get("apellido_m")
 			telefono=request.POST.get("telefono")				
-			e_mail=request.POST.get("e_mail")
+			e_mail=request.POST.get("e_mail").upper()
 			rfc=request.POST.get("rfc")	
 			numero_interior=request.POST.get("numero_interior")
 			numero_exterior=request.POST.get("numero_exterior")
@@ -189,7 +204,6 @@ def api_direccion_envio_temporal(request):
 			referencia=request.POST.get("referencia")		
 			#borramos la direccion de envio que ya tiene esa session
 			Direccion_Envio_Cliente_Temporal.objects.filter(session=session).delete()
-			print("borro")
 			#insertamos la direccion de envio vinculanda a la session
 			Direccion_Envio_Cliente_Temporal.objects.create(session=session,nombre=nombre,apellido_p=apellido_p,apellido_m=apellido_m,telefono=telefono,e_mail=e_mail,rfc=rfc,numero_interior=numero_interior,numero_exterior=numero_exterior,calle=calle,cp=cp,municipio=municipio,estado=estado,pais=pais,referencia=referencia)
 			estatus.append({"estatus":"1","msj":"Se guardo correctamente la direccion."})
@@ -206,7 +220,7 @@ def api_direccion_envio_temporal(request):
 def api_e_mail_notificacion(request):
 	estatus=[]
 	try:
-		e_mail=request.POST.get("e_mail")
+		e_mail=request.POST.get("e_mail").upper()
 		print(e_mail)
 		try:			
 			E_Mail_Notificacion.objects.get(e_mail=e_mail)
@@ -263,7 +277,7 @@ def api_actualiza_contraseña(request):
 def api_solicita_recupera_psw(request):
 	estatus=[]
 	try:
-		e_mail=request.POST.get("e_mail")
+		e_mail=request.POST.get("e_mail").upper()
 		session=request.POST.get("session")
 
 		try:#validamos que exista el email en nuestrs cuentas
@@ -291,3 +305,62 @@ def api_solicita_recupera_psw(request):
 		estatus.append({"estatus":"0","msj":"Ocurrio un error, intentelo nuevamente."})
 
 	return Response(estatus)
+
+#actualiza la contraseña
+#parametro
+#		token:
+#			es el token que se envio al correo y que se ligo al correo.
+#		psw nuevo:
+#			Es la nueva contraseña
+@api_view(['POST'])
+def api_cambia_psw_token(request):
+	estatus=[]
+	try:
+		token=request.POST.get("token")
+		psw_nueva=request.POST.get("psw_nueva")
+		print(psw_nueva)
+		#validamos que el token exista
+		try:
+			r=Recupera_pws.objects.get(session=token)
+			print(r.e_mail)
+			#obtenemos el cliente del correo
+			c=Cliente.objects.get(e_mail=r.e_mail)
+			print(c.e_mail)
+			c.psw=psw_nueva
+			c.save()
+			print(c.psw)
+			estatus.append({'estatus':"1","msj":""})
+			return Response(estatus)
+		except:			
+			estatus.append({'estatus':'0','msj':'El token no existe, intenta nuevamente.'})
+			return Response(estatus)
+	except Exception as e:
+		print(e)
+		estatus.append({'estatus':'0','msj':'Error al actualizar la contraseña'})
+	return Response(estatus)
+
+#esta api es usada para al momento de confirmar informacion para la venta, 
+#se desea cargar la informacion que se tiene registrada en la cuenta.
+@api_view(['POST'])
+def api_reinicia_direccion_temporal(request):
+	estatus=[]
+	session=request.POST.get("session")
+	try:
+		c=Clientes_Logueados.objects.get(session=session)
+		try:
+			#borramos la direccion de envio temporal que ya tiene registrada para registrar una nueva.
+			Direccion_Envio_Cliente_Temporal.objects.get(session=session).delete()
+		except Exception as e:
+			print(e)
+			print("No hay Direccion temporal")
+		#obtenemos la direccion de envio de cliente, la que tiene registrada en la cuenta.
+		de=Direccion_Envio_Cliente.objects.get(cliente=c.cliente)		
+		#Insertamos la informacion de la cuenta del cliente, para que sea mostrada por default al momento de terminar la venta,
+		#esta infmormacion podra ser modificada por el cliente.		
+		Direccion_Envio_Cliente_Temporal.objects.create(session=session,nombre=c.cliente.nombre,apellido_p=c.cliente.apellido_p,apellido_m=c.cliente.apellido_m,telefono=c.cliente.telefono,e_mail=c.cliente.e_mail,rfc=c.cliente.rfc,calle=de.calle,numero_interior=de.numero_interior,numero_exterior=de.numero_exterior,cp=de.cp,municipio=de.municipio,estado=de.estado,pais=de.pais,	referencia=de.referencia)
+		estatus.append({"estatus":"1","msj":""})
+	except Exception as e:
+		print(e)
+		estatus.append({'estatus':"0","msj":"Error al consultar la informacion de su cuenta."})
+	return Response(estatus) 
+
