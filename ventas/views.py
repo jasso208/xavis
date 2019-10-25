@@ -291,7 +291,7 @@ def api_consulta_detalle_venta(request):
 			except Exception as e:
 				print(e)
 				nom_img=""				
-			respuesta.append({"estatus":"1","msj":"","nom_img":nom_img,'nombre':v.id_producto.nombre,"cantidad":v.cantidad,"talla":v.talla.talla,"precio_unitario":v.precio_unitario})
+			respuesta.append({"estatus":"1","msj":"","nom_img":nom_img,'nombre':v.id_producto.nombre,"cantidad":v.cantidad,"talla":v.talla.talla,"precio_unitario":v.precio_unitario,"marca":v.id_producto.marca})
 	except Exception as e:
 		print(e)
 		respuesta.append({"estatus":"0","msj":"Error al consultar el detalle de la venta."})

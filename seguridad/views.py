@@ -51,7 +51,7 @@ def api_alta_cliente(request):
 			session=request.POST.get("session")
 			if session==None:
 				session=""				
-				
+			#print(request.POST.get("e_mail"))
 			nombre=request.POST.get("nombre")
 			apellido_p=request.POST.get("apellido_p")
 			apellido_m=request.POST.get("apellido_m")
@@ -66,7 +66,7 @@ def api_alta_cliente(request):
 			cp=request.POST.get("cp")
 			municipio=request.POST.get("municipio")
 			estado=request.POST.get("estado")
-			pais=request.POST.get("pais")		
+			#pais=request.POST.get("pais")		
 			referencia=request.POST.get("referencia")
 			
 			#obtenemos el cliente logueado con la session.
@@ -91,7 +91,7 @@ def api_alta_cliente(request):
 					d_e.cp=cp
 					d_e.municipio=municipio
 					d_e.estado=estado
-					d_e.pais=pais
+					d_e.pais="Mexico"
 					d_e.referencia=referencia
 					d_e.save()
 				except:
@@ -108,7 +108,7 @@ def api_alta_cliente(request):
 				else:
 					c=Cliente(psw=psw,nombre=nombre,apellido_p=apellido_p,apellido_m=apellido_m,telefono=telefono,e_mail=e_mail.upper(),rfc=rfc)
 					c.save()			
-					d_e=Direccion_Envio_Cliente(cliente=c,numero_interior=numero_interior,numero_exterior=numero_exterior,calle=calle,cp=cp,municipio=municipio,estado=estado,pais=pais,referencia=referencia)
+					d_e=Direccion_Envio_Cliente(cliente=c,numero_interior=numero_interior,numero_exterior=numero_exterior,calle=calle,cp=cp,municipio=municipio,estado=estado,pais="Mexico",referencia=referencia)
 					d_e.save()			
 			#el estatus 1 indica que se guardo correctamente el cliente.
 			estatus.append({"estatus":"1","msj":""})

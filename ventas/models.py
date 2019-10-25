@@ -4,7 +4,7 @@ from django.utils import timezone
 from datetime import datetime
 from inventario.models import Productos,Tallas
 from seguridad.models import Cliente
-
+from django.utils import timezone
 class Carrito_Compras(models.Model):
 	session=models.CharField(max_length=18,null=False)
 	id_producto=models.ForeignKey(Productos,on_delete=models.PROTECT)
@@ -21,7 +21,7 @@ class Estatus_Venta(models.Model):
 		return self.estatus_venta
 		
 class Venta(models.Model):
-	fecha=models.DateTimeField(default=datetime.now())
+	fecha=models.DateTimeField(default=timezone.now())
 	sub_total=models.DecimalField(max_digits=20,decimal_places=2,null=False)
 	descuento=models.DecimalField(max_digits=20,decimal_places=2,null=False,default=0)
 	iva=models.DecimalField(max_digits=20,decimal_places=2,null=False)	
