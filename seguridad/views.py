@@ -15,13 +15,11 @@ class Login(FormView):
 	template_name="login.html"
 	form_class=AuthenticationForm
 	success_url="/bienvenidos"
-	
 	def dispatch(self,request,*args,**kwargs):
 		if request.user.is_authenticated:
 			return HttpResponseRedirect("/bienvenidos")
 		else:
 			return super(Login,self).dispatch(request,*args,**kwargs)
-
 	def form_valid(self,form):
 		login(self.request,form.get_user())
 		return super(Login,self).form_valid(form)
@@ -228,6 +226,8 @@ def api_e_mail_notificacion(request):
 		except Exception as e:
 			E_Mail_Notificacion.objects.create(e_mail=e_mail)
 			estatus.append({"estatus":"1","msj":"Te Subscribiste Corecctamente."})
+		email = EmailMessage('Subscripcion Jassdel', 'Gracias por subscribirte%sA partir de este momento recibiras notificaciones de todas nuestras novedades.%sAtte: Equipo Jassdel.', to=[e_mail])
+		email.send()	
 	except Exception as e:		
 		print(e)
 		estatus.append({"estatus":"0","msj":"Ocurrio un Error al Subcribirte, Intentalo Nueva mente."})
