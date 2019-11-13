@@ -25,7 +25,7 @@ SECRET_KEY = 'n6%+v%t$z641u295)j778z#+cdgrw&r+yo7(+8r=j4)9&p(xa-'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['pollo146.pythonanywhere.com']
 
 
 # Application definition
@@ -88,7 +88,7 @@ PROJECT_DIR = os.path.abspath(os.path.dirname(__file__))
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(PROJECT_DIR, 'Cantora_Qa.db'),
+        'NAME': os.path.join(PROJECT_DIR, 'jassdel_Qa.db'),
     }
 }
 
