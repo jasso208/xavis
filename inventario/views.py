@@ -235,9 +235,9 @@ def api_consulta_producto(request):
 def api_busqueda_productos(request):
 	productos=[]
 	muestra_descuento=0
-	if request.method=="GET":				
+	if request.method=="GET":						
 		tipo_busqueda=request.GET.get("tipo_busqueda")
-		est=Estatus.objects.get(id=1)#obtenemos el estatus "activo" del catalogo		
+		est=Estatus.objects.get(id=1)#obtenemos el estatus "activo" del catalogo				
 		if tipo_busqueda=="1":#busqueda por categoria.
 			id=request.GET.get("param1")		
 			try:

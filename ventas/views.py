@@ -9,7 +9,7 @@ import datetime
 from django.urls import reverse
 from .forms import Busqueda_Venta_Form,Venta_Form
 from django.http.response import HttpResponseRedirect
-from seguridad.models import Direccion_Envio_Cliente_Temporal,Clientes_Logueados
+from seguridad.models import Direccion_Envio_Cliente_Temporal,Clientes_Logueados,Cliente
 from django.core.mail import EmailMessage
 
 
@@ -169,8 +169,22 @@ def api_crea_venta(request):
 	if request.method=="POST":
 		folio_venta=[]
 		session=request.POST.get("session")
-		c_l=Clientes_Logueados.objects.get(session=session)
-		cliente=c_l.cliente
+		try:
+			
+			c_l=Clientes_Logueados.objects.get(session=session)
+			cliente=c_l.cliente		
+		except:
+			#si no exite cliente logueado, valida el usuario que tiene el correo electronico dado,
+			#si no existe cliente registrado, crea una cuenta para ese correo.			
+			e_m=Direccion_Envio_Cliente_Temporal.objects.get(session=session)
+			try:
+				c_l=Cliente.objects.get(e_mail=e_m.e_mail)
+				cliente=c_l		
+			except Exception as e:
+				print(e)
+				Cliente.objects.create(e_mail=e_m.e_mail)
+				c_l=Cliente.objects.get(e_mail=e_m.e_mail)
+				cliente=c_l		
 		#obtenemos la inormacion guardada en la session
 		c_c=Carrito_Compras.objects.filter(session=session)
 		if c_c.exists():
@@ -234,7 +248,7 @@ def api_crea_venta(request):
 			#borramos la informacion de la session del cliente
 			c_c.delete()
 			d_e.delete()
-			folio_venta.append({"estatus":1,"msj":"El folio de su transaccion es: "+str(v.id)})							
+			folio_venta.append({"estatus":1,"folio":str(v.id)})							
 		else:
 			folio_venta.append({"estatus":0,"msj":"No tiene productos agregados al carrito de compras."})
 		return Response(folio_venta)

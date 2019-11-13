@@ -41,7 +41,7 @@ class Direccion_Envio_Cliente_Temporal(models.Model):
 	e_mail=models.CharField(max_length=50)
 	rfc=models.CharField(max_length=13,null=True)	
 	calle=models.CharField(max_length=50,null=False)
-	numero_interior=models.CharField(max_length=10,null=False)	
+	numero_interior=models.CharField(max_length=10,null=True)	
 	numero_exterior=models.CharField(max_length=10,null=False)
 	cp=models.CharField(max_length=10,null=False)	
 	municipio=models.CharField(max_length=50,null=False,default="")
