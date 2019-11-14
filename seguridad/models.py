@@ -36,7 +36,7 @@ class Direccion_Envio_Cliente_Temporal(models.Model):
 	session=models.CharField(max_length=18,null=False)	
 	nombre=models.CharField(max_length=20,null=False) #es el nombre de quien recibe
 	apellido_p=models.CharField(max_length=20,null=False)
-	apellido_m=models.CharField(max_length=20)
+	apellido_m=models.CharField(max_length=20,null=True)
 	telefono=models.CharField(max_length=10)
 	e_mail=models.CharField(max_length=50)
 	rfc=models.CharField(max_length=13,null=True)	

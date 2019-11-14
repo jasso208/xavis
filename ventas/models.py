@@ -44,7 +44,7 @@ class Direccion_Envio_Venta(models.Model):
 	id_venta=models.ForeignKey(Venta,on_delete=models.PROTECT)
 	nombre_recibe=models.CharField(max_length=20,null=False)
 	apellido_p=models.CharField(max_length=20,null=False)
-	apellido_m=models.CharField(max_length=20)
+	apellido_m=models.CharField(max_length=20,null=True)
 	calle=models.CharField(max_length=50,null=False)
 	numero_interior=models.CharField(max_length=10,null=True)	
 	numero_exterior=models.CharField(max_length=10,null=True)	
