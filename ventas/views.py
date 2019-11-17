@@ -178,12 +178,12 @@ def api_crea_venta(request):
 			#si no existe cliente registrado, crea una cuenta para ese correo.			
 			e_m=Direccion_Envio_Cliente_Temporal.objects.get(session=session)
 			try:
-				c_l=Cliente.objects.get(e_mail=e_m.e_mail)
+				c_l=Cliente.objects.get(e_mail=e_m.e_mail.strip().upper())
 				cliente=c_l		
 			except Exception as e:
 				print(e)
-				Cliente.objects.create(e_mail=e_m.e_mail)
-				c_l=Cliente.objects.get(e_mail=e_m.e_mail)
+				Cliente.objects.create(e_mail=e_m.e_mail.strip().upper())
+				c_l=Cliente.objects.get(e_mail=e_m.e_mail.strip().upper())
 				cliente=c_l		
 		#obtenemos la inormacion guardada en la session
 		c_c=Carrito_Compras.objects.filter(session=session)

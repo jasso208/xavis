@@ -240,7 +240,7 @@ def api_e_mail_notificacion(request):
 #		contraseña actual: se recibe la contraseña actual para validar que otra persona no pueda cambiar la contraseña
 #		contraseña nueva: es la nueva contraseña
 @api_view(['POST'])
-def api_actualiza_contraseña(request):
+def api_actualiza_contrasena(request):
 	estatus=[]
 	try:
 		if request.method=="POST":
