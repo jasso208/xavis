@@ -11,7 +11,7 @@ from .forms import Busqueda_Venta_Form,Venta_Form
 from django.http.response import HttpResponseRedirect
 from seguridad.models import Direccion_Envio_Cliente_Temporal,Clientes_Logueados,Cliente
 from django.core.mail import EmailMessage
-
+from decimal import Decimal
 
 def busca_ventas(request):
 	if not request.user.is_authenticated:	
@@ -305,7 +305,7 @@ def api_consulta_detalle_venta(request):
 			except Exception as e:
 				print(e)
 				nom_img=""				
-			respuesta.append({"estatus":"1","msj":"","nom_img":nom_img,'nombre':v.id_producto.nombre,"cantidad":v.cantidad,"talla":v.talla.talla,"precio_unitario":v.precio_unitario,"marca":v.id_producto.marca})
+			respuesta.append({"estatus":"1","msj":"","nom_img":nom_img,'nombre':v.id_producto.nombre,"cantidad":v.cantidad,"talla":v.talla.talla,"precio_unitario":Decimal(v.precio_unitario)*Decimal(1.16),"marca":v.id_producto.marca})
 	except Exception as e:
 		print(e)
 		respuesta.append({"estatus":"0","msj":"Error al consultar el detalle de la venta."})

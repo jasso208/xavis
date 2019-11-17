@@ -256,7 +256,6 @@ def api_busqueda_productos(request):
 						cont=0
 					
 					if cont>0:
-						print("entro")
 						if p.id_producto.id_estatus==est:#validamos que el producto este activo
 							#imagen=Img_Producto.objects.get(id_producto=p.id_producto,orden=1)
 							#precio_desc=decimal.Decimal(p.id_producto.precio)*decimal.Decimal((decimal.Decimal(p.id_producto.descuento)/100.00))

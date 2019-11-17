@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from seguridad.models import Cliente,Direccion_Envio_Cliente,Clientes_Logueados,Direccion_Envio_Cliente_Temporal
 from seguridad.models import E_Mail_Notificacion,Recupera_pws
 from django.core.mail import EmailMessage
+from ventas.models import Venta
 
 class Login(FormView):
 	template_name="login.html"
@@ -274,29 +275,37 @@ def api_actualiza_contraseña(request):
 #				este token se liga al correo
 #		e_mail:	Es el email de la cuenta que se desea cambiar contraseña.
 @api_view(['POST'])
-def api_solicita_recupera_psw(request):
+def api_envia_token(request):
 	estatus=[]
 	try:
 		e_mail=request.POST.get("e_mail").upper()
 		session=request.POST.get("session")
-
+		
 		try:#validamos que exista el email en nuestrs cuentas
 			Cliente.objects.get(e_mail=e_mail)
-		except:
+			
+		except Exception as e:
+			print(e)
 			#si llega aqui es porque el e_mail no existe.
 			estatus.append({"estatus":0,"msj":"El E-Mail no existe en la base de datos."})
 			return Response(estatus)
 
-		#borramos todas los registros de el email recibido
-		Recupera_pws.objects.filter(e_mail=e_mail).delete()
+		try:
+			#borramos todas los registros de el email recibido
+			Recupera_pws.objects.filter(e_mail=e_mail).delete()
+			
+			#borramos todas los registros de la session recibida
+			Recupera_pws.objects.filter(session=session).delete()
+			
+			Recupera_pws.objects.create(session=session,e_mail=e_mail)
 
-		#borramos todas los registros de la session recibida
-		Recupera_pws.objects.filter(session=session).delete()
-		
-		Recupera_pws.objects.create(session=session,e_mail=e_mail)
-		
+
+			ff=Recupera_pws.objects.get(session=session)
+
+		except Exception as e:
+			print(e)
 		#se envia el correo con el codigo de seguridad.		
-		email = EmailMessage('Solicitud Cambio Contraseña', 'Introduce este token en el formulario de cambio de contraseña: '+session, to=[e_mail])
+		email = EmailMessage('Token Seguridad Jassdel', 'Introduce este token en el formulario : '+session, to=[e_mail])
 		email.send()	
 		estatus.append({"estatus":"1","msj":""})
 
@@ -305,6 +314,35 @@ def api_solicita_recupera_psw(request):
 		estatus.append({"estatus":"0","msj":"Ocurrio un error, intentelo nuevamente."})
 
 	return Response(estatus)
+
+#para los clientes que hacen compras como invitados, se les envia un token a su correo para que puedan consultar sus ventas-
+@api_view(['GET'])
+def api_consulta_ventas_invitado(request):
+	estatus=[]	
+	token=request.GET.get("token")
+	print(token)
+	ventas=[]
+	#validamos que el token exista
+	try:
+		try:
+			r=Recupera_pws.objects.get(session=token)
+		except:
+			estatus.append({"estatus":"0","msj":"El token es incorrecto."})
+			return Response(estatus)
+		try:
+		#obtenemos el cliente del correo
+			c=Cliente.objects.get(e_mail=r.e_mail)
+		except:
+			estatus.append({"estatus":"0","msj":"El Email no existe."})
+			return Response(estatus)
+		vtas=Venta.objects.filter(cliente=c)
+		for v in vtas:		
+			ventas.append({"folio":v.id,"fecha":str(v.fecha.day)+"-"+str(v.fecha.month)+"-"+str(+v.fecha.year),"total":v.total,"estatus":v.id_estatus_venta.estatus_venta,"seguimiento":v.link_seguimiento})
+		estatus.append({"estatus":1,'ventas':ventas})
+	except:
+		estatus.append({"estatus":"0","msj":"No existen ventas para el Correo electronico indicado indicado."})
+	return Response(estatus)
+
 
 #actualiza la contraseña
 #parametro
@@ -318,14 +356,12 @@ def api_cambia_psw_token(request):
 	try:
 		token=request.POST.get("token")
 		psw_nueva=request.POST.get("psw_nueva")
-		print(psw_nueva)
 		#validamos que el token exista
 		try:
 			r=Recupera_pws.objects.get(session=token)
 			print(r.e_mail)
 			#obtenemos el cliente del correo
 			c=Cliente.objects.get(e_mail=r.e_mail)
-			print(c.e_mail)
 			c.psw=psw_nueva
 			c.save()
 			print(c.psw)
