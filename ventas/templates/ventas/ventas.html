@@ -76,6 +76,8 @@
 			<div class="col-xs-4"><label>Pais</label><br>{{direccion_enviio.pais}}</div>
 			<div class="col-xs-4"><label>Numero</label><br>{{direccion_enviio.numero}}</div>
 			<div class="col-xs-4"><label>Codigo Postal</label><br>{{direccion_enviio.cp}}</div>
+			
+			<div class="col-xs-4"><label>Colonia</label><br>{{direccion_enviio.colonia}}</div>
 			<div class="col-xs-6"><label>Telefono</label><br>{{direccion_enviio.telefono}}</div>
 			<div class="col-xs-6"><label>E-Mail</label><br>{{direccion_enviio.correo_electronico}}</div>
 			<div class="col-xs-12"><label>Referencias</label><br>{{direccion_enviio.referencia}}</div>
@@ -95,5 +97,6 @@
 				Guardar
 			</button>
 		</div>
+		<a href="../../reenvia_mail/{{id_venta}}">enviar confirmacion de compra</a>
 	</form>
 {% endblock %}

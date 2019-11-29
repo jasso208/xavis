@@ -184,8 +184,8 @@ def api_esta_logueado(request):
 def api_direccion_envio_temporal(request):
 	estatus=[]
 	try:
-		print(request.method)
 		if request.method=="POST":
+			print(request.POST.get("colonia"))
 			session=request.POST.get("session")	
 			nombre=request.POST.get("nombre")
 			apellido_p=request.POST.get("apellido_p")
@@ -200,16 +200,17 @@ def api_direccion_envio_temporal(request):
 			municipio=request.POST.get("municipio")
 			estado=request.POST.get("estado")
 			pais=request.POST.get("pais")		
-			referencia=request.POST.get("referencia")		
+			referencia=request.POST.get("referencia")				
+			colonia=request.POST.get("colonia")		
 			#borramos la direccion de envio que ya tiene esa session
 			Direccion_Envio_Cliente_Temporal.objects.filter(session=session).delete()
 			#insertamos la direccion de envio vinculanda a la session
-			Direccion_Envio_Cliente_Temporal.objects.create(session=session,nombre=nombre,apellido_p=apellido_p,apellido_m=apellido_m,telefono=telefono,e_mail=e_mail,rfc=rfc,numero_interior=numero_interior,numero_exterior=numero_exterior,calle=calle,cp=cp,municipio=municipio,estado=estado,pais=pais,referencia=referencia)
+			Direccion_Envio_Cliente_Temporal.objects.create(colonia=colonia,session=session,nombre=nombre,apellido_p=apellido_p,apellido_m=apellido_m,telefono=telefono,e_mail=e_mail,rfc=rfc,numero_interior=numero_interior,numero_exterior=numero_exterior,calle=calle,cp=cp,municipio=municipio,estado=estado,pais=pais,referencia=referencia)
 			estatus.append({"estatus":"1","msj":"Se guardo correctamente la direccion."})
 		if request.method=="GET":
 			session=request.GET.get("session")				
 			d=Direccion_Envio_Cliente_Temporal.objects.get(session=session)			
-			estatus.append({"estatus":"1","msj":"Se guardo correctamente la direccion.","nombre":d.nombre,"apellido_p":d.apellido_p,"apellido_m":d.apellido_m,"telefono":d.telefono,"e_mail":d.e_mail,"rfc":d.rfc,"numero_interior":d.numero_interior,"numero_exterior":d.numero_exterior,"calle":d.calle,"cp":d.cp,"municipio":d.municipio,"estado":d.estado,"pais":d.pais,"referencia":d.referencia})
+			estatus.append({"estatus":"1","msj":"Se guardo correctamente la direccion.","colonia":d.colonia,"nombre":d.nombre,"apellido_p":d.apellido_p,"apellido_m":d.apellido_m,"telefono":d.telefono,"e_mail":d.e_mail,"rfc":d.rfc,"numero_interior":d.numero_interior,"numero_exterior":d.numero_exterior,"calle":d.calle,"cp":d.cp,"municipio":d.municipio,"estado":d.estado,"pais":d.pais,"referencia":d.referencia})
 	except Exception as e:	
 		print(e)
 		estatus.append({"estatus":"0","msj":"Error al guardar la direccion de envio,intente nuevamente."})

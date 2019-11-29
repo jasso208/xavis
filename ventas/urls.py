@@ -8,6 +8,7 @@ urlpatterns=[
 	#formularios
 	url(r'^busca_ventas/$',views.busca_ventas,name="busca_ventas"),
 	url(r'^detalle_venta/(?P<id_venta>\d+)/$',views.detalle_venta_form,name="detalle_venta"),
+	url(r'^reenvia_mail/(?P<id_venta>\d+)/$',views.reenvia_venta,name="reenvia_mail"),
 	
 	#apis
 	url(r'^carrito_compras/$',api_consulta_carrito_compras),	
@@ -17,6 +18,7 @@ urlpatterns=[
 	url(r'^guarda_venta/$',api_crea_venta),		
 	url(r'^conslta_ventas_cliente/$',views.api_consulta_ventas),		
 	url(r'^consulta_detalle_venta/$',views.api_consulta_detalle_venta),		
+	url(r'^genera_cargo/$',views.api_genera_cargo),		
 	
 	
 	

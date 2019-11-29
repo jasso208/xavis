@@ -86,6 +86,7 @@ def api_consulta_blogs(request):
 		print(e)
 	return Response(blog)
 
+#recibimos com parametro id_blogS
 @api_view(["GET"])
 def api_consulta_detalle_blog(request):
 	detalle_blog=[]
