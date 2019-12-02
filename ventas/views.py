@@ -370,133 +370,140 @@ def api_genera_cargo(request):
 #parametros:
 #	session:
 #			Solo recibe este parametro ya que el resto de la informacion esta ya almacenada ligada a esta session.
-@api_view(['POST'])		
+@api_view(['POST','GET'])		
 def api_crea_venta(request):
 	if request.method=="POST":
-		folio_venta=[]
 		session=request.POST.get("session")
+	if request.method=="GET":
+		session=request.GET.get("session")
+	print(session)
+	folio_venta=[]		
+	try:
+		c_l=Clientes_Logueados.objects.get(session=session)
+		cliente=c_l.cliente		
+	except:
+		#si no exite cliente logueado, valida el usuario que tiene el correo electronico dado,
+		#si no existe cliente registrado, crea una cuenta para ese correo.	1			
 		try:
-			c_l=Clientes_Logueados.objects.get(session=session)
-			cliente=c_l.cliente		
-		except:
-			#si no exite cliente logueado, valida el usuario que tiene el correo electronico dado,
-			#si no existe cliente registrado, crea una cuenta para ese correo.			
 			e_m=Direccion_Envio_Cliente_Temporal.objects.get(session=session)
-			try:
-				c_l=Cliente.objects.get(e_mail=e_m.e_mail.strip().upper())
-				cliente=c_l		
-			except Exception as e:
-				print(e)
-				Cliente.objects.create(e_mail=e_m.e_mail.strip().upper())
-				c_l=Cliente.objects.get(e_mail=e_m.e_mail.strip().upper())
-				cliente=c_l		
-		#obtenemos la inormacion guardada en la session
-		c_c=Carrito_Compras.objects.filter(session=session)
-		if c_c.exists():
-			try:
-				d_e=Direccion_Envio_Cliente_Temporal.objects.get(session=session)		
-			except:
-				#sillega a la except es porque no tiene capturada la direccion de envio
-				folio_venta.append({"estatus":0,"msj":"No se ha agregado la direccion de envio."})			
-				return Response(folio_venta)			
-			#calculamos el total de la venta
-			total=0.00
+		except:
+			#sillega a la except es porque no tiene capturada la direccion de envio
+			folio_venta.append({"estatus":0,"msj":"No se ha agregado la direccion de envio."})			
+			return Response(folio_venta)
+		try:
+			c_l=Cliente.objects.get(e_mail=e_m.e_mail.strip().upper())
+			cliente=c_l		
+		except Exception as e:
+			print(e)
+			Cliente.objects.create(e_mail=e_m.e_mail.strip().upper())
+			c_l=Cliente.objects.get(e_mail=e_m.e_mail.strip().upper())
+			cliente=c_l		
+	#obtenemos la inormacion guardada en la session
+	c_c=Carrito_Compras.objects.filter(session=session)
+	if c_c.exists():
+		try:
+			d_e=Direccion_Envio_Cliente_Temporal.objects.get(session=session)		
+		except:
+			#sillega a la except es porque no tiene capturada la direccion de envio
+			folio_venta.append({"estatus":0,"msj":"No se ha agregado la direccion de envio."})			
+			return Response(folio_venta)			
+		#calculamos el total de la venta
+		total=0.00
+		descuento=0.00
+		iva=0.00
+		for cc in c_c:					
+			#calculamos el precio de venta(en caso de tener descuento)					
+			if cc.id_producto.descuento!=0:
+				#obtenemos el precio sin iva
+				sub_total=decimal.Decimal(cc.id_producto.precio)/decimal.Decimal(1.16)
+				#obtenemos el descuento
+				descuento=decimal.Decimal(descuento)+(decimal.Decimal(sub_total)*(decimal.Decimal(cc.id_producto.descuento/100.00)))
+				descuento=decimal.Decimal(descuento)*decimal.Decimal(cc.cantidad)								
+				#obtenemos el subtotal con descuento
+				sub_total_con_desc=decimal.Decimal(sub_total)-(decimal.Decimal(sub_total)*(decimal.Decimal(cc.id_producto.descuento/100.00)))
+				#una vez que tenemos el precio con descuento, le agregamos el iva y lo multiplicamos por la cantidad
+				sub_total_con_iva=(decimal.Decimal(sub_total_con_desc)*decimal.Decimal(1.16))*decimal.Decimal(cc.cantidad)								
+			else:
+				sub_total_con_iva=decimal.Decimal(cc.id_producto.precio)*decimal.Decimal(cc.cantidad)				
+			#total ya con iva
+			total=decimal.Decimal(total)+decimal.Decimal(sub_total_con_iva)
+			#el subtotal es sin iva
+			sub_total=decimal.Decimal(decimal.Decimal(total)/decimal.Decimal(1.16))+decimal.Decimal(descuento)
+			#el iva es la diferencia entre el total y el subtotal
+			#iva=decimal.Decimal(sub_total)*decimal.Decimal(0.16)
+		#CREAMOS LA VENTA
+		iva=decimal.Decimal(decimal.Decimal(sub_total)-decimal.Decimal(descuento))*decimal.Decimal(0.16)
+		v=Venta(total=total,sub_total=sub_total,iva=iva,descuento=descuento,cliente=cliente)
+		v.save()
+		#recorremos los productos del carrito para crear el detalle d ela venta
+		for cc in c_c:
+			#calculamos el precio de venta(en caso de tener descuento)	
+			precio_unitario=0.00
 			descuento=0.00
 			iva=0.00
-			for cc in c_c:					
-				#calculamos el precio de venta(en caso de tener descuento)					
-				if cc.id_producto.descuento!=0:
-					#obtenemos el precio sin iva
-					sub_total=decimal.Decimal(cc.id_producto.precio)/decimal.Decimal(1.16)
-					#obtenemos el descuento
-					descuento=decimal.Decimal(descuento)+(decimal.Decimal(sub_total)*(decimal.Decimal(cc.id_producto.descuento/100.00)))
-					descuento=decimal.Decimal(descuento)*decimal.Decimal(cc.cantidad)								
-					#obtenemos el subtotal con descuento
-					sub_total_con_desc=decimal.Decimal(sub_total)-(decimal.Decimal(sub_total)*(decimal.Decimal(cc.id_producto.descuento/100.00)))
-					#una vez que tenemos el precio con descuento, le agregamos el iva y lo multiplicamos por la cantidad
-					sub_total_con_iva=(decimal.Decimal(sub_total_con_desc)*decimal.Decimal(1.16))*decimal.Decimal(cc.cantidad)								
-				else:
-					sub_total_con_iva=decimal.Decimal(cc.id_producto.precio)*decimal.Decimal(cc.cantidad)				
-				#total ya con iva
-				total=decimal.Decimal(total)+decimal.Decimal(sub_total_con_iva)
-				#el subtotal es sin iva
-				sub_total=decimal.Decimal(decimal.Decimal(total)/decimal.Decimal(1.16))+decimal.Decimal(descuento)
-				#el iva es la diferencia entre el total y el subtotal
-				#iva=decimal.Decimal(sub_total)*decimal.Decimal(0.16)
-			#CREAMOS LA VENTA
-			iva=decimal.Decimal(decimal.Decimal(sub_total)-decimal.Decimal(descuento))*decimal.Decimal(0.16)
-			v=Venta(total=total,sub_total=sub_total,iva=iva,descuento=descuento,cliente=cliente)
-			v.save()
-			#recorremos los productos del carrito para crear el detalle d ela venta
-			for cc in c_c:
-				#calculamos el precio de venta(en caso de tener descuento)	
-				precio_unitario=0.00
-				descuento=0.00
-				iva=0.00
-				precio_total=0.00
-				if cc.id_producto.descuento!=0:
-					precio_unitario=decimal.Decimal(cc.id_producto.precio)/decimal.Decimal(1.16)#precio antes de iva
-					descuento=decimal.Decimal(precio_unitario)*(decimal.Decimal(cc.id_producto.descuento)/decimal.Decimal(100))
-					iva=(decimal.Decimal(precio_unitario)-decimal.Decimal(descuento))*decimal.Decimal(0.16)
-					precio_total=(decimal.Decimal(precio_unitario)-decimal.Decimal(descuento)+decimal.Decimal(iva))*decimal.Decimal(cc.cantidad)
-				else:
-					precio_unitario=decimal.Decimal(cc.id_producto.precio)/decimal.Decimal(1.16)
-					iva=decimal.Decimal(precio_unitario)*decimal.Decimal(0.16)
-					precio_total=decimal.Decimal(cc.id_producto.precio)*decimal.Decimal(cc.cantidad)
-				#guardamos el detalle de la venta
-				d=Detalle_Venta(id_venta=v,id_producto=cc.id_producto,cantidad=cc.cantidad,talla=cc.talla,precio_unitario=precio_unitario,descuento=descuento,iva=iva,precio_total=precio_total)				
-				d.save()
-			#agregamos la direccion de envio a la venta.
-			dir_envio=Direccion_Envio_Venta(id_venta=v,nombre_recibe=d_e.nombre,colonia=d_e.colonia,apellido_p=d_e.apellido_p,apellido_m=d_e.apellido_m,calle=d_e.calle,numero_interior=d_e.numero_interior,numero_exterior=d_e.numero_exterior,cp=d_e.cp,municipio=d_e.municipio,estado=d_e.estado,pais=d_e.pais,telefono=d_e.telefono,correo_electronico=d_e.e_mail,referencia=d_e.referencia)
-			dir_envio.save()
+			precio_total=0.00
+			if cc.id_producto.descuento!=0:
+				precio_unitario=decimal.Decimal(cc.id_producto.precio)/decimal.Decimal(1.16)#precio antes de iva
+				descuento=decimal.Decimal(precio_unitario)*(decimal.Decimal(cc.id_producto.descuento)/decimal.Decimal(100))
+				iva=(decimal.Decimal(precio_unitario)-decimal.Decimal(descuento))*decimal.Decimal(0.16)
+				precio_total=(decimal.Decimal(precio_unitario)-decimal.Decimal(descuento)+decimal.Decimal(iva))*decimal.Decimal(cc.cantidad)
+			else:
+				precio_unitario=decimal.Decimal(cc.id_producto.precio)/decimal.Decimal(1.16)
+				iva=decimal.Decimal(precio_unitario)*decimal.Decimal(0.16)
+				precio_total=decimal.Decimal(cc.id_producto.precio)*decimal.Decimal(cc.cantidad)
+			#guardamos el detalle de la venta
+			d=Detalle_Venta(id_venta=v,id_producto=cc.id_producto,cantidad=cc.cantidad,talla=cc.talla,precio_unitario=precio_unitario,descuento=descuento,iva=iva,precio_total=precio_total)				
+			d.save()
+		#agregamos la direccion de envio a la venta.
+		dir_envio=Direccion_Envio_Venta(id_venta=v,nombre_recibe=d_e.nombre,colonia=d_e.colonia,apellido_p=d_e.apellido_p,apellido_m=d_e.apellido_m,calle=d_e.calle,numero_interior=d_e.numero_interior,numero_exterior=d_e.numero_exterior,cp=d_e.cp,municipio=d_e.municipio,estado=d_e.estado,pais=d_e.pais,telefono=d_e.telefono,correo_electronico=d_e.e_mail,referencia=d_e.referencia)
+		dir_envio.save()
 
 
-			#generamos el cargo 
-			try:
-				charge = openpay.Charge.create_as_merchant(
-					method="card",
-					amount=request.POST.get("amount"),
-					description=request.POST.get("description"),
-					order_id=str(v.id),
-					device_session_id=request.POST.get("deviceIdHiddenFieldName"),
-					source_id=request.POST.get("token_id")  ,
-					customer={
-						"name":d_e.nombre,
-						"last_name":d_e.apellido_p,
-						"email":d_e.e_mail,
-						"phone_number":d_e.telefono,
-						"address":{
-							"city": d_e.municipio,
-							"state":d_e.estado,
-							"line1":d_e.calle,
-							"postal_code":d_e.cp,
-							"line2":d_e.colonia,
-							"line3":d_e.referencia,
-							"country_code":"MX"
-						}
-					},
-					metadata={
-						"data1":"value1",
-						"data2":"value2"
+		#generamos el cargo 
+		try:
+			charge = openpay.Charge.create_as_merchant(
+				method="card",
+				amount=request.POST.get("amount"),
+				description=request.POST.get("description"),
+				order_id=str(v.id),
+				device_session_id=request.POST.get("deviceIdHiddenFieldName"),
+				source_id=request.POST.get("token_id")  ,
+				customer={
+					"name":d_e.nombre,
+					"last_name":d_e.apellido_p,
+					"email":d_e.e_mail,
+					"phone_number":d_e.telefono,
+					"address":{
+						"city": d_e.municipio,
+						"state":d_e.estado,
+						"line1":d_e.calle,
+						"postal_code":d_e.cp,
+						"line2":d_e.colonia,
+						"line3":d_e.referencia,
+						"country_code":"MX"
 					}
-				)
-				#si se genero correctamente el cargo a la tarjeta
-				#borramos la informacion de la session del cliente
-				c_c.delete()
-				d_e.delete()
-				folio_venta.append({"estatus":1,"folio":str(v.id)})	
-				#notificamos a el vendeor que uvo una venta
-				fn_envia_email(v)				
-			except Exception as e:
-				#borramos los registros de la venta, ya que el pago no pudo realizarse
-				Detalle_Venta.objects.filter(id_venta=v).delete()
-				Direccion_Envio_Venta.objects.filter(id_venta=v).delete()					
-				v.delete()
-
-				folio_venta.append({"estatus":0,"msj":"Su banco no puede procesar el pago."})									
-		else:			
-			folio_venta.append({"estatus":0,"msj":"No tiene productos agregados al carrito de compras."})
-		return Response(folio_venta)
+				},
+				metadata={
+					"data1":"value1",
+					"data2":"value2"
+				}
+			)
+			#si se genero correctamente el cargo a la tarjeta
+			#borramos la informacion de la session del cliente
+			c_c.delete()
+			d_e.delete()
+			folio_venta.append({"estatus":1,"folio":str(v.id)})	
+			#notificamos a el vendeor que uvo una venta
+			fn_envia_email(v)				
+		except Exception as e:
+			#borramos los registros de la venta, ya que el pago no pudo realizarse
+			Detalle_Venta.objects.filter(id_venta=v).delete()
+			Direccion_Envio_Venta.objects.filter(id_venta=v).delete()					
+			v.delete()
+			folio_venta.append({"estatus":0,"msj":"Su banco no puede procesar el pago."})									
+	else:			
+		folio_venta.append({"estatus":0,"msj":"No tiene productos agregados al carrito de compras."})
+	return Response(folio_venta)
 
 
 #obtenemos la cantidad de productos que estan en carrito de compras.
