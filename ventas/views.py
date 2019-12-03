@@ -374,8 +374,16 @@ def api_genera_cargo(request):
 def api_crea_venta(request):
 	if request.method=="POST":
 		session=request.POST.get("session")
+		amount=request.POST.get("amount")
+		description=request.POST.get("description")
+		device_session_id=request.POST.get("deviceIdHiddenFieldName")
+		source_id=request.POST.get("token_id") 
 	if request.method=="GET":
 		session=request.GET.get("session")
+		amount=request.GET.get("amount")
+		description=request.GET.get("description")
+		device_session_id=request.GET.get("deviceIdHiddenFieldName")
+		source_id=request.GET.get("token_id") 
 	print(session)
 	folio_venta=[]		
 	try:
@@ -457,17 +465,15 @@ def api_crea_venta(request):
 		#agregamos la direccion de envio a la venta.
 		dir_envio=Direccion_Envio_Venta(id_venta=v,nombre_recibe=d_e.nombre,colonia=d_e.colonia,apellido_p=d_e.apellido_p,apellido_m=d_e.apellido_m,calle=d_e.calle,numero_interior=d_e.numero_interior,numero_exterior=d_e.numero_exterior,cp=d_e.cp,municipio=d_e.municipio,estado=d_e.estado,pais=d_e.pais,telefono=d_e.telefono,correo_electronico=d_e.e_mail,referencia=d_e.referencia)
 		dir_envio.save()
-
-
 		#generamos el cargo 
 		try:
 			charge = openpay.Charge.create_as_merchant(
 				method="card",
-				amount=request.POST.get("amount"),
-				description=request.POST.get("description"),
+				amount=amount,
+				description=description,
 				order_id=str(v.id),
-				device_session_id=request.POST.get("deviceIdHiddenFieldName"),
-				source_id=request.POST.get("token_id")  ,
+				device_session_id=device_session_id,
+				source_id=source_id,
 				customer={
 					"name":d_e.nombre,
 					"last_name":d_e.apellido_p,
