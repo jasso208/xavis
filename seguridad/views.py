@@ -12,6 +12,42 @@ from seguridad.models import E_Mail_Notificacion,Recupera_pws
 from django.core.mail import EmailMessage
 from ventas.models import Venta
 
+import smtplib
+import email.message
+
+encabezado_link_consulta_venta_1="""
+<html>
+    <head>           
+    </head>
+    <body style="background-color:#e9e9e9;">
+        <table style="width: 300px;; margin:0 auto;background-color: white;"  cellpadding="10" cellspacing="0">
+            <tr style="background-color: black;">
+                <td colspan="6">
+                        <img src="http://jasso208.pythonanywhere.com/assets/img/logo_peque.png" style="width: 50px;">
+                </td>
+            </tr>
+			<tr>
+				<td colspan="6">
+					<p>Hola,:<br><br><br>
+					&nbsp;&nbsp;&nbsp; De click en el siguiente vinculo para poder consultar sus ventas:
+					<br><br>
+					
+					</p>
+					<a href="
+"""
+					
+encabezado_link_consulta_venta_2="""
+					">Click para consultar Ventas</a>
+					<br><br>
+					<p>Saludos.</p>				
+				</td>
+			</tr>
+		</table>
+	</body>
+</html>
+"""
+
+
 class Login(FormView):
 	template_name="login.html"
 	form_class=AuthenticationForm
@@ -290,24 +326,37 @@ def api_envia_token(request):
 			#si llega aqui es porque el e_mail no existe.
 			estatus.append({"estatus":0,"msj":"El E-Mail no existe en la base de datos."})
 			return Response(estatus)
-
 		try:
 			#borramos todas los registros de el email recibido
 			Recupera_pws.objects.filter(e_mail=e_mail).delete()
-			
 			#borramos todas los registros de la session recibida
 			Recupera_pws.objects.filter(session=session).delete()
-			
 			Recupera_pws.objects.create(session=session,e_mail=e_mail)
-
-
 			ff=Recupera_pws.objects.get(session=session)
 
 		except Exception as e:
 			print(e)
-		#se envia el correo con el codigo de seguridad.		
-		email = EmailMessage('Token Seguridad Jassdel', 'Introduce este token en el formulario : '+session, to=[e_mail])
-		email.send()	
+		link="http://localhost:4200/#/listado_ventas/"+session
+		html=encabezado_link_consulta_venta_1+link+encabezado_link_consulta_venta_2
+		html = html.replace("\xe9", "e")
+		html = html.replace("\x0a", "\n")
+		server = smtplib.SMTP('smtp.gmail.com:587')
+		msg = email.message.Message()
+		msg['Subject'] = 'Consulta tus compras'		
+		
+		msg['From'] = 'j.jassdel@gmail.com'
+		msg['To'] = e_mail
+		password = "JaSSDEL1985"
+		msg.add_header('Content-Type', 'text/html')
+		msg.set_payload(html)		
+		s = smtplib.SMTP('smtp.gmail.com: 587')
+		s.starttls()		
+		# Login Credentials for sending the mail
+		s.login(msg['From'], password)		
+		s.sendmail(msg['From'], [msg['To']], msg.as_string())
+
+
+
 		estatus.append({"estatus":"1","msj":""})
 
 	except Exception as e:

@@ -21,6 +21,7 @@ openpay.verify_ssl_certs = False
 openpay.merchant_id = "myllylbt6vwlywximkxg"
 openpay.production = False  # By default this works in sandbox mode
 
+
 encabezado_0="""
 <html>
     <head>           
