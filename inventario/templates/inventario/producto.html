@@ -13,10 +13,26 @@
 	{{	productos_relacionados_formset.management_form	}}
 	{{	rel_producto_categoria_formset.management_form	}}
 	{{ 	img_producto_formset.management_form	}}
-	<h1 class="base-h1">
-		Producto
-	</h1>
-	<br>	
+	<div class="row">
+		<div class="col-xs-10">
+			<h2 class="base-h1">
+				Producto
+			</h2>
+		</div>
+		{% if consulta %}
+		<div class="col-xs-2">
+			<a href="http://jasso208.pythonanywhere.com/assets/img/productos/{{img}}_1.png" id="btn_ampliar_img">
+				<img ID="img_prod"	 src="http://jasso208.pythonanywhere.com/assets/img/productos/{{img}}_1.png" style="width: 89%; border:1px solid gray; padding:5px;">
+				
+			</a>
+			
+		</div>
+		{% endif %}
+	</div>
+	
+	<br>
+	
+
 	<div class="row">
 		<div class="col-xs-12 cls_form">			
 			{% bootstrap_field form.nombre %}
@@ -28,10 +44,14 @@
 		</div>
 	</div>
 	<div class="row">
-		<div class="col-xs-6 cls_form">
+		<div class="col-xs-3 cls_form">
+			{% bootstrap_field form.precio_proveedor %}
+
+		</div>
+		<div class="col-xs-3 cls_form">
 			{%bootstrap_field form.precio%}
 		</div>
-		<div class="col-xs-6 cls_form">
+		<div class="col-xs-3 cls_form">
 			{% bootstrap_field form.descuento %}
 		</div>
 	</div>
@@ -250,17 +270,6 @@
 	$(document).ready(
 		function()
 		{	
-			/*$(".remove_prod_rel").click(				
-					function()
-					{
-						event.preventDefault();
-						$(this).closest('tr').remove();
-						cont=$("#id_producto-TOTAL_FORMS").val()-1;
-						$("#id_producto-TOTAL_FORMS").val(cont);
-						
-					}
-				
-			);*/
 		
 			$("#add-item-atributo").click(
 				function ()
@@ -295,7 +304,15 @@
 				}
 			);
 			
-			
+			$("#btn_ampliar_img").click(function() {
+			url = $(this).attr("href");
+			window.open(url, '_blank');
+			return false;
+			});
+
+			$('#img_prod').on("error", function () {
+				$('#img_prod').hide();
+			});
 			
 		}
 	)

@@ -25,7 +25,9 @@ class Productos(models.Model):
 	marca=models.CharField(max_length=100,null=False,default="")
 	clave_prod_proveedor=models.CharField(max_length=20,null=True)
 	id_estatus=models.ForeignKey(Estatus,on_delete=models.PROTECT,default=1)
+	precio_proveedor=models.DecimalField(max_digits=26,decimal_places=2,default=0.00,null=False)
 	
+
 	def __str__(self):
 		return str(self.id)+' '+self.nombre
 	
@@ -50,14 +52,14 @@ class Tallas(models.Model):
 	salida=models.IntegerField(default=0)
 	
 	def __str__(self):
-		return str(self.id)+' '+self.id_producto.nombre+' '+self.talla
+		return str(self.id_producto.id)+' '+self.id_producto.nombre+' '+self.talla
 	
 	class Meta:
 		unique_together=('id_producto','talla')
 		
 class Img_Producto(models.Model):
 	id_producto=models.ForeignKey(Productos,on_delete=models.PROTECT)
-	nom_img=models.CharField(max_length=20)
+	nom_img=models.CharField(max_length=7)
 	orden=models.IntegerField()
 	
 	def __str__(self):

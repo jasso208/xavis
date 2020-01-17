@@ -39,7 +39,7 @@
 					<div class="row">
 						<div class="col-xs-12">
 							<div class="page-header">
-								<a class="base-btn-menu-lateral"  href="{%url 'inventario:busca_proveedor'%}">
+								<a class="base-btn-menu-lateral " style="font-size:10px"  href="{%url 'inventario:busca_proveedor'%}" >
 									Proveedores
 								</a>
 							</div>									
@@ -48,9 +48,31 @@
 					<div class="row">
 						<div class="col-xs-12">
 							<div class="page-header">
-								<a class="base-btn-menu-lateral"  href="{%url 'inventario:busca_categoria'%}">
+								<a class="base-btn-menu-lateral" style="font-size:10px"  href="{%url 'inventario:busca_categoria'%}">
 									Categorias
 								</a>
+							</div>									
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-12">
+							<div class="page-header">
+								<a class="base-btn-menu-lateral"  style="font-size:10px" href="{%url 'contabilidad:concepto_ingreso'%}">Alta Concepto Ingreso</a>
+							</div>									
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-xs-12">
+							<div class="page-header">
+								<a class="base-btn-menu-lateral" style="font-size:10px"  href="{%url 'contabilidad:concepto_gasto'%}">Alta Concepto Gasto</a>
+							</div>									
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-12">
+							<div class="page-header">
+								<a class="base-btn-menu-lateral" style="font-size:10px"  href="{%url 'ventas:registro_medio_venta'%}">Alta Medio Compra</a>
 							</div>									
 						</div>
 					</div>
@@ -65,7 +87,7 @@
 					<div class="row">
 						<div class="col-xs-12">
 							<div class="page-header">
-								<a class="base-btn-menu-lateral"  href="{%url 'inventario:busca_producto'%}">Producto</a>
+								<a class="base-btn-menu-lateral" style="font-size:10px" href="{%url 'inventario:busca_producto'%}">Producto</a>
 							</div>									
 						</div>
 					</div>
@@ -80,11 +102,20 @@
 					<div class="row">
 						<div class="col-xs-12">
 							<div class="page-header">
-								<a class="base-btn-menu-lateral"  href="{%url 'ventas:busca_ventas'%}">Ventas</a>
+								<a class="base-btn-menu-lateral"   style="font-size:10px" href="{%url 'ventas:busca_ventas'%}">Ventas</a>
+							</div>									
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-xs-12">
+							<div class="page-header">
+								<a class="base-btn-menu-lateral"   style="font-size:10px" href="{%url 'ventas:guarda_venta_manual'%}">Guarda Venta</a>
 							</div>									
 						</div>
 					</div>
 					<br>
+					
 					<div class="row base-encabezado-menu-lateral">
 						<div class="col-xs-12 ">								
 								<h4 class="base-h4">Contenido</h4>								
@@ -95,11 +126,49 @@
 					<div class="row">
 						<div class="col-xs-12">
 							<div class="page-header">
-								<a class="base-btn-menu-lateral"  href="{%url 'blog:busqueda_blog'%}">Blog</a>
+								<a class="base-btn-menu-lateral" style="font-size:10px"  href="{%url 'blog:busqueda_blog'%}">Blog</a>
+							</div>									
+						</div>
+					</div>
+						<br>
+						
+					<div class="row base-encabezado-menu-lateral">
+						<div class="col-xs-12 ">								
+								<h4 class="base-h4">Contabilidad</h4>								
+						</div>
+					</div>
+					<br>
+					<div class="row">
+						<div class="col-xs-12">
+							<div class="page-header">
+								<a class="base-btn-menu-lateral" style="font-size:10px"  href="{%url 'contabilidad:registro_ingreso'%}">Registro Ingreso </a>
+							</div>									
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-12">
+							<div class="page-header">
+								<a class="base-btn-menu-lateral" style="font-size:10px"  href="{%url 'contabilidad:registro_gasto'%}">Registro Gasto </a>
+							</div>									
+						</div>
+					</div>
+					
+					<div class="row">
+						<div class="col-xs-12">
+							<div class="page-header">
+								<a class="base-btn-menu-lateral" style="font-size:10px"  href="{%url 'contabilidad:reporte_ingresos'%}">Reporte Ingresos</a>
 							</div>									
 						</div>
 					</div>
 
+					<div class="row">
+						<div class="col-xs-12">
+							<div class="page-header">
+								<a class="base-btn-menu-lateral" style="font-size:10px"  href="{%url 'contabilidad:reporte_gastos'%}">Reporte Gastos</a>
+							</div>									
+						</div>
+					</div>
+					
 					
 				</div>
 				<div class="col-xs-12 col-sm-10 col-md-10" >
@@ -145,6 +214,7 @@
 			
 				// Clonamos la ultima fila de la tabla
 				var newElement = $("."+tabla+" tr:last").clone(true);
+				
 				// Necesitamos aumentar en 1 el total de los formularios
 				// por eso obtenemos el total actual, debería ser 4
 				var total = $("#"+obj).val();
@@ -163,6 +233,8 @@
 				$("#"+obj).val(total);
 				// Insertamos el nueva formulario al final
 				$("."+tabla+" tr:last").after(newElement);
+				
+		
 				// Solo mostramos el botón para quitar si hay mas de un formulario
 				
 			}

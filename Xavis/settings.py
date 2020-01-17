@@ -41,10 +41,11 @@ INSTALLED_APPS = [
 	'inventario',
 	'ventas',
 	'blog',
+    'smart_selects',
+    'contabilidad',
 	'rest_framework',
 	'corsheaders',	
 	'bootstrap3',
-	
 ]
 
 MIDDLEWARE = [
@@ -59,7 +60,6 @@ MIDDLEWARE = [
 	
     
 ]
-
 ROOT_URLCONF = 'Xavis.urls'
 
 TEMPLATES = [

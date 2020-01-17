@@ -10,6 +10,11 @@
 				{% bootstrap_field form.fecha %}
 			</div>		
 		</div>
+		<div class="row">
+			<div class="col-xs-3">
+				{% bootstrap_field form.id_medio_venta %}
+			</div>		
+		</div>
 		<br>
 		<h3>Detalle Venta</h3>
 		<table class="table">
@@ -46,14 +51,20 @@
 		<br></br>
 		<div class="row">
 			<div class="col-xs-4"></div>
-			<div class="col-xs-4">Sub Total</div>
-			<div class="col-xs-4">{% bootstrap_field form.sub_total show_label=False%}</div>
-		</div>
-		<div class="row">
-			<div class="col-xs-4"></div>
 			<div class="col-xs-4">Descuento</div>
 			<div class="col-xs-4">{% bootstrap_field  form.descuento show_label=False%}</div>
 		</div>
+		<div class="row">
+			<div class="col-xs-4"></div>
+			<div class="col-xs-4">Costo Envio</div>
+			<div class="col-xs-4">{% bootstrap_field  form.costo_envio show_label=False%}</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-4"></div>
+			<div class="col-xs-4">Sub Total</div>
+			<div class="col-xs-4">{% bootstrap_field form.sub_total show_label=False%}</div>
+		</div>
+
 		<div class="row">
 			<div class="col-xs-4"></div>
 			<div class="col-xs-4">IVA</div>

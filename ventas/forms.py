@@ -1,5 +1,7 @@
 from django import forms
-from .models import Venta,Estatus_Venta
+from .models import Venta,Estatus_Venta,Detalle_Venta,Medio_Venta
+
+
 class Busqueda_Venta_Form(forms.Form):
 	fecha_inicial=forms.DateTimeField()
 	fecha_final=forms.DateTimeField()
@@ -16,5 +18,14 @@ class Busqueda_Venta_Form(forms.Form):
 class Venta_Form(forms.ModelForm):
 	class Meta:
 		model=Venta
-		fields=("fecha","sub_total","descuento","iva","total","id_estatus_venta","link_seguimiento")
+		fields=("fecha","costo_envio","sub_total","descuento","iva","total","id_medio_venta","id_estatus_venta","link_seguimiento",)
 	
+class Det_Venta_Form(forms.ModelForm):
+	class Meta:
+		model=Detalle_Venta
+		fields=("id_venta","id_producto","cantidad","talla","precio_unitario","descuento","iva","precio_total",)
+
+class Medio_Venta_Form(forms.ModelForm):
+	class Meta:
+		model=Medio_Venta
+		fields=("desc_medio",)

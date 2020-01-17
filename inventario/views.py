@@ -83,6 +83,7 @@ def proveedores_edicion_registro(request,id_proveedor=None):
 def categoria_edicion_registro(request,id_categoria=None):
 	if not request.user.is_authenticated:	
 		return HttpResponseRedirect(reverse('seguridad:login'))
+		
 	if id_categoria:
 		categoria=Categorias.objects.get(id=id_categoria)
 	else:
@@ -109,11 +110,15 @@ def registro_edicion_producto(request,id_producto=None):
 	#creamos los formsets	
 	Atributo_Formset=inlineformset_factory(Productos,Atributos,fields=["atributo","valor_atributo",],extra=1,can_delete=True)		
 	Talla_Formset=inlineformset_factory(Productos,Tallas,fields=["talla",],extra=1,max_num=10,can_delete=True)
+	
 	#imagenes_formset=inlineformset_factory(Productos,Img_Producto,fields=["nom_img","orden",],extra=2,can_delete=False)
 	Productos_Relacionados_Formset=inlineformset_factory(Productos,Productos_Relacionados,fields=["id_producto_relacionado",],fk_name="id_producto",extra=1,can_delete=True)	
 	Rel_Producto_Categoria_Formset=inlineformset_factory(Productos,Rel_Producto_Categoria,fields=["id_producto","id_categoria",],fk_name="id_producto",extra=1,can_delete=True)
 	Img_Producto_Formset=inlineformset_factory(Productos,Img_Producto,fields=["nom_img",'orden',],fk_name="id_producto",extra=1,can_delete=True)
+	
 	if request.method=="POST":	
+		consulta=False
+		img=""
 		form=Productos_Form(request.POST,instance=producto)
 		atributo_formset=Atributo_Formset(request.POST,instance=producto)
 		talla_formset=Talla_Formset(request.POST,instance=producto)
@@ -129,6 +134,12 @@ def registro_edicion_producto(request,id_producto=None):
 			img_producto_formset.save()
 			return HttpResponseRedirect(reverse('inventario:busca_producto'))
 	else:	
+		consulta=True
+		try:
+			img=Img_Producto.objects.get(id_producto=producto,orden=1).nom_img
+		except:
+			consulta=False
+			img=""
 		form=Productos_Form(instance=producto)
 		atributo_formset=Atributo_Formset(instance=producto)
 		talla_formset=Talla_Formset(instance=producto)

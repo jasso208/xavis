@@ -12,7 +12,7 @@ class Cliente(models.Model):
 	psw=models.CharField(max_length=10)
 	
 class Direccion_Envio_Cliente(models.Model):
-	cliente=models.ForeignKey(Cliente,on_delete=models.PROTECT,default=2)	
+	cliente=models.ForeignKey(Cliente,on_delete=models.PROTECT,null=True)	
 	calle=models.CharField(max_length=50,null=False)
 	numero_interior=models.CharField(max_length=10,null=False)	
 	numero_exterior=models.CharField(max_length=10,null=False)

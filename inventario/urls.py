@@ -2,7 +2,9 @@ from django.conf.urls import include, url
 from .views import api_consulta_producto,api_get_municipios
 from .views import api_busqueda_productos
 from inventario import views
+
 app_name="inventario"
+
 urlpatterns=[
 	#formularios
 	url(r'^busca_producto/$',views.busca_producto,name="busca_producto"),	

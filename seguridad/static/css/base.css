@@ -63,6 +63,7 @@
 	font-weight:bold;
 	color:gray;
 	letter-spacing:1px;
+	
 }
 
 .base-btn-menu-lateral:hover
@@ -71,6 +72,11 @@
 	text-decoration:none;
 	color:#41758f;
 }
+.cls_btn_lateral
+{
+	font-size:5px;
+}
+
 .base-h4
 {
 	font-family: 'Noto Serif JP', serif;

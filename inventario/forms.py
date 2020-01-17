@@ -10,7 +10,7 @@ class Proveedores_Form(forms.ModelForm):
 class Productos_Form(forms.ModelForm):
 	class Meta:
 		model=Productos
-		fields=('nombre','desc_producto','precio','descuento','id_proveedor','marca','id_estatus','clave_prod_proveedor',)
+		fields=('nombre','desc_producto','precio','descuento','id_proveedor','marca','id_estatus','clave_prod_proveedor','precio_proveedor',)
 
 class Busqueda_Producto_Form(forms.Form):
 	id_proveedor=forms.ModelChoiceField(queryset=Proveedor.objects.all())
@@ -36,3 +36,4 @@ class Categorias_Form(forms.ModelForm):
 		
 class Busca_X_Clave_Prod_Prov_Form(forms.Form):
 	clave_prod_proveedor=forms.CharField(max_length=20)
+

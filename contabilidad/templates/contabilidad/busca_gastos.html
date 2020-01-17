@@ -1,0 +1,84 @@
+{% extends 'base.html'%}
+
+{% load bootstrap3 %}
+
+{% block content %}
+    <form action="#" method="POST">
+        {% csrf_token %}
+        <h2>Reporte de Gastos</h2>
+		<br>
+		<div class="row">
+			<div class="col-xs-3">
+				<label>Fecha Inicial</label>
+			</div>
+			<div class="col-xs-3">
+				<label>Fecha Final</label>
+			</div>
+
+		</div>
+		<div class="row">
+			<div class="col-xs-3">
+				<input  name="fecha_inicial" class="form-control" type="date" title="" id="id_fecha_inicial">
+			</div>
+			<div class="col-xs-3">
+				<input  name="fecha_final" class="form-control" type="date" title="" id="id_fecha_final">				
+			</div>
+		
+			<div class="col-xs-3">
+				<button class="btn">Consultar</button>
+			</div>
+        </div>
+        <br>
+        <br>
+        <div class="row">
+
+            <div class="col-xs-12">
+                <p>Del {{fecha_i}} al {{fecha_f}} </p>
+            </div>
+        </div>
+        <br>
+        <br>
+		<table class="table">
+			<thead>
+
+				<th>Concepto</th>
+				<th>Descripcion</th>
+				<th>Fecha</th>
+				<th>Folio Venta</th>
+				<th>Importe</th>				
+			</thead>
+			<tbody>
+                {% for v in bita %}
+                    {% ifequal v.c1 '' %}
+                        <tr >						
+                            <td>{{v.c1}}</td>
+                            <td>{{v.c2}}</td>
+                            <td>{{v.c3}}</td>
+                            <td>{{v.c4}}</td>
+                            <td>{{v.c5 | floatformat:2}}</td>
+                        </tr>
+                    {% else %}
+                    {% ifequal v.c1 None %}
+                        <tr >						
+                            <td>{{v.c1}}</td>
+                            <td>{{v.c2}}</td>
+                            <td>{{v.c3}}</td>
+                            <td>{{v.c4}}</td>
+                            <td>{{v.c5 | floatformat:2}}</td>
+                        </tr>
+                    {% else %}
+                        <tr style="font-weight: bold;color:white;background-color: gray;">						
+                            <td>{{v.c1}}</td>
+                            <td>{{v.c2}}</td>
+                            <td>{{v.c3}}</td>
+                            <td>{{v.c4}}</td>
+                            <td>{{v.c5 | floatformat:2}}</td>
+                        </tr>
+                    {% endifequal  %}
+                      
+                    {% endifequal  %}
+				{% endfor %}
+			</tbody>
+		</table>
+    </form>
+{% endblock %}

@@ -7,15 +7,17 @@ from django.db.models import Sum
 import decimal
 import datetime
 from django.urls import reverse
-from .forms import Busqueda_Venta_Form,Venta_Form
+from .forms import Busqueda_Venta_Form,Venta_Form,Medio_Venta_Form,Det_Venta_Form
 from django.http.response import HttpResponseRedirect
 from seguridad.models import Direccion_Envio_Cliente_Temporal,Clientes_Logueados,Cliente
-
+from django.forms.models import inlineformset_factory
 from decimal import Decimal
+from contabilidad.models import Concepto_Gasto,Concepto_Ingreso,Movs_Gasto,Movs_Ingreso
 import openpay
 import smtplib
 import email.message
-
+from smart_selects.db_fields import ChainedForeignKey
+from django.forms import widgets
 openpay.api_key = "sk_f0e4778198cb46a69fd64b50d1276efa"
 openpay.verify_ssl_certs = False
 openpay.merchant_id = "myllylbt6vwlywximkxg"
@@ -180,6 +182,18 @@ encabezado_7="""
 """
 
 
+#registramos el medio de venta, mercado libre, facebook, instagram etc
+def registro_medio_venta(request):
+	if not request.user.is_authenticated:	
+		return HttpResponseRedirect(reverse('seguridad:login'))
+	if request.method=="POST":
+		form=Medio_Venta_Form(request.POST)
+		if form.is_valid():
+			form.save()
+			return HttpResponseRedirect(reverse('seguridad:bienvenidos'))
+	else:
+		form=Medio_Venta_Form()
+	return render(request,"ventas/medio_venta.html",locals())
 
 def busca_ventas(request):
 	if not request.user.is_authenticated:	
@@ -228,7 +242,44 @@ def detalle_venta_form(request,id_venta):
 		form=Venta_Form(instance=venta)	
 	return render(request,'ventas/ventas.html',locals())
 
+#cuando se crea una vent desde mercado libre o facebook o algun otro canal, se registra la venta por esta vista
+def guarda_venta_manual(request,id_venta=None):
+	if not request.user.is_authenticated:	
+		return HttpResponseRedirect(reverse('seguridad:login'))	
 
+	if id_venta:
+		venta=Venta.objects.get(id=id_venta)
+	else:
+		venta=Venta()
+
+	#creamos formset del detalle de la venta
+	Detalle_Venta_Formset=inlineformset_factory(Venta,Detalle_Venta,form=Det_Venta_Form,extra=1,can_delete=True)
+
+	if request.method=="POST":
+		
+		form=Venta_Form(request.POST,instance=venta)
+		detalle_venta_formset=Detalle_Venta_Formset(request.POST, instance=venta)
+	
+	
+		if form.is_valid() and detalle_venta_formset.is_valid():
+			form.save()
+			detalle_venta_formset.save()
+			Direccion_Envio_Venta.objects.create(id_venta=venta,nombre_recibe='NA',apellido_p="NA",apellido_m="NA",calle="NA",numero_interior="NA",numero_exterior="NA",cp="NA",colonia="NA",municipio="NA",estado="NA",pais="NA",telefono="NA",correo_electronico="NA",referencia="NA")
+			Detalle_Venta.objects.filter(id_venta=venta,cantidad=0).delete()
+
+			#obtenemos el concepto para ingreso por venta.
+			ci=Concepto_Ingreso.objects.get(id=2)
+
+			Movs_Ingreso.objects.create(id_concepto_ingreso=ci,descripcion="Ingreso por Venta",importe=venta.total,id_v=venta,fecha=venta.fecha)
+
+			return HttpResponseRedirect(reverse('ventas:busca_ventas'))
+		else:			
+			print(form.errors)
+			print(detalle_venta_formset.errors)
+	else:
+		form=Venta_Form(instance=venta)
+		detalle_venta_formset=Detalle_Venta_Formset(instance=venta)
+	return render(request,'ventas/registra_venta.html',locals())
 
 #esta api, regresa los productos que estan en el carrito de compras de de la sessionq ue recibe como parametro
 #tambien inserta productos al carrito de compras.
