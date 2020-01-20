@@ -85,13 +85,24 @@ WSGI_APPLICATION = 'Xavis.wsgi.application'
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
 PROJECT_DIR = os.path.abspath(os.path.dirname(__file__))
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(PROJECT_DIR, 'jassdel_Qa.db'),
-    }
-}
 
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.sqlite3',
+#        'NAME': os.path.join(PROJECT_DIR, 'jassdel_Qa.db'),
+#    }
+#}
+
+DATABASES = {
+ 'default': {
+ 'ENGINE': 'django.db.backends.postgresql',
+ 'NAME': 'jassdel',
+ 'USER': 'postgres',
+ 'PASSWORD': 'Blanca1985',
+ 'HOST': 'localhost',
+ 'PORT': '5432',
+ }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators

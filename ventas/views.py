@@ -268,8 +268,7 @@ def guarda_venta_manual(request,id_venta=None):
 			Detalle_Venta.objects.filter(id_venta=venta,cantidad=0).delete()
 
 			#obtenemos el concepto para ingreso por venta.
-			ci=Concepto_Ingreso.objects.get(id=2)
-
+			ci=Concepto_Ingreso.objects.get(id=1)
 			Movs_Ingreso.objects.create(id_concepto_ingreso=ci,descripcion="Ingreso por Venta",importe=venta.total,id_v=venta,fecha=venta.fecha)
 
 			return HttpResponseRedirect(reverse('ventas:busca_ventas'))

@@ -21,7 +21,7 @@ class Productos(models.Model):
 	desc_producto=models.TextField()
 	precio=models.DecimalField(max_digits=26,decimal_places=2,default=0.00)
 	descuento=models.IntegerField(default=0)	
-	id_proveedor=models.ForeignKey(Proveedor,on_delete=models.PROTECT,null=False,default=0)
+	id_proveedor=models.ForeignKey(Proveedor,on_delete=models.PROTECT,null=True)
 	marca=models.CharField(max_length=100,null=False,default="")
 	clave_prod_proveedor=models.CharField(max_length=20,null=True)
 	id_estatus=models.ForeignKey(Estatus,on_delete=models.PROTECT,default=1)
