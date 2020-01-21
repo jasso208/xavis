@@ -13,6 +13,7 @@ from django.template import RequestContext as ctx
 from django.http.response import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth import authenticate
+from django.db.models import Max
 
 #formulario de busqueda de producto
 def busca_producto(request):	
@@ -29,18 +30,27 @@ def busca_producto(request):
 			estatus=0
 		else:
 			estatus=int(request.POST.get("id_estatus"))
+
+		if request.POST.get("id_producto")=='':
+			id_producto=0
+		else:
+			id_producto=int(request.POST.get("id_producto"))
 			
-		if proveedor==0 and estatus==0:
-			producto=Productos.objects.all()
-		if proveedor>0 and estatus==0:
-			producto=Productos.objects.filter(id_proveedor=proveedor)
-		if estatus>0 and proveedor==0:
-			producto=Productos.objects.filter(id_estatus=estatus)
-		if proveedor>0 and estatus>0:
-			producto=Productos.objects.filter(id_proveedor=proveedor,id_estatus=estatus)						
+		if proveedor==0 and estatus==0 and id_producto==0:
+			producto=Productos.objects.all().order_by("id")
+		
+		if id_producto>0:
+			producto=Productos.objects.filter(id=id_producto).order_by("id")
+		else:
+			if proveedor>0 and estatus==0:
+				producto=Productos.objects.filter(id_proveedor=proveedor).order_by("id")
+			if estatus>0 and proveedor==0:
+				producto=Productos.objects.filter(id_estatus=estatus).order_by("id")
+			if proveedor>0 and estatus>0:
+				producto=Productos.objects.filter(id_proveedor=proveedor,id_estatus=estatus).order_by("id")
 		form=Busqueda_Producto_Form(request.POST)			
 	else:
-		producto=Productos.objects.all()
+		producto=Productos.objects.all().order_by("id")
 		form=Busqueda_Producto_Form()	
 	return render(request,'inventario/busca_producto.html',locals())
 
@@ -102,11 +112,15 @@ def registro_edicion_producto(request,id_producto=None):
 	if not request.user.is_authenticated:	
 		return HttpResponseRedirect(reverse('seguridad:login'))
 
+	
 	if id_producto:
 		producto=Productos.objects.get(id=id_producto)
+		folio=str_clave(producto.id)
 	else:
-		producto=Productos()			
-		
+		producto=Productos()		
+		prod=Productos.objects.aggregate(Max("id"))
+		folio=str_clave(int(prod["id__max"])+1)
+
 	#creamos los formsets	
 	Atributo_Formset=inlineformset_factory(Productos,Atributos,fields=["atributo","valor_atributo",],extra=1,can_delete=True)		
 	Talla_Formset=inlineformset_factory(Productos,Tallas,fields=["talla",],extra=1,max_num=10,can_delete=True)
@@ -276,10 +290,11 @@ def api_busqueda_productos(request):
 							else:
 								muestra_descuento=0
 							productos.append({"descuento":p.id_producto.descuento,"precio_antes":p.id_producto.precio,"id":p.id_producto.id,'str_id':str_clave(p.id_producto.id),"nombre":p.id_producto.nombre,"precio":precio_desc,'muestra_descuento':muestra_descuento})				
-		if tipo_busqueda=="2":#busqueda por palabra		
+		if tipo_busqueda=="2":#busqueda por palabra	
+			
 			text_busqueda=request.GET.get("param1")										
 			print(text_busqueda)
-			prod=Productos.objects.filter(desc_producto__icontains=str(text_busqueda))							
+			prod=Productos.objects.filter(desc_producto__icontains=str(text_busqueda)).order_by("id")							
 			#p_e=Rel_Producto_Categoria.objects.filter(id_producto__in=prod)
 			
 			if prod.exists():

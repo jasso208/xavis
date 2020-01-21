@@ -8,65 +8,80 @@
 		<h2 >Busqueda</h2>
 		<br>
 		<div class="row">
-			<div class="col-xs-4 col-sm-3">
+			<div class="col-xs-4">
 				<label>
 					Proveedor
 				</label>
 			</div>
-			<div class="col-xs-4 col-sm-3">
+			<div class="col-xs-4">
 				<label>
 					Estatus
 				</label>
 			</div>
+			
+			<div class="col-xs-4">
+				<label>
+					id Producto
+				</label>
+			</div>
 		</div>
 		<div class="row">			
-			<div class="col-xs-4 col-sm-3">
+			<div class="col-xs-4">
 				{% bootstrap_field form.id_proveedor  show_label=False%}
 			</div>
-			<div class="col-xs-4 col-sm-3">
+			<div class="col-xs-4">
 				{%bootstrap_field form.id_estatus show_label=False%}
+			</div>			
+			<div class="col-xs-4">
+				{%bootstrap_field form.id_producto show_label=False%}
 			</div>
-			<div class="col-xs-4 col-sm-3">
-				
-				<button class="btn">Buscar</button>
-			</div>
-			
 		</div>
+		<div class="row">			
+			<div class="col-xs-8" >				
+				<a  href="../productos/new/" style="float: right;margin-top:10px">{%bootstrap_icon "plus"%} Agregar Producto</a>
+			</div>
+				
+			<div class="col-xs-4" >				
+				<button class="btn" style="float: right;">Buscar</button>
+			</div>
+		</div>
+		<br>
+		
+		<br>
 		<div class="row">
-			<div class="col-xs-12 " style="text-align:right">				
-					<a  href="../productos/new/">{%bootstrap_icon "plus"%} Agregar Producto</a>
+			<div class="col-xs-12">
+				<table class="table table-striped" style="font-size: 10px;">
+					<thead class="thead-dark">
+						<tr>
+							<th scope="col">#</th>
+							<th scope="col">Nombre</th>
+							<th scope="col">Precio</th>
+							<th scope="col">Prov</th>
+							<th scope="col">Marca</th>
+							<th scope="col">Estatus</th>
+						</tr>
+					</thead>
+					<tbody>
+						{%for prod in producto %}
+						<tr>
+							<th scope="row">
+								<a href="/inventario/productos_edita/{{prod.id}}/"> {%bootstrap_icon "pencil"%} </a> 												
+								<a href="/inventario/existencias/{{prod.id}}/"> {%bootstrap_icon "plus"%} </a> 												
+							</th>
+							<td>{{prod.id}} - {{prod.nombre}}</td>
+							<td>{{prod.precio}}</td>
+							<td>{{prod.id_proveedor.proveedor}}</td>
+							<td>{{prod.marca}}</td>
+							<td>{{prod.id_estatus}}</td>
+						</tr>
+						
+						{%endfor%}
+					</tbody>
+				
+				</table>
 			</div>
 		</div>
-		<br>
-		
-		<br>
-		<table clasS="table">
-			<thead>
-				<th scope="col">#</th>
-				<th scope="col">Nombre</th>
-				<th scope="col">Precio</th>
-				<th scope="col">Proveedor</th>
-				<th scope="col">Marca</th>
-				<th scope="col">Estatus</th>
-			</thead>
-			<tbody>
-				{%for prod in producto %}
-				<tr>
-					<td>
-						<a href="/inventario/productos_edita/{{prod.id}}/"> {%bootstrap_icon "pencil"%} </a> 												
-						<a href="/inventario/existencias/{{prod.id}}/"> {%bootstrap_icon "plus"%} </a> 												
-					</td>
-					<td>{{prod.nombre}}</td>
-					<td>{{prod.precio}}</td>
-					<td>{{prod.id_proveedor.proveedor}}</td>
-					<td>{{prod.marca}}</td>
-					<td>{{prod.id_estatus}}</td>
-				</tr>
-				
-				{%endfor%}
-			</tbody>
-		
-		</table>
+
 		
 	</form>
 	
