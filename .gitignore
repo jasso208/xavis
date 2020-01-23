@@ -7,3 +7,4 @@ db.sqlite3
 .DS_Store
 Xavis/Cantora_Qa.db
 *.db
+settings.py
