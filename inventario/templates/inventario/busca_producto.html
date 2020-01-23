@@ -8,32 +8,40 @@
 		<h2 >Busqueda</h2>
 		<br>
 		<div class="row">
-			<div class="col-xs-4">
+			<div class="col-xs-3">
 				<label>
 					Proveedor
 				</label>
 			</div>
-			<div class="col-xs-4">
+			<div class="col-xs-3">
 				<label>
 					Estatus
 				</label>
 			</div>
 			
-			<div class="col-xs-4">
+			<div class="col-xs-3">
 				<label>
 					id Producto
 				</label>
 			</div>
+			<div class="col-xs-3">
+				<label>
+					Clave Proveedor
+				</label>
+			</div>
 		</div>
 		<div class="row">			
-			<div class="col-xs-4">
+			<div class="col-xs-3">
 				{% bootstrap_field form.id_proveedor  show_label=False%}
 			</div>
-			<div class="col-xs-4">
+			<div class="col-xs-3">
 				{%bootstrap_field form.id_estatus show_label=False%}
 			</div>			
-			<div class="col-xs-4">
+			<div class="col-xs-3">
 				{%bootstrap_field form.id_producto show_label=False%}
+			</div>
+			<div class="col-xs-3">
+				{%bootstrap_field form.clave_proveedor show_label=False%}
 			</div>
 		</div>
 		<div class="row">			
@@ -85,4 +93,68 @@
 		
 	</form>
 	
+	<script>
+		$(document).ready(
+			function()
+			{
+				$("#id_id_producto").val("0");
+				$("#id_clave_proveedor").val("NA");
+
+				$("#id_id_producto").focusout(
+					function()
+					{
+						if($("#id_id_producto").val()=="")
+						{
+							$("#id_id_producto").val("0");
+						}
+					}
+				);
+
+				$("#id_clave_proveedor").focusout(
+					function()
+					{
+						if($("#id_clave_proveedor").val()=="")
+						{
+							$("#id_clave_proveedor").val("NA");
+						}
+					}
+				);
+
+				$("#id_id_estatus").focusin(
+						function()
+						{
+							$("#id_id_producto").val("0");
+							$("#id_clave_proveedor").val("NA");
+						}
+
+				);
+				$("#id_id_proveedor").focusin(
+						function()
+						{
+							$("#id_id_producto").val("0");
+							$("#id_clave_proveedor").val("NA");
+						}
+
+				);
+				$("#id_id_proveedor").val("");
+
+				$("#id_id_producto").on('keypress',function(e) {
+				
+					$("#id_id_estatus").val("");
+					$("#id_id_proveedor").val("");
+					$("#id_clave_proveedor").val("NA");
+			
+			});
+			$("#id_clave_proveedor").on('keypress',function(e) {
+				
+				$("#id_id_estatus").val("");
+				$("#id_id_proveedor").val("");
+				$("#id_id_producto").val("0");
+		
+		});
+
+			}
+
+		);
+	</script>
 {%endblock%}

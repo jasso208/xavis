@@ -35,19 +35,29 @@ def busca_producto(request):
 			id_producto=0
 		else:
 			id_producto=int(request.POST.get("id_producto"))
-			
-		if proveedor==0 and estatus==0 and id_producto==0:
-			producto=Productos.objects.all().order_by("id")
 		
-		if id_producto>0:
-			producto=Productos.objects.filter(id=id_producto).order_by("id")
+		if request.POST.get("clave_proveedor")=='NA':
+			cve_prod_proveedor="0"
 		else:
-			if proveedor>0 and estatus==0:
-				producto=Productos.objects.filter(id_proveedor=proveedor).order_by("id")
-			if estatus>0 and proveedor==0:
-				producto=Productos.objects.filter(id_estatus=estatus).order_by("id")
-			if proveedor>0 and estatus>0:
-				producto=Productos.objects.filter(id_proveedor=proveedor,id_estatus=estatus).order_by("id")
+			cve_prod_proveedor=request.POST.get("clave_proveedor")
+
+	
+		if cve_prod_proveedor!="0":		
+			producto=Productos.objects.filter(clave_prod_proveedor=cve_prod_proveedor).order_by("id")
+		else:
+			
+			if proveedor==0 and estatus==0 and id_producto==0:
+				producto=Productos.objects.all().order_by("id")
+			
+			if id_producto>0:
+				producto=Productos.objects.filter(id=id_producto).order_by("id")
+			else:			
+				if proveedor>0 and estatus==0:
+					producto=Productos.objects.filter(id_proveedor=proveedor).order_by("id")
+				if estatus>0 and proveedor==0:
+					producto=Productos.objects.filter(id_estatus=estatus).order_by("id")
+				if proveedor>0 and estatus>0:
+					producto=Productos.objects.filter(id_proveedor=proveedor,id_estatus=estatus).order_by("id")
 		form=Busqueda_Producto_Form(request.POST)			
 	else:
 		producto=Productos.objects.all().order_by("id")
