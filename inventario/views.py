@@ -20,7 +20,8 @@ def busca_producto(request):
 	if not request.user.is_authenticated:	
 		return HttpResponseRedirect(reverse('seguridad:login'))
 		
-	if request.method=="POST":		
+	if request.method=="POST":	
+		
 		if request.POST.get("id_proveedor")=='':
 			proveedor=0
 		else:
@@ -60,8 +61,13 @@ def busca_producto(request):
 					producto=Productos.objects.filter(id_proveedor=proveedor,id_estatus=estatus).order_by("id")
 		form=Busqueda_Producto_Form(request.POST)			
 	else:
-		producto=Productos.objects.all().order_by("id")
+		est=Estatus.objects.get(id=1)	
+		producto=Productos.objects.filter(id_estatus=est).order_by("id")
 		form=Busqueda_Producto_Form()	
+	produ=[]
+	for x in producto:
+		produ.append({"id":x.id,"nombre":x.nombre,"precio":x.precio,"proveedor":x.id_proveedor.proveedor,"marca":x.marca,"id_estatus":x.id_estatus.estatus,"nom_img":str_clave(x.id)})
+
 	return render(request,'inventario/busca_producto.html',locals())
 
 def busca_proveedor(request):

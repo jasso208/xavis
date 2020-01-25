@@ -1,6 +1,7 @@
 {%extends 'base.html'%}
 {%load bootstrap3%}
 
+{% load static %}
 {%block content%}
 	<form method="post" action="#">
 		{%csrf_token%}
@@ -57,7 +58,52 @@
 		
 		<br>
 		<div class="row">
-			<div class="col-xs-12">
+
+			{%for prod in produ %}
+				<div class="col-xs-12 col-md-3" style="margin-top:10px;">
+					<div class="col-xs-6 col-md-12">
+						<img id="{{prod.nom_img}}" class="cls_img_prod" src="{% static 'img/'%}{{prod.nom_img}}_1.PNG" style="width: 100%;max-height: 300px;">
+					</div>
+					<div class="col-xs-6 col-md-12" >
+
+						<div class="col-xs-12">
+							<h1 style="font-size: 15px;font-weight: bold;text-align: center;">{{prod.id}} - {{prod.nombre}}</h1>		
+						</div>																	
+						<div class="col-xs-12">
+							
+							<p style="font-size: 12px;">Precio: <span style="font-weight: bold;">{{prod.precio}}</span>
+								 </p> 
+						</div>
+						<div class="col-xs-12">
+							<p style="font-size: 12px;"><span style="font-weight: bold;">{{prod.id_estatus}}</span>
+								 </p> 
+						</div>
+						<div class="col-xs-12">
+							<p style="font-size: 12px;">Marca: <span style="font-weight: bold;">{{prod.marca}}</span>
+							</p> 
+						</div>
+
+						<div class="col-xs-12">
+							<p style="font-size: 12px;">Proveedor: <span style="font-weight: bold;">{{proveedor}}</span>
+							</p> 
+						</div>
+
+						
+					</div>
+					<div class="col-xs-12">
+						<div class="col-xs-6 col-md-12">
+							<a class="btn  btn-primary btn-block" href="/inventario/productos_edita/{{prod.id}}/">Modificar</a>
+						</div>
+						<div class="col-xs-6 col-md-12">
+							<a class="btn  btn-primary btn-block" href="/inventario/existencias/{{prod.id}}/">Stock</a>
+						</div>
+					</div>
+
+				</div>
+			{% endfor %}
+
+		
+			<!--<div class="col-xs-12">
 				<table class="table table-striped" style="font-size: 10px;">
 					<thead class="thead-dark">
 						<tr>
@@ -87,7 +133,8 @@
 					</tbody>
 				
 				</table>
-			</div>
+			
+			</div>-->
 		</div>
 
 		
@@ -120,6 +167,7 @@
 					}
 				);
 
+				
 				$("#id_id_estatus").focusin(
 						function()
 						{
@@ -153,6 +201,10 @@
 		
 		});
 
+		$('.cls_img_prod').on("error", function () {
+
+			$(this).height($(this).width());
+			});
 			}
 
 		);

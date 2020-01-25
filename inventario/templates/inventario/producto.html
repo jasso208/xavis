@@ -2,6 +2,7 @@
 
 {% load bootstrap3 %}
 
+{% load static %}
 {# Display a form #}
 
 {%block content%}
@@ -20,7 +21,7 @@
 			<h4 >
 				Folio Producto: {{folio}}
 			</h4>
-			<a href="https://www.pythonanywhere.com/user/pollo146/files/home/pollo146/pollo146.pythonanywhere.com/static/img/{{img}}_1.png" id="btn_ampliar_img">
+			<a href=" {%static 'img/'%} {{img}}_1.png" id="btn_ampliar_img">
 				<img ID="img_prod"	 src="https://www.pythonanywhere.com/user/pollo146/files/home/pollo146/pollo146.pythonanywhere.com/static/img/{{img}}_1.png" style="width: 89%; border:1px solid gray; padding:5px;">
 				
 			</a>
