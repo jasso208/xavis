@@ -8,3 +8,7 @@ db.sqlite3
 Xavis/Cantora_Qa.db
 *.db
 settings.py
+Xavis/ventas/migrations
+Xavis/seguridad/migrations
+Xavis/inventario/migrations
+Xavis/blog/migrations
