@@ -8,7 +8,9 @@ class Estatus(models.Model):
 	
 	def __str__(self):
 		return str(self.id)+' '+self.estatus
-		
+
+
+
 class Proveedor(models.Model):
 	proveedor=models.CharField(max_length=40,null=False)
 	id_estatus=models.ForeignKey(Estatus,on_delete=models.PROTECT,default=1)
@@ -17,16 +19,16 @@ class Proveedor(models.Model):
 		return self.proveedor
 		
 class Productos(models.Model):	
-	nombre=models.CharField(max_length=100)
+	nombre=models.CharField(max_length=60)
 	desc_producto=models.TextField()
 	precio=models.DecimalField(max_digits=26,decimal_places=2,default=0.00)
 	descuento=models.IntegerField(default=0)	
 	id_proveedor=models.ForeignKey(Proveedor,on_delete=models.PROTECT,null=True)
 	marca=models.CharField(max_length=100,null=False,default="")
 	clave_prod_proveedor=models.CharField(max_length=20,null=True)
-	id_estatus=models.ForeignKey(Estatus,on_delete=models.PROTECT,default=1)
+	id_estatus=models.ForeignKey(Estatus,on_delete=models.PROTECT,default=1,related_name="id_estatus")
 	precio_proveedor=models.DecimalField(max_digits=26,decimal_places=2,default=0.00,null=False)
-	
+	publicado_ml=models.ForeignKey(Estatus,on_delete=models.PROTECT,default=2,related_name="publicado_ml")
 
 	def __str__(self):
 		return str(self.id)+' '+self.nombre

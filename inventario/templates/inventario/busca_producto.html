@@ -8,42 +8,76 @@
 		
 		<h2 >Busqueda</h2>
 		<br>
-		<div class="row">
-			<div class="col-xs-3">
-				<label>
-					Proveedor
-				</label>
+	
+		<div class="row">	
+			<div class="panel panel-default">
+				
+				<div class="panel-body">
+					<div class="col-xs-6 col-md-3">
+						<label for=""> Proveedor</label>
+						{% bootstrap_field form.id_proveedor  show_label=False%}
+					</div>
+					<div class="col-xs-6 col-md-3">
+						<label for=""> Estatus</label>
+						{%bootstrap_field form.id_estatus show_label=False%}
+					</div>
+					<div class="col-xs-4 col-md-2">
+						<label for=""> Publicado ML</label>
+						{%bootstrap_field form.pml show_label=False%}
+					</div>
+					
+					<div class="col-xs-4 col-md-2">
+						<label for="">
+							&nbsp;
+						</label>
+						<br>
+						<button class="btn btn-default" style="float: right;"  id="buscar_1">Buscar</button>
+						
+					</div>
+					<div class="col-xs-4 col-md-2">
+						<label for="">
+							&nbsp;
+						</label>
+						<br>
+						<a class="btn btn-primary" id="ver_mas_filtros"> Ver mas Filtros</a>
+					</div>
+				</div>
+				
+			</div>		
+				
+					
+			<div class="panel panel-default" id="panel_busqueda_1">
+				<div class="panel-body">						
+				<div class="col-xs-6 col-md-3">
+						<label for="">clave Producto</label>
+						{%bootstrap_field form.id_producto show_label=False%}
+					</div>					
+				<div class="col-xs-6 col-md-3">
+						<label for="">
+							&nbsp;
+						</label>
+						<br>
+						<button class="btn btn-default" style="float: right;"  id="buscar_2">Buscar</button>
+					</div>
+				</div>
 			</div>
-			<div class="col-xs-3">
-				<label>
-					Estatus
-				</label>
+
+			<div class="panel panel-default" id="panel_busqueda_2">
+				<div class="panel-body">						
+					<div class="col-xs-6 col-md-3">
+						<label for="">Clave Proveedor</label>
+						{%bootstrap_field form.clave_proveedor show_label=False%}
+					</div>
+					<div class="col-xs-6 col-md-3">
+						<label for="">
+							&nbsp;
+						</label>
+						<br>
+						<button class="btn btn-default" style="float: right;"  id="buscar_3">Buscar</button>
+					</div>
+				</div>
 			</div>
 			
-			<div class="col-xs-3">
-				<label>
-					id Producto
-				</label>
-			</div>
-			<div class="col-xs-3">
-				<label>
-					Clave Proveedor
-				</label>
-			</div>
-		</div>
-		<div class="row">			
-			<div class="col-xs-3">
-				{% bootstrap_field form.id_proveedor  show_label=False%}
-			</div>
-			<div class="col-xs-3">
-				{%bootstrap_field form.id_estatus show_label=False%}
-			</div>			
-			<div class="col-xs-3">
-				{%bootstrap_field form.id_producto show_label=False%}
-			</div>
-			<div class="col-xs-3">
-				{%bootstrap_field form.clave_proveedor show_label=False%}
-			</div>
 		</div>
 		<div class="row">			
 			<div class="col-xs-8" >				
@@ -67,28 +101,26 @@
 					<div class="col-xs-6 col-md-12" >
 
 						<div class="col-xs-12">
-							<h1 style="font-size: 15px;font-weight: bold;text-align: center;">{{prod.id}} - {{prod.nombre}}</h1>		
+							<h1 style="font-size: 12px;font-weight: bold;text-align: justify;min-height: 40px;">{{prod.id}} - {{prod.nombre}}</h1>		
 						</div>																	
-						<div class="col-xs-12">
-							
-							<p style="font-size: 12px;">Precio: <span style="font-weight: bold;">{{prod.precio}}</span>
-								 </p> 
+						<div class="col-xs-12">							
+							<p style="font-size: 20px; text-align: center; color:red"> <span style="font-weight: bold;">${{prod.precio}}</span>
+						</p> 
 						</div>
-						<div class="col-xs-12">
-							<p style="font-size: 12px;"><span style="font-weight: bold;">{{prod.id_estatus}}</span>
-								 </p> 
-						</div>
+						<!--
 						<div class="col-xs-12">
 							<p style="font-size: 12px;">Marca: <span style="font-weight: bold;">{{prod.marca}}</span>
 							</p> 
 						</div>
-
 						<div class="col-xs-12">
-							<p style="font-size: 12px;">Proveedor: <span style="font-weight: bold;">{{proveedor}}</span>
+							<p style="font-size: 12px;height: 50px;">Proveedor: <span style="font-weight: bold;">{{prod.proveedor}}</span>
 							</p> 
 						</div>
-
-						
+-->
+						<div class="col-xs-12">
+							<p style="font-size: 12px;text-align: center;">PML: <span style="font-weight: bold;">{{prod.pml}}</span>
+							</p> 
+						</div>
 					</div>
 					<div class="col-xs-12">
 						<div class="col-xs-6 col-md-12">
@@ -147,6 +179,11 @@
 				$("#id_id_producto").val("0");
 				$("#id_clave_proveedor").val("NA");
 
+				$('#id_pml').removeAttr("required");
+
+				$("#panel_busqueda_1").hide();
+					$("#panel_busqueda_2").hide();
+				$(".help-block").hide();
 				$("#id_id_producto").focusout(
 					function()
 					{
@@ -176,6 +213,15 @@
 						}
 
 				);
+				$("#id_pml").focusin(
+						function()
+						{
+							
+							$("#id_id_producto").val("0");
+							$("#id_clave_proveedor").val("NA");
+						}
+
+				);
 				$("#id_id_proveedor").focusin(
 						function()
 						{
@@ -191,11 +237,12 @@
 					$("#id_id_estatus").val("");
 					$("#id_id_proveedor").val("");
 					$("#id_clave_proveedor").val("NA");
-			
+					$("#id_pml").val("");
 			});
 			$("#id_clave_proveedor").on('keypress',function(e) {
 				
 				$("#id_id_estatus").val("");
+				$("#id_pml").val("");
 				$("#id_id_proveedor").val("");
 				$("#id_id_producto").val("0");
 		
@@ -205,6 +252,14 @@
 
 			$(this).height($(this).width());
 			});
+
+			$("#ver_mas_filtros").click(
+				function()
+				{
+					$("#panel_busqueda_1").show();
+					$("#panel_busqueda_2").show();
+				}
+			);
 			}
 
 		);
