@@ -153,7 +153,10 @@ def registro_edicion_producto(request,id_producto=None):
 	else:
 		producto=Productos()		
 		prod=Productos.objects.aggregate(Max("id"))
-		folio=str_clave(int(prod["id__max"])+1)
+		try:
+			folio=str_clave(int(prod["id__max"])+1)
+		except:
+			folio=str_clave(1)
 
 	#creamos los formsets	
 	Atributo_Formset=inlineformset_factory(Productos,Atributos,fields=["atributo","valor_atributo",],extra=1,can_delete=True)		

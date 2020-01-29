@@ -56,14 +56,56 @@
 		</div>
 	</div>
 	<div class="row">
-		<div class="col-xs-5 col-md-3 cls_form">
-			{% bootstrap_field form.precio_proveedor %}
+		<div class="col-xs-12  cls_form">
+			<div class="col-xs-6">
+				{% bootstrap_field form.precio_proveedor %}
+			</div>
+			<div class="col-xs-6">
+				{% bootstrap_field form.porcentaje_ganancia %}
+			</div>
+			
+		</div>
+		<div class="col-xs-6 col-md-3 cls_form">
+			<label for="">Precio R. S. </label>
+			{%bootstrap_field form.precio show_label=False %}
+			
+			<label for="">Precio ML</label>
+			{%bootstrap_field form.precio_ml show_label=False %}
+			
+		</div>
+		<div class="col-md-6 cls_form" >
+			<label for="">
+				Detalle Redes Sociales
+			</label>
+			
+			<div class="col-xs-12" style="font-size:10px">
+				<div class="col-xs-6"><strong>C. E.</strong>  </div>
+				<div class="col-xs-6"> <strong>Utilidad</strong> </div>
+				<div class="col-xs-6"> <p> <span id="c_envio_rs">0.00</span> </p></div>
+				<div class="col-xs-6"><p> <span id="c_utilidad_rs">0.00</span> </p></div>
+			</div>
+			<br>
+			<br>
+			<br>
+			<br>
 
+			<label for="">
+				Detalle ML.
+			</label>
+			<div class="col-xs-12" style="font-size:10px">
+				<div class="col-xs-4"> <strong>Comision</strong> </div>
+				<div class="col-xs-4"> <strong>C. E.</strong> </div>
+				<div class="col-xs-4"> <strong>Utilidad</strong> </div>
+				<div class="col-xs-4"><p><span id="c_comision_ml">0.00</span> </p></div>
+				<div class="col-xs-4"><p><span id="c_costo_envio_ml">0.00</span> </p></div>
+				<div class="col-xs-4"><p><span id="c_utilidad_ml">0.00</span> </p></div>
+			</div>
+			<br>
+			<br>
+			<br>
 		</div>
-		<div class="col-xs-4 col-md-3 cls_form">
-			{%bootstrap_field form.precio%}
-		</div>
-		<div class="col-xs-3 col-md-3 cls_form">
+		<br>
+		<div class="col-md-3 cls_form" style="display: none;">
 			{% bootstrap_field form.descuento %}
 		</div>
 	</div>
@@ -288,7 +330,73 @@
 	$(document).ready(
 		function()
 		{	
-		
+
+			var fn_calcula_utilidad_rs=function()
+				{
+					p_desc=1+(parseFloat($("#id_porcentaje_ganancia").val())/100)
+					var pf=$("#id_precio_proveedor").val()*p_desc;
+							var costo_envio=0.00
+							if (pf<500.00)
+							{
+								pf=pf+50;
+								$("#c_envio_rs").text("50.00");
+								costo_envio=50;
+							}
+							else
+							{
+								pf=pf+30;
+								$("#c_envio_rs").text("30.00");
+								costo_envio=30;
+							}
+							var c_utilidad_rs=pf-costo_envio-$("#id_precio_proveedor").val();
+							
+							$("#id_precio").val(pf);
+							$("#c_utilidad_rs").text(c_utilidad_rs);
+				}
+				var fn_calcula_utilidad_ml=function()
+				{
+					var comision=0.00;
+					var costo_envio=0.00;
+					var utilidad=0.00;
+					comision=($("#id_precio").val()*0.175)+5.00;
+
+					//if es mayor a 498 consideramos envio
+					if ($("#id_precio").val()>498.00)
+					{
+						costo_envio=73.5;	
+					}
+					else
+					{
+						
+						costo_envio=0.00;	
+					}
+
+					$("#id_precio_ml").val( parseFloat($("#id_precio").val()) + parseFloat(costo_envio)  );
+
+					utilidad=$("#id_precio_ml").val()-costo_envio-comision-$("#id_precio_proveedor").val();
+					$("#c_comision_ml").text(comision);
+					$("#c_costo_envio_ml").text(costo_envio);
+					$("#c_utilidad_ml").text(utilidad);
+
+
+				}
+			$("#id_precio_proveedor").keyup(function(){
+
+				fn_calcula_utilidad_rs();
+				fn_calcula_utilidad_ml();
+				
+			});
+			$("#id_porcentaje_ganancia").keyup(
+				function()
+				{
+					
+				fn_calcula_utilidad_rs();
+				fn_calcula_utilidad_ml();
+				}
+			);
+			fn_calcula_utilidad_rs();
+			fn_calcula_utilidad_ml();
+
 			$("#add-item-atributo").click(
 				function ()
 				{
@@ -332,6 +440,8 @@
 				$('#img_prod').hide();
 			});
 			
+
+		
 		}
 	)
 	
