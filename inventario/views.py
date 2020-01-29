@@ -84,7 +84,7 @@ def busca_producto(request):
 		form=Busqueda_Producto_Form()	
 	produ=[]
 	for x in producto:
-		produ.append({"pml":x.publicado_ml.estatus,"id":x.id,"nombre":x.nombre,"precio":x.precio,"proveedor":x.id_proveedor.proveedor,"marca":x.marca,"id_estatus":x.id_estatus.estatus,"nom_img":str_clave(x.id)})
+		produ.append({"precio_ml":x.precio_ml,"pml":x.publicado_ml.estatus,"id":x.id,"nombre":x.nombre,"precio":x.precio,"proveedor":x.id_proveedor.proveedor,"marca":x.marca,"id_estatus":x.id_estatus.estatus,"nom_img":str_clave(x.id)})
 
 	return render(request,'inventario/busca_producto.html',locals())
 

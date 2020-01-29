@@ -57,10 +57,10 @@
 	</div>
 	<div class="row">
 		<div class="col-xs-12  cls_form">
-			<div class="col-xs-6">
+			<div class="col-xs-4 col-md-2" >
 				{% bootstrap_field form.precio_proveedor %}
 			</div>
-			<div class="col-xs-6">
+			<div class="col-xs-4 col-md-2" >
 				{% bootstrap_field form.porcentaje_ganancia %}
 			</div>
 			
@@ -109,6 +109,7 @@
 			{% bootstrap_field form.descuento %}
 		</div>
 	</div>
+	<hr>
 	<div class="row">
 		<div class="col-xs-6 cls_form">
 			<label>Proveedor</label>
@@ -350,7 +351,7 @@
 							}
 							var c_utilidad_rs=pf-costo_envio-$("#id_precio_proveedor").val();
 							
-							$("#id_precio").val(pf);
+							$("#id_precio").val(pf.toFixed(2));
 							$("#c_utilidad_rs").text(c_utilidad_rs);
 				}
 				var fn_calcula_utilidad_ml=function()
@@ -371,7 +372,7 @@
 						costo_envio=0.00;	
 					}
 
-					$("#id_precio_ml").val( parseFloat($("#id_precio").val()) + parseFloat(costo_envio)  );
+					$("#id_precio_ml").val((parseFloat($("#id_precio").val()) + parseFloat(costo_envio)).toFixed(2)  );
 
 					utilidad=$("#id_precio_ml").val()-costo_envio-comision-$("#id_precio_proveedor").val();
 					$("#c_comision_ml").text(comision);
@@ -389,11 +390,11 @@
 			$("#id_porcentaje_ganancia").keyup(
 				function()
 				{
-					
 				fn_calcula_utilidad_rs();
 				fn_calcula_utilidad_ml();
 				}
 			);
+
 			fn_calcula_utilidad_rs();
 			fn_calcula_utilidad_ml();
 
