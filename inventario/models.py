@@ -21,6 +21,7 @@ class Proveedor(models.Model):
 class Productos(models.Model):	
 	nombre=models.CharField(max_length=60)
 	desc_producto=models.TextField()
+	porcentaje_ganancia=models.DecimalField(max_digits=26,decimal_places=2,default=0.00)
 	precio=models.DecimalField(max_digits=26,decimal_places=2,default=0.00)# precio redes sociales.
 	descuento=models.IntegerField(default=0)	
 	id_proveedor=models.ForeignKey(Proveedor,on_delete=models.PROTECT,null=True)
@@ -30,7 +31,7 @@ class Productos(models.Model):
 	precio_proveedor=models.DecimalField(max_digits=26,decimal_places=2,default=0.00,null=False)
 	publicado_ml=models.ForeignKey(Estatus,on_delete=models.PROTECT,default=2,related_name="publicado_ml")
 	precio_ml=models.DecimalField(max_digits=26,decimal_places=2,default=0.00)
-	porcentaje_ganancia=models.IntegerField(default=0)
+	porcentaje_ganancia_ml=models.DecimalField(max_digits=26,decimal_places=2,default=0.00)
 	
 	def __str__(self):
 		return str(self.id)+' '+self.nombre

@@ -56,6 +56,60 @@
 		</div>
 	</div>
 	<div class="row">
+		<div class="col-xs-6 col-md-3">
+			{% bootstrap_field form.precio_proveedor %}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-4 col-md-2" >
+			<label for="">% RS</label>
+			{% bootstrap_field form.porcentaje_ganancia show_label=False%}
+		</div>
+
+		<div class="col-xs-4 col-md-2">
+			<label for="">Precio R. S. </label>
+			{%bootstrap_field form.precio show_label=False %}
+		</div>
+		<div class="col-xs-12 col-md-8">
+			<label for="">
+				Detalle Comisiones Redes Sociales
+			</label>
+			
+			<div class="col-xs-12" style="font-size:12px">
+				<div class="col-xs-6"><strong>C. E.</strong>  </div>
+				<div class="col-xs-6"> <strong>Utilidad</strong> </div>
+				<div class="col-xs-6"> <p> <span id="c_envio_rs">0.00</span> </p></div>
+				<div class="col-xs-6"><p> <span id="c_utilidad_rs">0.00</span> </p></div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-4 col-md-2" >
+			<label for="">% ML</label>
+			{% bootstrap_field form.porcentaje_ganancia_ml show_label=False%}
+		</div>
+		<div class="col-xs-4 col-md-2">
+			<label for="">Precio ML</label>
+			{%bootstrap_field form.precio_ml show_label=False %}
+		</div>
+		<div class="col-xs-12 col-md-8">
+			<label for="">
+				Detalle ML.
+			</label>
+			<div class="col-xs-12" style="font-size:12px">
+				<div class="col-xs-4"> <strong>Comision</strong> </div>
+				<div class="col-xs-4"> <strong>C. E.</strong> </div>
+				<div class="col-xs-4"> <strong>Utilidad</strong> </div>
+				<div class="col-xs-4"><p><span id="c_comision_ml">0.00</span> </p></div>
+				<div class="col-xs-4"><p><span id="c_costo_envio_ml">0.00</span> </p></div>
+				<div class="col-xs-4"><p><span id="c_utilidad_ml">0.00</span> </p></div>
+			</div>
+		</div>
+
+	</div>
+
+<!--
+	<div class="row">
 		<div class="col-xs-12  cls_form">
 			<div class="col-xs-4 col-md-2" >
 				{% bootstrap_field form.precio_proveedor %}
@@ -73,6 +127,7 @@
 			{%bootstrap_field form.precio_ml show_label=False %}
 			
 		</div>
+		
 		<div class="col-md-6 cls_form" >
 			<label for="">
 				Detalle Redes Sociales
@@ -104,11 +159,16 @@
 			<br>
 			<br>
 		</div>
+		
 		<br>
 		<div class="col-md-3 cls_form" style="display: none;">
 			{% bootstrap_field form.descuento %}
 		</div>
-	</div>
+	</div>-->
+	<br>
+		<div class="col-md-3 cls_form" style="display: none;">
+			{% bootstrap_field form.descuento %}
+		</div>
 	<hr>
 	<div class="row">
 		<div class="col-xs-6 cls_form">
@@ -334,35 +394,42 @@
 
 			var fn_calcula_utilidad_rs=function()
 				{
-					p_desc=1+(parseFloat($("#id_porcentaje_ganancia").val())/100)
-					var pf=$("#id_precio_proveedor").val()*p_desc;
+					var c_utilidad_rs=0.00;
+					var pf=$("#id_precio").val();
 							var costo_envio=0.00
 							if (pf<500.00)
 							{
-								pf=pf+50;
+								
 								$("#c_envio_rs").text("50.00");
 								costo_envio=50;
 							}
 							else
 							{
-								pf=pf+30;
+								
 								$("#c_envio_rs").text("30.00");
 								costo_envio=30;
 							}
-							var c_utilidad_rs=pf-costo_envio-$("#id_precio_proveedor").val();
+							console.log(parseFloat(pf).toFixed(2));
+							var c_utilidad_rs=parseFloat(pf).toFixed(2)-parseFloat(costo_envio).toFixed(2)-parseFloat($("#id_precio_proveedor").val()).toFixed(2);
 							
-							$("#id_precio").val(pf.toFixed(2));
-							$("#c_utilidad_rs").text(c_utilidad_rs);
+							p_ganancia=(parseFloat(c_utilidad_rs).toFixed(2)*parseFloat(100).toFixed(2))/parseFloat($("#id_precio_proveedor").val()).toFixed(2);
+							$("#id_porcentaje_ganancia").val(parseFloat(p_ganancia).toFixed(2));
+							$("#c_utilidad_rs").text(parseFloat(c_utilidad_rs).toFixed(2));
 				}
+
 				var fn_calcula_utilidad_ml=function()
 				{
 					var comision=0.00;
 					var costo_envio=0.00;
 					var utilidad=0.00;
-					comision=($("#id_precio").val()*0.175)+5.00;
+					var precio=0.00;
+					var p_ganancia=0.00;
+					precio=parseFloat($("#id_precio_ml").val());
+
+					comision=(precio*0.175)+5.00;
 
 					//if es mayor a 498 consideramos envio
-					if ($("#id_precio").val()>498.00)
+					if (precio>498.00)
 					{
 						costo_envio=73.5;	
 					}
@@ -372,29 +439,38 @@
 						costo_envio=0.00;	
 					}
 
-					$("#id_precio_ml").val((parseFloat($("#id_precio").val()) + parseFloat(costo_envio)).toFixed(2)  );
+					
 
-					utilidad=$("#id_precio_ml").val()-costo_envio-comision-$("#id_precio_proveedor").val();
-					$("#c_comision_ml").text(comision);
-					$("#c_costo_envio_ml").text(costo_envio);
-					$("#c_utilidad_ml").text(utilidad);
+					utilidad=precio-$("#id_precio_proveedor").val()-comision-costo_envio;
+					p_ganancia=(utilidad*100)/$("#id_precio_proveedor").val();
+					$("#id_porcentaje_ganancia_ml").val(parseFloat(p_ganancia).toFixed(2));
+
+					$("#c_comision_ml").text(parseFloat(comision).toFixed(2));
+					$("#c_costo_envio_ml").text(parseFloat(costo_envio).toFixed(2));
+					$("#c_utilidad_ml").text(parseFloat(utilidad).toFixed(2));
 
 
 				}
+				$("#id_precio_ml").keyup(
+					function()
+					{
+						fn_calcula_utilidad_ml();
+					}
+				);
+				$("#id_precio").keyup(
+					function()
+					{
+						fn_calcula_utilidad_rs();
+					}
+				);
+
 			$("#id_precio_proveedor").keyup(function(){
-
 				fn_calcula_utilidad_rs();
-				fn_calcula_utilidad_ml();
 				
-			});
-			$("#id_porcentaje_ganancia").keyup(
-				function()
-				{
-				fn_calcula_utilidad_rs();
 				fn_calcula_utilidad_ml();
-				}
-			);
+			});
 
+			
 			fn_calcula_utilidad_rs();
 			fn_calcula_utilidad_ml();
 
