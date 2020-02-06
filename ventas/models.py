@@ -40,6 +40,7 @@ class Venta(models.Model):
 	link_seguimiento=models.CharField(max_length=200,null=True,default='No Disponible')
 	cliente=models.ForeignKey(Cliente,on_delete=models.PROTECT,null=True)
 	id_medio_venta=models.ForeignKey(Medio_Venta,on_delete=models.PROTECT,null=True)
+	comision=models.DecimalField(max_digits=20,decimal_places=2,null=False,default=0.00)
 
 class Detalle_Venta(models.Model):
 	id_venta=models.ForeignKey(Venta,on_delete=models.PROTECT)

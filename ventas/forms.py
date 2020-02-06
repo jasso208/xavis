@@ -18,7 +18,7 @@ class Busqueda_Venta_Form(forms.Form):
 class Venta_Form(forms.ModelForm):
 	class Meta:
 		model=Venta
-		fields=("fecha","costo_envio","sub_total","descuento","iva","total","id_medio_venta","id_estatus_venta","link_seguimiento",)
+		fields=("fecha","comision","costo_envio","sub_total","descuento","iva","total","id_medio_venta","id_estatus_venta","link_seguimiento",)
 	
 class Det_Venta_Form(forms.ModelForm):
 	class Meta:

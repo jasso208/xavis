@@ -256,11 +256,8 @@ def guarda_venta_manual(request,id_venta=None):
 	Detalle_Venta_Formset=inlineformset_factory(Venta,Detalle_Venta,form=Det_Venta_Form,extra=1,can_delete=True)
 
 	if request.method=="POST":
-		
 		form=Venta_Form(request.POST,instance=venta)
 		detalle_venta_formset=Detalle_Venta_Formset(request.POST, instance=venta)
-	
-	
 		if form.is_valid() and detalle_venta_formset.is_valid():
 			form.save()
 			detalle_venta_formset.save()
@@ -271,6 +268,17 @@ def guarda_venta_manual(request,id_venta=None):
 			ci=Concepto_Ingreso.objects.get(id=1)
 			Movs_Ingreso.objects.create(id_concepto_ingreso=ci,descripcion="Ingreso por Venta",importe=venta.total,id_v=venta,fecha=venta.fecha)
 
+			if venta.comision>0.00:
+				#registramos la comision de ML en caso de existir
+				#esta comision es considerada como publicidad.
+				cg=Concepto_Gasto.objects.get(id=6)
+				Movs_Gasto.objects.create(id_concepto_gasto=cg,descripcion="Comision por Venta en ML",importe=venta.comision,id_v=venta,fecha=venta.fecha)
+
+			#registramos el costo de envio,
+			if venta.costo_envio>0.00:
+				cg2=Concepto_Gasto.objects.get(id=7)
+				Movs_Gasto.objects.create(id_concepto_gasto=cg2,descripcion="Costo de Envio",importe=venta.costo_envio,id_v=venta,fecha=venta.fecha)
+			
 			return HttpResponseRedirect(reverse('ventas:busca_ventas'))
 		else:			
 			print(form.errors)
