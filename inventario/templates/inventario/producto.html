@@ -518,7 +518,14 @@
 			});
 			
 
-		
+			$("#id_desc_producto").keyup(function(){
+
+					var str=$("#id_desc_producto").val().replace(";","<br>");
+					$("#id_desc_producto").val(str);
+					
+				}
+
+			);
 		}
 	)
 	

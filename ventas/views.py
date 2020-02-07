@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Detalle_Venta,Direccion_Envio_Venta,Venta,Carrito_Compras
+from .models import Detalle_Venta,Direccion_Envio_Venta,Venta,Carrito_Compras,Estatus_Venta
 from inventario.models import Productos,Tallas,Img_Producto
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -347,9 +347,11 @@ def api_consulta_carrito_compras(request):
 			try:
 				#en caso de que exista ya un registro en el carrito que cumpla con la session, producto y talla
 				#envia error ya que todos los productos son pieza unica, y no puede agregar mas de uno.
-				cc=Carrito_Compras.objects.get(session=session,id_producto=producto,talla=talla)				
-				error.append({'estatus':0,'msj':'Este producto es pieza unica y ya lo tienes agregado a tu carrito.'})
-				return Response(error)
+				cc=Carrito_Compras.objects.get(session=session,id_producto=producto,talla=talla)
+				cc.cantidad=cc.cantidad+cantidad				
+				cc.save()
+				#error.append({'estatus':0,'msj':'Este producto es pieza unica y ya lo tienes agregado a tu carrito.'})
+				#return Response(error)
 				
 				#cuando se tenga mas de una existencia de un mismo producto, habilitar las lineas de abajo.
 				#cc.cantidad=int(cc.cantidad)+int(cantidad)
@@ -433,17 +435,18 @@ def api_genera_cargo(request):
 def api_crea_venta(request):
 	if request.method=="POST":
 		session=request.POST.get("session")
-		amount=request.POST.get("amount")
-		description=request.POST.get("description")
-		device_session_id=request.POST.get("deviceIdHiddenFieldName")
-		source_id=request.POST.get("token_id") 
+		#amount=request.POST.get("amount")
+		#description=request.POST.get("description")
+		#device_session_id=request.POST.get("deviceIdHiddenFieldName")
+		#source_id=request.POST.get("token_id") 
 	if request.method=="GET":
 		session=request.GET.get("session")
-		amount=request.GET.get("amount")
-		description=request.GET.get("description")
-		device_session_id=request.GET.get("deviceIdHiddenFieldName")
-		source_id=request.GET.get("token_id") 
-	print(session)
+		#amount=request.GET.get("amount")
+		#description=request.GET.get("description")
+		#device_session_id=request.GET.get("deviceIdHiddenFieldName")
+		#source_id=request.GET.get("token_id") 
+
+
 	folio_venta=[]		
 	try:
 		c_l=Clientes_Logueados.objects.get(session=session)
@@ -461,7 +464,6 @@ def api_crea_venta(request):
 			c_l=Cliente.objects.get(e_mail=e_m.e_mail.strip().upper())
 			cliente=c_l		
 		except Exception as e:
-			print(e)
 			Cliente.objects.create(e_mail=e_m.e_mail.strip().upper())
 			c_l=Cliente.objects.get(e_mail=e_m.e_mail.strip().upper())
 			cliente=c_l		
@@ -498,9 +500,12 @@ def api_crea_venta(request):
 			sub_total=decimal.Decimal(decimal.Decimal(total)/decimal.Decimal(1.16))+decimal.Decimal(descuento)
 			#el iva es la diferencia entre el total y el subtotal
 			#iva=decimal.Decimal(sub_total)*decimal.Decimal(0.16)
+		#buscamos el estatus de venta "pendiente de pago"
+		est_v=Estatus_Venta.objects.get(id=2)
 		#CREAMOS LA VENTA
+		
 		iva=decimal.Decimal(decimal.Decimal(sub_total)-decimal.Decimal(descuento))*decimal.Decimal(0.16)
-		v=Venta(total=total,sub_total=sub_total,iva=iva,descuento=descuento,cliente=cliente)
+		v=Venta(total=total,sub_total=sub_total,iva=iva,descuento=descuento,cliente=cliente,id_estatus_venta=est_v)
 		v.save()
 		#recorremos los productos del carrito para crear el detalle d ela venta
 		for cc in c_c:
@@ -524,48 +529,50 @@ def api_crea_venta(request):
 		#agregamos la direccion de envio a la venta.
 		dir_envio=Direccion_Envio_Venta(id_venta=v,nombre_recibe=d_e.nombre,colonia=d_e.colonia,apellido_p=d_e.apellido_p,apellido_m=d_e.apellido_m,calle=d_e.calle,numero_interior=d_e.numero_interior,numero_exterior=d_e.numero_exterior,cp=d_e.cp,municipio=d_e.municipio,estado=d_e.estado,pais=d_e.pais,telefono=d_e.telefono,correo_electronico=d_e.e_mail,referencia=d_e.referencia)
 		dir_envio.save()
+		folio_venta.append({"estatus":1,"msj":""})
+
 		#generamos el cargo 
-		try:
-			charge = openpay.Charge.create_as_merchant(
-				method="card",
-				amount=amount,
-				description=description,
-				order_id=str(v.id),
-				device_session_id=device_session_id,
-				source_id=source_id,
-				customer={
-					"name":d_e.nombre,
-					"last_name":d_e.apellido_p,
-					"email":d_e.e_mail,
-					"phone_number":d_e.telefono,
-					"address":{
-						"city": d_e.municipio,
-						"state":d_e.estado,
-						"line1":d_e.calle,
-						"postal_code":d_e.cp,
-						"line2":d_e.colonia,
-						"line3":d_e.referencia,
-						"country_code":"MX"
-					}
-				},
-				metadata={
-					"data1":"value1",
-					"data2":"value2"
-				}
-			)
-			#si se genero correctamente el cargo a la tarjeta
-			#borramos la informacion de la session del cliente
-			c_c.delete()
-			d_e.delete()
-			folio_venta.append({"estatus":1,"folio":str(v.id)})	
-			#notificamos a el vendeor que uvo una venta
-			fn_envia_email(v)				
-		except Exception as e:
-			#borramos los registros de la venta, ya que el pago no pudo realizarse
-			Detalle_Venta.objects.filter(id_venta=v).delete()
-			Direccion_Envio_Venta.objects.filter(id_venta=v).delete()					
-			v.delete()
-			folio_venta.append({"estatus":0,"msj":"Su banco no puede procesar el pago."})									
+		#try:
+		#	charge = openpay.Charge.create_as_merchant(
+		#		method="card",
+		#		amount=amount,
+		#		description=description,
+		#		order_id=str(v.id),
+		#		device_session_id=device_session_id,
+		#		source_id=source_id,
+		#		customer={
+		#			"name":d_e.nombre,
+		#			"last_name":d_e.apellido_p,
+		#			"email":d_e.e_mail,
+		#			"phone_number":d_e.telefono,
+		#			"address":{
+		#				"city": d_e.municipio,
+		#				"state":d_e.estado,
+		#				"line1":d_e.calle,
+		#				"postal_code":d_e.cp,
+		#				"line2":d_e.colonia,
+		#				"line3":d_e.referencia,
+		#				"country_code":"MX"
+		#			}
+		#		},
+		#		metadata={
+		#			"data1":"value1",
+		#			"data2":"value2"
+		#		}
+		#	)
+		#	#si se genero correctamente el cargo a la tarjeta
+		#	#borramos la informacion de la session del cliente
+		#	c_c.delete()
+		#	d_e.delete()
+		#	folio_venta.append({"estatus":1,"folio":str(v.id)})	
+		#	#notificamos a el vendeor que uvo una venta
+		#	fn_envia_email(v)				
+		#except Exception as e:
+		#	#borramos los registros de la venta, ya que el pago no pudo realizarse
+		#	Detalle_Venta.objects.filter(id_venta=v).delete()
+		#	Direccion_Envio_Venta.objects.filter(id_venta=v).delete()					
+		#	v.delete()
+		#	folio_venta.append({"estatus":0,"msj":"Su banco no puede procesar el pago."})									
 	else:			
 		folio_venta.append({"estatus":0,"msj":"No tiene productos agregados al carrito de compras."})
 	return Response(folio_venta)
