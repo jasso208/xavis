@@ -91,16 +91,37 @@ class Estado(models.Model):
 class Pais(models.Model):
 	pais=models.CharField(max_length=50,null=False)
 	
+class Categoria_1(models.Model):
+	categoria_1=models.CharField(max_length=50,null=False)
 
-	
+	def __str__(self):
+		return str(self.id)+' '+self.categoria_1
+
+	class Meta:
+		unique_together=("categoria_1",)
+
+class Categoria_2(models.Model):
+	categoria_2=models.CharField(max_length=50,null=False)
+
+	def __str__(self):
+		return str(self.id)+' '+self.categoria_2
+
+	class Meta:
+		unique_together=("categoria_2",)
+
+#manejamos tres niveles de categoria.
 class Categorias(models.Model):
+	categoria_1=models.ForeignKey(Categoria_1,on_delete=models.PROTECT,default=0)
+	categoria_2=models.ForeignKey(Categoria_2,on_delete=models.PROTECT,default=0)	
 	categoria=models.CharField(max_length=50,null=False)
 	
 	def __str__(self):
-		return str(self.id)+' '+self.categoria
+		return str(self.id)+' '+self.categoria_1.categoria_1+'/'+self.categoria_2.categoria_2+'/'+self.categoria
 	
 	class Meta:
 		unique_together=("categoria",)
+
+
 class Rel_Producto_Categoria(models.Model):
 	id_producto=models.ForeignKey(Productos,on_delete=models.PROTECT)
 	id_categoria=models.ForeignKey(Categorias,on_delete=models.PROTECT)

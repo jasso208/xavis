@@ -39,7 +39,7 @@ class Busca_Proveedores_Form(forms.Form):
 class Categorias_Form(forms.ModelForm):
 	class Meta:
 		model=Categorias
-		fields=("categoria",)
+		fields=("categoria_1","categoria_2","categoria",)
 		
 class Busca_X_Clave_Prod_Prov_Form(forms.Form):
 	clave_prod_proveedor=forms.CharField(max_length=20)
