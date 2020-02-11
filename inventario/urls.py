@@ -21,6 +21,7 @@ urlpatterns=[
 	
 	#urls de apis
 	url(r'^detalle_producto/$',api_consulta_producto),		
-	url(r'^busca_productos/$',api_busqueda_productos),		
+	url(r'^busca_productos/$',api_busqueda_productos),	
+	url(r'^busca_prod_x_bloque/$',views.api_busca_prod_x_bloque),		
 	
 ]

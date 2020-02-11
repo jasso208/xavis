@@ -354,7 +354,49 @@ def api_busqueda_productos(request):
 								muestra_descuento=0
 							productos.append({"descuento":p.descuento,"precio_antes":p.precio,"id":p.id,'str_id':str_clave(p.id),"nombre":p.nombre,"precio":precio_desc,'muestra_descuento':muestra_descuento})				
 	return Response(productos)	
+
+@api_view(['GET'])
+def api_busca_prod_x_bloque(request):
+	jeans=[]
+	blusas=[]
+	bolsos=[]	
+	carteras=[]
+	respuesta=[]
+	try:
+		#obtenemos la categoria jeans
+		est_jeans=Categorias.objects.get(id=16)
+		p_jeans=Rel_Producto_Categoria.objects.filter(id_categoria=est_jeans)
+
+		jeans=fn_detalle_producto(p_jeans)
+
+		#obtenemos las categorias blusas
+		est_blusas=Categorias.objects.get(id=15)		
+		p_blusas=Rel_Producto_Categoria.objects.filter(id_categoria=est_blusas)
+
+		print(blusas)
+		
+		jeans=fn_detalle_producto(p_blusas)
+
+		#obtenemos las categorias bolsas
+		est_bolsas=Categorias.objects.get(id=9)				
+		p_bolsas=Rel_Producto_Categoria.objects.filter(id_categoria=est_bolsas)
+
+		bolsos=fn_detalle_producto(p_bolsas)
+
+		#obtenemos las categorias carteras
+		est_cartera=Categorias.objects.get(id=11)
+		p_cartera=Rel_Producto_Categoria.objects.filter(id_categoria=est_cartera)
+
+		carteras=fn_detalle_producto(p_cartera)
+
+		respuesta.append({"jeans":jeans,"blusas":blusas,"bolsos":bolsos,"carteras":carteras})
+
+	except Exception as e:
+		print(e)
+	return Response(respuesta)
 	
+
+
 #api para consultar el catalogo de municipios
 @api_view(['GET'])
 def api_get_municipios(request):
@@ -385,3 +427,27 @@ def str_clave(id):
 
 def int_clave(id):
 	return int(id)
+
+def fn_detalle_producto(obj):
+	productos=[]
+	est=Estatus.objects.get(id=1)#obtenemos el estatus "activo" del catalogo
+	if obj.exists():
+				for p in obj:
+					try:
+						tallas_entrada=Tallas.objects.filter(id_producto=p.id_producto).aggregate(Sum('entrada'))
+						tallas_salida=Tallas.objects.filter(id_producto=p.id_producto).aggregate(Sum('salida'))
+						cont=int(tallas_entrada["entrada__sum"])-(tallas_salida["salida__sum"])
+					except:
+						cont=0
+					
+					if cont>0:						
+						if p.id_producto.id_estatus==est:#validamos que el producto este activo
+							#imagen=Img_Producto.objects.get(id_producto=p.id_producto,orden=1)
+							#precio_desc=decimal.Decimal(p.id_producto.precio)*decimal.Decimal((decimal.Decimal(p.id_producto.descuento)/100.00))
+							precio_desc=p.id_producto.precio-(p.id_producto.precio*(decimal.Decimal(p.id_producto.descuento/100.00)))
+							if p.id_producto.descuento>0:
+								muestra_descuento=1
+							else:
+								muestra_descuento=0
+							productos.append({"descuento":p.id_producto.descuento,"precio_antes":p.id_producto.precio,"id":p.id_producto.id,'str_id':str_clave(p.id_producto.id),"nombre":p.id_producto.nombre,"precio":precio_desc,'muestra_descuento':muestra_descuento})		
+	return productos

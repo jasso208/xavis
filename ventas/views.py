@@ -530,7 +530,11 @@ def api_crea_venta(request):
 		dir_envio=Direccion_Envio_Venta(id_venta=v,nombre_recibe=d_e.nombre,colonia=d_e.colonia,apellido_p=d_e.apellido_p,apellido_m=d_e.apellido_m,calle=d_e.calle,numero_interior=d_e.numero_interior,numero_exterior=d_e.numero_exterior,cp=d_e.cp,municipio=d_e.municipio,estado=d_e.estado,pais=d_e.pais,telefono=d_e.telefono,correo_electronico=d_e.e_mail,referencia=d_e.referencia)
 		dir_envio.save()
 		folio_venta.append({"estatus":1,"msj":""})
-
+		c_c.delete()
+		d_e.delete()
+		folio_venta.append({"estatus":1,"folio":str(v.id)})	
+		#notificamos a el vendeor que uvo una venta
+		fn_envia_email(v)
 		#generamos el cargo 
 		#try:
 		#	charge = openpay.Charge.create_as_merchant(
@@ -677,7 +681,7 @@ def fn_envia_email(v):
 		
 		msg['From'] = 'j.jassdel@gmail.com'
 		msg['To'] = v.cliente.e_mail
-		password = "JaSSDEL1985"
+		password = "JaSSO123"
 		msg.add_header('Content-Type', 'text/html')
 		msg.set_payload(html)		
 		s = smtplib.SMTP('smtp.gmail.com: 587')
@@ -695,7 +699,7 @@ def fn_envia_email(v):
 		html="Error al notifica al cliente la compra con folio: "+str(v.id)+"; "+str(e)
 		msg['From'] = 'j.jassdel@gmail.com'
 		msg['To'] = 'gerencia.jassdel@jassdel.com'
-		password = "JaSSDEL1985"
+		password = "JaSSO123"
 		msg.add_header('Content-Type', 'text/html')
 		msg.set_payload(html)		
 		s = smtplib.SMTP('smtp.gmail.com: 587')

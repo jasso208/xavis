@@ -22,6 +22,8 @@ urlpatterns=[
 	url(r'^conslta_ventas_cliente/$',views.api_consulta_ventas),		
 	url(r'^consulta_detalle_venta/$',views.api_consulta_detalle_venta),		
 	url(r'^genera_cargo/$',views.api_genera_cargo),		
+		
+
 	
 	
 	
