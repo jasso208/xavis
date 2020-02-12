@@ -370,7 +370,6 @@ def api_busca_prod_x_bloque(request):
 		jeans=fn_detalle_producto(p_jeans)
 
 		#obtenemos las categorias blusas
-<<<<<<< HEAD
 		est_blusas=Categorias.objects.get(id=15)		
 		p_blusas=Rel_Producto_Categoria.objects.filter(id_categoria=est_blusas)[:2]
 
@@ -380,17 +379,6 @@ def api_busca_prod_x_bloque(request):
 
 		#obtenemos las categorias bolsas
 		est_bolsas=Categorias.objects.get(id=9)				
-=======
-		est_blusas=Categorias.objects.get(id=15)
-		p_blusas=Rel_Producto_Categoria.objects.filter(id_categoria=est_blusas)[:2]
-
-
-
-		blusas=fn_detalle_producto(p_blusas)
-
-		#obtenemos las categorias bolsas
-		est_bolsas=Categorias.objects.get(id=9)
->>>>>>> 68bebe90af3dcd9be458961ab8ed1fbbd9131932
 		p_bolsas=Rel_Producto_Categoria.objects.filter(id_categoria=est_bolsas)[:2]
 
 		bolsos=fn_detalle_producto(p_bolsas)
