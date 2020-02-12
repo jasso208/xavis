@@ -235,6 +235,16 @@ def detalle_venta_form(request,id_venta):
 		form=Venta_Form(request.POST,instance=venta)	
 		if form.is_valid():
 			form.save()
+			#obtnemos el estatus cancelado para validar si la venta fue cancelada
+			est_cancelado=Estatus_Venta.objects.get(id=3)
+			
+			if venta.id_estatus_venta.id==est_cancelado.id:
+				Movs_Ingreso.objects.filter(id_v=venta).delete()				
+				Movs_Gasto.objects.filter(id_v=venta).delete()
+				Detalle_Venta.objects.filter(id_venta=venta).delete()
+				Direccion_Envio_Venta.objects.get(id_venta=venta).delete()
+				venta.delete()
+				
 			return HttpResponseRedirect(reverse('ventas:busca_ventas'))
 	else:
 		det_venta=Detalle_Venta.objects.filter(id_venta=venta)
@@ -247,6 +257,7 @@ def guarda_venta_manual(request,id_venta=None):
 	if not request.user.is_authenticated:	
 		return HttpResponseRedirect(reverse('seguridad:login'))	
 
+	
 	if id_venta:
 		venta=Venta.objects.get(id=id_venta)
 	else:
@@ -260,6 +271,7 @@ def guarda_venta_manual(request,id_venta=None):
 		detalle_venta_formset=Detalle_Venta_Formset(request.POST, instance=venta)
 		if form.is_valid() and detalle_venta_formset.is_valid():
 			form.save()
+			
 			detalle_venta_formset.save()
 			Direccion_Envio_Venta.objects.create(id_venta=venta,nombre_recibe='NA',apellido_p="NA",apellido_m="NA",calle="NA",numero_interior="NA",numero_exterior="NA",cp="NA",colonia="NA",municipio="NA",estado="NA",pais="NA",telefono="NA",correo_electronico="NA",referencia="NA")
 			Detalle_Venta.objects.filter(id_venta=venta,cantidad=0).delete()
