@@ -331,7 +331,7 @@ def api_consulta_carrito_compras(request):
 					precio_desc=sub_total_con_iva
 				else:
 					precio_desc=cc.id_producto.precio
-				carrito.append({'marca':cc.id_producto.marca,'nombre':cc.id_producto.nombre,'id':cc.id,'id_producto':cc.id_producto.id,'precio':precio_desc,'id_producto':cc.id_producto.id,'nom_img':nom_img,'cantidad':cc.cantidad,'talla':cc.talla.talla})					
+				carrito.append({'marca':cc.id_producto.marca,'nombre':cc.id_producto.nombre,'id':cc.id,'id_producto':cc.id_producto.id,'precio':precio_desc*cc.cantidad,'id_producto':cc.id_producto.id,'nom_img':nom_img,'cantidad':cc.cantidad,'talla':cc.talla.talla})					
 		return Response(carrito)
 	if request.method=="POST":
 		error=[]
@@ -479,45 +479,45 @@ def api_crea_venta(request):
 			Cliente.objects.create(e_mail=e_m.e_mail.strip().upper())
 			c_l=Cliente.objects.get(e_mail=e_m.e_mail.strip().upper())
 			cliente=c_l		
-	#obtenemos la inormacion guardada en la session
+
+	#obtenemos la informacion guardada en la session
 	c_c=Carrito_Compras.objects.filter(session=session)
+
 	if c_c.exists():
 		try:
 			d_e=Direccion_Envio_Cliente_Temporal.objects.get(session=session)		
 		except:
 			#sillega a la except es porque no tiene capturada la direccion de envio
 			folio_venta.append({"estatus":0,"msj":"No se ha agregado la direccion de envio."})			
-			return Response(folio_venta)			
+			return Response(folio_venta)	
+
 		#calculamos el total de la venta
+		costo_envio=0.00
 		total=0.00
 		descuento=0.00
 		iva=0.00
-		for cc in c_c:					
+		sub_total=0.00
+		cont=0.00
+		#recorremos los productos del carrito de compras
+		for cc in c_c:	
+			#para determinar el numero de productos en el carrito				
+			cont=cont+1.00
 			#calculamos el precio de venta(en caso de tener descuento)					
-			if cc.id_producto.descuento!=0:
-				#obtenemos el precio sin iva
-				sub_total=decimal.Decimal(cc.id_producto.precio)/decimal.Decimal(1.16)
-				#obtenemos el descuento
-				descuento=decimal.Decimal(descuento)+(decimal.Decimal(sub_total)*(decimal.Decimal(cc.id_producto.descuento/100.00)))
-				descuento=decimal.Decimal(descuento)*decimal.Decimal(cc.cantidad)								
-				#obtenemos el subtotal con descuento
-				sub_total_con_desc=decimal.Decimal(sub_total)-(decimal.Decimal(sub_total)*(decimal.Decimal(cc.id_producto.descuento/100.00)))
-				#una vez que tenemos el precio con descuento, le agregamos el iva y lo multiplicamos por la cantidad
-				sub_total_con_iva=(decimal.Decimal(sub_total_con_desc)*decimal.Decimal(1.16))*decimal.Decimal(cc.cantidad)								
+			sub_total=decimal.Decimal(sub_total)+(decimal.Decimal(cc.id_producto.precio)*cc.cantidad)
+
+			#si el subtotal es menor a 500, se cobran 100 pesos de envio,
+			#si el subtotal es mayor a 500, no se cobra envio.
+			if decimal.Decimal(sub_total)<decimal.Decimal(500):
+				costo_envio=100				
 			else:
-				sub_total_con_iva=decimal.Decimal(cc.id_producto.precio)*decimal.Decimal(cc.cantidad)				
-			#total ya con iva
-			total=decimal.Decimal(total)+decimal.Decimal(sub_total_con_iva)
-			#el subtotal es sin iva
-			sub_total=decimal.Decimal(decimal.Decimal(total)/decimal.Decimal(1.16))+decimal.Decimal(descuento)
-			#el iva es la diferencia entre el total y el subtotal
-			#iva=decimal.Decimal(sub_total)*decimal.Decimal(0.16)
+				costo_envio=0
+
+			total=decimal.Decimal(sub_total)+decimal.Decimal(costo_envio)
+
 		#buscamos el estatus de venta "pendiente de pago"
 		est_v=Estatus_Venta.objects.get(id=2)
-		#CREAMOS LA VENTA
-		
-		iva=decimal.Decimal(decimal.Decimal(sub_total)-decimal.Decimal(descuento))*decimal.Decimal(0.16)
-		v=Venta(total=total,sub_total=sub_total,iva=iva,descuento=descuento,cliente=cliente,id_estatus_venta=est_v)
+		#CREAMOS LA VENTA		
+		v=Venta(total=total,sub_total=sub_total,descuento=descuento,cliente=cliente,id_estatus_venta=est_v,iva=0.00,costo_envio=costo_envio)
 		v.save()
 		#recorremos los productos del carrito para crear el detalle d ela venta
 		for cc in c_c:
@@ -526,15 +526,19 @@ def api_crea_venta(request):
 			descuento=0.00
 			iva=0.00
 			precio_total=0.00
-			if cc.id_producto.descuento!=0:
-				precio_unitario=decimal.Decimal(cc.id_producto.precio)/decimal.Decimal(1.16)#precio antes de iva
-				descuento=decimal.Decimal(precio_unitario)*(decimal.Decimal(cc.id_producto.descuento)/decimal.Decimal(100))
-				iva=(decimal.Decimal(precio_unitario)-decimal.Decimal(descuento))*decimal.Decimal(0.16)
-				precio_total=(decimal.Decimal(precio_unitario)-decimal.Decimal(descuento)+decimal.Decimal(iva))*decimal.Decimal(cc.cantidad)
-			else:
-				precio_unitario=decimal.Decimal(cc.id_producto.precio)/decimal.Decimal(1.16)
-				iva=decimal.Decimal(precio_unitario)*decimal.Decimal(0.16)
-				precio_total=decimal.Decimal(cc.id_producto.precio)*decimal.Decimal(cc.cantidad)
+			#if cc.id_producto.descuento!=0:
+			#	precio_unitario=decimal.Decimal(cc.id_producto.precio)/decimal.Decimal(1.16)#precio antes de iva
+			#	descuento=decimal.Decimal(precio_unitario)*(decimal.Decimal(cc.id_producto.descuento)/decimal.Decimal(100))
+			#	iva=(decimal.Decimal(precio_unitario)-decimal.Decimal(descuento))*decimal.Decimal(0.16)
+			#	precio_total=(decimal.Decimal(precio_unitario)-decimal.Decimal(descuento)+decimal.Decimal(iva))*decimal.Decimal(cc.cantidad)
+			#else:
+			#	precio_unitario=decimal.Decimal(cc.id_producto.precio)/decimal.Decimal(1.16)
+			#	iva=decimal.Decimal(precio_unitario)*decimal.Decimal(0.16)
+			#	precio_total=decimal.Decimal(cc.id_producto.precio)*decimal.Decimal(cc.cantidad)
+			precio_unitario=cc.id_producto.precio
+			descuento=0.00
+			iva=0.00
+			precio_total=precio_unitario*cc.cantidad
 			#guardamos el detalle de la venta
 			d=Detalle_Venta(id_venta=v,id_producto=cc.id_producto,cantidad=cc.cantidad,talla=cc.talla,precio_unitario=precio_unitario,descuento=descuento,iva=iva,precio_total=precio_total)				
 			d.save()
@@ -668,23 +672,25 @@ def reenvia_venta(request,id_venta):
 #funcion para enviar corre de confirmacion de compra
 def fn_envia_email(v):
 	global encabezado_1,encabezado_2
-	try:
-		d_e=Direccion_Envio_Venta.objects.get(id_venta=v)
+	try:		
+		d_e=Direccion_Envio_Venta.objects.get(id_venta=v)		
+		if d_e.apellido_m==None:
+			d_e.apellido_m=""
 		direccion_envio=d_e.calle+" Num."+d_e.numero_exterior+", "+d_e.colonia+" "+d_e.municipio+", "+d_e.estado+" "+d_e.pais+"<br>Referencia Domicilio: "+d_e.referencia
+
 		nom_recibe=d_e.nombre_recibe+" "+d_e.apellido_p+" "+d_e.apellido_m
+
 		productos=""
 		d_v=Detalle_Venta.objects.filter(id_venta=v)
 		subtotal=decimal.Decimal('0.0')
 		for p in d_v:			
-			subtotal=subtotal+(p.precio_unitario*decimal.Decimal('1.16'))
-			cad="<tr><td colspan='1'><img src='http://jasso208.pythonanywhere.com/assets/img/productos/"+fn_concatena_folio(str(p.id_producto.id))+"_1.png' style='width: 100px;'></td><td colspan='3'><p style='color: gray;font-size: 12;font-family: sans-serif;'>"+p.id_producto.nombre+"</p></td><td colspan='3'><p style='color: gray;font-size: 12;font-family: sans-serif;'>$"+str(round(p.precio_unitario*decimal.Decimal('1.16'),2))+"</p></td></tr>"
+			subtotal=subtotal+(p.precio_unitario*p.cantidad)
+			cad="<tr><td colspan='1'><img src='http://jasso208.pythonanywhere.com/assets/img/productos/"+fn_concatena_folio(str(p.id_producto.id))+"_1.png' style='width: 100px;'></td><td colspan='3'><p style='color: gray;font-size: 12;font-family: sans-serif;'>"+p.id_producto.nombre+"</p> <br>cantidad: "+str(p.cantidad)+" </td><td colspan='3'><p style='color: gray;font-size: 12;font-family: sans-serif;'>$"+str(round(p.precio_unitario*p.cantidad,2))+"</p></td></tr>"
 			productos=productos+cad
 		subtotal=round(subtotal,2)
-		costo_envio=decimal.Decimal('0.0')
-		if v.total<decimal.Decimal('800.0'):
-			costo_envio=decimal.Decimal('100.0')
+		costo_envio=v.costo_envio			
 
-		html=encabezado_0+fn_concatena_folio(str(v.id))+encabezado_1+direccion_envio+encabezado_2+nom_recibe+encabezado_3+productos+encabezado_4+str(subtotal)+encabezado_5+str(costo_envio)+encabezado_6+str(v.total+costo_envio)+encabezado_7
+		html=encabezado_0+fn_concatena_folio(str(v.id))+encabezado_1+direccion_envio+encabezado_2+nom_recibe+encabezado_3+productos+encabezado_4+str(subtotal)+encabezado_5+str(costo_envio)+encabezado_6+str(v.total)+encabezado_7
 		html = html.replace("\xe9", "e")
 		html = html.replace("\x0a", "\n")
 		server = smtplib.SMTP('smtp.gmail.com:587')
