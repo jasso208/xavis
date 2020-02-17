@@ -328,12 +328,26 @@ def api_busqueda_productos(request):
 								muestra_descuento=0
 							productos.append({"descuento":p.id_producto.descuento,"precio_antes":p.id_producto.precio,"id":p.id_producto.id,'str_id':str_clave(p.id_producto.id),"nombre":p.id_producto.nombre,"precio":precio_desc,'muestra_descuento':muestra_descuento})
 		if tipo_busqueda=="2":#busqueda por palabra
+			text_busqueda=request.GET.get("param1").split(" ")	
+			cont=0	
+			q=None
+			#este ciclo ayuda a buscar todas las palabras de busqueda, y hacer la busqueda por separada para cada una de ellas
+			for x in text_busqueda:
+				if len(x)>3:
+					if cont==0:
+						pr=Productos.objects.filter(desc_producto__icontains=str(x))
+						q=pr
+					else:
+						p=Productos.objects.filter(desc_producto__icontains=str(x))
+						q=q.union(p)					
+					cont=cont+1
+			prod=q
 
-			text_busqueda=request.GET.get("param1")
-			print(text_busqueda)
-			prod=Productos.objects.filter(desc_producto__icontains=str(text_busqueda)).order_by("id")
+				
+			
 			#p_e=Rel_Producto_Categoria.objects.filter(id_producto__in=prod)
-
+			if prod==None:
+				return Response(productos)
 			if prod.exists():
 				for p in prod:
 					try:
