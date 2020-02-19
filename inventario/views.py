@@ -331,15 +331,12 @@ def api_busqueda_productos(request):
 			text_busqueda=request.GET.get("param1").split(" ")	
 			cont=0	
 			q=None
+			q=Productos.objects.filter(desc_producto__icontains=str(request.GET.get("param1")))
 			#este ciclo ayuda a buscar todas las palabras de busqueda, y hacer la busqueda por separada para cada una de ellas
 			for x in text_busqueda:
-				if len(x)>3:
-					if cont==0:
-						pr=Productos.objects.filter(desc_producto__icontains=str(x))
-						q=pr
-					else:
-						p=Productos.objects.filter(desc_producto__icontains=str(x))
-						q=q.union(p)					
+				if len(x)>3:					
+					p=Productos.objects.filter(desc_producto__icontains=str(x))
+					q=q.union(p)					
 					cont=cont+1
 			prod=q
 
