@@ -38,7 +38,23 @@ class Productos(models.Model):
 	
 	def get_absolute_url(self):
 		return reverse('edicion_producto', kwargs={'id_producto': self.id})
-		
+
+class Productos_Temp(models.Model):	
+	nombre=models.CharField(max_length=60)
+	desc_producto=models.TextField()
+	porcentaje_ganancia=models.DecimalField(max_digits=26,decimal_places=2,default=0.00)
+	precio=models.DecimalField(max_digits=26,decimal_places=2,default=0.00)# precio redes sociales.
+	descuento=models.IntegerField(default=0)	
+	id_proveedor=models.ForeignKey(Proveedor,on_delete=models.PROTECT,null=True)
+	marca=models.CharField(max_length=100,null=False,default="")
+	clave_prod_proveedor=models.CharField(max_length=20,null=True)
+	id_estatus=models.ForeignKey(Estatus,on_delete=models.PROTECT,default=1,related_name="id_estatus_1")
+	precio_proveedor=models.DecimalField(max_digits=26,decimal_places=2,default=0.00,null=False)
+	publicado_ml=models.ForeignKey(Estatus,on_delete=models.PROTECT,default=2)
+	precio_ml=models.DecimalField(max_digits=26,decimal_places=2,default=0.00)
+	porcentaje_ganancia_ml=models.DecimalField(max_digits=26,decimal_places=2,default=0.00)
+	
+
 class Atributos(models.Model):
 	id_producto=models.ForeignKey(Productos,on_delete=models.PROTECT)
 	atributo=models.CharField(max_length=50)

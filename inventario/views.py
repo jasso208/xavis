@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.shortcuts import render
 from .models import Productos,Atributos,Tallas,Img_Producto,Estatus,Productos_Relacionados,Municipio,Estado,Pais
-from .models import Rel_Producto_Categoria,Categorias,Proveedor
+from .models import Rel_Producto_Categoria,Categorias,Proveedor,Productos_Temp
 from django.http import QueryDict
 from django.db.models import Sum
 from .forms import Productos_Form,Proveedores_Form,Busqueda_Producto_Form,Busca_Proveedores_Form
@@ -328,10 +328,15 @@ def api_busqueda_productos(request):
 								muestra_descuento=0
 							productos.append({"descuento":p.id_producto.descuento,"precio_antes":p.id_producto.precio,"id":p.id_producto.id,'str_id':str_clave(p.id_producto.id),"nombre":p.id_producto.nombre,"precio":precio_desc,'muestra_descuento':muestra_descuento})
 		if tipo_busqueda=="2":#busqueda por palabra
+			Productos_Temp.objects.all().delete()
+
 			text_busqueda=request.GET.get("param1").split(" ")	
 			cont=0	
 			q=None
-			q=Productos.objects.filter(desc_producto__icontains=str(request.GET.get("param1")))
+			q=Productos.objects.filter(desc_producto__icontains=str(request.GET.get("param1")))			
+			if q.exists():
+				for i in q:
+					Productos_Temp.objects.create(nombre=i.nombre,desc_producto=i.desc_producto,porcentaje_ganancia=i.porcentaje_ganancia,precio=i.precio,descuento=i.descuento,id_proveedor=i.id_proveedor,marca=i.marca,clave_prod_proveedor=i.clave_prod_proveedor,id_estatus=i.id_estatus,precio_proveedor=i.precio_proveedor,publicado_ml=i.publicado_ml,precio_ml=i.precio_ml,porcentaje_ganancia_ml=i.porcentaje_ganancia_ml)
 			cad1=""
 			cad2=""
 			cad3=""
@@ -343,18 +348,29 @@ def api_busqueda_productos(request):
 					cont=cont+1				
 					if cont==1:
 						cad1=x
-						p=Productos.objects.filter(desc_producto__icontains=str(cad1))
+						q=Productos.objects.filter(desc_producto__icontains=str(cad1))
+						if q.exists():
+							for i in q:
+								Productos_Temp.objects.create(nombre=i.nombre,desc_producto=i.desc_producto,porcentaje_ganancia=i.porcentaje_ganancia,precio=i.precio,descuento=i.descuento,id_proveedor=i.id_proveedor,marca=i.marca,clave_prod_proveedor=i.clave_prod_proveedor,id_estatus=i.id_estatus,precio_proveedor=i.precio_proveedor,publicado_ml=i.publicado_ml,precio_ml=i.precio_ml,porcentaje_ganancia_ml=i.porcentaje_ganancia_ml)
 					if cont==2:						
 						cad2=x
-						p=Productos.objects.filter(desc_producto__icontains=str(cad1)).filter(desc_producto__icontains=str(cad2))
+						q=Productos.objects.filter(desc_producto__icontains=str(cad1)).filter(desc_producto__icontains=str(cad2))
+						if q.exists():
+							for i in q:
+								Productos_Temp.objects.create(nombre=i.nombre,desc_producto=i.desc_producto,porcentaje_ganancia=i.porcentaje_ganancia,precio=i.precio,descuento=i.descuento,id_proveedor=i.id_proveedor,marca=i.marca,clave_prod_proveedor=i.clave_prod_proveedor,id_estatus=i.id_estatus,precio_proveedor=i.precio_proveedor,publicado_ml=i.publicado_ml,precio_ml=i.precio_ml,porcentaje_ganancia_ml=i.porcentaje_ganancia_ml)
 					if cont==3:						
 						cad3=x
-						p=Productos.objects.filter(desc_producto__icontains=str(cad1)).filter(desc_producto__icontains=str(cad2)).filter(desc_producto__icontains=str(cad3))
+						q=Productos.objects.filter(desc_producto__icontains=str(cad1)).filter(desc_producto__icontains=str(cad2)).filter(desc_producto__icontains=str(cad3))
+						if q.exists():
+							for i in q:
+								Productos_Temp.objects.create(nombre=i.nombre,desc_producto=i.desc_producto,porcentaje_ganancia=i.porcentaje_ganancia,precio=i.precio,descuento=i.descuento,id_proveedor=i.id_proveedor,marca=i.marca,clave_prod_proveedor=i.clave_prod_proveedor,id_estatus=i.id_estatus,precio_proveedor=i.precio_proveedor,publicado_ml=i.publicado_ml,precio_ml=i.precio_ml,porcentaje_ganancia_ml=i.porcentaje_ganancia_ml)
 					if cont==4:						
 						cad4=x
-						p=Productos.objects.filter(desc_producto__icontains=str(cad1)).filter(desc_producto__icontains=str(cad2)).filter(desc_producto__icontains=str(cad3)).filter(desc_producto__icontains=str(cad4))					
-				q=q.union(p)									
-			prod=q
+						q=Productos.objects.filter(desc_producto__icontains=str(cad1)).filter(desc_producto__icontains=str(cad2)).filter(desc_producto__icontains=str(cad3)).filter(desc_producto__icontains=str(cad4))					
+						if q.exists():
+							for i in q:
+								Productos_Temp.objects.create(nombre=i.nombre,desc_producto=i.desc_producto,porcentaje_ganancia=i.porcentaje_ganancia,precio=i.precio,descuento=i.descuento,id_proveedor=i.id_proveedor,marca=i.marca,clave_prod_proveedor=i.clave_prod_proveedor,id_estatus=i.id_estatus,precio_proveedor=i.precio_proveedor,publicado_ml=i.publicado_ml,precio_ml=i.precio_ml,porcentaje_ganancia_ml=i.porcentaje_ganancia_ml)				
+			prod=Productos_Temp.objects.all().order_by("id")
 			#p_e=Rel_Producto_Categoria.objects.filter(id_producto__in=prod)
 			if prod==None:
 				return Response(productos)
