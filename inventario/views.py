@@ -336,7 +336,7 @@ def api_busqueda_productos(request):
 			q=Productos.objects.filter(desc_producto__icontains=str(request.GET.get("param1")))			
 			if q.exists():
 				for i in q:
-					Productos_Temp.objects.create(nombre=i.nombre,desc_producto=i.desc_producto,porcentaje_ganancia=i.porcentaje_ganancia,precio=i.precio,descuento=i.descuento,id_proveedor=i.id_proveedor,marca=i.marca,clave_prod_proveedor=i.clave_prod_proveedor,id_estatus=i.id_estatus,precio_proveedor=i.precio_proveedor,publicado_ml=i.publicado_ml,precio_ml=i.precio_ml,porcentaje_ganancia_ml=i.porcentaje_ganancia_ml)
+					Productos_Temp.objects.create(id_producto=i.id)
 			cad1=""
 			cad2=""
 			cad3=""
@@ -349,50 +349,71 @@ def api_busqueda_productos(request):
 					if cont==1:
 						cad1=x
 						q=Productos.objects.filter(desc_producto__icontains=str(cad1))
+
 						if q.exists():
+
 							for i in q:
-								Productos_Temp.objects.create(nombre=i.nombre,desc_producto=i.desc_producto,porcentaje_ganancia=i.porcentaje_ganancia,precio=i.precio,descuento=i.descuento,id_proveedor=i.id_proveedor,marca=i.marca,clave_prod_proveedor=i.clave_prod_proveedor,id_estatus=i.id_estatus,precio_proveedor=i.precio_proveedor,publicado_ml=i.publicado_ml,precio_ml=i.precio_ml,porcentaje_ganancia_ml=i.porcentaje_ganancia_ml)
+								try:
+									Productos_Temp.objects.create(id_producto=i.id)
+								except:
+									print("el prod ya estaba agregado")
 					if cont==2:						
 						cad2=x
 						q=Productos.objects.filter(desc_producto__icontains=str(cad1)).filter(desc_producto__icontains=str(cad2))
 						if q.exists():
 							for i in q:
-								Productos_Temp.objects.create(nombre=i.nombre,desc_producto=i.desc_producto,porcentaje_ganancia=i.porcentaje_ganancia,precio=i.precio,descuento=i.descuento,id_proveedor=i.id_proveedor,marca=i.marca,clave_prod_proveedor=i.clave_prod_proveedor,id_estatus=i.id_estatus,precio_proveedor=i.precio_proveedor,publicado_ml=i.publicado_ml,precio_ml=i.precio_ml,porcentaje_ganancia_ml=i.porcentaje_ganancia_ml)
+								try:
+									Productos_Temp.objects.create(id_producto=i.id)
+								except:
+									print("el prod ya estaba agregado")
 					if cont==3:						
 						cad3=x
 						q=Productos.objects.filter(desc_producto__icontains=str(cad1)).filter(desc_producto__icontains=str(cad2)).filter(desc_producto__icontains=str(cad3))
 						if q.exists():
 							for i in q:
-								Productos_Temp.objects.create(nombre=i.nombre,desc_producto=i.desc_producto,porcentaje_ganancia=i.porcentaje_ganancia,precio=i.precio,descuento=i.descuento,id_proveedor=i.id_proveedor,marca=i.marca,clave_prod_proveedor=i.clave_prod_proveedor,id_estatus=i.id_estatus,precio_proveedor=i.precio_proveedor,publicado_ml=i.publicado_ml,precio_ml=i.precio_ml,porcentaje_ganancia_ml=i.porcentaje_ganancia_ml)
+								try:
+									Productos_Temp.objects.create(id_producto=i.id)
+								except:
+									print("el prod ya estaba agregado")
 					if cont==4:						
 						cad4=x
 						q=Productos.objects.filter(desc_producto__icontains=str(cad1)).filter(desc_producto__icontains=str(cad2)).filter(desc_producto__icontains=str(cad3)).filter(desc_producto__icontains=str(cad4))					
 						if q.exists():
 							for i in q:
-								Productos_Temp.objects.create(nombre=i.nombre,desc_producto=i.desc_producto,porcentaje_ganancia=i.porcentaje_ganancia,precio=i.precio,descuento=i.descuento,id_proveedor=i.id_proveedor,marca=i.marca,clave_prod_proveedor=i.clave_prod_proveedor,id_estatus=i.id_estatus,precio_proveedor=i.precio_proveedor,publicado_ml=i.publicado_ml,precio_ml=i.precio_ml,porcentaje_ganancia_ml=i.porcentaje_ganancia_ml)				
+								try:
+									Productos_Temp.objects.create(id_producto=i.id)				
+								except:
+									print("el prod ya estaba agregado")
 			prod=Productos_Temp.objects.all().order_by("id")
+		
 			#p_e=Rel_Producto_Categoria.objects.filter(id_producto__in=prod)
 			if prod==None:
 				return Response(productos)
 			if prod.exists():
 				for p in prod:
+					print(p.id_producto)
 					try:
-						tallas_entrada=Tallas.objects.filter(id_producto=p).aggregate(Sum('entrada'))
-						tallas_salida=Tallas.objects.filter(id_producto=p).aggregate(Sum('salida'))
+						pr=Productos.objects.get(id=p.id_producto)
+					except Exception as e:
+						print(e)
+					#validamos que el producto tenga existencia.
+					try:
+						tallas_entrada=Tallas.objects.filter(id_producto=pr).aggregate(Sum('entrada'))
+						tallas_salida=Tallas.objects.filter(id_producto=pr).aggregate(Sum('salida'))
 						cont=int(tallas_entrada["entrada__sum"])-(tallas_salida["salida__sum"])
 					except:
 						cont=0
 
 					if cont>0:
-						if p.id_estatus==est:#validamos que el producto este activo
+						if pr.id_estatus==est:#validamos que el producto este activo
 							#imagen=Img_Producto.objects.get(id_producto=p.id_producto,orden=1)
 							#precio_desc=decimal.Decimal(p.id_producto.precio)*decimal.Decimal((decimal.Decimal(p.id_producto.descuento)/100.00))
-							precio_desc=p.precio-(p.precio*(decimal.Decimal(p.descuento/100.00)))
-							if p.descuento>0:
+							precio_desc=pr.precio-(pr.precio*(decimal.Decimal(pr.descuento/100.00)))
+							if pr.descuento>0:
 								muestra_descuento=1
 							else:
 								muestra_descuento=0
-							productos.append({"descuento":p.descuento,"precio_antes":p.precio,"id":p.id,'str_id':str_clave(p.id),"nombre":p.nombre,"precio":precio_desc,'muestra_descuento':muestra_descuento})
+							productos.append({"descuento":pr.descuento,"precio_antes":pr.precio,"id":pr.id,'str_id':str_clave(pr.id),"nombre":pr.nombre,"precio":precio_desc,'muestra_descuento':muestra_descuento})
 	return Response(productos)
 
 @api_view(['GET'])
