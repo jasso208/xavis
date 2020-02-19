@@ -332,16 +332,29 @@ def api_busqueda_productos(request):
 			cont=0	
 			q=None
 			q=Productos.objects.filter(desc_producto__icontains=str(request.GET.get("param1")))
+			cad1=""
+			cad2=""
+			cad3=""
+			cad4=""
+			cont=0
 			#este ciclo ayuda a buscar todas las palabras de busqueda, y hacer la busqueda por separada para cada una de ellas
-			for x in text_busqueda:
+			for x in text_busqueda:				
 				if len(x)>3:					
-					p=Productos.objects.filter(desc_producto__icontains=str(x))
-					q=q.union(p)					
-					cont=cont+1
+					cont=cont+1				
+					if cont==1:
+						cad1=x
+						p=Productos.objects.filter(desc_producto__icontains=str(cad1))
+					if cont==2:						
+						cad2=x
+						p=Productos.objects.filter(desc_producto__icontains=str(cad1)).filter(desc_producto__icontains=str(cad2))
+					if cont==3:						
+						cad3=x
+						p=Productos.objects.filter(desc_producto__icontains=str(cad1)).filter(desc_producto__icontains=str(cad2)).filter(desc_producto__icontains=str(cad3))
+					if cont==4:						
+						cad4=x
+						p=Productos.objects.filter(desc_producto__icontains=str(cad1)).filter(desc_producto__icontains=str(cad2)).filter(desc_producto__icontains=str(cad3)).filter(desc_producto__icontains=str(cad4))					
+				q=q.union(p)									
 			prod=q
-
-				
-			
 			#p_e=Rel_Producto_Categoria.objects.filter(id_producto__in=prod)
 			if prod==None:
 				return Response(productos)
