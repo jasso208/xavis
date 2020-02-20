@@ -425,13 +425,13 @@ def api_busca_prod_x_bloque(request):
 	respuesta=[]
 	try:
 		#obtenemos la categoria jeans
-		est_jeans=Categorias.objects.get(id=16)
+		est_jeans=Categorias.objects.get(id=31)
 		p_jeans=Rel_Producto_Categoria.objects.filter(id_categoria=est_jeans)[:2]
 
 		jeans=fn_detalle_producto(p_jeans)
 
 		#obtenemos las categorias blusas
-		est_blusas=Categorias.objects.get(id=15)		
+		est_blusas=Categorias.objects.get(id=26)		
 		p_blusas=Rel_Producto_Categoria.objects.filter(id_categoria=est_blusas)[:2]
 
 	
@@ -439,13 +439,13 @@ def api_busca_prod_x_bloque(request):
 		blusas=fn_detalle_producto(p_blusas)
 
 		#obtenemos las categorias bolsas
-		est_bolsas=Categorias.objects.get(id=9)				
+		est_bolsas=Categorias.objects.get(id=39)				
 		p_bolsas=Rel_Producto_Categoria.objects.filter(id_categoria=est_bolsas)[:2]
 
 		bolsos=fn_detalle_producto(p_bolsas)
 
 		#obtenemos las categorias carteras
-		est_cartera=Categorias.objects.get(id=11)
+		est_cartera=Categorias.objects.get(id=42)
 		p_cartera=Rel_Producto_Categoria.objects.filter(id_categoria=est_cartera)[:2]
 
 		carteras=fn_detalle_producto(p_cartera)
