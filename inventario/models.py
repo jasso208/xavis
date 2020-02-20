@@ -122,7 +122,7 @@ class Categorias(models.Model):
 		return str(self.id)+' '+self.categoria_1.categoria_1+'/'+self.categoria_2.categoria_2+'/'+self.categoria
 	
 	class Meta:
-		unique_together=("categoria",)
+		unique_together=("categoria","categoria_1","categoria_2")
 
 
 class Rel_Producto_Categoria(models.Model):
