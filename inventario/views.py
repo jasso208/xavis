@@ -345,45 +345,62 @@ def api_busqueda_productos(request):
 			#este ciclo ayuda a buscar todas las palabras de busqueda, y hacer la busqueda por separada para cada una de ellas
 			for x in text_busqueda:				
 				if len(x)>3:					
-					cont=cont+1				
+					if cont<4:
+						cont=cont+1				
 					if cont==1:
 						cad1=x
-						q=Productos.objects.filter(desc_producto__icontains=str(cad1))
-
-						if q.exists():
-
-							for i in q:
-								try:
-									Productos_Temp.objects.create(id_producto=i.id)
-								except:
-									print("el prod ya estaba agregado")
-					if cont==2:						
+					if cont==2:
 						cad2=x
-						q=Productos.objects.filter(desc_producto__icontains=str(cad1)).filter(desc_producto__icontains=str(cad2))
-						if q.exists():
-							for i in q:
-								try:
-									Productos_Temp.objects.create(id_producto=i.id)
-								except:
-									print("el prod ya estaba agregado")
-					if cont==3:						
+					if cont==3:
 						cad3=x
-						q=Productos.objects.filter(desc_producto__icontains=str(cad1)).filter(desc_producto__icontains=str(cad2)).filter(desc_producto__icontains=str(cad3))
-						if q.exists():
-							for i in q:
-								try:
-									Productos_Temp.objects.create(id_producto=i.id)
-								except:
-									print("el prod ya estaba agregado")
-					if cont==4:						
+					if cont==4:
 						cad4=x
-						q=Productos.objects.filter(desc_producto__icontains=str(cad1)).filter(desc_producto__icontains=str(cad2)).filter(desc_producto__icontains=str(cad3)).filter(desc_producto__icontains=str(cad4))					
-						if q.exists():
-							for i in q:
-								try:
-									Productos_Temp.objects.create(id_producto=i.id)				
-								except:
-									print("el prod ya estaba agregado")
+
+			if cont==4:	
+				cont=cont-1					
+				
+				q=Productos.objects.filter(desc_producto__icontains=str(cad1)).filter(desc_producto__icontains=str(cad2)).filter(desc_producto__icontains=str(cad3)).filter(desc_producto__icontains=str(cad4))					
+				if q.exists():
+					for i in q:
+						try:
+							Productos_Temp.objects.create(id_producto=i.id)				
+						except:
+							print("el prod ya estaba agregado")
+			if cont==3:						
+				cont=cont-1
+			
+				q=Productos.objects.filter(desc_producto__icontains=str(cad1)).filter(desc_producto__icontains=str(cad2)).filter(desc_producto__icontains=str(cad3))
+				if q.exists():
+					for i in q:
+						try:
+							Productos_Temp.objects.create(id_producto=i.id)
+						except:
+							print("el prod ya estaba agregado")
+			if cont==2:						
+				cont=cont-1
+				
+				q=Productos.objects.filter(desc_producto__icontains=str(cad1)).filter(desc_producto__icontains=str(cad2))
+				if q.exists():
+					for i in q:
+						try:
+							Productos_Temp.objects.create(id_producto=i.id)
+						except:
+							print("el prod ya estaba agregado")
+
+
+			if cont==1:
+				cont=cont-1
+				q=Productos.objects.filter(desc_producto__icontains=str(cad1))
+
+				if q.exists():
+
+					for i in q:
+						try:
+							Productos_Temp.objects.create(id_producto=i.id)
+						except:
+							print("el prod ya estaba agregado")
+
+				
 			prod=Productos_Temp.objects.all().order_by("id")
 		
 			#p_e=Rel_Producto_Categoria.objects.filter(id_producto__in=prod)
@@ -391,7 +408,7 @@ def api_busqueda_productos(request):
 				return Response(productos)
 			if prod.exists():
 				for p in prod:
-					print(p.id_producto)
+					
 					try:
 						pr=Productos.objects.get(id=p.id_producto)
 					except Exception as e:
