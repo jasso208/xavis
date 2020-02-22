@@ -693,9 +693,22 @@ def fn_envia_email(v,email_copia):
 		subtotal=round(subtotal,2)
 		costo_envio=v.costo_envio			
 
-		html=encabezado_0+fn_concatena_folio(str(v.id))+encabezado_1+direccion_envio+encabezado_2+nom_recibe+encabezado_3+productos+encabezado_4+str(subtotal)+encabezado_5+str(costo_envio)+encabezado_6+str(v.total)+encabezado_7
-		html = html.replace("\xe9", "e")
+		html=encabezado_0+fn_concatena_folio(str(v.id))+encabezado_1+direccion_envio+encabezado_2+nom_recibe+encabezado_3+productos+encabezado_4+str(subtotal)+encabezado_5+str(costo_envio)+encabezado_6+str(v.total)+encabezado_7		
 		html = html.replace("\x0a", "\n")
+
+		html = html.replace("\xe1", "a")		
+		html = html.replace("\xe9", "e")		
+		html = html.replace("\xed", "i")		
+		html = html.replace("\xf3", "o")				
+		html = html.replace("\xfa", "u")
+
+
+		html = html.replace("\xc1", "A")		
+		html = html.replace("\xc9", "E")		
+		html = html.replace("\xcd", "I")		
+		html = html.replace("\xd3", "O")				
+		html = html.replace("\xda", "U")
+
 		server = smtplib.SMTP('smtp.gmail.com:587')
 		msg = email.message.Message()
 		msg['Subject'] = 'Confirmacion de Compra'		
