@@ -709,7 +709,7 @@ def fn_envia_email(v,email_copia):
 
 		password = "JaSSO123"
 		msg.add_header('Content-Type', 'text/html')
-		msg.set_payload(html)		
+		msg.set_payload(unicode(html))		
 		s = smtplib.SMTP('smtp.gmail.com: 587')
 		s.starttls()		
 		# Login Credentials for sending the mail
