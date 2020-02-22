@@ -44,7 +44,7 @@ encabezado_1="""
             </tr>
             <tr>
                 <td colspan="6">
-                    <img src="http://jasso208.pythonanywhere.com/assets/img/img-gracias.png" width="300px;">
+                    <img src="https://www.jassdel.com/assets/img/img-gracias.png" width="300px;">
                 </td>
             </tr>
             <tr>
@@ -688,7 +688,7 @@ def fn_envia_email(v,email_copia):
 		subtotal=decimal.Decimal('0.0')
 		for p in d_v:			
 			subtotal=subtotal+(p.precio_unitario*p.cantidad)
-			cad="<tr><td colspan='1'><img src='http://jasso208.pythonanywhere.com/assets/img/productos/"+fn_concatena_folio(str(p.id_producto.id))+"_1.png' style='width: 100px;'></td><td colspan='3'><p style='color: gray;font-size: 12;font-family: sans-serif;'>"+p.id_producto.nombre+"</p> <br>cantidad: "+str(p.cantidad)+" </td><td colspan='3'><p style='color: gray;font-size: 12;font-family: sans-serif;'>$"+str(round(p.precio_unitario*p.cantidad,2))+"</p></td></tr>"
+			cad="<tr><td colspan='1'><img src='https://www.jassdel.com/assets/img/productos/"+fn_concatena_folio(str(p.id_producto.id))+"_1.png' style='width: 100px;'></td><td colspan='3'><p style='color: gray;font-size: 12;font-family: sans-serif;'>"+p.id_producto.nombre+"</p> <br>cantidad: "+str(p.cantidad)+" </td><td colspan='3'><p style='color: gray;font-size: 12;font-family: sans-serif;'>$"+str(round(p.precio_unitario*p.cantidad,2))+"</p></td></tr>"
 			productos=productos+cad
 		subtotal=round(subtotal,2)
 		costo_envio=v.costo_envio			
