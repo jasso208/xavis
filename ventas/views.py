@@ -32,7 +32,7 @@ encabezado_0="""
         <table style="width: 300px;; margin:0 auto;background-color: white;"  cellpadding="10" cellspacing="0">
             <tr style="background-color: black;">
                 <td colspan="2">
-                        <img src="http://jasso208.pythonanywhere.com/assets/img/logo_peque.png" style="width: 50px;">
+                        <img src="http://www.jassdel.com/assets/img/logo_peque.png" style="width: 50px;">
                 </td>
                 <td colspan="4" style="text-align: right;" valign="bottom">
                    
@@ -123,13 +123,13 @@ encabezado_4="""
                 </td>
             </tr>
             <tr>
-                <td colspan="4">
+                <td colspan="3">
                     <p style="font-family: sans-serif ;font-size: 12px;text-align: right;">
                         Sub Total
                     </p>
                 </td>
                 
-                <td colspan="2">
+                <td colspan="3">
                         <p style="font-family: sans-serif ;font-size: 12px;text-align: right;">
 			
                             $
@@ -140,13 +140,13 @@ encabezado_5="""
                     </td>
             </tr>
             <tr>
-                    <td colspan="4">
+                    <td colspan="3">
                         <p style="font-family: sans-serif ;font-size: 12px;text-align: right;">
                            Costo de Envio
                         </p>
                     </td>
                     
-                    <td colspan="2">
+                    <td colspan="3">
                             <p style="font-family: sans-serif ;font-size: 12px;text-align: right;">
                                 $
 """
@@ -156,13 +156,13 @@ encabezado_6="""
                         </td>
                 </tr>
                 <tr>
-                    <td colspan="4">
+                    <td colspan="3">
                         <p style="font-family: sans-serif ;font-size: 12px;text-align: right;">
                             Total
                         </p>
                     </td>
                     
-                    <td colspan="2">
+                    <td colspan="3">
                             <p style="font-family: sans-serif ;font-size: 12px;text-align: right;">
                                 $
 								"""
@@ -551,7 +551,9 @@ def api_crea_venta(request):
 		
 		folio_venta.append({"estatus":1,"folio":fn_concatena_folio(str(v.id))})	
 		#notificamos a el vendeor que uvo una venta
-		#fn_envia_email(v)
+		fn_envia_email(v,"")
+		#envia notificacion de compra a jassdel.com
+		fn_envia_email(v,"gerencia.jassdel@jassdel.com")
 		#generamos el cargo 
 		#try:
 		#	charge = openpay.Charge.create_as_merchant(
@@ -664,20 +666,20 @@ def reenvia_venta(request,id_venta):
 	v=Venta.objects.get(id=id_venta)
 	
 	if request.method=="POST":
-		fn_envia_email(v)
+		fn_envia_email(v,"")
 	else:
-		fn_envia_email(v)
+		fn_envia_email(v,"")
 	return render(request,'ventas/busca_ventas.html',locals())
 
 
 #funcion para enviar corre de confirmacion de compra
-def fn_envia_email(v):
+def fn_envia_email(v,email):
 	global encabezado_1,encabezado_2
 	try:		
 		d_e=Direccion_Envio_Venta.objects.get(id_venta=v)		
 		if d_e.apellido_m==None:
 			d_e.apellido_m=""
-		direccion_envio=d_e.calle+" Num."+d_e.numero_exterior+", "+d_e.colonia+" "+d_e.municipio+", "+d_e.estado+" "+d_e.pais+"<br>Referencia Domicilio: "+d_e.referencia
+		direccion_envio=d_e.calle+" Numero exterior: "+d_e.numero_exterior+", Numero interior: "+d_e.numero_interior+", "+d_e.colonia+" "+d_e.municipio+", "+d_e.estado+" "+d_e.pais+"<br>Referencia Domicilio: "+d_e.referencia
 
 		nom_recibe=d_e.nombre_recibe+" "+d_e.apellido_p+" "+d_e.apellido_m
 
@@ -699,7 +701,12 @@ def fn_envia_email(v):
 		msg['Subject'] = 'Confirmacion de Compra'		
 		
 		msg['From'] = 'j.jassdel@gmail.com'
-		msg['To'] = v.cliente.e_mail
+
+		if email=="":
+			msg['To'] = v.cliente.e_mail
+		else:
+			msg['To'] = email
+			
 		password = "JaSSO123"
 		msg.add_header('Content-Type', 'text/html')
 		msg.set_payload(html)		
