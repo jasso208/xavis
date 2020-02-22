@@ -673,7 +673,7 @@ def reenvia_venta(request,id_venta):
 
 
 #funcion para enviar corre de confirmacion de compra
-def fn_envia_email(v,email):
+def fn_envia_email(v,email_copia):
 	global encabezado_1,encabezado_2
 	try:		
 		d_e=Direccion_Envio_Venta.objects.get(id_venta=v)		
@@ -702,11 +702,11 @@ def fn_envia_email(v,email):
 		
 		msg['From'] = 'j.jassdel@gmail.com'
 
-		if email=="":
+		if email_copia=="":
 			msg['To'] = v.cliente.e_mail
 		else:
-			msg['To'] = email
-			
+			msg['To'] = email_copia
+
 		password = "JaSSO123"
 		msg.add_header('Content-Type', 'text/html')
 		msg.set_payload(html)		
