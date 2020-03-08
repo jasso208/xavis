@@ -23,7 +23,7 @@ encabezado_link_consulta_venta_1="""
         <table style="width: 300px;; margin:0 auto;background-color: white;"  cellpadding="10" cellspacing="0">
             <tr style="background-color: black;">
                 <td colspan="6">
-                        <img src="http://jasso208.pythonanywhere.com/assets/img/logo_peque.png" style="width: 50px;">
+                        <img src="https://www.jassdel.com/assets/img/logo_peque.png" style="width: 50px;">
                 </td>
             </tr>
 			<tr>
@@ -336,7 +336,7 @@ def api_envia_token(request):
 
 		except Exception as e:
 			print(e)
-		link="http://localhost:4200/#/listado_ventas/"+session
+		link="https://www.jassdel.com/#/listado_ventas/"+session
 		html=encabezado_link_consulta_venta_1+link+encabezado_link_consulta_venta_2
 		html = html.replace("\xe9", "e")
 		html = html.replace("\x0a", "\n")
@@ -346,7 +346,7 @@ def api_envia_token(request):
 		
 		msg['From'] = 'j.jassdel@gmail.com'
 		msg['To'] = e_mail
-		password = "JaSSDEL1985"
+		password = "JaSSO123"
 		msg.add_header('Content-Type', 'text/html')
 		msg.set_payload(html)		
 		s = smtplib.SMTP('smtp.gmail.com: 587')
