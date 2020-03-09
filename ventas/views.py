@@ -475,6 +475,7 @@ def api_crea_venta(request):
             #validamos que la session tenga registrada la direccion de envio
 			e_m=Direccion_Envio_Cliente_Temporal.objects.get(session=session)
 		except:
+			print("fallo 1")
 			#sillega a la except es porque no tiene capturada la direccion de envio
 			folio_venta.append({"estatus":0,"msj":"No se ha agregado la direccion de envio."})			
 			return Response(folio_venta)
@@ -495,6 +496,7 @@ def api_crea_venta(request):
 		try:
 			d_e=Direccion_Envio_Cliente_Temporal.objects.get(session=session)		
 		except:
+			print("fallo 2")
 			#sillega a la except es porque no tiene capturada la direccion de envio
 			folio_venta.append({"estatus":0,"msj":"No se ha agregado la direccion de envio."})			
 			return Response(folio_venta)	
@@ -562,6 +564,7 @@ def api_crea_venta(request):
 		if tipo_compra=="2":
 			#generamos el cargo 
 			try:
+				
 				charge = openpay.Charge.create_as_merchant(
 					method="card",
 					amount=amount,
@@ -590,7 +593,6 @@ def api_crea_venta(request):
 					}
 				)	
 				print(charge.authorization)
-				
 						
 			except Exception as e:
 				fn_notifica_error("Error no identificado al procesar el pago",str(e))
@@ -697,6 +699,8 @@ def fn_envia_email(v,email_copia):
 		d_e=Direccion_Envio_Venta.objects.get(id_venta=v)		
 		if d_e.apellido_m==None:
 			d_e.apellido_m=""
+		if d_e.numero_interior==None:
+			d_e.numero_interior="NA"
 		direccion_envio=d_e.calle+" Numero exterior: "+d_e.numero_exterior+", Numero interior: "+d_e.numero_interior+", "+d_e.colonia+" "+d_e.municipio+", "+d_e.estado+" "+d_e.pais+"<br>Referencia Domicilio: "+d_e.referencia
 
 		nom_recibe=d_e.nombre_recibe+" "+d_e.apellido_p+" "+d_e.apellido_m
