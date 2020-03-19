@@ -24,6 +24,29 @@ openpay.verify_ssl_certs = False
 openpay.merchant_id = "myllylbt6vwlywximkxg"
 openpay.production = False  # By default this works in sandbox mode
 
+html_link_seg_0="""
+"""
+
+html_link_seg_1="""
+		<tr>
+		    <td colspan="6" style="text-align:center">
+		        <p>Tu paquete ya fue enviado puedes seguirlo en el siguiente link:</p>
+		         <br>
+		        <a href="		        
+"""
+
+html_link_seg_2="""
+				">
+					Seguir Envio
+				</a>
+ 			</td>
+		</tr>
+		<tr>
+		    <td colspan="6">
+		        <hr>
+		    </td>
+		</tr>
+"""
 
 encabezado_0="""
 <html>
@@ -53,12 +76,15 @@ encabezado_1="""
                     <hr>
                 </td>
             </tr>
+"""
+encabezado_1_1="""
             <tr>
                 <td colspan="6">
-                    Forma Pago: 
+                    <strong> 
 """
 					
-encabezado_1_1="""
+encabezado_1_2="""
+					</strong>
                 </td>
             </tr>
 
@@ -238,15 +264,33 @@ def busca_ventas(request):
 		ventas=Venta.objects.all()
 	return render(request,'ventas/busca_ventas.html',locals())
 
-def detalle_venta_form(request,id_venta):	
+def detalle_venta_form(request,id_venta):
+	global html_link_seg_0
+
 	if not request.user.is_authenticated:	
 		return HttpResponseRedirect(reverse('seguridad:login'))
-		
+
 	venta=Venta.objects.get(id=id_venta)
+	est_envio=venta.estatus_envio_producto.id
 	if request.method=="POST":
 		form=Venta_Form(request.POST,instance=venta)	
 		if form.is_valid():
 			form.save()
+
+			html_link_seg_0=""
+			
+
+			#si no es uno, nos indica que el mail ya fue envieado.
+			if est_envio==1 and venta.estatus_envio_producto.id==2:
+				html_link_seg_0=html_link_seg_1+venta.link_seguimiento+html_link_seg_2
+		        #Notificamos al comprador de su compra
+				fn_envia_email(venta,"","Tu paquete esta en camino")				
+				#envia notificacion de compra a jassdel.com
+				fn_envia_email(venta,"gerencia.jassdel@jassdel.com","Tu paquete esta en camino")
+			else:
+				html_link_seg_0=""
+
+
 			#obtnemos el estatus cancelado para validar si la venta fue cancelada
 			est_cancelado=Estatus_Venta.objects.get(id=3)
 			
@@ -269,7 +313,7 @@ def guarda_venta_manual(request,id_venta=None):
 	if not request.user.is_authenticated:	
 		return HttpResponseRedirect(reverse('seguridad:login'))	
 
-	
+	print("aqui entro")
 	if id_venta:
 		venta=Venta.objects.get(id=id_venta)
 	else:
@@ -400,7 +444,7 @@ def api_elimina_carrito_compras(request):
 	if request.method=="POST":
 		error=[]
 		try:			
-			print(request.POST.get("id"))
+			
 			#parametros
 			id_carrito=request.POST.get("id")			
 			#parametros
@@ -624,11 +668,12 @@ def api_crea_venta(request):
 		d_e.delete()
         
 		folio_venta.append({"estatus":1,"folio":fn_concatena_folio(str(v.id))})	
-        #notificamos a el vendeor que uvo una venta
 
-		fn_envia_email(v,"")
+        #Notificamos al comprador de su compra
+		fn_envia_email(v,"","Confirmacion de Compra")
+		
 		#envia notificacion de compra a jassdel.com
-		fn_envia_email(v,"gerencia.jassdel@jassdel.com")
+		fn_envia_email(v,"gerencia.jassdel@jassdel.com","Confirmacion de Compra")
 
             
             
@@ -707,15 +752,15 @@ def reenvia_venta(request,id_venta):
 	v=Venta.objects.get(id=id_venta)
 	
 	if request.method=="POST":
-		fn_envia_email(v,"")
+		fn_envia_email(v,"","Confirmacion de Compra")
 	else:
-		fn_envia_email(v,"")
+		fn_envia_email(v,"","Confirmacion de Compra")
 	return HttpResponseRedirect(reverse('ventas:busca_ventas'))
 	
 
 
 #funcion para enviar corre de confirmacion de compra
-def fn_envia_email(v,email_copia):
+def fn_envia_email(v,email_copia,asunto):
 	global encabezado_1,encabezado_2
 	try:		
 		d_e=Direccion_Envio_Venta.objects.get(id_venta=v)		
@@ -735,9 +780,9 @@ def fn_envia_email(v,email_copia):
 			cad="<tr><td colspan='1'><img src='https://www.jassdel.com/assets/img/productos/"+fn_concatena_folio(str(p.id_producto.id))+"_1.png' style='width: 100px;'></td><td colspan='3'><p style='color: gray;font-size: 12;font-family: sans-serif;'>"+p.id_producto.nombre+"</p> <br>cantidad: "+str(p.cantidad)+" </td><td colspan='3'><p style='color: gray;font-size: 12;font-family: sans-serif;'>$"+str(round(p.precio_unitario*p.cantidad,2))+"</p></td></tr>"
 			productos=productos+cad
 		subtotal=round(subtotal,2)
-		costo_envio=v.costo_envio			
-
-		html=encabezado_0+fn_concatena_folio(str(v.id))+encabezado_1+v.forma_pago.desc_forma_pago+encabezado_1_1+direccion_envio+encabezado_2+nom_recibe+encabezado_3+productos+encabezado_4+str(subtotal)+encabezado_5+str(costo_envio)+encabezado_6+str(v.total)+encabezado_7		
+		costo_envio=v.costo_envio	
+	
+		html=encabezado_0+fn_concatena_folio(str(v.id))+encabezado_1+html_link_seg_0+encabezado_1_1+v.forma_pago.desc_forma_pago+encabezado_1_2+direccion_envio+encabezado_2+nom_recibe+encabezado_3+productos+encabezado_4+str(subtotal)+encabezado_5+str(costo_envio)+encabezado_6+str(v.total)+encabezado_7		
 		html = html.replace("\x0a", "\n")
 
 		html = html.replace("\xe1", "a")		
@@ -755,7 +800,8 @@ def fn_envia_email(v,email_copia):
 
 		server = smtplib.SMTP('smtp.gmail.com:587')
 		msg = email.message.Message()
-		msg['Subject'] = 'Confirmacion de Compra; Folio: '+fn_concatena_folio(str(v.id))		
+		msg['Subject'] = asunto+'; Folio: '+fn_concatena_folio(str(v.id))		
+		
 		
 		msg['From'] = 'j.jassdel@gmail.com'
 
