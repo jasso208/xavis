@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from seguridad.models import Cliente,Direccion_Envio_Cliente,Clientes_Logueados,Direccion_Envio_Cliente_Temporal
 from seguridad.models import E_Mail_Notificacion,Recupera_pws
 from django.core.mail import EmailMessage
-from ventas.models import Venta
+from ventas.models import Venta,Detalle_Venta
 
 import smtplib
 import email.message
@@ -28,7 +28,7 @@ encabezado_link_consulta_venta_1="""
             </tr>
 			<tr>
 				<td colspan="6">
-					<p>Hola,:<br><br><br>
+					<p>Hola:<br><br><br>
 					&nbsp;&nbsp;&nbsp; De click en el siguiente vinculo para poder consultar sus ventas:
 					<br><br>
 					
@@ -333,10 +333,9 @@ def api_envia_token(request):
 			Recupera_pws.objects.filter(session=session).delete()
 			Recupera_pws.objects.create(session=session,e_mail=e_mail)
 			ff=Recupera_pws.objects.get(session=session)
-
 		except Exception as e:
 			print(e)
-		link="https://www.jassdel.com/#/listado_ventas/"+session
+		link="http://localhost:4200/#/listado_ventas/"+session
 		html=encabezado_link_consulta_venta_1+link+encabezado_link_consulta_venta_2
 		html = html.replace("\xe9", "e")
 		html = html.replace("\x0a", "\n")
@@ -386,10 +385,43 @@ def api_consulta_ventas_invitado(request):
 			estatus.append({"estatus":"0","msj":"El Email no existe."})
 			return Response(estatus)
 		vtas=Venta.objects.filter(cliente=c)
+		print(vtas)
 		for v in vtas:		
-			ventas.append({"folio":v.id,"fecha":str(v.fecha.day)+"-"+str(v.fecha.month)+"-"+str(+v.fecha.year),"total":v.total,"estatus":v.id_estatus_venta.estatus_venta,"seguimiento":v.link_seguimiento})
+			if v.link_seguimiento=='No Disponible':
+				enviado=False
+			else:
+				enviado=True
+
+			dv=Detalle_Venta.objects.filter(id_venta=v)
+			img_1=""
+			img_2=""
+			img_3=""
+			img_4=""
+			cont=1
+			for d in dv:
+				if cont==4:
+					img_4=fn_concatena_folio(str(d.id_producto.id))+"_1"
+					cont=cont+1
+				if cont==3:
+					img_3=fn_concatena_folio(str(d.id_producto.id))+"_1"
+					cont=cont+1
+				if cont==2:
+					img_2=fn_concatena_folio(str(d.id_producto.id))+"_1"
+					cont=cont+1
+				if cont==1:
+					img_1=fn_concatena_folio(str(d.id_producto.id))+"_1"
+					cont=cont+1
+				
+			if (cont-1)==1:
+				solo_1=True
+			else:
+				solo_1=False
+
+			ventas.append({"solo_1":solo_1,"img_1":img_1,"img_2":img_2,"img_3":img_3,"img_4":img_4,"enviado":enviado,"folio":v.id,"fecha":str(v.fecha.day)+"-"+str(v.fecha.month)+"-"+str(+v.fecha.year),"total":v.total,"estatus":v.id_estatus_venta.estatus_venta,"seguimiento":v.link_seguimiento})
+	
 		estatus.append({"estatus":1,'ventas':ventas})
-	except:
+	except Exception as e:
+		print(e)
 		estatus.append({"estatus":"0","msj":"No existen ventas para el Correo electronico indicado indicado."})
 	return Response(estatus)
 
@@ -450,3 +482,20 @@ def api_reinicia_direccion_temporal(request):
 		estatus.append({'estatus':"0","msj":"Error al consultar la informacion de su cuenta."})
 	return Response(estatus) 
 
+def fn_concatena_folio(folio):
+	f=""
+	if len(folio)==7:
+		f=folio
+	if len(folio)==6:
+		f="0"+folio
+	if len(folio)==5:
+		f="00"+folio
+	if len(folio)==4:
+		f="000"+folio
+	if len(folio)==3:
+		f="0000"+folio
+	if len(folio)==2:
+		f="00000"+folio
+	if len(folio)==1:
+		f="000000"+folio
+	return f

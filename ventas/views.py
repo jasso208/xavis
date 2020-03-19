@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Detalle_Venta,Direccion_Envio_Venta,Venta,Carrito_Compras,Estatus_Venta,Medio_Venta
+from .models import Detalle_Venta,Direccion_Envio_Venta,Venta,Carrito_Compras,Estatus_Venta,Medio_Venta,Forma_Pago
 from inventario.models import Productos,Tallas,Img_Producto
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -55,6 +55,22 @@ encabezado_1="""
             </tr>
             <tr>
                 <td colspan="6">
+                    Forma Pago: 
+"""
+					
+encabezado_1_1="""
+                </td>
+            </tr>
+
+
+            <tr>
+                <td colspan="6">
+                    <hr>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="6">
                     <p style="font-family: sans-serif">
                       
                             Resumen de Compra
@@ -63,11 +79,6 @@ encabezado_1="""
                 </td>
             </tr>
             
-            <tr>
-                    <td colspan="6">
-                        <hr>
-                    </td>
-                </tr>
             <tr>
                 <td colspan="6">
                     <p style="font-family: sans-serif ;font-size: 12px;">
@@ -528,18 +539,24 @@ def api_crea_venta(request):
 		if tipo_compra=="1":
 			#buscamos el estatus de venta "pendiente de pago"
 			est_v=Estatus_Venta.objects.get(id=2)
+			#obtenemos la forma de pago
+			f_p=Forma_Pago.objects.get(id=2)
 		else:#generamos una compra pagada con tarjeta
 			#buscamos el estatus de venta "Pagado"
 			est_v=Estatus_Venta.objects.get(id=1)
-            
+			#obtenemos la forma de pago
+			f_p=Forma_Pago.objects.get(id=1)
  
 		#obtenemos el medio de venta que identifica el sitio web
 		mv=Medio_Venta.objects.get(id=3)
 
+		
 
-		print(est_v)
+		
+		
+		
         #CREAMOS LA VENTA		
-		v=Venta(total=total,sub_total=sub_total,descuento=descuento,cliente=cliente,id_estatus_venta=est_v,iva=0.00,costo_envio=costo_envio,id_medio_venta=mv)
+		v=Venta(total=total,sub_total=sub_total,descuento=descuento,cliente=cliente,id_estatus_venta=est_v,iva=0.00,costo_envio=costo_envio,id_medio_venta=mv,forma_pago=f_p)
 		v.save()
         #recorremos los productos del carrito para crear el detalle d ela venta
 		for cc in c_c:
@@ -650,10 +667,12 @@ def api_consulta_ventas(request):
 		cliente=c_l.cliente
 		ventas=Venta.objects.filter(cliente=cliente).order_by('-fecha')
 		for v in ventas:			
+			
 			respuesta.append({"estatus":"1","msj":"","id_venta":v.id,"descuento":v.descuento,"fecha":v.fecha,"sub_total":v.sub_total,"iva":v.iva,"total":v.total,"link_seg":v.link_seguimiento})
 	except Exception as e:
 		print(e)
 		respuesta.append({"estatus":"0","msj":"Error al consultar las ventas, intente refrescar la pagina."})
+	print("aqui entro")
 	return Response(respuesta)
 
 @api_view(['GET'])	
@@ -682,14 +701,17 @@ def api_consulta_detalle_venta(request):
 def reenvia_venta(request,id_venta):	
 	if not request.user.is_authenticated:	
 		return HttpResponseRedirect(reverse('seguridad:login'))
-		
+	
+	form=Busqueda_Venta_Form()
+	ventas=Venta.objects.all()
 	v=Venta.objects.get(id=id_venta)
 	
 	if request.method=="POST":
 		fn_envia_email(v,"")
 	else:
 		fn_envia_email(v,"")
-	return render(request,'ventas/busca_ventas.html',locals())
+	return HttpResponseRedirect(reverse('ventas:busca_ventas'))
+	
 
 
 #funcion para enviar corre de confirmacion de compra
@@ -715,7 +737,7 @@ def fn_envia_email(v,email_copia):
 		subtotal=round(subtotal,2)
 		costo_envio=v.costo_envio			
 
-		html=encabezado_0+fn_concatena_folio(str(v.id))+encabezado_1+direccion_envio+encabezado_2+nom_recibe+encabezado_3+productos+encabezado_4+str(subtotal)+encabezado_5+str(costo_envio)+encabezado_6+str(v.total)+encabezado_7		
+		html=encabezado_0+fn_concatena_folio(str(v.id))+encabezado_1+v.forma_pago.desc_forma_pago+encabezado_1_1+direccion_envio+encabezado_2+nom_recibe+encabezado_3+productos+encabezado_4+str(subtotal)+encabezado_5+str(costo_envio)+encabezado_6+str(v.total)+encabezado_7		
 		html = html.replace("\x0a", "\n")
 
 		html = html.replace("\xe1", "a")		

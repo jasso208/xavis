@@ -29,6 +29,12 @@ class Medio_Venta(models.Model):
 	def __str__(self):
 		return self.desc_medio
 
+class Forma_Pago(models.Model):
+	desc_forma_pago=models.CharField(max_length=30)
+
+	def __str__(self):
+		return self.desc_forma_pago
+
 class Venta(models.Model):
 	fecha=models.DateTimeField(default=timezone.now())
 	costo_envio=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)
@@ -41,6 +47,7 @@ class Venta(models.Model):
 	cliente=models.ForeignKey(Cliente,on_delete=models.PROTECT,null=True)
 	id_medio_venta=models.ForeignKey(Medio_Venta,on_delete=models.PROTECT,null=True)
 	comision=models.DecimalField(max_digits=20,decimal_places=2,null=False,default=0.00)
+	forma_pago=models.ForeignKey(Forma_Pago,on_delete=models.PROTECT,null=True)
 
 class Detalle_Venta(models.Model):
 	id_venta=models.ForeignKey(Venta,on_delete=models.PROTECT)
