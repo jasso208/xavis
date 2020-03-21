@@ -11,7 +11,7 @@ from seguridad.models import Cliente,Direccion_Envio_Cliente,Clientes_Logueados,
 from seguridad.models import E_Mail_Notificacion,Recupera_pws
 from django.core.mail import EmailMessage
 from ventas.models import Venta,Detalle_Venta
-
+from django.conf import settings
 import smtplib
 import email.message
 
@@ -335,7 +335,9 @@ def api_envia_token(request):
 			ff=Recupera_pws.objects.get(session=session)
 		except Exception as e:
 			print(e)
-		link="http://localhost:4200/#/listado_ventas/"+session
+
+		link=settings.URL_LOCAL_FRONTEND+"listado_ventas/"+session
+
 		html=encabezado_link_consulta_venta_1+link+encabezado_link_consulta_venta_2
 		html = html.replace("\xe9", "e")
 		html = html.replace("\x0a", "\n")
