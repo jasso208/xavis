@@ -18,7 +18,7 @@ import smtplib
 import email.message
 from smart_selects.db_fields import ChainedForeignKey
 from django.forms import widgets
-
+from django.conf import settings
 openpay.api_key = "sk_f0e4778198cb46a69fd64b50d1276efa"
 openpay.verify_ssl_certs = False
 openpay.merchant_id = "myllylbt6vwlywximkxg"
@@ -630,7 +630,7 @@ def api_crea_venta(request):
 					method="card",
 					amount=amount,
 					description=description,
-					order_id=fn_concatena_folio(str(v.id)),
+					order_id=settings.INDICADOR_ENTORNO+fn_concatena_folio(str(v.id)),
 					device_session_id=device_session_id,
 					source_id=source_id,
 					customer={

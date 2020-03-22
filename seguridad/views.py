@@ -386,8 +386,8 @@ def api_consulta_ventas_invitado(request):
 		except:
 			estatus.append({"estatus":"0","msj":"El Email no existe."})
 			return Response(estatus)
-		vtas=Venta.objects.filter(cliente=c)
-		print(vtas)
+		vtas=Venta.objects.filter(cliente=c).order_by("-id")
+	
 		for v in vtas:		
 			if v.link_seguimiento=='No Disponible':
 				enviado=False
@@ -396,11 +396,12 @@ def api_consulta_ventas_invitado(request):
 
 			dv=Detalle_Venta.objects.filter(id_venta=v)
 			img_1=""
-			img_2=""
+			img_2=""	
 			img_3=""
 			img_4=""
 			cont=1
 			for d in dv:
+
 				if cont==4:
 					img_4=fn_concatena_folio(str(d.id_producto.id))+"_1"
 					cont=cont+1
@@ -419,7 +420,7 @@ def api_consulta_ventas_invitado(request):
 			else:
 				solo_1=False
 
-			ventas.append({"solo_1":solo_1,"img_1":img_1,"img_2":img_2,"img_3":img_3,"img_4":img_4,"enviado":enviado,"folio":v.id,"fecha":str(v.fecha.day)+"-"+str(v.fecha.month)+"-"+str(+v.fecha.year),"total":v.total,"estatus":v.id_estatus_venta.estatus_venta,"seguimiento":v.link_seguimiento})
+			ventas.append({"solo_1":solo_1,"img_1":img_1,"img_2":img_2,"img_3":img_3,"img_4":img_4,"enviado":enviado,"folio":v.id,"folio_0":fn_concatena_folio(str(v.id)),"fecha":str(v.fecha.day)+"-"+str(v.fecha.month)+"-"+str(+v.fecha.year),"total":v.total,"estatus":v.id_estatus_venta.estatus_venta,"seguimiento":v.link_seguimiento})
 	
 		estatus.append({"estatus":1,'ventas':ventas})
 	except Exception as e:
