@@ -468,6 +468,7 @@ def api_genera_cargo(request):
 			order_id="123123123",
 			device_session_id=request.POST.get("deviceIdHiddenFieldName"),
 			source_id=request.POST.get("token_id")  ,
+			currency="MXN"
 			customer={
 				"name":"Heber",
 				"last_name":"Robles",
