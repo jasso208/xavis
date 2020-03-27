@@ -811,7 +811,7 @@ def fn_envia_email(v,email_copia,asunto):
 		else:
 			msg['To'] = email_copia
 
-		password = "JaSSO123"
+		password = settings.EMAIL_HOST_PASSWORD
 		msg.add_header('Content-Type', 'text/html')
 		msg.set_payload(html)		
 		s = smtplib.SMTP('smtp.gmail.com: 587')
@@ -837,7 +837,7 @@ def fn_notifica_error(asunto,html):
 		html=html
 		msg['From'] = 'j.jassdel@gmail.com'
 		msg['To'] = 'gerencia.jassdel@jassdel.com'
-		password = "JaSSO123"
+		password = settings.EMAIL_HOST_PASSWORD
 		msg.add_header('Content-Type', 'text/html')
 		msg.set_payload(html)		
 		s = smtplib.SMTP('smtp.gmail.com: 587')
