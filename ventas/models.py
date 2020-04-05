@@ -55,6 +55,8 @@ class Venta(models.Model):
 	comision=models.DecimalField(max_digits=20,decimal_places=2,null=False,default=0.00)
 	forma_pago=models.ForeignKey(Forma_Pago,on_delete=models.PROTECT,null=True)
 	estatus_envio_producto=models.ForeignKey(Estatus_Envio_Producto,on_delete=models.PROTECT,null=True,default=1)
+	descuento_cupon=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)
+	folio_descuento=models.IntegerField(default=0)
 
 class Detalle_Venta(models.Model):
 	id_venta=models.ForeignKey(Venta,on_delete=models.PROTECT)
@@ -87,5 +89,16 @@ class Direccion_Envio_Venta(models.Model):
 	telefono=models.CharField(max_length=20,null=False)
 	correo_electronico=models.CharField(max_length=50,null=False)
 	referencia=models.CharField(max_length=200,null=False)
-	
+
+
+#esta tabla almacena a los clientes que genraron un cupon de descuento,
+#el folio del cupon es el id de la tabla.
+class Email_Cupon(models.Model):
+	email=models.CharField(max_length=100,null=False)
+	usado=models.CharField(max_length=1,default="N")
+
+#esta tabla la usamos para almacenar los valores que almacena temporalmente la session
+class Session_Temporal(models.Model):
+	session=models.CharField(max_length=18,null=False)
+	folio_cupon=models.IntegerField()#se relaciona con el id de la tabla Email_Cupon
 	

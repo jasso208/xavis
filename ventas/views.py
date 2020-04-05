@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Detalle_Venta,Direccion_Envio_Venta,Venta,Carrito_Compras,Estatus_Venta,Medio_Venta,Forma_Pago
+from .models import Detalle_Venta,Direccion_Envio_Venta,Venta,Carrito_Compras,Estatus_Venta,Medio_Venta,Forma_Pago,Email_Cupon,Session_Temporal
 from inventario.models import Productos,Tallas,Img_Producto
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -48,6 +48,55 @@ html_link_seg_2="""
 		</tr>
 """
 
+encabezado_cupon="""
+	<html>
+    <head>           
+    </head>
+    <body style="background-color:#e9e9e9;">
+        <table style="width: 300px;; margin:0 auto;background-color: white;"  cellpadding="10" cellspacing="0">
+            <tr style="background-color: black;">
+                <td colspan="4" style="text-align:center">
+                        <img src="http://www.jassdel.com/assets/img/logo_grande.png" style="height: 50px;">
+                </td>
+                
+			</tr>
+			<tr>
+				<td colspan="4" style="text-align: right;" valign="bottom">
+					<hr>
+				</td>
+				
+			</tr>
+			<tr>
+			
+                <td colspan="4" style="text-align: center;" valign="bottom">
+					Tu clave de descuento es:<br>
+					<br>
+						<strong>
+"""
+pie_cupon="""
+						</strong>						
+						
+					<br>
+					<br>
+					ingresala cuando te sea solicitada y obtén un descuento por: 
+					<br>
+					<br>
+					<span style="font-size:40px;font-weight:bold">$150.00</span>
+				</td>
+			</tr>
+			
+			<tr>
+				<td colspan="4" style="text-align: right;" valign="bottom">
+					<hr>
+				</td>
+				
+			</tr>
+		</table>
+	</body>
+	</html>
+"""
+
+
 encabezado_0="""
 <html>
     <head>           
@@ -56,7 +105,7 @@ encabezado_0="""
         <table style="width: 300px;; margin:0 auto;background-color: white;"  cellpadding="10" cellspacing="0">
             <tr style="background-color: black;">
                 <td colspan="2">
-                        <img src="http://www.jassdel.com/assets/img/logo_peque.png" style="width: 50px;">
+                        <img src="http://www.jassdel.com/assets/img/logo_grande.png" style="width: 50px;">
                 </td>
                 <td colspan="4" style="text-align: right;" valign="bottom">
                    
@@ -181,6 +230,39 @@ encabezado_5="""
                     <td colspan="3">
                         <p style="font-family: sans-serif ;font-size: 12px;text-align: right;">
                            Costo de Envio
+                        </p>
+                    </td>
+                    
+                    <td colspan="3">
+                            <p style="font-family: sans-serif ;font-size: 12px;text-align: right;">
+                                $
+"""
+
+encabezado_5_1="""
+				
+                        </p>
+                    </td>
+            </tr>
+            <tr>
+                    <td colspan="3">
+                        <p style="font-family: sans-serif ;font-size: 12px;text-align: right;">
+                           Subtotal
+                        </p>
+                    </td>
+                    
+                    <td colspan="3">
+                            <p style="font-family: sans-serif ;font-size: 12px;text-align: right;">
+                                $
+"""
+encabezado_5_2="""
+				
+                        </p>
+                    </td>
+            </tr>
+            <tr>
+                    <td colspan="3">
+                        <p style="font-family: sans-serif ;font-size: 12px;text-align: right;">
+                           Descuento por cupon
                         </p>
                     </td>
                     
@@ -363,6 +445,7 @@ def guarda_venta_manual(request,id_venta=None):
 @api_view(['GET','POST'])
 def api_consulta_carrito_compras(request):
 	if request.method=="GET":
+		respuesta=[]
 		carrito=[]
 		session=request.GET.get("session")		
 		#obtenemos los productos que estan en el carrito de compras.
@@ -388,7 +471,15 @@ def api_consulta_carrito_compras(request):
 				else:
 					precio_desc=cc.id_producto.precio
 				carrito.append({'marca':cc.id_producto.marca,'nombre':cc.id_producto.nombre,'id':cc.id,'id_producto':cc.id_producto.id,'precio':precio_desc*cc.cantidad,'id_producto':cc.id_producto.id,'nom_img':nom_img,'cantidad':cc.cantidad,'talla':cc.talla.talla})					
-		return Response(carrito)
+		respuesta.append({'carrito':carrito})		
+		try:
+			#si existe registro esque ya capturo un folio valido y se le aplicara el descuento
+			s=Session_Temporal.objects.get(session=session)
+			respuesta.append({'cupon':s.id})
+		except:
+			print("no ha encontrado cupon registrado")
+			respuesta.append({'cupon':0})
+		return Response(respuesta)
 	if request.method=="POST":
 		error=[]
 		try:			
@@ -595,14 +686,27 @@ def api_crea_venta(request):
 		#obtenemos el medio de venta que identifica el sitio web
 		mv=Medio_Venta.objects.get(id=3)
 
+		desc_cupon=0.00
+		folio_cupon=0
+		try:
+
+			ob_session=Session_Temporal.objects.get(session=session)
+			#si contamos con folio de cupon es que si aplico uno real
+			if ob_session.folio_cupon != 0:
+				desc_cupon=150.00
+				folio_cupon=ob_session.folio_cupon
+		except:			
+			#esto es porque no encontro cupon de descuento
+			print("no hay descuento por cupon")
 		
 
-		
-		
-		
+		sub_total=decimal.Decimal(sub_total)+decimal.Decimal(costo_envio)
+		total=decimal.Decimal(sub_total)-decimal.Decimal(desc_cupon)
         #CREAMOS LA VENTA		
-		v=Venta(total=total,sub_total=sub_total,descuento=descuento,cliente=cliente,id_estatus_venta=est_v,iva=0.00,costo_envio=costo_envio,id_medio_venta=mv,forma_pago=f_p)
+		v=Venta(folio_descuento=folio_cupon,descuento_cupon=desc_cupon,total=total,sub_total=sub_total,descuento=descuento,cliente=cliente,id_estatus_venta=est_v,iva=0.00,costo_envio=costo_envio,id_medio_venta=mv,forma_pago=f_p)
+		
 		v.save()
+
         #recorremos los productos del carrito para crear el detalle d ela venta
 		for cc in c_c:
 			#calculamos el precio de venta(en caso de tener descuento)	
@@ -664,9 +768,18 @@ def api_crea_venta(request):
 				v.delete()
 				folio_venta.append({"estatus":0,"msj":str(e)})	
 				return Response(folio_venta)
+		
+		ob_session=Session_Temporal.objects.get(session=session)
 
+		ec=Email_Cupon.objects.get(id=ob_session.folio_cupon)
+		ec.usado='S'
+		ec.save()
+
+		#solo borramos la informacion de la session cuando se confirma la venta.
 		c_c.delete()
 		d_e.delete()
+		ob_session.delete()
+
         
 		folio_venta.append({"estatus":1,"folio":fn_concatena_folio(str(v.id))})	
 
@@ -721,13 +834,48 @@ def api_consulta_ventas(request):
 	print("aqui entro")
 	return Response(respuesta)
 
+#enviamos el email para notificar al cliente que se gano un cupon
+@api_view(['POST','GET'])
+def api_genera_cupon(request):
+	respuesta=[]
+	try:
+		if request.method=="POST":
+			email=request.POST.get("email")
+			session=request.GET.get("session")		
+			#validamos que el cliente no haya pedido ya  un cupon
+			try:
+				Email_Cupon.objects.get(email=email)
+				respuesta.append({"estatus":"0","msj":"Este email ya ha generado un cupon de descuento anteriormente."})
+			except:
+				respuesta.append({"estatus":"1","msj":"Enviamos al correo electrónico tu clave de descuento."})
+				cupon=Email_Cupon.objects.create(email=email)
+				fn_envia_cupon(email,cupon.id)
+				fn_envia_cupon("gerencia.jassdel@jassdel.com",cupon.id)
+		else:
+			try:
+				email=request.GET.get("email")
+				session=request.GET.get("session")
+				folio=int(request.GET.get("folio"))
+				#si encontramos registro es que si es valido el cupon.
+				Email_Cupon.objects.get(id=folio,email=email,usado="N")
+				#lo almacenamos aqui temporalmente, cuando se concrete la venta, se elimina el registro de aqui.
+				Session_Temporal.objects.create(session=session,folio_cupon=folio)
+				respuesta.append({"estatus":"1","msj":"El folio es valido"})
+			except Exception as e:
+				respuesta.append({"estatus":"0","msj":"El folio no es valido o ya fue usado."})
+				print(str(e))
+	except Exception as e:
+		print(str(e))
+	return Response(respuesta)
+
 @api_view(['GET'])	
 def api_consulta_detalle_venta(request):
+	vent=[]
+	det_venta=[]
 	respuesta=[]
 	try:
 		id_venta=request.GET.get("id_venta")
 		venta=Venta.objects.get(id=id_venta)
-		print(venta)
 		d_v=Detalle_Venta.objects.filter(id_venta=venta)
 		
 		for v in d_v:
@@ -737,7 +885,13 @@ def api_consulta_detalle_venta(request):
 			except Exception as e:
 				print(e)
 				nom_img=""				
-			respuesta.append({"estatus":"1","msj":"","nom_img":nom_img,'nombre':v.id_producto.nombre,"cantidad":v.cantidad,"talla":v.talla.talla,"precio_unitario":Decimal(v.precio_unitario)*Decimal(1.16),"marca":v.id_producto.marca})
+			det_venta.append({"nom_img":nom_img,'nombre':v.id_producto.nombre,"cantidad":v.cantidad,"talla":v.talla.talla,"precio_unitario":Decimal(v.precio_unitario),"marca":v.id_producto.marca})
+		vent.append({"total":venta.total,"costo_envio":venta.costo_envio,"descuento_cupon":venta.descuento_cupon})
+
+		respuesta.append({"estatus":"1","msj":""})
+		respuesta.append({"detalle":det_venta})
+		respuesta.append({"venta":vent})
+
 	except Exception as e:
 		print(e)
 		respuesta.append({"estatus":"0","msj":"Error al consultar el detalle de la venta."})
@@ -754,10 +908,57 @@ def reenvia_venta(request,id_venta):
 	
 	if request.method=="POST":
 		fn_envia_email(v,"","Confirmacion de Compra")
+		fn_envia_email(v,"gerencia.jassdel@jassdel.com","Confirmacion de Compra")
 	else:
 		fn_envia_email(v,"","Confirmacion de Compra")
+		fn_envia_email(v,"gerencia.jassdel@jassdel.com","Confirmacion de Compra")
 	return HttpResponseRedirect(reverse('ventas:busca_ventas'))
 	
+
+def fn_envia_cupon(email_p,folio):
+	html=encabezado_cupon+fn_concatena_folio(str(folio))+pie_cupon
+
+
+	html = html.replace("\xa1", "")
+	html = html.replace("\xbf", "")
+	html = html.replace("\xd1", "N")
+	html = html.replace("\xdc", "U")
+	html = html.replace("\xf1", "n")
+
+	html = html.replace("\x0a", "\n")
+
+	html = html.replace("\xe1", "a")		
+	html = html.replace("\xe9", "e")		
+	html = html.replace("\xed", "i")		
+	html = html.replace("\xf3", "o")				
+	html = html.replace("\xfa", "u")
+
+
+	html = html.replace("\xc1", "A")		
+	html = html.replace("\xc9", "E")		
+	html = html.replace("\xcd", "I")		
+	html = html.replace("\xd3", "O")				
+	html = html.replace("\xda", "U")
+
+	
+
+
+	server = smtplib.SMTP('smtp.gmail.com:587')
+	msg = email.message.Message()
+	msg['Subject'] = "Cupon de descuento Jassdel.com"
+	
+	msg['From'] = 'j.jassdel@gmail.com'	
+	msg['To'] = email_p		
+
+	password = settings.EMAIL_HOST_PASSWORD
+	msg.add_header('Content-Type', 'text/html')
+	msg.set_payload(html)		
+	s = smtplib.SMTP('smtp.gmail.com: 587')
+	s.starttls()		
+	# Login Credentials for sending the mail
+	s.login(msg['From'], password)		
+	s.sendmail(msg['From'], [msg['To']], msg.as_string())
+	return 0
 
 
 #funcion para enviar corre de confirmacion de compra
@@ -783,7 +984,12 @@ def fn_envia_email(v,email_copia,asunto):
 		subtotal=round(subtotal,2)
 		costo_envio=v.costo_envio	
 	
-		html=encabezado_0+fn_concatena_folio(str(v.id))+encabezado_1+html_link_seg_0+encabezado_1_1+v.forma_pago.desc_forma_pago+encabezado_1_2+direccion_envio+encabezado_2+nom_recibe+encabezado_3+productos+encabezado_4+str(subtotal)+encabezado_5+str(costo_envio)+encabezado_6+str(v.total)+encabezado_7		
+		html=encabezado_0+fn_concatena_folio(str(v.id))+encabezado_1+html_link_seg_0+encabezado_1_1+v.forma_pago.desc_forma_pago+encabezado_1_2+direccion_envio+encabezado_2+nom_recibe+encabezado_3+productos+encabezado_4+str(subtotal)+encabezado_5+str(costo_envio)+encabezado_5_1+str(subtotal+costo_envio)+encabezado_5_2+str(v.descuento_cupon)+encabezado_6+str(v.total)+encabezado_7		
+		html = html.replace("\xa1", "")
+		html = html.replace("\xbf", "")
+		html = html.replace("\xd1", "N")
+		html = html.replace("\xdc", "U")
+		html = html.replace("\xf1", "n")
 		html = html.replace("\x0a", "\n")
 
 		html = html.replace("\xe1", "a")		

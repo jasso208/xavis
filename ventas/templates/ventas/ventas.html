@@ -3,6 +3,7 @@
 {% block content%}
 	<form method="post" action="#">
 		{%csrf_token%}
+
 		<h2>Venta</h2>
 		<br><br>
 		<div class="row">
@@ -49,7 +50,6 @@
 						<td>{{dv.cantidad}}</td>						
 						<td>{{dv.precio_total}}</td>						
 					</tr>
-					
 				{% endfor %}
 			</tbody>
 		</table>
@@ -74,7 +74,18 @@
 			<div class="col-xs-4">Sub Total</div>
 			<div class="col-xs-4">{% bootstrap_field form.sub_total show_label=False%}</div>
 		</div>
-
+		<div class="row">
+			<div class="col-xs-4"></div>
+			<div class="col-xs-4">Descuento Cupon</div>
+			<div class="col-xs-4">{% bootstrap_field form.descuento_cupon show_label=False%}</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-4"></div>
+			<div class="col-xs-4">Sub Total</div>
+			<div class="col-xs-4">
+				<input type="text" class="form-control" id="segundo_subtotal" name="">
+			</div>
+		</div>
 		<div class="row">
 			<div class="col-xs-4"></div>
 			<div class="col-xs-4">IVA</div>
@@ -103,7 +114,7 @@
 			<div class="col-xs-4"><label>Colonia</label><br>{{direccion_enviio.colonia}}<br><hr></div>
 			<div class="col-xs-6"><label>Telefono</label><br>{{direccion_enviio.telefono}}<br><hr></div>
 			<div class="col-xs-6"><label>E-Mail</label><br>{{direccion_enviio.correo_electronico}}<br><hr></div>
-			<div class="col-xs-12"><label>Referencias</label><br>{{direccion_enviio.referencia}}<br><hr>s</div>
+			<div class="col-xs-12"><label>Referencias</label><br>{{direccion_enviio.referencia}}<br><hr></div>
 		</div>
 		<br><br>
 		<div class="row">
@@ -125,4 +136,17 @@
 		</div>
 		<a href="../../reenvia_mail/{{id_venta}}">enviar confirmacion de compra</a>
 	</form>
+	<script type="text/javascript">
+		
+		$(document).ready(
+				function()
+				{
+					var sub_total=$("#id_sub_total").val();
+					var desc_cupon=$("#id_descuento_cupon").val();
+					
+					$("#segundo_subtotal").val(parseFloat(sub_total)-parseFloat(desc_cupon));
+
+				}
+			);
+	</script>
 {% endblock %}

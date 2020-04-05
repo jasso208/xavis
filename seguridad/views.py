@@ -347,7 +347,7 @@ def api_envia_token(request):
 		
 		msg['From'] = 'j.jassdel@gmail.com'
 		msg['To'] = e_mail
-		password = "JaSSO123"
+		password = settings.EMAIL_HOST_PASSWORD
 		msg.add_header('Content-Type', 'text/html')
 		msg.set_payload(html)		
 		s = smtplib.SMTP('smtp.gmail.com: 587')
