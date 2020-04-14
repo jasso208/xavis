@@ -488,7 +488,8 @@ def api_consulta_carrito_compras(request):
 			session=request.POST.get("session")
 			cantidad=int(request.POST.get("cantidad"))
 			id_talla=request.POST.get("id_talla")
-			
+			print("cantidad")
+			print(cantidad)
 			#parametros
 			try:
 				producto=Productos.objects.get(id=id_producto)
@@ -503,11 +504,43 @@ def api_consulta_carrito_compras(request):
 				print(e)
 				error.append({'estatus':0,'msj':'Erro al encontrar la talla solicitada.'})				
 				return Response(error)
+
+
 			try:
+
+
+				
+				#para que otro cliente no lo pueda comprar, se aparta el stock
+				#registrando una salida y un ingreso en el apartado.
+
+				print("entr")
+				print(talla.salida)
+				print(cantidad)
+
+				talla.apartado=talla.apartado+cantidad
+
+				print("salida 0")
+				print(talla.salida)
+
+				talla.salida=talla.salida+cantidad
+
+				print("salida 1")
+				print(talla.salida)
+				if (talla.entrada-talla.salida)>=0:
+					talla.save()
+				else:						
+					talla.apartado=talla.apartado-cantidad
+					talla.salida=talla.salida-cantidad
+					error.append({'estatus':0,'msj':'La talla que intentas agregar solo cuenta con: '+str(talla.entrada-talla.salida)+' productos disponibles.'})
+					return Response(error)
+
+
+
 				#en caso de que exista ya un registro en el carrito que cumpla con la session, producto y talla
 				#envia error ya que todos los productos son pieza unica, y no puede agregar mas de uno.
 				cc=Carrito_Compras.objects.get(session=session,id_producto=producto,talla=talla)
 				cc.cantidad=cc.cantidad+cantidad				
+
 				cc.save()
 				#error.append({'estatus':0,'msj':'Este producto es pieza unica y ya lo tienes agregado a tu carrito.'})
 				#return Response(error)
@@ -519,7 +552,14 @@ def api_consulta_carrito_compras(request):
 				#en caso de que no existe el registro en el carrito que cumpla con la session, producto y talla
 				#se crea uno nuevo.
 				print(e)
+				
 				Carrito_Compras.objects.create(session=session,id_producto=producto,cantidad=cantidad,talla=talla)			
+				#para que otro cliente no lo pueda comprar, se aparta el stock
+				#registrando una salida y un ingreso en el apartado.
+				
+				
+				
+
 			error.append({'estatus':1,'msj':'El producto se agrego correctamente.'})
 		except Exception as e:
 			print(e)
@@ -535,11 +575,15 @@ def api_elimina_carrito_compras(request):
 	if request.method=="POST":
 		error=[]
 		try:			
-			
 			#parametros
 			id_carrito=request.POST.get("id")			
 			#parametros
-			Carrito_Compras.objects.get(id=id_carrito).delete()
+
+			cc=Carrito_Compras.objects.get(id=id_carrito)
+			cc.talla.entrada=cc.talla.entrada+cc.cantidad
+			cc.talla.apartado=cc.talla.apartado-cc.cantidad
+			cc.talla.save()
+			cc.delete()
 			error.append({"estatus":1,"msj":""})
 		except Exception as e:
 			print(e)

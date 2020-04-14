@@ -12,9 +12,11 @@
 		{% for form in tallas_formset %}
 			<div class="row">			
 				{% bootstrap_field form.id %}
-				<div class="col-xs-4">{% bootstrap_field form.talla %}</div>
-				<div class="col-xs-4">{% bootstrap_field form.entrada %}</div>
-				<div class="col-xs-4">{% bootstrap_field form.salida %}</div>
+				<div class="col-xs-3">{% bootstrap_field form.talla %}</div>
+				<div class="col-xs-3">{% bootstrap_field form.entrada %}</div>
+				<div class="col-xs-3">{% bootstrap_field form.salida %}</div>
+
+				<div class="col-xs-3">{% bootstrap_field form.apartado %}</div>
 			</div>
 		{% endfor %}
 		<div class="row">

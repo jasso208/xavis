@@ -56,8 +56,11 @@ class Atributos(models.Model):
 class Tallas(models.Model):
 	id_producto=models.ForeignKey(Productos,on_delete=models.PROTECT)
 	talla=models.CharField(max_length=10)
-	entrada=models.IntegerField(default=0)
-	salida=models.IntegerField(default=0)
+	entrada=models.IntegerField(default=0)#la diferencia entre estrada y salida es el disponible
+											#cuando se elimina un producto al carrito, se registra una entrada
+	salida=models.IntegerField(default=0)#cuando un producto se agrega al carrito se registra una salida
+
+	apartado=models.IntegerField(default=0)#cuando un producto se agrega un producto al carrito, se incremente aqui.
 	
 	def __str__(self):
 		return str(self.id_producto.id)+' '+self.id_producto.nombre+' '+self.talla
