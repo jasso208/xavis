@@ -28,7 +28,18 @@ class Busqueda_Producto_Form(forms.Form):
 		self.fields['clave_proveedor'].requiered=False		
 		self.fields['pml'].requiered=False
 		
-		
+class Consulta_Existencia_Form(forms.Form):
+	producto=forms.CharField(max_length=60)
+	id_producto=forms.IntegerField()
+	clave_proveedor=forms.CharField(max_length=20)
+
+	def __init__(self,*args,**kwargs):
+		super(self.__class__,self).__init__(*args,**kwargs)
+		self.fields['producto'].requiered=False
+		self.fields['id_producto'].requiered=False
+		self.fields['clave_proveedor'].requiered=False
+
+
 class Busca_Proveedores_Form(forms.Form):
 	nombre_proveedor=forms.CharField(max_length=50)
 	

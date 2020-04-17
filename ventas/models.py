@@ -12,10 +12,11 @@ class Carrito_Compras(models.Model):
 	id_producto=models.ForeignKey(Productos,on_delete=models.PROTECT)
 	cantidad=models.IntegerField(null=False)
 	talla=models.ForeignKey(Tallas,on_delete=models.PROTECT)
+	fecha=models.DateTimeField(auto_now_add=True)
 	
 	def __str__(self):
 		return self.session
-	
+
 class Estatus_Venta(models.Model):
 	estatus_venta=models.CharField(max_length=30,null=False)
 	

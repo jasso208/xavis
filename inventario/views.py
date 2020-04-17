@@ -5,7 +5,7 @@ from .models import Productos,Atributos,Tallas,Img_Producto,Estatus,Productos_Re
 from .models import Rel_Producto_Categoria,Categorias,Proveedor,Productos_Temp
 from django.http import QueryDict
 from django.db.models import Sum
-from .forms import Productos_Form,Proveedores_Form,Busqueda_Producto_Form,Busca_Proveedores_Form
+from .forms import Productos_Form,Proveedores_Form,Busqueda_Producto_Form,Busca_Proveedores_Form,Consulta_Existencia_Form
 from .forms import Categorias_Form,Busca_X_Clave_Prod_Prov_Form
 import decimal
 from django.forms.models import inlineformset_factory
@@ -14,6 +14,43 @@ from django.http.response import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth import authenticate
 from django.db.models import Max
+
+
+def consulta_stock(request):
+	if not request.user.is_authenticated:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+
+
+	if request.method=="POST":
+		reporte=[]
+		txt_palabra=request.POST.get("producto")
+		id_producto=request.POST.get("id_producto")
+		clave_proveedor=request.POST.get("clave_proveedor")
+		if id_producto=="":
+			id_producto=0
+
+		if id_producto!=0:
+			producto=Productos.objects.filter(id=id_producto)
+		else:
+			#si se requiere buscar por todos los parametros.
+			if txt_palabra!=""  and clave_proveedor!="":
+				producto=Productos.objects.filter(desc_producto__icontains=txt_palabra,clave_prod_proveedor__icontains=clave_proveedor)
+			else:
+				if txt_palabra!="":
+					producto=Productos.objects.filter(desc_producto__icontains=txt_palabra)					
+				else:
+					producto=Productos.objects.filter(clave_prod_proveedor__icontains=clave_proveedor)					
+
+		#es en las tallas donde tenemos el stock			
+		t=Tallas.objects.filter(id_producto__in=producto)
+		for x in t:			
+			reporte.append({"talla":x.talla,"id":x.id_producto.id,"nombre":str(x.id_producto.id)+' - '+x.id_producto.nombre,"marca":x.id_producto.marca,"clave_proveedor":x.id_producto.clave_prod_proveedor,"entrada":x.entrada,"salida":x.salida,"apartado":x.apartado,"existencia":(x.entrada+x.apartado-x.salida)})	
+
+		form=Consulta_Existencia_Form(request.POST)
+	else:
+		print("no hay nada")
+		form=Consulta_Existencia_Form()
+	return render(request,'inventario/consulta_stock.html',locals())
 
 #formulario de busqueda de producto
 def busca_producto(request):
@@ -258,7 +295,32 @@ def api_consulta_producto(request):
 		#validamos que tenga tallas registradas
 		if ta.exists():
 			for t in ta:
-				tallas.append({'id_talla':t.id,'talla':t.talla})
+
+				print(str(t.id_producto.id)+' '+t.talla+' '+str(t.entrada)+' '+str(t.salida))
+
+				#validamos que tenga existencia la talla
+				if (t.entrada-t.salida)>0:
+					talla=t.talla
+					if len(t.talla)==9:
+						talla=t.talla+' '
+					if len(t.talla)==8:
+						talla=t.talla+'  '
+					if len(t.talla)==7:
+						talla=t.talla+'   '
+					if len(t.talla)==6:
+						talla=t.talla+'    '
+					if len(t.talla)==5:
+						talla=t.talla+'     '
+					if len(t.talla)==4:
+						talla=t.talla+'      '
+					if len(t.talla)==3:
+						talla=t.talla+'       '
+					if len(t.talla)==2:
+						talla=t.talla+'        '
+					if len(t.talla)==1:
+						talla=t.talla+'         '
+
+					tallas.append({'id_talla':t.id,'talla':t.talla+" ("+str(t.entrada-t.salida)+" disp.)"})
 
 		#obtenemos las imagenes del producto
 		img=Img_Producto.objects.filter(id_producto=prod).order_by('id')

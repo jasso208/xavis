@@ -23,7 +23,7 @@ encabezado_link_consulta_venta_1="""
         <table style="width: 300px;; margin:0 auto;background-color: white;"  cellpadding="10" cellspacing="0">
             <tr style="background-color: black;">
                 <td colspan="6">
-                        <img src="https://www.jassdel.com/assets/img/logo_peque.png" style="width: 50px;">
+                        <img src="https://www.jassdel.com/assets/img/logo_peque.jpg" style="width: 50px;">
                 </td>
             </tr>
 			<tr>

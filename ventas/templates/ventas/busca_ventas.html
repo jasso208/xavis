@@ -49,7 +49,8 @@
 			<tbody>
 				{% for v in ventas %}
 					<tr>
-						<td><a href="../detalle_venta/{{v.id}}">{% bootstrap_icon 'pencil' %}</a></td>
+						<td><a href="../detalle_venta/{{v.id}}">{% bootstrap_icon 'pencil' %}</a>
+							</td>
 						<td>{{v.fecha}}</td>
 						<td>{{v.sub_total}}</td>
 						<td>{{v.descuento}}</td>

@@ -7,7 +7,9 @@ app_name="inventario"
 
 urlpatterns=[
 	#formularios
-	url(r'^busca_producto/$',views.busca_producto,name="busca_producto"),	
+	url(r'^busca_producto/$',views.busca_producto,name="busca_producto"),		
+	url(r'^consulta_stock/$',views.consulta_stock,name="consulta_stock"),	
+
 	url(r'^busca_proveedor/$',views.busca_proveedor,name="busca_proveedor"),
 	url(r'^busca_categoria/$',views.busca_categoria,name="busca_categoria"),	
 	url(r'^productos/new/$',views.registro_edicion_producto,name="producto"),	

@@ -137,6 +137,10 @@
 		font-size:12px;
 		
 	}
+	.cls_form_1
+{
+	padding: 10px;
+}
 /*Solo para tablets y cel*/
 @media( min-width: 737px)
 {

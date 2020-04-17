@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from django.db.models import Sum
 import decimal
 import datetime
+import time
 from django.urls import reverse
 from .forms import Busqueda_Venta_Form,Venta_Form,Medio_Venta_Form,Det_Venta_Form
 from django.http.response import HttpResponseRedirect
@@ -438,6 +439,29 @@ def guarda_venta_manual(request,id_venta=None):
 		detalle_venta_formset=Detalle_Venta_Formset(instance=venta)
 	return render(request,'ventas/registra_venta.html',locals())
 
+#esta api es llamada cuando a algun cliente se le termino el tiempo del carrito y 
+#liberamos los productos
+@api_view(['POST'])
+def api_libera_carrito(request):	
+	if request.method=="POST":		
+
+		respuesta=[]
+		session=request.POST.get("session")
+
+		c_c=Carrito_Compras.objects.filter(session=session)
+
+		#recorremos todos los productos del carrito para liberar los productos.		
+		for x in c_c:
+			x.talla.apartado=x.talla.apartado-x.cantidad
+			x.talla.entrada=x.talla.entrada+x.cantidad
+			x.talla.save()
+
+		#eliminamos los productos del carrito
+		Carrito_Compras.objects.filter(session=session).delete()		
+		
+		return Response(respuesta)
+
+
 #esta api, regresa los productos que estan en el carrito de compras de de la sessionq ue recibe como parametro
 #tambien inserta productos al carrito de compras.
 #parametros
@@ -513,19 +537,14 @@ def api_consulta_carrito_compras(request):
 				#para que otro cliente no lo pueda comprar, se aparta el stock
 				#registrando una salida y un ingreso en el apartado.
 
-				print("entr")
-				print(talla.salida)
-				print(cantidad)
 
 				talla.apartado=talla.apartado+cantidad
 
-				print("salida 0")
-				print(talla.salida)
+
 
 				talla.salida=talla.salida+cantidad
 
-				print("salida 1")
-				print(talla.salida)
+
 				if (talla.entrada-talla.salida)>=0:
 					talla.save()
 				else:						
@@ -533,8 +552,6 @@ def api_consulta_carrito_compras(request):
 					talla.salida=talla.salida-cantidad
 					error.append({'estatus':0,'msj':'La talla que intentas agregar solo cuenta con: '+str(talla.entrada-talla.salida)+' productos disponibles.'})
 					return Response(error)
-
-
 
 				#en caso de que exista ya un registro en el carrito que cumpla con la session, producto y talla
 				#envia error ya que todos los productos son pieza unica, y no puede agregar mas de uno.
@@ -553,7 +570,7 @@ def api_consulta_carrito_compras(request):
 				#se crea uno nuevo.
 				print(e)
 				
-				Carrito_Compras.objects.create(session=session,id_producto=producto,cantidad=cantidad,talla=talla)			
+				Carrito_Compras.objects.create(fecha=datetime.datetime.now(),session=session,id_producto=producto,cantidad=cantidad,talla=talla)			
 				#para que otro cliente no lo pueda comprar, se aparta el stock
 				#registrando una salida y un ingreso en el apartado.
 				
@@ -566,7 +583,25 @@ def api_consulta_carrito_compras(request):
 			error.append({'estatus':0,'msj':'Error al agregar el producto, intente nuevamente.'})
 		return Response(error)
 
+@api_view(['POST'])
+def api_reinicia_tiempo_carrito(request):
+	if request.method=="POST":
+		resp=[]
+		try:
 
+			session=request.POST.get("session")
+			#obtenemos los productos del carrito de compras que pertenecen a la session
+			car=Carrito_Compras.objects.filter(session=session)
+
+			#actualizamos la fecha d registro de cada producto para que nos de mas tiempo.
+			#ya que de no actualizarlos se liberarian por medio del proceso automatico que corre cada minuto}}
+			for x in car:
+				x.fecha=datetime.datetime.now()
+				x.save()
+
+		except Exception as e:
+			print(e)
+		return Response(resp)
 
 #al parecer django no soporta el metodo delete, por lo tanto eliminar un producto del carrito
 # se ara atravez de una url diferente por el metodo post
@@ -747,7 +782,7 @@ def api_crea_venta(request):
 		sub_total=decimal.Decimal(sub_total)+decimal.Decimal(costo_envio)
 		total=decimal.Decimal(sub_total)-decimal.Decimal(desc_cupon)
         #CREAMOS LA VENTA		
-		v=Venta(folio_descuento=folio_cupon,descuento_cupon=desc_cupon,total=total,sub_total=sub_total,descuento=descuento,cliente=cliente,id_estatus_venta=est_v,iva=0.00,costo_envio=costo_envio,id_medio_venta=mv,forma_pago=f_p)
+		v=Venta(folio_descuento=folio_cupon,descuento_cupon=desc_cupon,total=total,sub_total=sub_total,descuento=descuento,cliente=cliente,id_estatus_venta=est_v,iva=0.00,costo_envio=costo_envio,id_medio_venta=mv,forma_pago=f_p,fecha=datetime.datetime.now())
 		
 		v.save()
 
@@ -810,19 +845,29 @@ def api_crea_venta(request):
 				Detalle_Venta.objects.filter(id_venta=v).delete()
 				Direccion_Envio_Venta.objects.filter(id_venta=v).delete()					
 				v.delete()
+
 				folio_venta.append({"estatus":0,"msj":str(e)})	
 				return Response(folio_venta)
-		
-		ob_session=Session_Temporal.objects.get(session=session)
+		#una vez que se autorizo la venta quitamoslos productos de apartado.		
+		dv=Detalle_Venta.objects.filter(id_venta=v)
+		for x in dv:
+			x.talla.apartado=x.talla.apartado-x.cantidad
+			x.talla.save()
 
-		ec=Email_Cupon.objects.get(id=ob_session.folio_cupon)
-		ec.usado='S'
-		ec.save()
+		try:
+			ob_session=Session_Temporal.objects.get(session=session)
+			ec=Email_Cupon.objects.get(id=ob_session.folio_cupon)
+			ec.usado='S'
+			ec.save()
+			ob_session.delete()
+		except:
+			print("No hay cupon de descuento")
+		
 
 		#solo borramos la informacion de la session cuando se confirma la venta.
 		c_c.delete()
 		d_e.delete()
-		ob_session.delete()
+		
 
         
 		folio_venta.append({"estatus":1,"folio":fn_concatena_folio(str(v.id))})	

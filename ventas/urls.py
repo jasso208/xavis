@@ -1,5 +1,5 @@
 from django.conf.urls import include,url
-from .views import api_cont_productos_carrito,api_crea_venta,api_consulta_carrito_compras,api_elimina_carrito_compras,registro_medio_venta,api_genera_cupon
+from .views import api_cont_productos_carrito,api_crea_venta,api_consulta_carrito_compras,api_elimina_carrito_compras,registro_medio_venta,api_genera_cupon,api_libera_carrito,api_reinicia_tiempo_carrito
 
 from ventas import views
 
@@ -16,6 +16,8 @@ urlpatterns=[
 	#apis
 	url(r'^carrito_compras/$',api_consulta_carrito_compras),	
 	url(r'^elimina_prod_carrito/$',api_elimina_carrito_compras),
+	url(r'^libera_carrito/$',api_libera_carrito),
+	url(r'^reinicia_tiempo_carrito/$',api_reinicia_tiempo_carrito),
 	
 	url(r'^cont_prod_carrito/$',api_cont_productos_carrito),		
 	url(r'^guarda_venta/$',api_crea_venta),		
