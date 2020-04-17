@@ -1,0 +1,88 @@
+{%extends 'base.html'%}
+{%load bootstrap3%}
+
+{% load static %}
+{%block content%}
+	<form method="post" action="#" class="cls_form_1">
+		{%csrf_token%}
+		
+		<h2 >Reporte de inventario</h2>
+
+
+		<br id="na">
+	
+		<div class="row">	
+			<div class="panel panel-default">
+				
+				<div class="panel-body">
+					<div class="col-xs-6 col-md-3">
+						<label for=""> Desc Producto</label>
+						{% bootstrap_field form.producto  show_label=False%}
+					</div>
+					<div class="col-xs-6 col-md-3">
+						<label for=""> Clave Producto</label>
+						{%bootstrap_field form.id_producto show_label=False%}
+					</div>
+					<div class="col-xs-4 col-md-2">
+						<label for=""> Clave Proveedor</label>
+						{%bootstrap_field form.clave_proveedor show_label=False%}
+					</div>
+					
+					<div class="col-xs-4 col-md-2">
+						<label for="">
+							&nbsp;
+						</label>
+						<br>
+						<button class="btn btn-default" style="float: right;"  id="buscar_1">Buscar</button>
+						
+					</div>	
+					
+				</div>
+				<table class="table">
+					<thead>
+						<th>
+						</th>
+						<th>Nombre</th>
+						<th>Talla</th>
+						<th>Marca</th>
+						<th>Clave Proveedor</th>
+						<th>Entrada</th>
+						<th>Salida</th>
+						<th>En carrito</th>
+						<th>Existencia</th>
+					</thead>
+					<tbody>
+						{% for prod in reporte %}
+							<tr>
+								<td>
+									<a href="../productos_edita/{{prod.id}}">{% bootstrap_icon 'search' %}</a>
+									<a href="../existencias/{{prod.id}}">{% bootstrap_icon 'pencil' %}</a>
+								</td>
+								<td>{{prod.nombre}}</td>
+								<td>{{prod.talla}}</td>
+								<td>{{prod.marca}}</td>
+								<td>{{prod.clave_proveedor}}</td>
+								<td>{{prod.entrada}}</td>
+								<td>{{prod.salida}}</td>
+								<td>{{prod.apartado}}</td>
+								<td>{{prod.existencia}}</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>		
+		</div>
+	</form>
+	<script type="text/javascript">
+		$(document).ready(
+				function()
+				{
+					$('#id_producto').removeAttr("required");
+					$('#id_id_producto').removeAttr("required");
+					$('#id_clave_proveedor').removeAttr("required");
+					$(".help-block").hide();
+				}
+			);
+
+	</script>
+{%endblock%}
