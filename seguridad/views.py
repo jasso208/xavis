@@ -1,3 +1,4 @@
+
 from django.views.generic.edit import FormView
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
@@ -14,6 +15,9 @@ from ventas.models import Venta,Detalle_Venta
 from django.conf import settings
 import smtplib
 import email.message
+from .forms import Login_Form,Permisos_Form,User_Form,Busca_Usuario_Form,Cambia_Psw_Form
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.models  import Permission,User
 
 encabezado_link_consulta_venta_1="""
 <html>
@@ -46,23 +50,121 @@ encabezado_link_consulta_venta_2="""
 	</body>
 </html>
 """
+def Login(request):
+	#en caso de que ya este logueado, lo redireccionamos a la pantalla de bienvenidos.
+	if request.user.is_authenticated:
+		return HttpResponseRedirect("/bienvenidos")
 
-
-class Login(FormView):
-	template_name="login.html"
-	form_class=AuthenticationForm
-	success_url="/bienvenidos"
-	def dispatch(self,request,*args,**kwargs):
-		if request.user.is_authenticated:
-			return HttpResponseRedirect("/bienvenidos")
+	if request.method=="POST":
+		usuario=request.POST.get("usuario")
+		password=request.POST.get("password")
+		user=authenticate (request,username=usuario,password=password)
+		if user is not None:
+			login(request,user)
+			estatus=1			
+			print("se logueo")
+			form=Login_Form()
+			return render(request,'seguridad/bienvenidos.html',locals())
+			#return HttpResponseRedirect("/bienvenidos")
 		else:
-			return super(Login,self).dispatch(request,*args,**kwargs)
-	def form_valid(self,form):
-		login(self.request,form.get_user())
-		return super(Login,self).form_valid(form)
+			form=Login_Form(request.POST)
+			#mandamos mensaje de error
+			estatus=0
+			msj="El usuario y contraseña no coinciden."			
+			return render(request,'login.html',locals())
+	else:
+		form=Login_Form()
+		return render(request,'login.html',locals())
+
+
+		
+def cerrar_session(request):
+
+	logout(request)
+	return HttpResponseRedirect("/")
 
 def bienvenidos(request):
 	return render(request,'seguridad/bienvenidos.html',{})
+
+def admin_user(request):
+	return render(request,'seguridad/admin_user.html',{})
+
+def admin_catalogos(request):
+	return render(request,'seguridad/admin_catalogos.html',{})
+
+def admin_productos(request):
+	return render(request,'seguridad/admin_stock.html',{})
+
+def admin_ventas(request):
+	return render(request,'seguridad/admin_ventas.html',{})
+
+def admin_miperfil(request):
+	return render(request,'seguridad/admin_mi_perfil.html',{})
+		
+def permisos(request):
+	if request.method=="POST":
+		form=Permisos_Form(request.POST)
+	else:
+		permisos=Permission.objects.filter(name__icontains="p_")
+		form=Permisos_Form()
+	return render(request,'seguridad/consulta_permisos.html',locals())
+
+def cambio_psw_usr(request):
+
+	if request.method=="POST":
+		
+		psw=request.POST.get("psw")
+
+		usr=request.user
+		usr.set_password(psw)
+		usr.save()
+		user=authenticate (request,username=usr.username,password=psw)
+		
+		login(request,user)
+		return HttpResponseRedirect(reverse('seguridad:admin_miperfil'))
+	
+	else:
+		form=Cambia_Psw_Form()
+	return render(request,'seguridad/cambio_psw_usr.html',locals())
+
+def alta_usuario(request,id=None):
+
+	#obtenemos el objeto a editar
+	if id:
+		#obtenemos el objeto a editar
+		usr=User.objects.get(id=id)
+	else:
+		usr=User()
+
+	user=request.POST.get("username")
+	if request.method=="POST":
+		form=User_Form(request.POST,instance=usr)
+
+		if form.is_valid():		
+			form.save()
+			usuario_creado=User.objects.get(username=user)
+			usuario_creado.set_password("123456789")
+			usuario_creado.save()
+			return HttpResponseRedirect(reverse('seguridad:consulta_usuarios'))
+	else:
+		form=User_Form( instance=usr)
+	return render(request,'seguridad/alta_usuario.html',locals())
+
+
+
+def consulta_usuarios(request):
+	if request.method=="POST":
+		form=Busca_Usuario_Form(request.POST)
+		if request.POST.get("username")=="":
+			usuarios=User.objects.all()
+		else:
+			usuarios=User.objects.filter(username__icontains=request.POST.get("username"))
+	else:
+		form=Busca_Usuario_Form()
+		usuarios=User.objects.all()
+	return render(request,'seguridad/consulta_usuarios.html',locals())
+
+
 
 #esta api recibe la session y la desvincula de la cuenta logueada,
 #esto con la finalidad de no perder los carritos agregados al carrito de compras.

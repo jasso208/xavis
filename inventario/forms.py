@@ -2,10 +2,13 @@ from .models import Productos,Atributos,Tallas,Proveedor,Estatus,Categorias
 from django import forms
 from django.forms.models import inlineformset_factory
 
+
 class Proveedores_Form(forms.ModelForm):
 	class Meta:
 		model=Proveedor
 		fields=("proveedor","id_estatus",)
+
+
 
 class Productos_Form(forms.ModelForm):
 	class Meta:

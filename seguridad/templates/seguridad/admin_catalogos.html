@@ -1,0 +1,76 @@
+{%extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% block content %}
+
+<div class="col-xs-12 cls_encabezado_body">
+	<a>
+		Administración de Productos
+	</a>	
+</div>
+
+<div class="col-xs-12">
+	<div class="row" >
+		<div class="col-xs-12 cls_encabezado_body_2">
+			<a>
+				Catalogos
+			</a>
+			<br>
+		</div>
+		<div class="row cls_row_body"  >
+			<div class="col-xs-2">
+				<div class="cls_boton_body">
+					<a href="{%url 'inventario:busca_proveedor'%}">
+						<span class="glyphicon glyphicon-inbox"></span>
+						<br>
+						<br>
+						Proveedores
+					</a>	
+				</div>
+			</div>
+			<div class="col-xs-2">
+				<div class="cls_boton_body">
+					<a href="{% url 'inventario:busca_categoria' %}">
+						<span class="glyphicon glyphicon-list-alt"></span>
+						<br>
+						<br>
+						Categorias
+					</a>	
+				</div>
+			</div>
+			<!--
+			<div class="col-xs-2">
+				<div class="cls_boton_body">
+					<a href="{% url 'contabilidad:concepto_ingreso' %}">
+						<span class="glyphicon glyphicon-arrow-up"></span>
+						<br>
+						<br>
+						Concepto Ingreso
+					</a>	
+				</div>
+			</div>
+			<div class="col-xs-2">
+				<div class="cls_boton_body">
+					<a href="{% url 'contabilidad:concepto_gasto' %}">
+						<span class="glyphicon glyphicon-arrow-down"></span>
+						<br>
+						<br>
+						Contepto Gasto
+					</a>	
+				</div>
+			</div>
+			<div class="col-xs-2">
+				<div class="cls_boton_body">
+					<a href="{% url 'ventas:registro_medio_venta' %}">
+						<span class="glyphicon glyphicon-tags"></span>
+						<br>
+						<br>
+						Medio Venta
+					</a>	
+				</div>
+			</div>
+		-->
+		</div>
+	</div>
+</div>
+{% endblock %}

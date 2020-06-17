@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load bootstrap3 %}
+{% load static %}
+{%block content%}
+<div class="col-xs-12 cls_encabezado_body">
+	<a>
+		Cambio de Contraseña
+	</a>	
+</div>
+<div class="col-xs-12">
+
+	<form method="post" action="#" class="cls_form_1">
+		{%csrf_token%}
+		
+		<div class="row cls_form_consulta">
+			<div class="col-xs-12">
+				<div class="panel panel-default">
+					
+					<div class="panel-body">
+						<div class="col-xs-12 col-sm-3">
+							<label for=""> Nueva Contraseña</label>
+							{% bootstrap_field form.psw  show_label=False%}
+						</div>
+						<div class="col-xs-12 col-md-3">
+								<label for="">
+									&nbsp;
+								</label>
+								<br>
+								<button class="btn btn-default" style="float: left;"  >guardar</button>
+								
+							</div>	
+					</div>
+				</div>
+			</div>
+		</div>
+	</form>
+	
+</div>
+{% endblock %}

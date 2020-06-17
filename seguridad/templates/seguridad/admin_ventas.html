@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% block content%}
+	<div class="col-xs-12 cls_encabezado_body">
+	<a>
+		Administración Ventas
+	</a>	
+</div>
+<div class="col-xs-12">
+	<div class="row" >
+		<div class="col-xs-12 cls_encabezado_body_2">
+			<a>
+				Ventas
+			</a>
+			<br>
+		</div>
+	</div>
+	<div class="row cls_row_body"  >
+		<div class="col-xs-2">
+			<div class="cls_boton_body">
+				<a href="{%url 'ventas:guarda_venta_manual'%}">
+					<span class="glyphicon glyphicon-tags"></span>
+					<br>
+					<br>
+					Venta Manual
+				</a>	
+			</div>
+		</div>
+		<div class="col-xs-2">
+			<div class="cls_boton_body">
+				<a href="{%url 'ventas:busca_ventas'%}">
+					<span class="glyphicon glyphicon-list"></span>
+					<br>
+					<br>
+					Reporte Ventas
+				</a>	
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}

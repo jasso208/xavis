@@ -25,12 +25,22 @@ SECRET_KEY = 'n6%+v%t$z641u295)j778z#+cdgrw&r+yo7(+8r=j4)9&p(xa-'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['pollo146.pythonanywhere.com','127.0.0.1','192.168.1.84']
+ALLOWED_HOSTS = ['pollo146.pythonanywhere.com','127.0.0.1','192.168.1.84','http://192.168.8.146:4200/']
 
+
+URL_LOCAL_BACKEND="http://127.0.0.1:8000/"
+URL_LOCAL_FRONTEND="http://localhost:4200/#/"
+
+#nos ayuda a saber en que entorno estamos trabajando
+#para QA ponemos QA
+# para produccion ponemos P
+#se usa al generar folio en open pay.
+INDICADOR_ENTORNO="QA"
 
 # Application definition
 
 INSTALLED_APPS = [
+    
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -41,12 +51,16 @@ INSTALLED_APPS = [
 	'inventario',
 	'ventas',
 	'blog',
+    'empenos',
     'smart_selects',
     'contabilidad',
 	'rest_framework',
 	'corsheaders',	
 	'bootstrap3',
+    'rolepermissions',
 ]
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -100,7 +114,7 @@ DATABASES = {
  'USER': 'postgres',
  'PASSWORD': 'Blanca1985',
  'HOST': 'localhost',
- 'PORT': '5432',
+ 'PORT': '5433',
  }
 }
 
@@ -142,8 +156,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 #STATIC_URL = 'static'
-STATUS_ROOT=os.path.join(BASE_DIR, 'static')
-
+#STATUS_ROOT=os.path.join(BASE_DIR, 'static')
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "staticfiles"), 
+]
 
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -151,7 +167,7 @@ CORS_ALLOW_CREDENTIALS = True
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'j.jassdel@gmail.com'
-EMAIL_HOST_PASSWORD = 'JaSSDEL1985'
+EMAIL_HOST_PASSWORD = 'Blanca3060'
 EMAIL_PORT = 587
 #CORS_ORIGIN_WHITELIST = (
 #    'localhost:8000',

@@ -1,0 +1,25 @@
+body{
+	background: url("/static/img/fondo-login.jpg");
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
+	background-size: cover;
+}
+
+.cls_error_form
+{
+	font-size: 12px;
+	color: red;
+	text-align: center;
+}
+
+.panel-heading
+{
+	text-align: center;
+	background-color: #f3f3f3;
+}
+#img_encabezado_login
+{
+	height: 60px;
+	
+}

@@ -6,7 +6,27 @@
 {# Display a form #}
 
 {%block content%}
-<form method="post" action="#">
+
+<div class="col-xs-12 cls_encabezado_body">
+	<div class="col-xs-8">
+		<a >
+			Alta Producto
+		</a>		
+	</div>
+	<div class="col-xs-4">
+		<a>
+		
+					Folio: {{folio}}
+				
+		
+		</a>
+	</div>
+</div>
+
+<div class="col-xs-12">
+	
+
+<form method="post" action="#" class="form-body">
 
 	{% csrf_token %}
 	{{	atributo_formset.management_form	}}
@@ -14,37 +34,6 @@
 	{{	productos_relacionados_formset.management_form	}}
 	{{	rel_producto_categoria_formset.management_form	}}
 	{{ 	img_producto_formset.management_form	}}
-	<div class="row">
-		
-		{% if consulta %}
-		<div class="col-xs-12 col-md-3">
-			<h4 >
-				Folio Producto: {{folio}}
-			</h4>
-			<a href=" {%static 'img/'%} {{img}}_1.png" id="btn_ampliar_img">
-				<img ID="img_prod"	 src=" {%static 'img/'%} {{img}}_1.png" style="width: 89%; border:1px solid gray; padding:5px;">
-				
-			</a>
-			
-		</div>
-
-		{% else %}
-		<div class="col-xs-12 col-md-3">
-			<h2 class="base-h1">
-				Producto
-			</h2>
-		</div>
-			<div class="col-xs-6" style="text-align:right">
-				<h4 >
-					Folio: {{folio}}
-				</h4>
-			</div>
-		{% endif %}
-	</div>
-	
-	<br>
-	
-
 	<div class="row">
 		<div class="col-xs-12 cls_form">			
 			{% bootstrap_field form.nombre %}
@@ -171,49 +160,49 @@
 		</div>
 	<hr>
 	<div class="row">
-		<div class="col-xs-6 cls_form">
+		<div class="col-xs-6 col-md-4 cls_form">
 			<label>Proveedor</label>
 			{% bootstrap_field form.id_proveedor show_label=False%}
 		</div>
-		<div class="col-xs-6 cls_form">
+		<div class="col-xs-6 col-md-4 cls_form">
 			{% bootstrap_field form.marca %}
 		</div>
-	
-	</div>
-	<div class="row">
-		<div class="col-xs-6 cls_form">
+		<div class="col-xs-6 col-md-4 cls_form">
 			<label>Clave Producto (Proveedor)</label>
 			{% bootstrap_field form.clave_prod_proveedor show_label=False %}
 		</div>
+	
 	</div>
+	
 	<br>
 	<br>
 	<div class="row">
 	<div class="col-xs-12 col-sm-6 cls_form">
-		<h2 class="page-header">Atributos</h2>
-		<br>
-		<table class="table_atributo table">
+		<div class="panel panel-default" id="panel-atributos">
+			<div class="panel-heading">
+				Atributos
+			</div>			
+			<table class="table_atributo table">
 			<thead>
-				<th>
-				</th>
-				<th>Atributo</th>
-				<th>Valor Atributo</th>
 			</thead>
 			<tbody>    				
-				{% for form in atributo_formset %}
-					<tr>
-						<td>{% bootstrap_field form.id %}</td>
-						<td>{% bootstrap_field form.atributo  show_label=False%}
-							{%bootstrap_form_errors form %}
-						</td>
-						
-						<td>{% bootstrap_field form.valor_atributo  show_label=False%}</td>
-						<td>{%bootstrap_field form.DELETE %}</td>
-						
-					</tr>
-				{% endfor %}
-			</tbody>
-		</table>
+					
+					{% for form in atributo_formset %}
+						<tr>
+							<td>{% bootstrap_field form.id %}</td>
+							<td>{% bootstrap_field form.atributo  show_label=False%}
+								{%bootstrap_form_errors form %}
+							</td>						
+							<td>{% bootstrap_field form.valor_atributo  show_label=False%}</td>
+							<td>{%bootstrap_field form.DELETE %}</td>
+						</tr>
+					{% endfor %}
+					
+				</tbody>
+			</table>
+		</div>
+		
+		
 		<div style="width:100%;text-align:right">
 				<button id="add-item-atributo" type="button">{%bootstrap_icon "plus"%}</button>
 		</div>
@@ -222,15 +211,14 @@
 	
 	
 		<div class="col-xs-12 col-sm-6 cls_form">
-		<h2 class="page-header">Tallas</h2>
-		<br>
+		
+			<div class="panel panel-default" id="panel-atributos">
+			<div class="panel-heading">
+				Tallas
+			</div>			
+			
 			<table class="table_talla table">
 				<thead>
-					<th>					
-					</th>
-					<th>
-						Tallas
-					</th>
 				</thead>
 				<tbody>
 					{%for form in talla_formset %}
@@ -248,7 +236,13 @@
 					{%endfor%}
 				</tbody>
 			</table>
-				
+			
+		</div>
+		
+		
+
+
+	
 			<div style="width:100%;text-align:right">
 					<button id="add-item-talla" type="button">{%bootstrap_icon "plus"%}</button>
 			</div>
@@ -260,50 +254,49 @@
 	<br>
 	<div class="row">
 		<div class="col-xs-12 col-sm-6">
-			<h2 class="page-header">Productos Relacionados</h2>
-			<br>			
-			<table class="table_Productos_Relacionados table">
-				<thead>
-					<th>
+			<div class="panel panel-default" id="panel-atributos">
+				<div class="panel-heading">
+					Productos Relacionados
+				</div>			
+				<table class="table_Productos_Relacionados table">
+					<thead>
+					</thead>		
+					<tbody>
 						
-					</th>
-					<th>
-						Producto
-					</th>
-				</thead>		
-				<tbody>
-					
-					{%for form in productos_relacionados_formset %}
-						<tr >						
-							<td>
-								{{form.id}}
-							</td>
-							<td>
-								<!--{{ form.as_ul }}-->								
-								
-								{% bootstrap_field form.id_producto_relacionado show_label=False %}
-								{% bootstrap_form_errors form layout='inline' %}
-								
-							</td>							
-							<td>
-								{% bootstrap_field form.DELETE %}
-							</td>
-						</tr>
-					{%endfor%}
-				</tbody>
-			</table>			
+						{%for form in productos_relacionados_formset %}
+							<tr >						
+								<td>
+									{{form.id}}
+								</td>
+								<td>
+									<!--{{ form.as_ul }}-->								
+									
+									{% bootstrap_field form.id_producto_relacionado show_label=False %}
+									{% bootstrap_form_errors form layout='inline' %}
+									
+								</td>							
+								<td>
+									{% bootstrap_field form.DELETE %}
+								</td>
+							</tr>
+						{%endfor%}
+					</tbody>
+				</table>
+			</div>
+
+
 			<div style="width:100%;text-align:right">
 					<button id="add-item-prod-relacionado" type="button">{%bootstrap_icon "plus"%}</button>
 			</div>
 		</div>	
 		<div class="col-xs-12 col-sm-6">
-			<h2 class="page-header">Categorias</h2>
-			<br>
-			<table class="table_categorias table">
+
+			<div class="panel panel-default" id="panel-atributos">
+					<div class="panel-heading">
+						Categorias
+					</div>			
+					<table class="table_categorias table">
 				<thead>
-					<th></th>
-					<th>Categoria</th>
-					<th></th>
 				</thead>
 				<tbody>
 					{% for form in rel_producto_categoria_formset %}
@@ -320,28 +313,26 @@
 					{%endfor%}
 				</tbody>
 			</table>
+				</div>
+
+
+			
 			<div style="width:100%;text-align:right">
 					<button id="add-item-categoria" type="button">{%bootstrap_icon "plus"%}</button>
 			</div>
 		</div>
 	</div>
 	<br><br>
-	<div class="row">
+	<div class="row">			
+			
 			<div class="col-xs-12 col-sm-6">
-				<h2 class="page-header">
-					Estatus
-				</h2>
-				<br>
-				{%bootstrap_field form.id_estatus show_label=False%}
-			</div>
-			<div class="col-xs-12 col-sm-6">
-				<h2 class="page-header">Imagenes</h2>
-				<br>
+
+			<div class="panel panel-default" id="panel-atributos">
+				<div class="panel-heading">
+					Imagenes
+				</div>			
 				<table class="table table_imagenes">
-					<thead >
-						<th></th>
-						<th>Nom Imagen</th>
-						<th>orden</th>
+					<thead>
 					</thead>
 					<tbody>
 						{% for img in img_producto_formset %}
@@ -362,18 +353,23 @@
 						{% endfor %}
 					</tbody>
 				</table>
+			</div>
+
+
 				<div style="width:100%;text-align:right">
 					<button id="add-item-imagen" type="button">{%bootstrap_icon "plus"%}</button>
 			</div>
 			</div>
 		</div>
 	
-		<div class="row">
-			<div class="col-xs-12 col-md-6">
-				<label for="">Publicado en ML</label>
-				{%bootstrap_field form.publicado_ml show_label=False%}
+	<div class="row">
+		<div class="col-xs-12 col-sm-6">				
+				{%bootstrap_field form.id_estatus %}
 			</div>
-		</div> 
+			<div class="col-xs-12 col-md-6">				
+				{% bootstrap_field form.publicado_ml %}
+			</div>
+	</div>
 	<br><br>
 	<div class="row">	
 		<div class="col-xs-12 " style="text-align:center">
@@ -383,7 +379,7 @@
 	
 	
 </form>
-
+</div>
 <script>
 
 

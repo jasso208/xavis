@@ -3,184 +3,202 @@
 {# Display a form #}
 
 {% block content %}
+
+<div class="col-xs-12 cls_encabezado_body">
+    <div class="col-xs-12">
+        <a >
+            Alta Venta
+        </a>        
+    </div>
+</div>
+<div class="col-xs-12">
     <form action="#" method="POST">
         {% csrf_token %}
 
         {{ detalle_venta_formset.management_form }}
         {% bootstrap_form_errors form %}
         
-        <h2>Alta Venta</h2>
-        <br>
-        <div class="row">
-
-            <div class="col-xs-6 col-md-3 ">			
-                <label for="">Fecha</label>
-                {% bootstrap_field form.fecha show_label=False %}
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-xs-12 col-md-3">
-                <label for="">Medio de Venta</label>
-                {% bootstrap_field form.id_medio_venta show_label=False %}
-
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-xs-12 col-md-3">
-                <label for="">Forma Pago</label>
-                {% bootstrap_field form.forma_pago show_label=False %}
-
-            </div>
-        </div>
-        <br>
-        <div class="row">
+      <div class="row cls_form_consulta">
             <div class="col-xs-12">
-                <h4>Agrega Productos</h4>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-xs-12">
-                <table class=" tabla_productos table" id="tabla_productos">
-                    <thead>
-                        <th></th>
-                        <th>Producto</th>
-                        
-                        <th>Cantidad</th>
-                        <th>Precio U</th>
-                        <th>Precio Total</th>				
-                    </thead>
-                    <tbody>
+                <div class="panel panel-default">
+                    
+                    <div class="panel-body">
 
-                        
-                        {% for form2 in detalle_venta_formset %}
-                        {% bootstrap_form_errors  form2%}
-                        <tr>
-                            <td>{% bootstrap_field form2.id %}</td>
-                            <td style="display: none;">
-                                {% bootstrap_field form2.id_producto show_label=false %}
-                                {% bootstrap_form_errors form2 %}
-                            </td>
-                            <td>
-                                {% bootstrap_field form2.talla  show_label=False %}
-                                {% bootstrap_form_errors form2 %}
-                            </td>
-                            <td>
-                                {% bootstrap_field form2.cantidad  show_label=False %}
-                                {% bootstrap_form_errors form2 %}
-                            </td>
-                            <td>
-                                {% bootstrap_field form2.precio_unitario  show_label=False %}
-                                {% bootstrap_form_errors form2 %}
-                            </td>
-                            <td>
-                                {% bootstrap_field form2.precio_total  show_label=False %}
-                                {% bootstrap_form_errors form2 %}
-                            </td>
-                            <td style="display: none;">{% bootstrap_field form2.descuento  show_label=False %}
-                                {% bootstrap_form_errors form2 %}
-                            </td>
-                            <td style="display: none;" >
-                                {% bootstrap_field form2.iva  show_label=False %}
-                                {% bootstrap_form_errors form2 %}
-                            </td>
-                            <td>
-                                {% bootstrap_field form2.DELETE  show_label=False %}
-                            </td>
+                <div class="row">
 
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                <div style="width:100%;text-align:right">
-                    <button class="btn btn-default" id="add-item-producto" type="button">{% bootstrap_icon "plus" %} Agregar Producto</button>
+                    <div class="col-xs-6 col-md-3 ">			
+                        <label for="">Fecha</label>
+                        {% bootstrap_field form.fecha show_label=False %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 col-md-3">
+                        <label for="">Medio de Venta</label>
+                        {% bootstrap_field form.id_medio_venta show_label=False %}
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 col-md-3">
+                        <label for="">Forma Pago</label>
+                        {% bootstrap_field form.forma_pago show_label=False %}
+
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <h4>Agrega Productos</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <table class=" tabla_productos table" id="tabla_productos">
+                            <thead>
+                                <th></th>
+                                <th>Producto</th>
+                                
+                                <th>Cantidad</th>
+                                <th>Precio U</th>
+                                <th>Precio Total</th>				
+                            </thead>
+                            <tbody>
+
+                                
+                                {% for form2 in detalle_venta_formset %}
+                                {% bootstrap_form_errors  form2%}
+                                <tr>
+                                    <td>{% bootstrap_field form2.id %}</td>
+                                    <td style="display: none;">
+                                        {% bootstrap_field form2.id_producto show_label=false %}
+                                        {% bootstrap_form_errors form2 %}
+                                    </td>
+                                    <td>
+                                        {% bootstrap_field form2.talla  show_label=False %}
+                                        {% bootstrap_form_errors form2 %}
+                                    </td>
+                                    <td>
+                                        {% bootstrap_field form2.cantidad  show_label=False %}
+                                        {% bootstrap_form_errors form2 %}
+                                    </td>
+                                    <td>
+                                        {% bootstrap_field form2.precio_unitario  show_label=False %}
+                                        {% bootstrap_form_errors form2 %}
+                                    </td>
+                                    <td>
+                                        {% bootstrap_field form2.precio_total  show_label=False %}
+                                        {% bootstrap_form_errors form2 %}
+                                    </td>
+                                    <td style="display: none;">{% bootstrap_field form2.descuento  show_label=False %}
+                                        {% bootstrap_form_errors form2 %}
+                                    </td>
+                                    <td style="display: none;" >
+                                        {% bootstrap_field form2.iva  show_label=False %}
+                                        {% bootstrap_form_errors form2 %}
+                                    </td>
+                                    <td>
+                                        {% bootstrap_field form2.DELETE  show_label=False %}
+                                    </td>
+
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <div style="width:100%;text-align:right">
+                            <button class="btn btn-default" id="add-item-producto" type="button">{% bootstrap_icon "plus" %} Agregar Producto</button>
+                        </div>
+                    </div>
+                </div>
+                <br>
+
+                <div class="row" style="display: none;">
+                    <DIV class="col-xs-8 col-md-10 text-right" >
+                        <label for="">descuento</label>
+                    </DIV>
+                    <div class="col-xs-4 col-md-2 ">
+                        
+                        {% bootstrap_field form.descuento show_label=False %}
+                    </div>
+                </div>
+                <div class="row" >
+                    <DIV class="col-xs-8 col-md-10 text-right" >
+                        <label for="">Comision X Venta</label>
+                    </DIV>
+                    <div class="col-xs-4 col-md-2 ">
+                        
+                        {% bootstrap_field form.comision show_label=False %}
+                    </div>
+                </div>
+                <div class="row">
+                    <DIV class=" col-xs-8 col-md-10 text-right">
+                        <label for="">Costo de Envio</label>
+                    </DIV>
+                    <div class="col-xs-4 col-md-2 ">
+                        
+                        {% bootstrap_field form.costo_envio show_label=False %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <DIV class="col-xs-8 col-md-10 text-right">
+                        <label for="">Sub total</label>
+                    </DIV>
+                    <div class="col-xs-4 col-md-2 ">
+                        
+                        {% bootstrap_field form.sub_total show_label=False %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <DIV class="col-xs-8 col-md-10 text-right">
+                        <label for="">Iva</label>
+                    </DIV>
+                    <div class="col-xs-4 col-md-2 ">
+                        {% bootstrap_field form.iva show_label=False %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <DIV class="col-xs-8 col-md-10 text-right">
+                        <label for="">Total</label>
+                    </DIV>
+                    <div class="col-xs-4 col-md-2 ">
+                        {% bootstrap_field form.total show_label=False %}
+                    </div>
+                </div>
+                <div class="row">
+                    <DIV class="col-xs-8 col-md-10 text-right">
+                        <label for="">Estatus Venta</label>
+                    </DIV>
+                    <div class="col-xs-4 col-md-2 ">
+                        {% bootstrap_field form.id_estatus_venta show_label=False %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <DIV class="col-xs-8 col-md-10 text-right">
+                        <label for="">Link Seguimiento</label>
+                    </DIV>
+                    <div class="col-xs-4 col-md-2 ">
+                        
+                        {% bootstrap_field form.link_seguimiento show_label=False %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12" style="text-align:center">
+                        <button class="btn btn-primary">
+                            Guardar
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-        <br>
-
-        <div class="row" style="display: none;">
-            <DIV class="col-xs-8 col-md-10 text-right" >
-                <label for="">descuento</label>
-            </DIV>
-            <div class="col-xs-4 col-md-2 ">
-                
-                {% bootstrap_field form.descuento show_label=False %}
-            </div>
-        </div>
-        <div class="row" >
-            <DIV class="col-xs-8 col-md-10 text-right" >
-                <label for="">Comision X Venta</label>
-            </DIV>
-            <div class="col-xs-4 col-md-2 ">
-                
-                {% bootstrap_field form.comision show_label=False %}
-            </div>
-        </div>
-        <div class="row">
-            <DIV class=" col-xs-8 col-md-10 text-right">
-                <label for="">Costo de Envio</label>
-            </DIV>
-            <div class="col-xs-4 col-md-2 ">
-                
-                {% bootstrap_field form.costo_envio show_label=False %}
-            </div>
-        </div>
-
-        <div class="row">
-            <DIV class="col-xs-8 col-md-10 text-right">
-                <label for="">Sub total</label>
-            </DIV>
-            <div class="col-xs-4 col-md-2 ">
-                
-                {% bootstrap_field form.sub_total show_label=False %}
-            </div>
-        </div>
-
-        <div class="row">
-            <DIV class="col-xs-8 col-md-10 text-right">
-                <label for="">Iva</label>
-            </DIV>
-            <div class="col-xs-4 col-md-2 ">
-                {% bootstrap_field form.iva show_label=False %}
-            </div>
-        </div>
-
-        <div class="row">
-            <DIV class="col-xs-8 col-md-10 text-right">
-                <label for="">Total</label>
-            </DIV>
-            <div class="col-xs-4 col-md-2 ">
-                {% bootstrap_field form.total show_label=False %}
-            </div>
-        </div>
-        <div class="row">
-            <DIV class="col-xs-8 col-md-10 text-right">
-                <label for="">Estatus Venta</label>
-            </DIV>
-            <div class="col-xs-4 col-md-2 ">
-                {% bootstrap_field form.id_estatus_venta show_label=False %}
-            </div>
-        </div>
-
-        <div class="row">
-            <DIV class="col-xs-8 col-md-10 text-right">
-                <label for="">Link Seguimiento</label>
-            </DIV>
-            <div class="col-xs-4 col-md-2 ">
-                
-                {% bootstrap_field form.link_seguimiento show_label=False %}
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-xs-12" style="text-align:center">
-                <button class="btn btn-primary">
-                    Guardar
-                </button>
-            </div>
-        </div>
+    </div>
+</div>
 
   
-
+    </form>
+</div>
     <script>
        
         $(document).ready(

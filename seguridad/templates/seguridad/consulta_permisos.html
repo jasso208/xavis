@@ -1,0 +1,46 @@
+{%extends 'base.html'%}
+{%load static%}
+{% load bootstrap3 %}
+{% block content %}
+<div class="col-xs-12 cls_encabezado_body">
+	<div class="col-xs-10">
+		<a >
+			Consulta permiso
+		</a>		
+	</div>
+	<div class="col-xs-2" >
+		<a href="{% url 'seguridad:alta_usuario' %}" type="button" class="btn btn-default btn-sm" id="btn_menu_consulta_prod" >
+          <span class="glyphicon glyphicon-plus"  ></span> 
+          	Agregar Permiso
+        </a>
+	</div>
+</div>
+<div class="col-xs-12">
+	
+<form method="post" action="#" class="cls_form_1">
+		<div class="row row_grid">	
+			<div class="col-xs-12" >
+				<div class="content-grid" >
+				<table class="table">
+				<thead>
+					<th><a>Nombre</a></th>
+					<th><a>Content Type</a></th>
+					<th><a>Code Name</a></th>				
+				</thead>
+				<tbody>
+					{% for perm in permisos %}
+						<tr>								
+							<td><a>{{perm.name}}</a></td>
+							<td><a>{{perm.content_type}}</a></td>
+							<td><a>{{perm.codename}}</a></td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>					
+			</div>
+			
+		</div>
+	</div>
+</form>
+		</div>
+{% endblock %}

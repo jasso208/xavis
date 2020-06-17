@@ -2,6 +2,57 @@
 {% load bootstrap3 %}
 
 {% block content %}
+
+<div class="col-xs-12 cls_encabezado_body">
+	<div class="col-xs-10">
+		<a >
+			Busca Categoria
+		</a>		
+	</div>
+	<div class="col-xs-2" >
+		<a href="{% url 'inventario:categoria' %}" type="button" class="btn btn-default btn-sm" id="btn_menu_consulta_prod" >
+          <span class="glyphicon glyphicon-plus"  ></span> 
+          	Agregar Categoria
+        </a>
+	</div>
+</div>
+
+<div class="col-xs-12">
+	<div class="cls_form_1">
+		<div class="row row_grid">	
+			<div class="col-xs-12" >
+				<div class="content-grid">
+					<table class="table ">
+							<thead>
+								<th>
+									
+								</th>
+								<th>
+									<a >Categoria</a>									
+								</th>
+							</thead>
+							<tbody>
+								{% for cat in categoria %}
+									<tr>
+										<td>
+											<a href="/inventario/categoria_edita/{{cat.id}}">{% bootstrap_icon 'pencil' %}</a>
+										</td>
+										<td>
+											<a> 
+												{{cat.id}}.-{{cat.categoria_1.categoria_1}} / {{cat.categoria_2.categoria_2}} / {{cat.categoria}}
+											</a>
+										</td>
+									</tr>
+								{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
 	<h2>Categorias</h2>
 	<br><br>
 	<div class="row">

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load bootstrap3 %}
+{% load static %}
+{%block content%}
+<div class="col-xs-12 cls_encabezado_body">
+	<a >
+		Administración de Usuarios
+	</a>	
+</div>
+
+
+<div class="col-xs-12">
+		<div class="row" >
+			<div class="col-xs-12 cls_encabezado_body_2">
+				<a >
+					Seguridad	
+				</a>
+				<br>
+			</div>
+			<div class="row cls_row_body"  >
+				<div class="col-xs-2">
+					<div class="cls_boton_body">
+						<a href="{% url 'seguridad:consulta_usuarios' %}">
+							<span class="glyphicon glyphicon-user"></span>
+							<br>
+							<br>
+							Usuarios
+						</a>	
+					</div>
+					
+				</div>	
+				
+			</div>
+			
+		</div>
+</div>
+
+
+{% endblock %}

@@ -3,13 +3,24 @@
 
 {% load static %}
 {%block content%}
+<div class="col-xs-12 cls_encabezado_body">
+	<div class="col-xs-10">
+		<a >
+			Consulta Productos.
+		</a>		
+	</div>
+	<div class="col-xs-2" >
+		<a href="{% url 'inventario:producto' %}" type="button" class="btn btn-default btn-sm" id="btn_menu_consulta_prod" >
+          <span class="glyphicon glyphicon-plus" href="{% url 'inventario:producto'%}" ></span> 
+          	Agregar Producto
+        </a>
+	</div>
+</div>
+
+<div class="col-xs-12">
 	<form method="post" action="#">
 		{%csrf_token%}
-		
-		<h2 >Busqueda</h2>
-		<br>
-	
-		<div class="row">	
+		<div class="row cls_form_consulta" >	
 			<div class="panel panel-default">
 				
 				<div class="panel-body">
@@ -79,19 +90,8 @@
 			</div>
 			
 		</div>
-		<div class="row">			
-			<div class="col-xs-8" >				
-				<a  href="../productos/new/" style="float: right;margin-top:10px">{%bootstrap_icon "plus"%} Agregar Producto</a>
-			</div>
-				
-			<div class="col-xs-4" >				
-				<button class="btn" style="float: right;">Buscar</button>
-			</div>
-		</div>
-		<br>
 		
-		<br>
-		<div class="row">
+		<div class="row" style="background-color: white">
 
 			{%for prod in produ %}
 				<div class="col-xs-12 col-md-3" style="margin-top:10px;">
@@ -168,7 +168,7 @@
 
 		
 	</form>
-	
+	</div>
 	<script>
 		$(document).ready(
 			function()
@@ -257,7 +257,8 @@
 					$("#panel_busqueda_2").show();
 				}
 			);
-			}
+
+			}//cierre ready
 
 		);
 	</script>

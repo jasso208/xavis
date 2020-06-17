@@ -1,19 +1,116 @@
 {% load static %}
 <html>
 	<head>
-        <title>Django Girls blog</title>
+        <title>Jassdel</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-        <link href='//fonts.googleapis.com/css?family=Lobster&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+       
 		<link href="https://fonts.googleapis.com/css?family=Pathway+Gothic+One" rel="stylesheet">
 		<link href="https://fonts.googleapis.com/css?family=Noto+Serif+JP" rel="stylesheet">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 	
 		<link rel="stylesheet" href="{% static 'css/base.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'css/alta_modifica_producto.css'%}">
+		<link rel="stylesheet" type="text/css" href="{% static 'css/busca_producto.css'%}">
     </head>
 	<body>		
-		
+		<div class="content-fluid">
+			<div class="row" id="encabezado_principal">
+				<div class="col-xs-6" >
+					<a id="logo_peque">
+						<img src="{% static 'img/logo_peque.png' %}">
+						JassDel
+					</a>
+					
+				</div>
+
+				<div class="col-xs-2">
+					
+				</div>
+				<div class="col-xs-3" >
+
+					<p id="usuario_logueado"  > 
+						<span class="glyphicon glyphicon  glyphicon-user" ></span>
+						 &nbsp; Javier Jasso Gallegos
+					</p>
+				</div>
+				<div class="col-xs-1">
+					<a class="cls_icono" href="{% url 'seguridad:cerrar_session' %}">
+						<span class="glyphicon glyphicon glyphicon-off"></span>
+					</a>
+				</div>
+			</div>	
+		</div>
+		<div class="container-fluid" id="body">
+			<div class="row" >
+				<div class="col-xs-2" style="padding: 0">
+					<div id="menu">
+						<div id="contenedor_logo_menu">
+							<img src="{% static 'img/logo_peque.png' %}">
+						</div>
+						<ul class="list-group">
+						  <li class="list-group-item  ">
+						  	<a href="{% url 'seguridad:bienvenidos' %}">
+						  		<span class="glyphicon glyphicon-home"></span>					  	
+						  		Inicio
+						  	</a>
+						  
+							</li>
+							 <li class="list-group-item ">
+							  	<a href="{% url 'seguridad:admin_user' %}">
+							  		<span class="glyphicon glyphicon-list-alt"></span>					  	
+							  		Usuarios de Sistema
+							  	</a>
+							  
+							</li>
+							<li class="list-group-item ">
+							  	<a href="{% url 'seguridad:admin_miperfil' %}">
+							  		<span class="glyphicon glyphicon-user"></span>					  	
+							  		Mi Cuenta
+							  	</a>
+							  
+							</li>
+
+						  <li class="list-group-item">
+						  	<a href="{% url 'seguridad:admin_catalogos'%}">
+						  		<span class="glyphicon glyphicon glyphicon-list-alt"></span>			Catalogos
+						  	</a>						  	
+						  </li>
+
+						  <li class="list-group-item">
+						  	<a href="{% url 'seguridad:admin_productos'%}">
+						  		<span class="glyphicon glyphicon glyphicon-equalizer"></span>			Inventario
+						  	</a>						  	
+						  </li>
+						   <li class="list-group-item">
+						  	<a href="{% url 'seguridad:admin_ventas'%}">
+						  		<span class="glyphicon glyphicon glyphicon-tags"></span>			Ventas
+						  	</a>						  	
+						  </li>
+						</ul>
+					</div>
+				</div>
+				<div class="col-xs-10">
+					<div class="row">
+
+						
+					{% block content %}
+					
+					{% endblock %}
+
+					</div>
+				</div>
+				
+			</div>
+		</div>
+
+
+
+
+
+
 		<div class="content container">
 			<div class="row base-div-header">
 				<div class="col-xs-12 col-md-12 base-div-menu-header">
@@ -181,9 +278,6 @@
 				</div>
 				<div class="col-xs-12 col-sm-10 col-md-10" >
 				
-					{% block content %}
-					
-					{% endblock %}
 					
 				</div>
 			</div>
