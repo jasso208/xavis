@@ -43,7 +43,7 @@ class Estatus_Envio_Producto(models.Model):
 		return self.desc_estatus_envio
 
 class Venta(models.Model):
-	fecha=models.DateTimeField(default=timezone.now())
+	fecha=models.DateTimeField(default=timezone.now)
 	costo_envio=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)
 	sub_total=models.DecimalField(max_digits=20,decimal_places=2,null=False)
 	descuento=models.DecimalField(max_digits=20,decimal_places=2,null=True,default=0)

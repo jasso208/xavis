@@ -1,0 +1,1094 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% block usuario %}
+						<p id="usuario_logueado"  > 
+							<strong>Usuario:</strong> {{user_2.user.username}}
+							&nbsp; / &nbsp;
+							<strong>Perfil:</strong> {{user_2.perfil}}
+							&nbsp; / &nbsp;
+							<strong>Sucursal:</strong> {{user_2.sucursal}}
+							&nbsp; / &nbsp;
+							<strong>Caja:</strong> {{c}}
+						</p>
+{% endblock  %}
+
+{% block content %}
+	<div class="col-xs-12 cls_encabezado_body">
+	
+		<a >
+			Corte Caja
+		</a>		
+	
+	</div>
+	<div class="col-xs-12">
+		<div  class="cls_form_1">
+	
+			<div class="row cls_form_consulta">
+				<div class="col-xs-12">
+					<div class="panel panel-default">						
+						<div class="panel-body">
+							<div clasS="col-xs-12">
+								<div class="panel panel-default">						
+									<div class="panel-body">
+
+										<div class="col-xs-3 ">
+											<label for=""> Sucursal</label>					
+											<select name="sucursal" class="form-control" title="" required="" id="id_sucursal">
+											  <option value="" selected="">---------</option>
+												{% for x in sucursales %}										
+													<option value="{{x.sucursal.id}}">{{ x.sucursal }}</option>
+												{% endfor %}
+											</select>
+										</div>
+										<div class="col-xs-3 ">
+											<label>Fecha</label>
+											<input type="date" name="" id="id_fecha" class="form-control">
+										</div>
+										<div class="col-xs-3 ">
+											<label>Nombre Usuario</label>
+											<input type="text" name="" id="id_nom_user" class="form-control" placeholder="ej. jasso208">
+										</div>
+										<div class="col-xs-1 ">
+											<label>Caja</label>
+											<input type="text" name="" id="id_caja_2" class="form-control" placeholder="ej. A" >
+										</div>
+										<div class="col-xs-2  text-right">
+											<label>&nbsp</label>
+											<br>
+											<a class="btn btn-primary" id="btn_buscar">Buscar</a>
+										</div>
+									</div>
+								</div>
+
+							</div>
+							<div class="col-xs-6">
+								<div class="col-xs-12">
+									<h4  id="txt_cajero"></h4>
+								</div>
+								<div class="col-xs-12" style="text-align: center;">
+									<h4 class="page-header">Teorico</h4>
+								</div>
+
+								<div class="col-xs-12">
+									<div class="col-xs-6">
+										<p>
+											<strong>
+												Descripción Ingresos
+											</strong>
+										</p>
+									</div>
+									<div class="col-xs-3  text-right">
+										<p>
+											<strong>
+												Movtos.
+											</strong>
+										</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>
+											<strong>
+												Importe
+											</strong>
+										</p>
+									</div>
+								</div>
+								<div class="col-xs-12">
+									<div class="col-xs-6">
+										<p>Fondo Inicial:</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>1</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p id="fondo_inicial"></p>
+									</div>
+								</div>
+								<div class="col-xs-12">
+									<div class="col-xs-6">
+										<p>Otros Ingresos:</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p id="cont_otros_ingresos"></p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p id="otros_ingresos"></p>
+									</div>
+								</div>
+
+
+								<div class="col-xs-12">
+									<div class="col-xs-6">
+										<p>Refrendos:</p>
+									</div>
+
+									<div class="col-xs-3 text-right">
+										<p id="cont_refrendos"></p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p id="importe_refrendo"></p>
+									</div>
+								</div>
+
+								<div class="col-xs-12">
+									<div class="col-xs-6">
+										<p>Comisiónes PG:</p>
+									</div>
+
+									<div class="col-xs-3 text-right">
+										<p id="cont_com_pg"></p>
+									</div>
+
+									<div class="col-xs-3 text-right">
+										<p id="comisiones_pg"></p>
+									</div>
+
+								</div>
+
+
+
+								<div class="col-xs-12">
+									<div class="col-xs-6">
+										<p>Pago Capital:</p>
+									</div>
+		
+
+
+									<div class="col-xs-3 text-right">
+										<p id="cont_pc"></p>
+									</div>
+									
+									<div class="col-xs-3 text-right">
+										<p id="pago_capital"></p>
+									</div>
+
+								</div>
+
+
+
+								<div class="col-xs-12">
+									<div class="col-xs-6">
+										<p>Desempeño:</p>
+									</div>
+		
+
+
+									<div class="col-xs-3 text-right">
+										<p id="cont_desemp"></p>
+									</div>
+									
+									<div class="col-xs-3 text-right">
+										<p id="importe_desemp"></p>
+									</div>
+
+								</div>
+
+
+
+								<div class="col-xs-12">
+									<br>
+								</div>
+
+								<div class="col-xs-12">
+									<div class="col-xs-6">
+										<p>
+											<strong>
+												Descripción Retiros
+											</strong>
+										</p>
+									</div>
+									<div class="col-xs-3  text-right">
+										<p>
+											<strong>
+												Movtos.
+											</strong>
+										</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>
+											<strong>
+												Importe
+											</strong>
+										</p>
+									</div>
+								</div>
+								<div class="col-xs-12">
+									<div class="col-xs-6">
+										<p>Retiros de Caja:</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p id="cont_retiros"></p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p id="retiros"></p>
+									</div>
+								</div>
+								<div class="col-xs-12">
+									<div class="col-xs-6">
+										<p>Empeños:</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p id="cont_empenos"></p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p id="empenos"></p>
+									</div>
+								</div>
+								<div class="col-xs-12">
+									<div class="col-xs-12">
+										<h4 class="page-header"></h4>
+									</div>
+								</div>
+								<div class="col-xs-12">
+									<div class="col-xs-6">
+										<p>Total Efectivo en Caja:</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p id="total_movs"></p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p id="total_efectivo"></p>
+									</div>
+								</div>
+								
+							</div>
+
+
+							<div class="col-xs-6 ">
+								<form method="POST" action="#" class="cls_form_1">
+								{%csrf_token%}
+
+								<div class="panel panel-default">						
+									<div class="panel-body">
+										<h4 class="page-header" style="padding-top: 0; margin-top: 20px;text-align: center;">Real</h4>
+										<div class="col-xs-12  cls_ocultar_field">											
+												<div class="col-xs-6 text-left">
+													<p>10 Centavos:</p>
+												</div>												
+												<div class="col-xs-6 text-right">
+													{% bootstrap_field form.centavos_10 show_label=False%}
+												</div>										
+										</div>
+										<div class="col-xs-12 cls_ocultar_field ">											
+												<div class="col-xs-6 text-left">
+													<p>50 Centavos:</p>
+												</div>												
+												<div class="col-xs-6 text-right">
+													{% bootstrap_field form.centavos_50 show_label=False%}
+												</div>										
+										</div>
+										<div class="col-xs-12 ">											
+												<div class="col-xs-6 text-left">
+													<p>1 Peso:</p>
+												</div>												
+												<div class="col-xs-6 text-right">
+													{% bootstrap_field form.pesos_1 show_label=False%}
+												</div>										
+										</div>
+										<div class="col-xs-12 ">											
+												<div class="col-xs-6 text-left">
+													<p>2 Pesos:</p>
+												</div>												
+												<div class="col-xs-6 text-right">
+													{% bootstrap_field form.pesos_2 show_label=False%}
+												</div>										
+										</div>
+										<div class="col-xs-12 ">											
+												<div class="col-xs-6 text-left">
+													<p>5 Pesos:</p>
+												</div>												
+												<div class="col-xs-6 text-right">
+													{% bootstrap_field form.pesos_5 show_label=False%}
+												</div>										
+										</div>
+										<div class="col-xs-12 ">											
+												<div class="col-xs-6 text-left">
+													<p>10 Pesos:</p>
+												</div>												
+												<div class="col-xs-6 text-right">
+													{% bootstrap_field form.pesos_10 show_label=False%}
+												</div>										
+										</div>
+										
+										<div class="col-xs-12 ">											
+												<div class="col-xs-6 text-left">
+													<p>20 Pesos:</p>
+												</div>												
+												<div class="col-xs-6 text-right">
+													{% bootstrap_field form.pesos_20 show_label=False%}
+												</div>										
+										</div>
+										<div class="col-xs-12 ">											
+												<div class="col-xs-6 text-left">
+													<p>50 Pesos:</p>
+												</div>												
+												<div class="col-xs-6 text-right">
+													{% bootstrap_field form.pesos_50 show_label=False%}
+												</div>										
+										</div>
+										<div class="col-xs-12">											
+												<div class="col-xs-6 text-left">
+													<p>100 Pesos:</p>
+												</div>												
+												<div class="col-xs-6 text-right">
+													{% bootstrap_field form.pesos_100 show_label=False%}
+												</div>										
+										</div>
+										<div class="col-xs-12 ">											
+												<div class="col-xs-6 text-left">
+													<p>200 Pesos:</p>
+												</div>												
+												<div class="col-xs-6 text-right">
+													{% bootstrap_field form.pesos_200 show_label=False%}
+												</div>										
+										</div>
+										<div class="col-xs-12 ">											
+												<div class="col-xs-6 text-left">
+													<p>500 Pesos:</p>
+												</div>												
+												<div class="col-xs-6 text-right">
+													{% bootstrap_field form.pesos_500 show_label=False%}
+												</div>										
+										</div>
+										<div class="col-xs-12 ">											
+												<div class="col-xs-6 text-left">
+													<p>1000 Pesos:</p>
+												</div>												
+												<div class="col-xs-6 text-right">
+													{% bootstrap_field form.pesos_1000 show_label=False%}
+												</div>										
+										</div>
+										<div class="col-xs-12">											
+											<h1 class="page-header">
+												
+											</h1>
+										</div>
+										<div class="col-xs-12 ">											
+												<div class="col-xs-6 text-left">
+													<p>Efectivo Real:</p>
+												</div>												
+												<div class="col-xs-6 text-right">
+													{% bootstrap_field form.real_efectivo show_label=False %}
+												</div>										
+										</div>
+										<div class="col-xs-12 ">											
+												<div class="col-xs-6 text-left">
+													<p>Diferencia:</p>
+												</div>												
+												<div class="col-xs-6 text-right">
+													{% bootstrap_field form.diferencia show_label=False%}
+												</div>										
+										</div>
+										<div class="col-xs-12 ">											
+												<div class="col-xs-12 text-left">
+													<p>Comentario:</p>
+												</div>												
+												<div class="col-xs-12 text-right">
+													{% bootstrap_field form.comentario show_label=False%}
+												</div>										
+										</div>
+										<div class="col-xs-12 cls_ocultar_field ">											
+												<div class="col-xs-6 text-left">
+													<p>Token:</p>
+												</div>												
+												<div class="col-xs-6 text-right">
+													{% bootstrap_field form.token show_label=False%}
+												</div>										
+										</div>
+										<div class="col-xs-12 text-right"  id="btn_guardar">	
+												<button class="btn btn-primary">
+													Guardar
+												</button>
+												<label id="id_nota_1" >
+													* Nota: Para cerrar caja primero debe guardar la información del corte de caja.
+												</label>
+										</div>
+									</div>
+								</div>
+							</form>
+							</div>
+
+
+							<div class="col-xs-12">
+								<div class="col-xs-3">
+									
+								</div>
+								<div class="col-xs-3">
+									<button class="btn btn-primary" id="btn_cerrar_caja">
+										Cerrar Caja	
+									</button>									
+								</div>
+
+								<div class="col-xs-3" >
+									<button class="btn btn-primary" id="btn_reabrir_caja">
+										Reabrir Caja
+									</button>									
+								</div>
+
+								<div class="col-xs-3">
+									<button class="btn btn-primary">
+										Imprimir
+									</button>									
+								</div>
+							</div>
+
+
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+<div id="fondo_preloader">
+	<div class="preloader" id="preloader">
+	
+	</div>
+</div>
+
+
+
+	{% if perfil_valido == '0' %}
+		<div class="fondo_mensaje" >
+			
+		</div >
+		<div class="mensaje" >
+				
+				<div class="panel panel-default">	
+					<h3 class="page-header">No tienes permiso para acceder a esta opción.</h3>
+					<a class="btn btn-primary" href="{% url 'seguridad:admin_cajas' %}">Aceptar</a>
+					<br>
+					<br>
+
+				</div>
+		</div>
+	{% endif %}
+	{% if error_guardar != '' %}
+		<div class="fondo_mensaje cls_error_guardar" >
+			
+		</div >
+		<div class="mensaje cls_error_guardar" >
+				
+				<div class="panel panel-default">	
+					<h3 class="page-header">{{error_guardar}}</h3>
+					<a class="btn btn-primary" id="btn_error">Aceptar</a>
+					<br>
+					<br>
+
+				</div>
+		</div>
+	{% endif %}
+		<div class="fondo_mensaje cls_error" >
+			
+		</div >
+		<div class="mensaje cls_error" >
+				
+				<div class="panel panel-default">	
+					<h3 class="page-header" id="msj_error"></h3>
+					<a class="btn btn-primary" id="btn_aceptar_error">Aceptar</a>
+					<br>
+					<br>
+
+				</div>
+		</div>
+
+		<div class="fondo_mensaje cls_confirmacion_cierre " >
+			
+		</div >
+		<div class="mensaje cls_confirmacion_cierre" >
+				
+				<div class="panel panel-default">	
+					<h3 class="page-header" id="msj_diferencia"></h3>
+					<a class="btn btn-primary" id="btn_confirmar_cierre">Aceptar</a>
+					<a class="btn btn-primary" id="btn_cancelar_cierre">Cancelar</a>
+					<br>
+					<br>
+
+				</div>
+		</div>
+
+
+	<script type="text/javascript">
+		var total_efectivo_global=0.00;
+		var recargar="0";
+		$(document).ready(
+			function()
+			{
+				
+				var username="{{user_2.user.username}}";
+
+				$("#cls_error_guardar").hide();
+
+					$("#btn_error").click(
+						function()
+						{
+								$(".cls_error_guardar").hide();
+						}
+					);
+
+
+				id_perfil="{{id_perfil}}";
+				
+				$(".cls_confirmacion_cierre").hide();
+											
+				if(id_perfil!="3")
+				{
+					$("#btn_reabrir_caja").hide();
+				}
+				else
+				{
+					$("#btn_reabrir_caja").show();	
+				}
+//*******************************************************************************************************************************************************
+//**************************************************************************************************************************************************************s
+
+				$("#btn_reabrir_caja").click(
+						function()
+						{
+							fn_re_abre_caja($("#id_token").val());
+						}
+					);
+//*******************************************************************************************************************************************************
+//**************************************************************************************************************************************************************s
+
+				$("#btn_cerrar_caja").click(
+						function()
+						{
+							
+							if(parseInt($("#id_diferencia").val())>0)
+							{
+								
+								$(".cls_confirmacion_cierre").show();
+								$("#msj_diferencia").text("Tienes una diferencia de $"+$("#id_diferencia").val()+" pesos. ¿Deseas cerrar la caja?");
+							}
+							else
+							{
+								
+								$(".cls_confirmacion_cierre").hide();
+								fn_cierra_caja($("#id_token").val(),username);	
+							}
+							
+						}
+					);
+
+				$("#btn_confirmar_cierre").click(
+						function()
+						{
+							$(".cls_confirmacion_cierre").hide();
+							fn_cierra_caja($("#id_token").val(),username);	
+						}
+					);
+
+				$("#btn_cancelar_cierre").click(
+						function()
+						{
+							$(".cls_confirmacion_cierre").hide();
+						}
+					);
+				$("#fondo_preloader").hide();
+				var is_post="{{is_post}}";
+
+				if (is_post=="1")
+				{
+
+					$("#id_sucursal").val("{{caja.sucursal.id}}");
+					$("#id_caja_2").val("{{caja.caja}}");
+					$("#id_fecha").val("{{fecha_post}}")					
+					$("#id_nom_user").val("{{caja.usuario.username}}")
+					fn_consulta_caja($("#id_sucursal").val(),$("#id_caja_2").val(),$("#id_fecha").val(),$("#id_nom_user").val());
+				}
+				$(".cls_error").hide();	
+				$(".cls_ocultar_field").hide();
+				$("#total_real").text("$0.00");
+				$("#id_diferencia,#id_real_efectivo").css({'text-align':"right"})
+				$("#id_centavos_10,#id_centavos_50,#id_pesos_1,#id_pesos_2,#id_pesos_5,#id_pesos_10,#id_pesos_20,#id_pesos_50,#id_pesos_100,#id_pesos_200,#id_pesos_500,#id_pesos_1000").change(
+						function()
+						{
+							fn_calcular_diferencia();			
+						}
+					);
+
+				$("#id_centavos_10,#id_centavos_50,#id_pesos_1,#id_pesos_2,#id_pesos_5,#id_pesos_10,#id_pesos_20,#id_pesos_50,#id_pesos_100,#id_pesos_200,#id_pesos_500,#id_pesos_1000,#id_comentario").prop('disabled',true);
+
+				$("#id_diferencia ,#id_real_efectivo").prop("readonly",true);
+
+				$("#btn_buscar").click(
+					function()
+					{
+						fn_consulta_caja($("#id_sucursal").val(),$("#id_caja_2").val(),$("#id_fecha").val(),$("#id_nom_user").val());
+					}
+				);
+
+				$("#btn_aceptar_error").click(
+						function(){
+							$(".cls_error").hide();	
+							
+							if(recargar=="1")
+							{
+								fn_consulta_caja($("#id_sucursal").val(),$("#id_caja_2").val(),$("#id_fecha").val(),$("#id_nom_user").val());	
+							}
+							
+						}
+				);
+			}
+		);
+
+
+
+//*******************************************************************************************************************************************************
+//**************************************************************************************************************************************************************s
+
+				function fn_re_abre_caja(token)
+				{
+					$("#fondo_preloader").show();	
+
+
+					$.ajax({
+					type: "GET",
+			        url: "http://{{IP_LOCAL}}/empenos/re_abre_caja/",
+			        data: { "token":token},
+			        contentType: "application/json; charset=utf-8",
+			        dataType: "json",
+			        success: function (r) {
+			        	if (r[0].estatus=="0")//falloRF
+			        	{
+			        		recargar="1";									
+				        	$("#fondo_preloader").hide();
+				            $("#msj_error").text(r[0].msj);
+				            $(".cls_error").show();	
+				            
+			        	}
+			        	else
+			        	{
+			        		recargar="1";									
+				        	$("#fondo_preloader").hide();
+				            $("#msj_error").text("La caja se abrio correctamente.");
+				            $(".cls_error").show();	
+
+			        	}
+			        	
+			        },
+			        error: function (r) {
+			        	recargar="1";									
+			        	$("#fondo_preloader").hide();
+			            $("#msj_error").text("Error al abrir la caja");
+			            $(".cls_error").show();	
+			            
+
+			        },
+			        failure: function (r) {
+			        	recargar="1";									
+			        	$("#fondo_preloader").hide();
+			            $("#msj_error").text("Error al abrir la caja");
+			            $(".cls_error").show();	
+			            
+			        }
+				});
+
+				}
+//*******************************************************************************************************************************************************
+//**************************************************************************************************************************************************************s
+		function fn_cierra_caja(token,username)
+		{
+
+
+
+			$("#fondo_preloader").show();	
+			$.ajax({
+				type: "GET",
+		        url: "http://{{IP_LOCAL}}/empenos/cierra_caja/",
+		        data: { "token":token,"username":username},
+		        contentType: "application/json; charset=utf-8",
+		        dataType: "json",
+		        success: function (r) {
+		        	if (r[0].estatus=="0")//falloRF
+		        	{
+			        	$("#fondo_preloader").hide();
+			        	recargar="1";
+			            $("#msj_error").text(r[0].msj);
+			            $(".cls_error").show();				            
+			            fn_consulta_caja($("#id_sucursal").val(),$("#id_caja_2").val(),$("#id_fecha").val(),$("#id_nom_user").val());
+		        	}
+		        	else
+		        	{
+			        	$("#fondo_preloader").hide();
+			        	recargar="1";
+			            $("#msj_error").text("La caja se cerro correctamente.");
+			            $(".cls_error").show();	
+
+
+		        	}
+		        	
+		        },
+		        error: function (r) {
+		        	$("#fondo_preloader").hide();
+		        	recargar="1";
+		            $("#msj_error").text("Error al cerrar la caja");
+		            $(".cls_error").show();	
+		            fn_consulta_caja($("#id_sucursal").val(),$("#id_caja_2").val(),$("#id_fecha").val(),$("#id_nom_user").val());
+
+		        },
+		        failure: function (r) {
+		        	$("#fondo_preloader").hide();
+		        	recargar="1";
+		            $("#msj_error").text("Error al cerrar la caja");
+		            $(".cls_error").show();	
+		            fn_consulta_caja($("#id_sucursal").val(),$("#id_caja_2").val(),$("#id_fecha").val(),$("#id_nom_user").val());
+		        }
+			});
+		}
+
+//*******************************************************************************************************************************************************
+//**************************************************************************************************************************************************************s
+		function fn_consulta_caja(id_sucursal,caja,fecha,usuario)
+		{
+
+				$("#fondo_preloader").show();
+				 $.ajax({
+					        type: "GET",
+					        url: "http://{{IP_LOCAL}}/empenos/api_consulta_corte_caja/",
+					        data: { 'id_sucursal':id_sucursal , 'caja':caja ,'fecha':fecha ,'usuario':usuario},
+					        contentType: "application/json; charset=utf-8",
+					        dataType: "json",
+					        success: function (r) {
+					        	fn_calcular_diferencia();
+					        	$("#btn_cerrar_caja").show()
+					        	$("#id_nota_1").hide()
+
+					        	//si el estatus es cero, es porque en algo fallo
+					            if(r[0].estatus=='0')
+					            {
+					            	recargar="0";
+					            	$("#msj_error").text(r[0].msj);
+					            	$(".cls_error").show();	
+
+
+					            	$("#fondo_inicial").text("$0.00");
+						            $("#otros_ingresos").text("$0.00");
+						            $("#cont_otros_ingresos").text("0");
+						            $("#cont_retiros").text("0");						            
+						            $("#retiros").text("$0.00");
+
+						            //$("#cont_ref_pg").text("0");
+						            //$("#refrendos_pg").text("$0.00");
+						            $("#cont_com_pg").text("0");
+						            $("#comisiones_pg").text("$0.00");
+						            $("#cont_pc").text("0");
+						            $("#pago_capital").text("$0.00");
+						            $("#cont_refrendos").text("0");
+			            			$("#importe_refrendo").text("$0.00");						            						            
+									$("#cont_desem").text("0");
+									$("#importe_desemp").text("$0.00");
+
+						            $("#cont_empenos").text("0");
+						            $("#empenos").text("$0.00");
+
+						            $("#total_efectivo").text("$0.00");
+						            $("#total_movs").text("0")
+						            $("#id_token").val("")
+
+									$("#id_centavos_10").val("0");
+						            $("#id_centavos_50").val("0");
+						            $("#id_pesos_1").val("0");
+						            $("#id_pesos_2").val("0");
+						            $("#id_pesos_5").val("0");
+						            $("#id_pesos_10").val("0");
+						            $("#id_pesos_20").val("0");
+						            $("#id_pesos_50").val("0");
+						            $("#id_pesos_100").val("0");
+						            $("#id_pesos_200").val("0");
+						            $("#id_pesos_500").val("0");
+						            $("#id_pesos_1000").val("0");
+						            $("#id_real_efectivo").val("0");
+						            $("#id_diferencia").val("0");
+						            $("#id_comentario").val("");
+						            $("#fondo_preloader").hide();
+
+									$("#id_centavos_10,#id_centavos_50,#id_pesos_1,#id_pesos_2,#id_pesos_5,#id_pesos_10,#id_pesos_20,#id_pesos_50,#id_pesos_100,#id_pesos_200,#id_pesos_500,#id_pesos_1000,#id_comentario").prop('disabled',true);
+									$("#btn_guardar").hide();
+									$("#fondo_preloader").hide();
+					            	return 0;
+					            }
+
+								
+					            $("#txt_cajero").text("Cajero: "+r[0].nombre_cajero);
+
+
+								$("#id_centavos_10,#id_centavos_50,#id_pesos_1,#id_pesos_2,#id_pesos_5,#id_pesos_10,#id_pesos_20,#id_pesos_50,#id_pesos_100,#id_pesos_200,#id_pesos_500,#id_pesos_1000,#id_comentario").prop('disabled',false);
+
+					            $("#id_token").val(r[0].token);
+
+					            
+					            $("#fondo_inicial").text("$"+r[0].fondo_inicial);
+					            $("#otros_ingresos").text("$"+r[0].otros_ingresos);
+					            $("#cont_otros_ingresos").text(r[0].cont_otros_ingresos);
+					            $("#cont_retiros").text(r[0].cont_retiros);
+					            $("#retiros").text("$"+r[0].retiros);
+
+								//$("#cont_ref_pg").text(r[0].cont_ref_pg);
+								//$("#refrendos_pg").text("$"+r[0].refrendos_pg+"");
+								$("#cont_com_pg").text(r[0].cont_com_pg);
+								$("#comisiones_pg").text("$"+r[0].comisiones_pg+"");
+								$("#cont_pc").text(r[0].cont_pc);
+								$("#pago_capital").text("$"+r[0].pago_capital+"");
+								$("#cont_refrendos").text(r[0].cont_refrendos);
+								$("#importe_refrendo").text("$"+r[0].importe_refrendo+"");						            						            
+
+								$("#cont_desemp").text(r[0].cont_desemp);
+								$("#importe_desemp").text("$"+r[0].importe_desemp+"");
+
+								$("#cont_empenos").text(r[0].cont_empenos);
+								$("#empenos").text(r[0].empenos);
+
+					            $("#total_efectivo").text("$"+r[0].total_efectivo);
+					            $("#total_movs").text(r[0].total_movs);
+
+					            total_efectivo_global=r[0].total_efectivo;
+					            
+					             str_msj="";
+					            //si la caja no esta abierta y no es del dia de hoy, escondemos el boton de guardar.
+					            if (r[0].caja_abierta=='0' || r[0].dia_valido=="0")
+					            {
+					            	$("#btn_guardar").hide();
+
+					            	if(r[0].caja_abierta=="0")
+					            	{
+					            		str_msj="Esta caja ya fue cerrada, no podras modificarla"
+					            		$("#btn_cerrar_caja").hide();
+					            		$("#id_nota_1").hide()
+					            	}
+					            	if(r[0].dia_valido=="0")
+					            	{
+					            		str_msj="Esta caja no es del dia actual, no podras modificarla"
+					            	}
+
+					            }
+					            else
+					            {
+					            	$("#btn_guardar").show();
+					            }
+					            
+
+					            //si no es del dia de hoy la caja consultada escondemos los botones de reabrir caja y de cerrar caja.
+					            if (r[0].dia_valido=="0")
+					            {
+					            	$("#btn_cerrar_caja").hide()
+									$("#id_nota_1").hide()
+
+					            	$("#btn_reabrir_caja").hide()
+					            }
+					            else
+					            {
+					            	if(id_perfil=="3" & r[0].caja_abierta!="1")
+									{
+									
+										$("#btn_reabrir_caja").show();	
+									}
+									else
+									{
+										$("#btn_reabrir_caja").hide();		
+									}
+
+
+					            }
+
+					            if (str_msj!="")
+					            {		
+					            	recargar="0";									
+						            $("#msj_error").text(str_msj);
+									$(".cls_error").show();						            	
+					            }
+					            //si el estatus de guardado es cero, no importa otra cosa, no le permitiremos cerrar caja.
+					            //este estatus nos indica que al menos una vez se capturo informacion para el cierre de caja.
+					            if(r[0].estatus_guardado=="0")
+					            {
+					            	$("#btn_cerrar_caja").hide();
+					            	$("#id_nota_1").show()
+					            }
+
+
+					            //cargamos la informacion guardada en el corte de caja
+					            $("#id_centavos_10").val(r[1].centavos_10);
+					            $("#id_centavos_50").val(r[1].centavos_50);
+					            $("#id_pesos_1").val(r[1].pesos_1);
+					            $("#id_pesos_2").val(r[1].pesos_2);
+					            $("#id_pesos_5").val(r[1].pesos_5);
+					            $("#id_pesos_10").val(r[1].pesos_10);
+					            $("#id_pesos_20").val(r[1].pesos_20);
+					            $("#id_pesos_50").val(r[1].pesos_50);
+					            $("#id_pesos_100").val(r[1].pesos_100);
+					            $("#id_pesos_200").val(r[1].pesos_200);
+					            $("#id_pesos_500").val(r[1].pesos_500);
+					            $("#id_pesos_1000").val(r[1].pesos_1000);
+					            $("#id_real_efectivo").val(r[1].real_efectivo);
+					            $("#id_diferencia").val(r[1].diferencia);
+					            $("#id_comentario").val(r[1].comentario);
+					            $("#fondo_preloader").hide();
+
+					            				//3 esla clave de gerente regional. y solo ese perfil puede reabrir caja.
+								id_perfil="{{id_perfil}}";
+								
+								
+								
+					        },
+					        error: function (r) {
+					        	$("#fondo_preloader").hide();
+					        	recargar="0";									
+					            $("#msj_error").text("Error al consultar la caja indicada");
+					            $(".cls_error").show();	
+
+					        },
+					        failure: function (r) {
+					        	$("#fondo_preloader").hide();
+					        	recargar="0";									
+					            $("#msj_error").text("Error al consultar la caja indicada");
+					            $(".cls_error").show();	
+					        }
+						});
+		}
+
+//*******************************************************************************************************************************************************
+//**************************************************************************************************************************************************************s
+		function fn_calcular_diferencia()
+		{
+
+			var centavos_10=$("#id_centavos_10").val();
+			var centavos_50=$("#id_centavos_50").val();
+			var pesos_1=$("#id_pesos_1").val();
+			var pesos_2=$("#id_pesos_2").val();
+			var pesos_5=$("#id_pesos_5").val();
+			var pesos_10=$("#id_pesos_10").val();
+			var pesos_20=$("#id_pesos_20").val();
+			var pesos_50=$("#id_pesos_50").val();
+			var pesos_100=$("#id_pesos_100").val();
+			var pesos_200=$("#id_pesos_200").val();
+			var pesos_500=$("#id_pesos_500").val();
+			var pesos_1000=$("#id_pesos_1000").val();
+
+			var total_pesos=0.00;
+
+			if (centavos_10=="")
+			{
+				centavos_10=0;
+				$("#id_centavos_10").val("0");
+			}
+
+			total_centavos_10=parseFloat(centavos_10).toFixed(2)*10;
+			total_pesos=total_pesos+(total_centavos_10/100.00);
+
+
+			if (centavos_50=="")
+			{
+				centavos_50=0;
+				$("#id_centavos_50").val("0");
+			}
+
+			total_centavos_50=parseFloat(centavos_50).toFixed(2)*50;
+			total_pesos=total_pesos+(total_centavos_50/100.00);
+
+			if (pesos_1=="")
+			{
+				pesos_1=0;
+				$("#id_pesos_1").val("0");
+			}
+
+			total_pesos_1=parseFloat(pesos_1).toFixed(2)*100;
+			total_pesos=total_pesos+(total_pesos_1/100.00);
+
+			if (pesos_2=="")
+			{
+				pesos_2=0;
+				$("#id_pesos_2").val("0");
+			}		
+
+			total_pesos_2=parseFloat(pesos_2).toFixed(2)*200;
+			total_pesos=total_pesos+(total_pesos_2/100.00);
+	
+
+			if (pesos_5=="")
+			{
+				pesos_5=0;
+				$("#id_pesos_5").val("0");
+			}			
+
+			total_pesos_5=parseFloat(pesos_5).toFixed(2)*500;
+			total_pesos=total_pesos+(total_pesos_5/100.00);
+
+			if (pesos_10=="")
+			{
+				pesos_10=0;
+				$("#id_pesos_10").val("0");
+			}			
+
+			total_pesos_10=parseFloat(pesos_10).toFixed(2)*1000;
+			total_pesos=total_pesos+(total_pesos_10/100.00);
+
+			if (pesos_20=="")
+			{
+				pesos_20=0;
+				$("#id_pesos_20").val("0");
+			}			
+			
+			total_pesos_20=parseFloat(pesos_20).toFixed(2)*2000;
+			total_pesos=total_pesos+(total_pesos_20/100.00);
+
+			if (pesos_50=="")
+			{
+				pesos_50=0;
+				$("#id_pesos_50").val("0");
+			}			
+
+			total_pesos_50=parseFloat(pesos_50).toFixed(2)*5000;
+			total_pesos=total_pesos+(total_pesos_50/100.00);
+
+			if (pesos_100=="")
+			{
+				pesos_100=0;
+				$("#id_pesos_100").val("0");
+			}			
+
+			total_pesos_100=parseFloat(pesos_100).toFixed(2)*10000;
+			total_pesos=total_pesos+(total_pesos_100/100.00);
+
+			if (pesos_200=="")
+			{
+				pesos_200=0;
+				$("#id_pesos_200").val("0");
+			}			
+
+			total_pesos_200=parseFloat(pesos_200).toFixed(2)*20000;
+			total_pesos=total_pesos+(total_pesos_200/100.00);
+
+			if (pesos_500=="")
+			{
+				pesos_500=0;
+				$("#id_pesos_500").val("0");
+			}			
+
+			total_pesos_500=parseFloat(pesos_500).toFixed(2)*50000;
+			total_pesos=total_pesos+(total_pesos_500/100.00);
+
+			if (pesos_1000=="")
+			{
+				pesos_1000=0;
+				$("#id_pesos_1000").val("0");
+			}			
+
+			total_pesos_1000=parseFloat(pesos_1000).toFixed(2)*100000;
+			total_pesos=total_pesos+(total_pesos_1000/100.00);
+
+			//ocultamos el boton de cerrar caja para garantizar que tengan que guardar los cambios antes de cerrar caja.
+			$("#btn_cerrar_caja").hide();
+			$("#id_nota_1").show()
+			$("#id_diferencia ,#id_real_efectivo").prop('readonly',true);
+			
+			//total_pesos
+			$("#id_diferencia").val(parseInt(total_efectivo_global-total_pesos).toString());
+
+			$("#id_real_efectivo").val(parseInt(total_pesos).toString());
+		}
+//*******************************************************************************************************************************************************
+//**************************************************************************************************************************************************************s
+	</script>
+{% endblock %}

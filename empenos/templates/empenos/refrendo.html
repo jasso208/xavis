@@ -1,0 +1,880 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% block usuario %}
+						<p id="usuario_logueado"  > 
+							<strong>Usuario:</strong> {{user_2.user.username}}
+							&nbsp; / &nbsp;
+							<strong>Perfil:</strong> {{user_2.perfil}}
+							&nbsp; / &nbsp;
+							<strong>Sucursal:</strong> {{user_2.sucursal}}
+							&nbsp; / &nbsp;
+							<strong>Caja:</strong> {{c}}
+						</p>
+{% endblock  %}
+
+{% block content %}
+	<div class="col-xs-12 cls_encabezado_body">
+	
+		<a >
+			Refrendos
+		</a>		
+	
+	</div>
+
+	<div class="col-xs-12">
+		<form method="post" action="#" class="cls_form_1">
+			{%csrf_token%}	
+			<div class="row cls_form_consulta">
+				<div class="col-xs-12">
+					<div class="panel panel-default">						
+						<div class="panel-body">
+							<div class="row">
+								<div clasS="col-xs-9">
+									<h4 class="page-header">Cliente</h4>
+								</div>	
+								<div class="col-xs-3">
+									<a href="/empenos/consulta_boleta" class="btn btn-primary">Buscar Boleta</a>
+								</div>
+							</div>
+							
+							<div class="row">
+								<div class="col-xs-6">
+									<p>
+										<strong>
+											No Boleta:
+										</strong>
+										{{boleta.folio}}
+									</p>
+								</div>
+
+								<div class="col-xs-6">
+									<p>
+										<strong>
+											Sucursal:
+										</strong>
+										{{boleta.sucursal.sucursal}}
+									</p>
+								</div>
+
+							</div>
+							<div class="row">
+								<div class="col-xs-6">
+									<p>
+										<strong>
+											Cliente:
+										</strong>
+										{{boleta.cliente.nombre}} {{boleta.cliente.apellido_p}} {{boleta.cliente.apellido_m}}
+									</p>
+								</div>
+								<div class="col-xs-3">
+									<p>
+										<strong>
+											Plazo:
+										</strong>
+										{{boleta.plazo.plazo}}
+									</p>
+								</div>
+
+								<div class="col-xs-3">
+									<p>
+										<strong>
+											Dias Empeñado:
+										</strong>
+										{{dias_empeno}}
+									</p>
+								</div>
+
+
+							</div>
+
+							<div class="row">
+								<div class="col-xs-6">
+									
+								</div>
+								<div class="col-xs-3">
+									<p>
+										<strong>
+											Fecha Emisión:
+										</strong>
+										{{boleta.fecha  | date:"d/m/Y" }}
+									</p>
+								</div>
+
+								<div class="col-xs-3">
+									<p>
+										<strong>
+											Fecha Vencimiento:
+										</strong>
+										{{boleta.fecha_vencimiento  | date:"d/m/Y" }}
+									</p>
+								</div>
+								
+
+							</div>
+
+							<div class="row">
+								<div clasS="col-xs-12">
+									<h4 class="page-header">Pagos Pendientes</h4>
+
+								</div>	
+							</div>
+
+							<div class="row">
+								<div class="col-xs-2">
+									<strong>
+										Mutuo:
+									</strong>									
+								</div>
+								<div class="col-xs-1 text-right">
+									${{boleta.mutuo}}.00
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-xs-2">
+									<strong>
+										Refrendo:
+									</strong>
+									
+								</div>
+								<div class="col-xs-1 text-right">
+									${{importe_refrendo_total}}.00
+								</div>
+							</div>
+
+
+
+							<div class="row">
+								<div class="col-xs-2">
+									<strong>
+										Comisión PG:
+									</strong>
+									
+								</div>
+								<div class="col-xs-1 text-right">							
+
+									<p>$<span id="importe_comisionpg"></span>.00</p>
+								</div>
+							</div>
+							<div class="row">
+								<div clasS="col-xs-12">
+									<h4 class="page-header">Pagar</h4>
+								</div>	
+							</div>
+							<div class="row">
+								<div class="col-xs-4">
+									<h5 class="page-header">
+										Pago Obligatorio
+									</h5>
+									<div class="col-xs-12">
+										<label>
+											Comisión PG:
+										</label>
+										${{importe_comisionpg}}.00		
+									</div>	
+									<div class="col-xs-12">
+										<label>
+											Refrendo:
+										</label>
+										${{importe_refrendopg}}.00			
+									</div>	
+								</div>
+								<div class="col-xs-4">
+									<h5 class="page-header">
+										Refrendos
+									</h5>
+								<!--	<p style="font-size: 10px;color:red;">* Multipo de ${{monto_minimo_refrendo}}.00; <br>* Maximo ${{importe_refrendo}}.00.<br><br></p>-->
+									<div class="col-xs-12">
+										<div class="col-xs-6">
+											<label>
+												Semanas a pagar
+											</label>
+										</div>
+										<div class="col-xs-6">
+											<select id="id_numero_semanas" class="form-control">
+												<option value="0" selected>0</option>
+												<option value="1">1</option>
+												<option value="2">2</option>
+												<option value="3">3</option>
+												<option value="4">4</option>
+											</select>
+										</div>
+									</div>
+									<div class="col-xs-12">
+										<div class="col-xs-6">
+											<label>
+												Importe:
+											</label>	
+										</div>
+										<div class="col-xs-6">
+											<input type="number" class="form-control" name="" id="id_refrendo" value="0">
+											<div class="help-block" id="error_multiplo_refrendo">
+												<p id="error_refrendo"></p>
+											</div>
+										</div>
+									</div>
+									
+								</div>
+								<div class="col-xs-4">
+									<h5 class="page-header">
+										Abono Capital
+									</h5>
+									<p style="font-size: 10px;color:red;">* Minimo $0.00;<br>* Maximo ${{boleta.mutuo}}.00.<br>* Debe cubrir el total de refrendo para habilitar este campo.</p>
+									<div class="col-xs-12">
+										<div class="col-xs-6">
+											<label>
+												Abono:
+											</label>
+										</div>
+
+										<div class="col-xs-6">
+										<input type="number" class="form-control" name="" id="id_abono" value="0.00">
+										<div class="help-block" id="txt_error_abono">
+											<p id="error_abono"></p>
+										</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-xs-12">
+									<hr>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-xs-12" id="cont_descuento">
+									
+										<p>Descuento: <span id="id_descuento"></span></p>
+									
+								</div>
+								<div class="col-xs-4">
+									<strong>
+										<p>Importe a Pagar: <span id="id_total_pagar"></span></p>
+									</strong>
+								</div>
+								<div class="col-xs-8">
+									<a class="btn btn-default" id="btn_simular">Simular</a>
+									
+								</div>
+								
+								
+							</div>
+
+							<div class="row" style="display: none;">
+								<div class="col-xs-4">
+									<label>
+										
+									</label>
+									
+									{% bootstrap_field form.importe_abono show_field=False %}
+									
+
+
+								</div>								
+							</div>
+							<div class="row" >
+								<div class="col-xs-3">
+									<label>
+										Su pago
+									</label>
+									
+									<input type="number" id="txt_su_pago" value="0.00" class="form-control">
+									
+									<div class="help-block" id="txt_error_su_pago">
+										<p id="error_pago"></p>
+									</div>
+
+								</div>								
+							</div>
+							<div class="row">
+								<div class="col-xs-4">
+									<strong>
+										<p>Cambio: <span id="id_cambio">$0.00</span></p>
+									</strong>
+								</div>
+								<div class="col-xs-4">									
+									<button class="btn btn-primary" id="btn_pagar">Pagar</button>
+								</div>
+								
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+
+<div id="fondo_preloader">
+	<div class="preloader" id="preloader">
+	
+	</div>
+</div>
+<div class="fondo_mensaje_2 cls_msj_error" >
+
+		</div >
+		<div class="mensaje_2 cls_msj_error" >
+			
+			<div class="panel panel-default">	
+				<h3 class="page-header" id="msj_error"></h3>
+				<a class="btn btn-primary" id="btn_aceptar">Aceptar</a>
+				<br>
+				<br>
+
+			</div>
+		</div>
+	{% if msj_error != '' %}
+		<div class="fondo_mensaje" >
+			
+		</div >
+		<div class="mensaje" >
+				
+				<div class="panel panel-default">	
+					<h3 class="page-header">{{msj_error}}</h3>
+					<a class="btn btn-primary" href="{% url 'seguridad:admin_empenos' %}">Aceptar</a>
+					<br>
+					<br>
+
+				</div>
+		</div>
+	{% endif %}
+
+{% ifequal abono_aplicado '1' %}
+		<div class="fondo_mensaje" >
+			
+		</div >
+		<div class="mensaje" >				
+				<div class="panel panel-default">	
+					<h3 class="page-header">El abono se aplico correctamente.</h3>
+					<a class="btn btn-primary" href="{% url 'seguridad:admin_empenos' %}">Aceptar</a>
+					<br>
+					<br>
+
+				</div>
+		</div>
+{% endifequal  %}
+
+		<div class="fondo_mensaje cls_error_aplicar_abono" >
+			
+		</div >
+		<div class="mensaje cls_error_aplicar_abono" >				
+				<div class="panel panel-default">	
+					<h3 class="page-header">Error al aplicar el pago.</h3>
+					<a class="btn btn-primary" id="btn_aceptar_error_aplicar_abono">Aceptar</a>
+					<br>
+					<br>
+
+				</div>
+		</div>
+
+
+
+		<div class="fondo_mensaje cls_mensaje_bonificacion" style="z-index: 1000">
+			
+		</div >
+		<div class="mensaje cls_mensaje_bonificacion" style="z-index: 1001">				
+				<div class="panel panel-default">	
+					<h3 class="page-header" id="msj_bonificacion"></h3>
+					<a class="btn btn-primary" id="btn_aceptar_bonificacion">Aceptar</a>
+					<br>
+					<br>
+
+				</div>
+		</div>
+
+
+		<div id="simulacion" class="cls_form_emergente">
+
+					<div class="row">
+						<div class="col-xs-12">
+							<h4 class="page-header" style="text-align: center;">Simulación</h4>
+						</div>
+						<div class="col-xs-6">
+							<label>Mutuo: <span id="nuevo_mutuo"></span></label>
+						</div>
+						<div class="col-xs-6" id="estatus_boleta">
+							<label>Boleta Desempeñada</label>
+						</div>
+
+					</div>
+					<div class="row">
+						<div class="col-xs-12">
+							<h5 class="page-header">Pagos Pendientes</h5>
+						</div>
+						<div class="col-xs-12">
+							<table id="tabla_pagos" class="table table-bordered">
+							    <thead>
+							      <tr>
+							        <th>Fecha de Venc.</th>
+							        <th>Importe</th>					        
+							        <th>Vencido</th>					        
+							        <th>Pagado</th>					        
+							      </tr>
+							    </thead>
+							    <tbody>
+						
+							    </tbody>
+							</table>
+							
+						</div>
+						
+					</div>
+					<div class="row">
+						<div class="col-xs-12" style="text-align: center;">
+							<a class="btn btn-primary" id="btn_aceptar_simulacion">Aceptar</a>
+							
+						</div>
+					</div>
+		
+		</div>
+	<div class="fondo_mensaje"  id="fondo_form_emergente">
+		
+	</div >
+
+<script type="text/javascript">
+	var total_pagar=0;
+	var importe_comisionpg=0;
+	
+	$(document).ready(
+			function()
+			{
+				
+				fn_inicio();
+				fn_calcula_total_pagar();
+				fn_Calcula_cambio();
+				$("#btn_aceptar").click(
+						function()
+						{
+							$(".cls_msj_error").hide();
+						}
+					);
+				$("#btn_aceptar_simulacion").click(
+						function()
+						{
+						$("#simulacion").hide();
+						$("#fondo_form_emergente").hide();
+						}
+					);
+				$("#btn_aceptar_bonificacion").click(
+						function()
+
+						{
+							$(".cls_mensaje_bonificacion").hide();
+						}
+					)				;
+			/*	$("#id_refrendo").change(
+						function ()
+						{
+							$("#id_importe_abono").val("0");
+							fn_Calcula_cambio();
+							$("#id_abono").prop("readonly",true);	
+							$("#id_abono").val("0");
+							$("#error_multiplo_refrendo").hide();
+							fn_calcula_total_pagar()
+
+						}
+					);
+					*/
+				$("#id_abono").change(
+						function ()
+						{
+							$("#id_importe_abono").val("0");
+							
+							$("#error_abono").hide();
+							fn_calcula_total_pagar()
+							fn_Calcula_cambio();
+
+						}
+					);
+				$("#btn_simular").click(
+					function()
+					{
+
+						$("#simulacion").show();
+						$("#fondo_form_emergente").show();
+
+						var imprefpg=parseInt("{{importe_refrendopg}}");
+
+						
+						
+
+						fn_simula_refrendo();
+					}
+				);
+
+				$("#txt_su_pago").change(
+						function()
+						{
+							fn_Calcula_cambio();
+						}
+					);
+
+				$("#fondo_form_emergente").click(
+					function()
+					{
+						$("#simulacion").hide();
+						$("#fondo_form_emergente").hide();
+					}
+				);
+				$(".cls_error_aplicar_abono").click(
+						function()
+						{
+							$(".cls_error_aplicar_abono").hide();				
+						}
+					);	
+				$("#id_numero_semanas").change(
+						function()
+						{
+							var monto_minimo_refrendo=parseInt("{{monto_minimo_refrendo}}");
+
+							var num_semanas=parseInt($("#id_numero_semanas").val());							
+
+
+							$("#id_refrendo").val(num_semanas*monto_minimo_refrendo);
+
+
+							$("#id_importe_abono").val("0");
+							fn_Calcula_cambio();
+							$("#id_abono").prop("readonly",true);	
+							$("#id_abono").val("0");
+							$("#error_multiplo_refrendo").hide();
+							fn_calcula_total_pagar()
+
+							$("#id_refrendo").prop("readonly",true);	
+
+
+
+						}
+					);
+			}
+		);
+
+	function fn_Calcula_cambio()
+	{
+		$("#txt_error_su_pago").hide();
+
+		//total_pagar
+		var  su_pago=$("#txt_su_pago").val();
+
+
+		var cambio=parseInt(su_pago)-parseInt($("#id_importe_abono").val());
+
+		if (cambio<0)
+		{
+			$("#txt_error_su_pago").show();
+			$("#error_pago").text("El importe de su pago no es correcto.");			
+			$("#btn_pagar").prop("disabled",true);
+			
+		}
+		else
+		{
+			$("#btn_pagar").prop("disabled",false);
+		}
+		if (parseInt($("#id_importe_abono").val())==0)
+		{
+			$("#error_pago").text("El importe a pagar debe cer mayor a cero.");			
+			$("#btn_pagar").prop("disabled",true);
+		}
+		$("#id_cambio").text("$"+cambio.toString()+".00");
+
+	}
+	function fn_inicio()
+	{
+		var abono_aplicado="{{abono_aplicado}}"
+
+		if (parseInt(abono_aplicado)==0)
+		{
+			$(".cls_error_aplicar_abono").show();
+		}
+		else
+		{
+			$(".cls_error_aplicar_abono").hide();	
+		}
+		$("#error_multiplo_refrendo").hide();
+		$("#id_refrendo").val("{{monto_minimo_refrendo}}");
+		$("#id_abono").prop("readonly",true);
+		$("#error_abono").hide();
+		$("#fondo_preloader").hide();
+		$(".cls_msj_error").hide();
+		
+		$("#btn_pagar").prop("disabled",true);
+		$("#simulacion").hide();
+		$("#fondo_form_emergente").hide();
+		$("#estatus_boleta").hide();
+
+
+		$("#importe_comisionpg").text("{{importe_comisionpg}}");
+		importe_comisionpg=parseInt("{{importe_comisionpg}}");
+		$(".cls_mensaje_bonificacion").hide();
+		$("#id_refrendo").prop("readonly",true);	
+		$("#id_refrendo").val("0");
+
+				
+	}
+
+	function fn_calcula_total_pagar()
+	{
+
+		var imp_saldo_vencido=parseInt("{{importe_saldo_vencido}}");
+		var ref=parseInt($("#id_refrendo").val())+parseInt("{{importe_refrendopg}}");
+		var minimo_pg=parseInt("{{minimo_pg}}");
+
+		//si se cubrio todo el saldo vencido y tuene importe aplicable para descuento (minimo_pg) se aplica el descuento
+		if (ref>=imp_saldo_vencido)
+		{
+			
+			if (minimo_pg!=0)
+			{
+				var importe_comisionpg=0;
+				$("#id_descuento").text("${{minimo_pg}}.00");
+			}
+			else
+			{
+				var importe_comisionpg="{{importe_comisionpg}}";	
+				$("#id_descuento").text("$0.00");
+			}
+			
+		}
+		else
+		{
+			var importe_comisionpg="{{importe_comisionpg}}";	
+			$("#id_descuento").text("$0.00");
+		}
+
+
+		
+		var importe_refrendopg="{{importe_refrendopg}}";
+		var importe_abono=fn_valida_abono();
+		var importe_refrendo=fn_calcula_refrendo();
+
+		total_pagar=parseInt(importe_comisionpg)+parseInt(importe_refrendopg)+parseInt(importe_refrendo)+parseInt(importe_abono);
+		$("#id_total_pagar").text("$"+total_pagar.toString()+".00");
+		$("#id_importe_abono").val(total_pagar.toString());
+
+	}
+
+	function fn_calcula_refrendo()
+	{
+
+		refrendo_requerido="{{importe_refrendo}}";
+
+		if (refrendo_requerido=="0")
+		{
+			var numero="0";
+			$("#id_abono").prop("readonly",false);
+			
+			$("#id_refrendo").prop("readonly",true);
+			$("#id_refrendo").val("0");
+			refrendo=0;
+		}
+		else
+		{
+			var numero="{{monto_minimo_refrendo}}";
+
+			var importe_maximo="{{importe_refrendo}}";
+			$("#id_refrendo").val(parseInt($("#id_refrendo").val()));
+			var refrendo=parseInt($("#id_refrendo").val());
+
+			
+			if ($("#id_refrendo").val()=="")
+			{
+				$("#id_refrendo").val("{{monto_minimo_refrendo}}");
+				var refrendo=parseInt($("#id_refrendo").val());
+			}
+
+			//Debe ser al menos una semana/ 1 mes de refrendo
+			if (refrendo<0)
+			{
+				$("#id_refrendo").val("{{monto_minimo_refrendo}}");
+				var refrendo=parseInt($("#id_refrendo").val());
+				$("#error_refrendo").text("El monto minimo debe ser $0.00.");
+				$("#error_multiplo_refrendo").show();	
+
+				if (parseInt(importe_maximo)==parseInt($("#id_refrendo").val()))
+				{
+					$("#id_abono").prop("readonly",false);
+					
+				}
+
+			}
+
+	
+			if (refrendo!=0)
+			{
+				var remainder = refrendo % numero;
+
+				//como el refrendo no se puede abonar parcialmente, se valida que abono sea multiplo del refrendo
+				if (remainder != 0){	
+
+					$("#id_refrendo").val("{{monto_minimo_refrendo}}");
+					var refrendo=parseInt($("#id_refrendo").val());
+
+
+					$("#error_refrendo").text("El monto capturado no es multipo de ${{monto_minimo_refrendo}}.00.");
+
+													  
+
+					$("#error_multiplo_refrendo").show();		
+
+					if (parseInt(importe_maximo)==parseInt($("#id_refrendo").val()))
+					{
+						$("#id_abono").prop("readonly",false);
+						
+					}
+
+					return refrendo;
+				}	
+			}
+			
+	
+			
+			//si el refrendo es mayor que el importe maximo permitido para refrendos, devuelve cero
+			if (refrendo>importe_maximo)
+			{
+				$("#id_refrendo").val("{{monto_minimo_refrendo}}");
+
+				var refrendo=parseInt($("#id_refrendo").val());
+
+				$("#error_refrendo").text("El monto capturado es mayor a ${{importe_refrendo}}.00.");
+
+				$("#error_multiplo_refrendo").show();
+				
+				if (parseInt(importe_maximo)==parseInt($("#id_refrendo").val()))
+				{
+					$("#id_abono").prop("readonly",false);
+					
+				}
+
+				return refrendo;
+			}
+
+
+			//si se liquida todo el refrendo, habilitamos el abono a capital.
+			if (refrendo==parseInt("{{importe_refrendo}}"))
+			{
+				$("#id_abono").prop("readonly",false);
+				
+			}
+			else
+			{
+				$("#id_abono").prop("readonly",true);	
+			}
+		}
+		
+		return refrendo;
+
+		
+	}
+	function fn_valida_abono()
+	{
+		$("#error_abono").hide();
+		abono=$("#id_abono").val();
+
+		
+		//como el abono no es obligatorio podemos dejarlo en cero.
+		if (abono=="" || isNaN(abono))
+		{
+			abono=0;
+			$("#id_abono").val("0");
+		}
+
+		if (parseInt(abono)>=0 & parseInt(abono)<=parseInt("{{boleta.mutuo}}"))
+		{
+			abono=abono;
+		}
+		else
+		{
+			abono=0;
+			$("#id_abono").val("0");
+			$("#error_abono").show();
+			$("#txt_error_abono").text("El monto del abono debe ser mayor o igual a 0 y menor o igual a {{boleta.mutuo}}.");
+		}
+
+		return abono;
+	}
+
+	function fn_simula_refrendo()
+	{
+		
+
+
+		if (parseInt(total_pagar)==0)
+		{
+	        		$("#msj_error").text("El total a pagar debe ser mayor a cero.");
+					$(".cls_msj_error").show();
+					return 0;
+		}
+
+		$("#fondo_preloader").show();
+		$("#tabla_pagos tbody tr").remove();
+		$.ajax({
+			type: "GET",
+	        url: "http://{{IP_LOCAL}}/empenos/api_simula_refrendo/",
+	        data: {"username":"{{username}}","folio_boleta":"{{boleta.folio}}","importe":total_pagar.toString(),"id_sucursal":"{{boleta.sucursal.id}}"},
+	        contentType: "application/json; charset=utf-8",
+	        dataType: "json",
+	        success: function (r) {
+    			if (r[0].estatus=="0")
+	        	{
+	        		$("#msj_error").text(r[0].msj);
+					$(".cls_msj_error").show();
+	        	}
+	        	else
+	        	{
+
+
+	        		cont=r[0].lista.length;
+
+	        		for(x=0;x<cont;x++)
+	        		{
+	        			var htmlTags = '<tr>'+
+
+						       // '<td>'+r[3].lista[x].tipo_pago+'</td>'+
+						        
+						        '<td>'+r[0].lista[x].fecha_vencimiento+'</td>'+
+						        '<td>$'+r[0].lista[x].importe+'.00</td>'+
+						        '<td>'+r[0].lista[x].vencido+'</td>'+
+						        '<td>'+r[0].lista[x].pagado+'</td>'+
+						        //'<td>'+r[3].lista[x].pagado+'</td>'+
+						        //'<td>'+r[3].lista[x].fecha_pago+'</td>'+
+						      '</tr>';
+			      
+			  	 			$('#tabla_pagos tbody').append(htmlTags);
+
+	        		}
+
+					$("#nuevo_mutuo").text("$"+r[1].nuevo_mutuo+".00");
+
+					
+
+					
+
+	        		if(parseInt(r[1].nuevo_mutuo)==0)
+	        		{
+	        			$("#estatus_boleta").show();
+	        		}
+	        		else
+	        		{
+	        			$("#estatus_boleta").hide();
+	        		}
+	        	}
+    	
+	        	$("#fondo_preloader").hide();
+	        },
+	        error: function (r) {
+	        		$("#msj_error").text("Error al consultar la boleta.");
+					$(".cls_msj_error").show();
+					$("#fondo_preloader").hide();
+	        },
+	        failure: function (r) {
+	        		$("#msj_error").text("Error al consultar la boleta.");
+					$(".cls_msj_error").show();
+					$("#fondo_preloader").hide();
+	        }
+		});
+	}
+
+</script>
+{% endblock %}

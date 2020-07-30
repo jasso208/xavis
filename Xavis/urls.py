@@ -24,5 +24,6 @@ urlpatterns = [
 	url(r'ventas/',include('ventas.urls')),
 	url(r'blog/',include('blog.urls')),
 	url(r'contabilidad/',include('contabilidad.urls')),
+    url(r'empenos/',include('empenos.urls')),
 	url(r'',include('seguridad.urls')),
 ]

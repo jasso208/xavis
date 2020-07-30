@@ -1,0 +1,659 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% block usuario %}
+						<p id="usuario_logueado"  > 
+							<strong>Usuario:</strong> {{user_2.user.username}}
+							&nbsp; / &nbsp;
+							<strong>Perfil:</strong> {{user_2.perfil}}
+							&nbsp; / &nbsp;
+							<strong>Sucursal:</strong> {{user_2.sucursal}}
+							&nbsp; / &nbsp;
+							<strong>Caja:</strong> {{c}}
+						</p>
+{% endblock  %}
+
+{% block content %}
+	<div class="col-xs-12 cls_encabezado_body">
+	
+		<a >
+			Consulta Boleta
+		</a>		
+	
+	</div>
+	<div class="col-xs-12">
+		<form method="post" action="#" class="cls_form_1">
+			{%csrf_token%}
+	
+			<div class="row cls_form_consulta">
+				<div class="col-xs-12">
+					<div class="panel panel-default">						 
+						<div class="panel-body">
+
+							<div class="col-xs-12">
+								<div class="panel panel-default">						
+									<div class="panel-body">
+										<div class="col-xs-12">
+											<label for="">Sucursal</label>					
+											<select name="sucursal" class="form-control" title="" id="id_sucursal" required="">
+											<option value="" selected="">---------</option>
+											{% for x in sucursales %}										
+											<option value="{{x.id}}">{{ x.sucursal }}</option>
+											{% endfor %}
+											</select>	
+											<br>
+										</div>
+										<div class="col-xs-3">
+								<div class="panel panel-default">						
+									<div class="panel-body">
+													<div class="col-xs-12">
+														<label>Filtrar por Cliente</label>
+													</div>
+
+													<div class="col-xs-12">
+														<label for="">Cliente</label>					
+														{% bootstrap_field form.cliente show_label=False %}
+													</div>
+													<div class="col-xs-12" style="text-align: center;">
+
+														<button class="btn btn-primary">Buscar</button>
+													</div>
+												</div>
+											</div>
+										</div>
+										<div class="col-xs-3">
+																			<div class="panel panel-default">						
+									<div class="panel-body">
+											
+													<div class="col-xs-12">
+														<label>Filtrar por # boleta</label>
+													</div>
+													<div class="col-xs-12">
+														<label for="">No. Boleta</label>					
+														{% bootstrap_field form.boleta show_label=False %}
+													</div>
+													<div class="col-xs-12" style="text-align: center;">
+														<button class="btn btn-primary">Buscar</button>
+													</div>
+												</div>
+
+											</div>
+												
+										</div>
+										<div class="col-xs-3">
+											<div class="panel panel-default">						
+												<div class="panel-body">
+													<div class="col-xs-12">
+														<label>Filtrar por fec venc														</label>	
+													</div>
+													
+													<div class="col-xs-12">
+														<label>
+															Fecha Inciial
+														</label>
+														<input type="date" name="fecha_inicial" class="form-control" placeholder="Fecha inicial" title=""  id="id_fecha_inicial">
+													</div>
+													<div class="col-xs-12">
+														<label>
+															Fecha Final
+														</label>
+														<input type="date" name="fecha_final" class="form-control" placeholder="Fecha final" title=""  id="id_fecha_final">
+														
+													</div>
+													<div class="col-xs-12" style="text-align: center;">
+														<button class="btn btn-primary">Buscar</button>
+													</div>
+												</div>
+											</div>
+
+										</div>
+
+										<div class="col-xs-3">
+											<div class="panel panel-default">						
+												<div class="panel-body">
+													<div class="col-xs-12">
+														<label>
+																Filtrar por estatus
+														</label>	
+													</div>
+
+													<div class="col-xs-12">
+														<label>
+															Estatus Boleta
+														</label>
+														{%bootstrap_field form.estatus_boleta show_label=False%}
+													</div>
+													<div class="col-xs-12" style="text-align: center;">
+														<button class="btn btn-primary">Buscar</button>
+													</div>
+
+												</div>
+											</div>
+										</div>
+
+									</div>
+								</div>
+							</div>
+
+							<div class="col-xs-12">
+								<label>
+									Resultado de busqueda.
+								</label>
+
+									<table id="tabla_cotizacion" class="table table-bordered">
+									    <thead>
+									      <tr>
+									      	<th></th>
+									        <th>No Bol</th>
+									        <th>Sucursal</th>
+									        <th>Tipo Prod</th>
+									        <th>Cliente</th>
+									        <th>Avaluo</th>
+
+									        <th>Emisión</th>
+									        <th>Plazo</th>
+									        <th>Fecha Venc.</th>
+									        <th>Estatus</th>					
+									      </tr>
+									    </thead>
+									    <tbody>
+									    	{% for b in boletas %}
+									    	<tr>
+									    		<td>
+									    			
+									    			<a onClick='fn_consulta_boleta({{b.id}})' class='btn btn-default btn-sm'>
+									    				<span class='glyphicon glyphicon-search'>
+									    					
+									    				</span>    					
+									    			</a> 
+
+									    			{% if b.plazo.id != 1  %}
+										    			 {%  if b.estatus.id != 4 %}
+
+										    			<a href='/empenos/refrendo/{{b.id}}' class='btn btn-default btn-sm'>
+										    				<span class='glyphicon glyphicon-euro'>
+										    					
+										    				</span>    					
+										    			</a>
+										    			{%endif%}
+
+									    			{%endif%}
+
+									    		</td>
+									    		<td>
+									    			<a>{{b.folio}}</a>
+									    		</td>
+									    		<td><a>{{b.sucursal.sucursal}}</a></td>
+									    		<td><a>{{b.tipo_producto.tipo_producto}}</a></td>
+									    		<td><a>{{b.cliente.nombre}} {{b.cliente.apellido_p}} {{b.cliente.apellido_m}}</a></td>
+									    		<td><a>${{b.avaluo}}.00</a></td>
+									    		<td><a>{{b.fecha | date:"d/m/Y" }}</a></td>
+									    		<td><a>{{b.plazo.plazo}}</a></td>
+									    		<td><a>{{b.fecha_vencimiento  | date:"d/m/Y" }}</a></td>
+									    		<td><a>{{b.estatus.estatus}}</a></td>
+
+									    	</tr>
+									     	{% endfor %}
+									    </tbody>
+									</table>
+							</div>
+						</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+	<div class="cls_form_emergente cls_form_resumen_boleta" style="width: 70%;left:15%;">		
+		<div class="row">
+			<div class="col-xs-12 " >
+				<h4 class="page-header" style="text-align: center;">
+					Detalle de Boleta
+				</h4>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-3">
+				
+			</div>	
+
+			<div class="col-xs-6">
+				<p>
+					<strong>Sucursal: </strong>
+					<span id="span_sucursal"></span>	
+				</p>
+			</div>	
+			<div class="col-xs-3">
+				<p>
+						<strong>No. Boleta: </strong>
+						<span id="span_no_boleta"></span>	
+				</p>
+			</div>	
+		</div>
+
+		<div class="row">
+			<div class="col-xs-12">
+				<br>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-12">
+				<p>
+					<strong>Cliente:</strong>
+					<span id="span_cliente"></span>
+				</p>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-xs-12">
+				
+					<div class="panel panel-default">						
+						<div class="panel-body">
+							
+								<div class="col-xs-9">
+									<p><strong>Calle: </strong><span id="span_calle"></span> </p>
+								</div>
+								<div class="col-xs-3">
+									<p><strong>C.P.: </strong><span id="span_cp"></span> </p>
+								</div>	
+								<div class="col-xs-3">									
+									<p><strong>No. Int: </strong><span id="span_int"></span> </p>
+								</div>
+
+								<div class="col-xs-9">
+									
+									<p><strong>No. Ext: </strong><span id="span_ext"></span> </p>
+								</div>	
+
+								<div class="col-xs-4">
+									
+									<p><strong>Colonia: </strong><span id="span_colonia"></span> </p>
+								</div>								
+
+								<div class="col-xs-4">
+									
+									<p><strong>Ciudad: </strong><span id="span_ciudad"></span> </p>
+								</div>
+
+								<div class="col-xs-4">
+									<p><strong>Estado: </strong><span id="span_estado"></span> </p>
+								</div>
+
+								<div class="col-xs-12">
+									<p><strong>País: </strong><span id="span_pais"></span> </p>
+								</div>
+
+								<div class="col-xs-6">
+									
+									<p><strong>Teléfono Fijo: </strong><span id="span_telefono_fijo"></span> </p>
+								</div>
+								<div class="col-xs-6">
+									<p><strong>Teléfono Celular: </strong><span id="span_telefono_celuar"></span> </p>
+								</div>
+
+						</div>
+					</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-xs-12">
+				<label>
+					Informacón de Empeño:
+				</label>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-xs-12">
+				
+
+				<div class="panel panel-default">						
+					<div class="panel-body">
+						<div class="col-xs-12">							
+							<p><strong>Tipo de Producto: </strong><span id="span_tipo_producto"></span> </p>
+						</div>
+
+						<div class="col-xs-4">
+							<p><strong>Avalúo: </strong><span id="span_avaluo"></span> </p>
+						</div>
+
+						<div class="col-xs-4">
+							<p><strong>Mutuo: </strong><span id="span_mutuo"></span> </p>
+						</div>
+
+						<div class="col-xs-4">
+							<p><strong>Refrendo: </strong><span id="span_refrendo"></span> </p>
+
+						</div>
+						<div class="col-xs-6">							
+							<p><strong>Fecha Emisión: </strong><span id="span_fecha_emision"></span> </p>
+						</div>
+						<div class="col-xs-6">							
+							<p><strong>Fecha Vencimiento: </strong><span id="span_fecha_vencimiento"></span> </p>
+						</div>
+
+						<div class="col-xs-12">
+							
+							<p><strong>Cotitular: </strong><span id="span_cotitular"></span> </p>
+						</div>
+
+						<div class="col-xs-12">
+							
+							<p><strong>Estatus Boleta: </strong><span id="span_estatus"></span> </p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-12">
+				<label>
+					Articulos:
+				</label>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-xs-12">
+				
+				<div class="panel panel-default">						
+					<div class="panel-body">
+						<table id="tabla_articulos" class="table table-bordered">
+						    <thead>
+						      <tr>
+						        <th style="width: 85%">Descripción</th>						        
+						        <th style="width: 15%">Avaluo</th>						        
+						      </tr>
+						    </thead>
+						    <tbody>
+					
+						    </tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+		<div class="row">
+			<div class="col-xs-12">
+				<label>
+					Resumen de Pagos:
+				</label>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-xs-12">
+				
+				<div class="panel panel-default">						
+					<div class="panel-body">
+						<table id="tabla_pagos" class="table table-bordered">
+						    <thead>
+						      <tr>
+						        <th>Tipo de Pago</th>
+						        
+						        <th>Fecha de Venc.</th>
+						        <th>Importe</th>
+						        <th>Vencido</th>
+						        <th>Pagado</th>
+						        <th>Fecha Pago</th>						        
+						      </tr>
+						    </thead>
+						    <tbody>
+					
+						    </tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-9">
+				
+			</div>
+
+			
+			
+					<div class="col-xs-3 text-right">
+
+						<a class="btn btn-primary" href="" id="btn_refrendar">Refrendar</a>
+					</div>
+				
+			
+			<div class="col-xs-3 text-right">
+				<a class="btn btn-default" id="btn_cancelar">Cancelar</a>
+			</div>
+			
+		</div>
+	</div>
+
+	<div class="fondo_mensaje cls_form_resumen_boleta"  id="fondo_form_emergente">
+		
+	</div >
+		<div class="fondo_mensaje_2 cls_msj_error" >
+
+		</div >
+		<div class="mensaje_2 cls_msj_error" >
+			
+			<div class="panel panel-default">	
+				<h3 class="page-header" id="msj_error"></h3>
+				<a class="btn btn-primary" id="btn_aceptar">Aceptar</a>
+				<br>
+				<br>
+
+			</div>
+		</div>
+
+<div id="fondo_preloader">
+	<div class="preloader" id="preloader">
+	
+	</div>
+</div>
+	{% if msj_error != '' %}
+	<div class="fondo_mensaje" >
+		
+	</div >
+	<div class="mensaje" >
+			
+			<div class="panel panel-default">	
+				<h3 class="page-header">{{msj_error}}</h3>
+				<a class="btn btn-primary" href="{% url 'seguridad:admin_cajas' %}">Aceptar</a>
+				<br>
+				<br>
+
+			</div>
+	</div>
+	{% endif %}
+<script type="text/javascript">
+	var id_boleta=0;
+	$(document).ready(
+			function()
+			{
+
+				fn_inicio();
+				$(".fondo_mensaje").click(
+						function()
+						{
+							$(".cls_form_resumen_boleta").hide();
+						}
+					);
+
+				$("#btn_cancelar").click(
+						function()
+						{
+							$(".cls_form_resumen_boleta").hide();
+						}
+					);
+				$("#btn_aceptar").click(
+						function()
+						{
+							$(".cls_msj_error").hide();
+						}
+					);
+				$("#id_cliente").focusin(
+						function()
+						{
+							$("#id_boleta,#id_fecha_inicial,#id_fecha_final,#id_estatus_boleta").val("");
+						}
+					);
+
+				$("#id_boleta").focusin(
+						function()
+						{
+							$("#id_cliente,#id_fecha_inicial,#id_fecha_final,#id_estatus_boleta").val("");
+
+						}
+					);
+
+				$("#id_fecha_inicial,#id_fecha_final").focusin(
+						function()
+						{
+							$("#id_cliente,#id_boleta,#id_estatus_boleta").val("");
+
+						}
+					);
+
+				$("#id_estatus_boleta").focusin(
+						function()
+						{
+							$("#id_cliente,#id_boleta,#id_fecha_inicial,#id_fecha_final").val("");
+
+						}
+					);
+			}
+		);
+	function fn_inicio()
+	{
+		$(".cls_form_resumen_boleta").hide();
+		$(".cls_msj_error").hide();
+		$("#fondo_preloader").hide();
+	}
+	function fn_consulta_boleta(id)
+	{
+		
+		id_boleta=id;
+		$("#btn_refrendar").attr("href","/empenos/refrendo/"+id_boleta.toString());
+
+		$("#fondo_preloader").show();
+		$("#tabla_pagos tbody tr").remove();
+		$("#tabla_articulos tbody tr").remove();
+
+		
+		$.ajax({
+			type: "GET",
+	        url: "http://{{IP_LOCAL}}/empenos/api_consulta_boleta/",
+	        data: {"id_boleta":id},
+	        contentType: "application/json; charset=utf-8",
+	        dataType: "json",
+	        success: function (r) {
+    			if (r[0].estatus=="0")
+	        	{
+	        		$("#msj_error").text(r[0].msj);
+					$(".cls_msj_error").show();
+	        	}
+	        	else
+	        	{
+	        		$(".cls_form_resumen_boleta").show();
+	        		$("#span_sucursal").text(r[1].sucursal);	        		
+	        		$("#span_no_boleta").text(r[1].no_boleta);	        		
+
+					//informacion de cliente	        		
+	        		$("#span_cliente").text(r[1].cliente);
+	        		$("#span_calle").text(r[1].calle);	     
+	        		$("#span_cp").text(r[1].CP);	     
+	        		$("#span_int").text(r[1].no_int);	     
+	        		$("#span_ext").text(r[1].no_ext);	     
+	        		$("#span_colonia").text(r[1].colonia);	     
+	        		$("#span_ciudad").text(r[1].ciudad);	     
+	        		$("#span_estado").text(r[1].estado);	     
+	        		$("#span_pais").text(r[1].pais);	     
+	        		$("#span_telefono_fijo").text(r[1].telefono_fijo);	     
+	        		$("#span_telefono_celuar").text(r[1].telefono_celular);	     
+
+	        		//informaciOn de boleta
+	        		$("#span_tipo_producto").text(r[2].tipo_producto);
+	        		$("#span_avaluo").text(r[2].avaluo);
+	        		$("#span_mutuo").text(r[2].mutuo);
+	        		$("#span_refrendo").text(r[2].refrendo);
+	        		$("#span_fecha_emision").text(r[2].fecha_emision);
+	        		$("#span_fecha_vencimiento").text(r[2].fecha_vencimiento);
+	        		$("#span_cotitular").text(r[2].cotitular);
+	        		$("#span_estatus").text(r[2].estatus);
+
+	        		if (parseInt(r[1].id_plazo)==1 || parseInt(r[1].id_estatus_boleta)==4)
+	        		{
+
+	        			$("#btn_refrendar").hide();
+	        		}
+	        		else
+	        		{
+						$("#btn_refrendar").show();
+	        		}
+
+	        		cont=r[3].lista.length;
+
+	        		for(x=0;x<cont;x++)
+	        		{
+	        			var htmlTags = '<tr>'+
+
+						        '<td>'+r[3].lista[x].tipo_pago+'</td>'+
+						        
+						        '<td>'+r[3].lista[x].fecha_vencimiento+'</td>'+
+						        '<td>$'+r[3].lista[x].importe+'.00</td>'+
+						        '<td>'+r[3].lista[x].vencido+'</td>'+
+						        '<td>'+r[3].lista[x].pagado+'</td>'+
+						        '<td>'+r[3].lista[x].fecha_pago+'</td>'+
+						      '</tr>';
+			      
+			  	 			$('#tabla_pagos tbody').append(htmlTags);			  	 			
+
+			  	 			
+	        		}
+
+
+	        		
+	        		cont=r[4].lista_2.length;
+
+	        		for(x=0;x<cont;x++)
+	        		{
+	        			var htmlTags = '<tr>'+
+
+						        "<td style='width: 85%'>"+r[4].lista_2[x].descripcion+"</td>"+
+						        
+						        "<td style='width: 15%'>$"+r[4].lista_2[x].avaluo+".00</td>"+						        
+						      '</tr>';
+			      
+			  	 			$('#tabla_articulos tbody').append(htmlTags);			  	 			
+
+			  	 			
+	        		}
+	        		
+	        		
+	        	}
+    	
+	        	$("#fondo_preloader").hide();
+	        },
+	        error: function (r) {
+	        		$("#msj_error").text("Error al consultar la boleta.");
+					$(".cls_msj_error").show();
+					$("#fondo_preloader").hide();
+	        },
+	        failure: function (r) {
+	        		$("#msj_error").text("Error al consultar la boleta.");
+					$(".cls_msj_error").show();
+					$("#fondo_preloader").hide();
+	        }
+		});
+
+	
+		
+	}
+
+</script>
+
+
+{% endblock %}

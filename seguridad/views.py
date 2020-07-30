@@ -18,7 +18,9 @@ import email.message
 from .forms import Login_Form,Permisos_Form,User_Form,Busca_Usuario_Form,Cambia_Psw_Form
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models  import Permission,User
-
+from empenos.models import User_2,Cajas
+from datetime import date, datetime, time
+from random import randint
 encabezado_link_consulta_venta_1="""
 <html>
     <head>           
@@ -60,11 +62,27 @@ def Login(request):
 		password=request.POST.get("password")
 		user=authenticate (request,username=usuario,password=password)
 		if user is not None:
+
 			login(request,user)
+
+			#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
+			try:
+				user_2=User_2.objects.get(user=user)
+			except:
+				
+				form=Login_Form(request.POST)
+				estatus=0
+				msj="La cuenta del usuario esta incompleta."			
+				return render(request,'login.html',locals())
+			
+			#cada que iniciamos sesion, se genera un nuevo folio.
+			user_2.sesion=fn_genera_sesion()
+			user_2.save()
+
 			estatus=1			
-			print("se logueo")
+			
 			form=Login_Form()
-			return render(request,'seguridad/bienvenidos.html',locals())
+			return HttpResponseRedirect(reverse('seguridad:login'))
 			#return HttpResponseRedirect("/bienvenidos")
 		else:
 			form=Login_Form(request.POST)
@@ -84,7 +102,36 @@ def cerrar_session(request):
 	return HttpResponseRedirect("/")
 
 def bienvenidos(request):
-	return render(request,'seguridad/bienvenidos.html',{})
+	if not request.user.is_authenticated:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+	
+	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
+	try:
+		user_2=User_2.objects.get(user=request.user)
+		print(user_2)
+	except Exception as e:		
+		form=Login_Form(request.POST)
+		estatus=0
+		msj="La cuenta del usuario esta incompleta."			
+		return render(request,'login.html',locals())
+
+	caja_abierta="0"
+
+	pub_date = date.today()
+	min_pub_date_time = datetime.combine(pub_date, time.min) 
+	max_pub_date_time = datetime.combine(pub_date, time.max)  
+
+	try:
+	#validamos si el usuario tiene caja abierta en el dia actual.
+		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+		c=caja.caja
+		caja_abierta="1"#si tiene caja abierta enviamos este estatus para no dejar entrar a la pantalla.
+	except:
+		print("no tiene caja abierta")
+
+
+
+	return render(request,'seguridad/bienvenidos.html',locals())
 
 def admin_user(request):
 	return render(request,'seguridad/admin_user.html',{})
@@ -100,7 +147,92 @@ def admin_ventas(request):
 
 def admin_miperfil(request):
 	return render(request,'seguridad/admin_mi_perfil.html',{})
-		
+
+def admin_cajas(request):
+	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
+	try:
+		user_2=User_2.objects.get(user=request.user)
+	except:
+		form=Login_Form(request.POST)
+		estatus=0
+		msj="La cuenta del usuario esta incompleta."			
+		return render(request,'login.html',locals())
+
+
+	pub_date = date.today()
+	min_pub_date_time = datetime.combine(pub_date, time.min) 
+	max_pub_date_time = datetime.combine(pub_date, time.max)  
+
+	try:
+		#validamos si el usuario tiene caja abierta en el dia actual.
+		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
+		suc=caja.sucursal
+		c=caja.caja
+	except Exception as e:
+		print(e)
+		caja_abierta="0"
+		caja=Cajas
+
+
+	return render(request,'seguridad/admin_cajas.html',locals())
+
+def admin_empenos(request):
+	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
+	try:
+		user_2=User_2.objects.get(user=request.user)
+	except:
+		form=Login_Form(request.POST)
+		estatus=0
+		msj="La cuenta del usuario esta incompleta."			
+		return render(request,'login.html',locals())
+
+	pub_date = date.today()
+	min_pub_date_time = datetime.combine(pub_date, time.min) 
+	max_pub_date_time = datetime.combine(pub_date, time.max)  
+
+	try:
+		#validamos si el usuario tiene caja abierta en el dia actual.
+		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
+		suc=caja.sucursal
+		c=caja.caja
+	except Exception as e:
+		print(e)
+		caja_abierta="0"
+		caja=Cajas
+	return render(request,'seguridad/admin_empenos.html',locals())
+
+def admin_reportes(request):
+
+	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
+	try:
+		user_2=User_2.objects.get(user=request.user)
+	except:
+		form=Login_Form(request.POST)
+		estatus=0
+		msj="La cuenta del usuario esta incompleta."			
+		return render(request,'login.html',locals())
+
+
+	pub_date = date.today()
+	min_pub_date_time = datetime.combine(pub_date, time.min) 
+	max_pub_date_time = datetime.combine(pub_date, time.max)  
+
+	try:
+		#validamos si el usuario tiene caja abierta en el dia actual.
+		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
+		suc=caja.sucursal
+		c=caja.caja
+	except Exception as e:
+		print(e)
+		caja_abierta="0"
+		caja=Cajas
+
+
+	return render(request,'seguridad/admin_reportes.html',locals())
+
 def permisos(request):
 	if request.method=="POST":
 		form=Permisos_Form(request.POST)
@@ -235,7 +367,7 @@ def api_alta_cliente(request):
 					d_e=Direccion_Envio_Cliente(cliente=c,numero_interior=numero_interior,numero_exterior=numero_exterior,calle=calle,cp=cp,municipio=municipio,estado=estado,pais=pais,referencia=referencia)
 					
 					d_e.save()
-					print(d_e.numero_interior)
+					
 			except Exception as e:#de lo contrario creamos registro
 				#validamos si existe el e mail
 				c=Cliente.objects.filter(e_mail=e_mail).exists()
@@ -263,9 +395,7 @@ def api_login_usuario(request):
 	e_mail=request.POST.get("e_mail").upper()
 	psw=request.POST.get("psw")
 	session=request.POST.get("session")	
-	print(e_mail)
-	print(psw)
-	print(session)
+	
 	try:
 		c=Cliente.objects.get(e_mail=e_mail,psw=psw)
 	except Exception as e:
@@ -301,7 +431,7 @@ def api_login_usuario(request):
 def api_esta_logueado(request):
 	estatus=[]
 	session=request.GET.get("session")	
-	print(session)
+	
 	try:
 		c_l=Clientes_Logueados.objects.get(session=session)
 		try:
@@ -323,7 +453,7 @@ def api_direccion_envio_temporal(request):
 	estatus=[]
 	try:
 		if request.method=="POST":
-			print(request.POST.get("colonia"))
+			
 			session=request.POST.get("session")	
 			nombre=request.POST.get("nombre")
 			apellido_p=request.POST.get("apellido_p")
@@ -359,7 +489,7 @@ def api_e_mail_notificacion(request):
 	estatus=[]
 	try:
 		e_mail=request.POST.get("e_mail").upper()
-		print(e_mail)
+		
 		try:			
 			E_Mail_Notificacion.objects.get(e_mail=e_mail)
 			estatus.append({"estatus":"1","msj":"El E-Mail ya ha sido registrado."})
@@ -473,7 +603,7 @@ def api_envia_token(request):
 def api_consulta_ventas_invitado(request):
 	estatus=[]	
 	token=request.GET.get("token")
-	print(token)
+	
 	ventas=[]
 	#validamos que el token exista
 	try:
@@ -551,7 +681,7 @@ def api_cambia_psw_token(request):
 			c=Cliente.objects.get(e_mail=r.e_mail)
 			c.psw=psw_nueva
 			c.save()
-			print(c.psw)
+			
 			estatus.append({'estatus':"1","msj":""})
 			return Response(estatus)
 		except:			
@@ -604,3 +734,15 @@ def fn_concatena_folio(folio):
 	if len(folio)==1:
 		f="000000"+folio
 	return f
+
+
+def fn_genera_sesion():
+	session=""
+	session=str(randint(0,9))	
+	session=session+str(randint(0,9))	
+	session=session+str(randint(0,9))	
+	session=session+str(randint(0,9))	
+	session=session+str(randint(0,9))	
+	session=session+str(randint(0,9))	
+	session=session+str(randint(0,9))	
+	return int(session)

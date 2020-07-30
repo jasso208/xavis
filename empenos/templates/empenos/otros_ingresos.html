@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% block usuario %}
+						<p id="usuario_logueado"  > 
+							<strong>Usuario:</strong> {{user_2.user.username}}
+							&nbsp; / &nbsp;
+							<strong>Perfil:</strong> {{user_2.perfil}}
+							&nbsp; / &nbsp;
+							<strong>Sucursal:</strong> {{user_2.sucursal}}
+							&nbsp; / &nbsp;
+							<strong>Caja:</strong> {{c}}
+						</p>
+{% endblock  %}
+
+{% block content %}
+	<div class="col-xs-12 cls_encabezado_body">	
+		<a >
+			Otros Ingresos
+		</a>		
+	</div>
+
+	<div class="col-xs-12">
+		<form method="post" action="#" class="cls_form_1">
+			{%csrf_token%}
+			{{form.errors}}
+			<div class="row cls_form_consulta">
+				<div class="col-xs-6">
+					<div class="panel panel-default">						
+						<div class="panel-body">
+							<div class="col-xs-12 col-md-6">
+								<label for=""> Importe</label>
+								{% bootstrap_field form.importe  show_label=False%}
+							</div>
+
+							<div class="col-xs-12">
+								<label for=""> Comentario</label>
+								{% bootstrap_field form.comentario  show_label=False%}
+							</div>
+
+							<div class="col-xs-12" id="tipo_movimiento">
+								<label for=""> tipo_movimiento</label>
+								{% bootstrap_field form.tipo_movimiento  show_label=False%}
+							</div>
+							<div class="col-xs-12">								
+								<button class="btn btn-primary" style="float: right;"   id="abrir_caja">Aceptar</button>								
+							</div>	
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+	<script type="text/javascript">
+		$(document).ready(
+				function()
+				{
+						$("#tipo_movimiento").hide();
+					$("#id_tipo_movimiento").val("2");
+					
+				}
+			);
+	</script>
+	{% if caja_abierta == '0' %}
+		<div class="fondo_mensaje" >
+			
+		</div >
+		<div class="mensaje" >
+				
+				<div class="panel panel-default">	
+					<h3 class="page-header">No cuentas con caja Abierta</h3>
+					<a class="btn btn-primary" href="{% url 'seguridad:admin_cajas' %}">Aceptar</a>
+					<br>
+					<br>
+
+				</div>
+		</div>
+	{% endif %}
+{% endblock %}

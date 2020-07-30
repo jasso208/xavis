@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% block usuario %}
+						<p id="usuario_logueado"  > 
+							<strong>Usuario:</strong> {{user_2.user.username}}
+							&nbsp; / &nbsp;
+							<strong>Perfil:</strong> {{user_2.perfil}}
+							&nbsp; / &nbsp;
+							<strong>Sucursal:</strong> {{user_2.sucursal}}
+							&nbsp; / &nbsp;
+							<strong>Caja:</strong> {{c}}
+						</p>
+{% endblock  %}
+{% block content %}
+
+	<div class="col-xs-12 cls_encabezado_body">
+		<a>
+			Boletas a imprimir
+		</a>		
+	</div>
+
+<div class="col-xs-12">
+	<br>
+	<br>
+</div>
+
+{% for x in boletas %}
+	<div class="col-xs-12" id="cls_boleta_imprimir">
+
+				<table id="boleta_imprimir" style="width: 100%">
+					<tr>
+						<td colspan="6">
+							<h4>
+							Empeños Express $</h4>
+						</td>
+						<td colspan="6" >
+							<h4>Boleta de Empeño</h4>
+						</td>
+					</tr>
+				</table>
+
+	
+	</div>
+	{% endfor %}
+<a href="javascript:pruebaDivAPdf()" class="button">Pasar a PDF</a>
+
+	<script>
+
+		$(document).ready(
+				function()
+				{
+					pruebaDivAPdf();		
+				}
+			);
+    function pruebaDivAPdf() {
+    	alert("func");
+        var pdf = new jsPDF('p', 'pt', 'letter');
+        source = $('#boleta_imprimir')[0];
+
+        specialElementHandlers = {
+            '#bypassme': function (element, renderer) {
+                return true
+            }
+        };
+        margins = {
+            top: 80,
+            bottom: 60,
+            left: 40,
+            width: 522
+        };
+
+        pdf.fromHTML(
+            source, 
+            margins.left, // x coord
+            margins.top, { // y coord
+                'width': margins.width, 
+                'elementHandlers': specialElementHandlers
+            },
+
+            function (dispose) {
+                pdf.save('Prueba.pdf');
+            }, margins
+        );
+    }
+</script>
+{% endblock %}

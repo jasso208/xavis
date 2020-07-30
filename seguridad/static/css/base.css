@@ -1,5 +1,50 @@
 
+.panel-body>div
+{
+	
+	margin-top: 10px;
+}
+th
+{
+	font-size: 12px;
+}
+td
+{
+font-size: 12px;	
+}
+.fondo_mensaje
+{
+	position:fixed;top:0;left:0;z-index:100;width: 100%; height: 100%; background-color: black;opacity: 0.7;
+}
+.mensaje
+{
+	position: fixed;top:10%;left: 30%;width: 40%;z-index: 111;background-color: white;border-radius: 5px; box-shadow: 4px 4px 4px black;padding:10px; text-align: center;
+}
 
+.fondo_mensaje_2
+{
+	position:fixed;
+	top:0;
+	left:0;
+	z-index:200;
+	width: 100%; 
+	height: 100%; 
+	background-color: black;
+	opacity: 0.7;
+}
+.mensaje_2
+{
+	position: fixed;
+	top:10%;
+	left: 30%;
+	width: 40%;
+	z-index: 211;
+	background-color: white;
+	border-radius: 5px; 
+	box-shadow: 4px 4px 4px black;
+	padding:10px; 
+	text-align: center;
+}
 #logo_peque 
 {
 	color:white;
@@ -67,7 +112,7 @@
 
 #body
 {
-	background-color: #eeeeee;
+	background-color: white;
 	min-height: 100%;
 }
 .base-div-header
@@ -179,6 +224,7 @@ box-shadow: 0px 1px 7px 0px rgba(0,0,0,0.75);
 	font-weight: bold;
 }
 
+
 .table th>a
 {
 	font-size: 15px;
@@ -192,7 +238,7 @@ box-shadow: 0px 1px 7px 0px rgba(0,0,0,0.75);
 .table tr>td>a
 {
 	
-	font-size: 12px;
+	font-size: 10px;
 	font-weight: bold;
 	text-decoration: none;
 	list-style: none;
@@ -217,11 +263,57 @@ box-shadow: 0px 1px 7px 0px rgba(0,0,0,0.75);
 
 
 
+/*efecto cargando*/
+#fondo_preloader
+{
+	width: 100%;
+	height: 100%;
+	position: fixed;
+	top:0;
+	left: 0;
+	z-index: 1000;
+	background-color: black;
+	opacity: 0.7;
+}
+.preloader {
+	margin:0 auto;
+	margin-top: 10%;
+  width: 70px;
+  height: 70px;
+  border: 10px solid #eee;
+  border-top: 10px solid #666;
+  border-radius: 50%;
+  animation-name: girar;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+@keyframes girar {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 
-
-
-
+.cls_form_emergente,.cls_form_busca_cliente
+{
+	width: 30%;
+	max-height: 80%;
+	overflow-y: scroll;
+	position: fixed;
+	top: 10%;
+	left: 35%;
+	background-color: white;
+	z-index: 150;
+	padding:15px;
+}
+.help-block
+{
+	color: red;
+}
 
 
 

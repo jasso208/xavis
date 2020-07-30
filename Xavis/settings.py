@@ -15,7 +15,7 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
+ 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
@@ -25,7 +25,7 @@ SECRET_KEY = 'n6%+v%t$z641u295)j778z#+cdgrw&r+yo7(+8r=j4)9&p(xa-'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['pollo146.pythonanywhere.com','127.0.0.1','192.168.1.84','http://192.168.8.146:4200/']
+ALLOWED_HOSTS = ['pollo146.pythonanywhere.com','127.0.0.1','192.168.0.7','http://192.168.8.146:4200/']
 
 
 URL_LOCAL_BACKEND="http://127.0.0.1:8000/"
@@ -148,7 +148,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -169,6 +169,8 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'j.jassdel@gmail.com'
 EMAIL_HOST_PASSWORD = 'Blanca3060'
 EMAIL_PORT = 587
+
+IP_LOCAL="192.168.0.7:8000"
 #CORS_ORIGIN_WHITELIST = (
 #    'localhost:8000',
 #)

@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% block usuario %}
+						<p id="usuario_logueado"  > 
+							<strong>Usuario:</strong> {{user_2.user.username}}
+							&nbsp;/&nbsp;
+							<strong>Perfil:</strong> {{user_2.perfil}}
+							&nbsp;/&nbsp;
+							<strong>Sucursal:</strong> {{user_2.sucursal}}
+														&nbsp;/&nbsp;
+							<strong>Caja:</strong> {{c}}
+						</p>
+{% endblock  %}
+
+{%block content%}
+<div class="col-xs-12 cls_encabezado_body">
+	<a>
+		Cajas
+	</a>	
+</div>
+<div class="col-xs-12">
+	<div class="row" >
+			<div class="col-xs-12 cls_encabezado_body_2">
+				<a>
+					Cajas
+				</a>
+				<br>
+			</div>
+			<div class="row cls_row_body"  >
+				<div class="col-xs-2">
+					<div class="cls_boton_body">
+						<a href="{% url 'empenos:abrir_caja' %}">
+							<span class="glyphicon glyphicon-inbox"></span>
+							<br>
+							<br>
+							Abrir Caja
+						</a>	
+					</div>
+					
+				</div>
+				<div class="col-xs-2">
+					<div class="cls_boton_body">
+						<a href="{% url 'empenos:otros_ingresos' %}">
+							<span class="glyphicon glyphicon-euro"></span>
+							<br>
+							<br>
+							Otros Ingresos
+						</a>	
+					</div>
+					
+				</div>
+				<div class="col-xs-2">
+					<div class="cls_boton_body">
+						<a href="{% url 'empenos:retiro_efectivo' %}">
+							<span class="glyphicon glyphicon-euro"></span>
+							<br>
+							<br>
+							Retiro Efectivo
+						</a>	
+					</div>
+					
+				</div>
+
+				<div class="col-xs-2">
+					<div class="cls_boton_body">
+						<a href="{% url 'empenos:corte_caja' %}">
+							<span class="glyphicon glyphicon-scissors"></span>
+							<br>
+							<br>
+							Corte Caja
+						</a>	
+					</div>
+					
+				</div>
+			</div>
+	</div>
+</div>
+	
+{%endblock%}

@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% block usuario %}
+						<p id="usuario_logueado"  > 
+							<strong>Usuario:</strong> {{user_2.user.username}}
+							&nbsp; / &nbsp;
+							<strong>Perfil:</strong> {{user_2.perfil}}
+							&nbsp; / &nbsp;
+							<strong>Sucursal:</strong> {{user_2.sucursal}}
+							&nbsp; / &nbsp;
+							<strong>Caja:</strong> {{c}}
+						</p>
+{% endblock  %}
+
+{% block content %}
+	<div class="col-xs-12 cls_encabezado_body">
+	
+		<a >
+			Abrir Caja
+		</a>		
+	
+	</div>
+	<div class="col-xs-12">
+		<form method="post" action="#" class="cls_form_1">
+			{%csrf_token%}
+			<div class="row cls_form_consulta">
+				<div class="col-xs-6">
+					<div class="panel panel-default">						
+						<div class="panel-body">
+							<div class="col-xs-12 ">
+								<label for=""> Sucursal</label>					
+								<select name="sucursal" class="form-control" title="" required="" id="id_sucursal">
+								  <option value="" selected="">---------</option>
+									{% for x in sucursales %}										
+										<option value="{{x.sucursal.id}}">{{ x.sucursal }}</option>
+									{% endfor %}
+								</select>
+							</div>
+
+							<div class="col-xs-12 col-md-6">
+								<label for=""> Fondo Inicial</label>
+								{% bootstrap_field form.importe  show_label=False%}
+							</div>
+							<div class="col-xs-12 col-md-6" id="tipo_mov">
+								<label for="">Tipo Movimiento</label>
+								{% bootstrap_field form.tipo_movimiento  show_label=False%}
+							</div>
+							<div class="col-xs-12 col-md-6" id="diferencia">
+								<label for="">diferencia</label>
+								{% bootstrap_field form.diferencia  show_label=False%}
+							</div>
+							<div class="col-xs-12 col-md-6" id="usuario" >
+								<label for="">Usuario</label>
+								{% bootstrap_field form.usuario  show_label=False%}
+							</div>
+
+							<div class="col-xs-12">								
+								<button class="btn btn-primary" style="float: right;"   id="abrir_caja">Abrir Caja</button>								
+							</div>	
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+	
+
+
+	<script type="text/javascript">
+		$(document).ready(
+				function()
+				{
+					$("#id_tipo_movimiento").val("1");
+					$("#tipo_mov").hide();
+					$("#diferencia").val("0");
+					$("#diferencia").hide();
+					$("#usuario").hide();
+					v_id_sucursal="{{id_sucursal}}";
+					//si del back nos mandan el id_sucursal, lo ponemos por default
+					if (v_id_sucursal!=0)
+					{
+						$("#id_sucursal").val(v_id_sucursal);
+						//validamos que en realidad se haya encontrado la sucursal,
+						//en caso de que no la haya tenido en la lista, manda error.
+						if($("#id_sucursal").val()!=v_id_sucursal)
+						{
+							$("#msj_error_bloquea_acceso").text("Error al detectar la sucursal del usuario. Contactese con el administrador de sistema.");
+							$(".error_bloquea_acceso").show();
+						}
+						else
+						{
+							$(".error_bloquea_acceso").hide();
+						}
+					}
+					else
+					{
+						$(".error_bloquea_acceso").hide();
+					}
+					$("#id_usuario").val("{{user_2.user.id}}");
+				}
+			);
+	</script>
+	
+
+	{% if caja_abierta == '1' %}
+	<div class="fondo_mensaje" >
+		
+	</div >
+	<div class="mensaje" >
+			
+			<div class="panel panel-default">	
+				<h3 class="page-header">Ya cuentas con caja abierta</h3>
+				<a class="btn btn-primary" href="{% url 'seguridad:admin_cajas' %}">Aceptar</a>
+				<br>
+				<br>
+
+			</div>
+	</div>
+	{% endif %}
+
+
+	<div class="fondo_mensaje error_bloquea_acceso"  >
+		
+	</div >
+	<div class="mensaje error_bloquea_acceso" >
+			
+			<div class="panel panel-default">	
+				<h3 class="page-header" id="msj_error_bloquea_acceso"></h3>
+				<a class="btn btn-primary" href="{% url 'seguridad:admin_cajas' %}">Aceptar</a>
+				<br>
+				<br>
+
+			</div>
+	</div>
+{% endblock %}

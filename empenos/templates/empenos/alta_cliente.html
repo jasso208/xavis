@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% block usuario %}
+						<p id="usuario_logueado"  > 
+							<strong>Usuario:</strong> {{user_2.user.username}}
+							&nbsp; / &nbsp;
+							<strong>Perfil:</strong> {{user_2.perfil}}
+							&nbsp; / &nbsp;
+							<strong>Sucursal:</strong> {{user_2.sucursal}}
+							&nbsp; / &nbsp;
+							<strong>Caja:</strong> {{c}}
+						</p>
+{% endblock  %}
+
+{% block content %}
+	<div class="col-xs-12 cls_encabezado_body">
+	
+		<a >
+			Alta de Cliente
+		</a>		
+	
+	</div>
+
+
+	<div class="col-xs-12">
+		<form method="POST" action="#" class="cls_form_1">
+			{%csrf_token%}
+
+
+			<div class="row cls_form_consulta">
+				<div class="col-xs-12">
+					<div class="panel panel-default">						
+						<div class="panel-body">
+							<div class="row">
+
+								<div class="col-xs-4">
+									<label>Nombre</label>
+									{%bootstrap_field form.nombre show_label=False%}
+								</div>
+								<div class="col-xs-4">
+									<label>Apellido Paterno</label>
+									{%bootstrap_field form.apellido_p show_label=False%}
+								</div>
+								<div class="col-xs-4">
+									<label>Apellido Materno</label>
+									{%bootstrap_field form.apellido_m show_label=False%}
+								</div>
+								<div class="col-xs-3">
+									<label>Genero</label>
+									{%bootstrap_field form.genero show_label=False%}
+								</div>
+
+								<div class="col-xs-3">
+									<label>Estado Civil</label>
+									{%bootstrap_field form.estado_civil show_label=False%}
+								</div>
+								<div class="col-xs-12">
+									<hr>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-xs-12">
+									<label>Calle</label>
+									{%bootstrap_field form.calle show_label=False%}
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-xs-3">
+									<label>Codigo Postal</label>
+									{%bootstrap_field form.codigo_postal show_label=False%}
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-xs-2">
+									<label>Numero Interior</label>
+									{%bootstrap_field form.numero_interior show_label=False%}
+								</div>
+								<div class="col-xs-2">
+									<label>Numero Exterior</label>
+									{%bootstrap_field form.numero_exterior show_label=False%}
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-xs-4">
+									<label>Colonia</label>
+									{%bootstrap_field form.colonia show_label=False%}
+								</div>
+								<div class="col-xs-4">
+									<label>Ciudad</label>
+									{%bootstrap_field form.ciudad show_label=False%}
+								</div>
+								<div class="col-xs-4">
+									<label>Estado</label>
+									{%bootstrap_field form.estado show_label=False%}
+								</div>
+								<div class="col-xs-4">
+									<label>Pais</label>
+									{%bootstrap_field form.pais show_label=False%}
+								</div>
+
+							</div>
+							<div class="row">
+								<div class="col-xs-4">
+									<label>Telefono Fijo</label>
+									{%bootstrap_field form.telefono_fijo show_label=False%}
+								</div>
+								<div class="col-xs-4">
+									<label>Telefono Celular</label>
+									{%bootstrap_field form.telefono_celular show_label=False%}
+								</div>
+								<div class="col-xs-4" style="display: none;">
+									<label>Usuario</label>
+									{%bootstrap_field form.usuario show_label=False%}
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-xs-12 text-right">
+									<button clasS="btn btn-primary">
+										Guardar
+									</button>
+								</div>
+							</div>
+
+		
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}

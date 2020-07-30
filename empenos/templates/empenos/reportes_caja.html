@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% block usuario %}
+						<p id="usuario_logueado"  > 
+							<strong>Usuario:</strong> {{user_2.user.username}}
+							&nbsp; / &nbsp;
+							<strong>Perfil:</strong> {{user_2.perfil}}
+							&nbsp; / &nbsp;
+							<strong>Sucursal:</strong> {{user_2.sucursal}}
+							&nbsp; / &nbsp;
+							<strong>Caja:</strong> {{c}}
+						</p>
+{% endblock  %}
+
+{% block content %}
+	<div class="col-xs-12 cls_encabezado_body">
+	
+		<a >
+			Reportes de Caja
+		</a>		
+	
+	</div>
+	<div class="col-xs-12">
+		<form method="POST" action="#" class="cls_form_1">
+		{%csrf_token%}
+			<div class="row cls_form_consulta">
+				<div class="col-xs-12">
+					<div class="panel panel-default">						
+						<div class="panel-body">
+							<div class="col-xs-3 ">											
+								<label>Tipo de movimiento</label>
+								
+								{% bootstrap_field form.id_tipo_mov show_label=False%}
+								
+							</div>
+							<div class="col-xs-3  ">											
+								<label>Fecha Inicial</label>								
+								{% bootstrap_field form.fecha_inicial show_label=False%}								
+							</div>
+
+							<div class="col-xs-3  ">											
+								<label>Fecha Final</label>								
+								{% bootstrap_field form.fecha_final show_label=False%}								
+							</div>
+							<div class="col-xs-2  text-right">
+								<label>&nbsp</label>
+								<br>
+								<button class="btn btn-primary" id="btn_buscar">Exportar</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+
+	{% if error == '1' %}
+		<div class="fondo_mensaje cls_error_guardar" >
+			
+		</div >
+		<div class="mensaje cls_error_guardar" >
+				
+				<div class="panel panel-default">	
+					<h3 class="page-header">{{msj_error}}</h3>
+					<a class="btn btn-primary" id="btn_error">Aceptar</a>
+					<br>
+					<br>
+
+				</div>
+		</div>
+	{% endif %}
+	<script type="text/javascript">
+		$(document).ready(
+				function()
+				{
+
+					$("#id_fecha_inicial").prop('type','date');
+					$("#id_fecha_final").prop('type','date');
+					$("#btn_error").click(
+						function()
+						{
+							$("#cls_error_guardar").hide();
+						}
+					);
+				}
+			);
+	</script>
+{% endblock %}

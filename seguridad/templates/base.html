@@ -10,38 +10,35 @@
 		<link href="https://fonts.googleapis.com/css?family=Pathway+Gothic+One" rel="stylesheet">
 		<link href="https://fonts.googleapis.com/css?family=Noto+Serif+JP" rel="stylesheet">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.2/jspdf.min.js"></script>
 		<link rel="stylesheet" href="{% static 'css/base.css' %}">
 		<link rel="stylesheet" type="text/css" href="{% static 'css/alta_modifica_producto.css'%}">
 		<link rel="stylesheet" type="text/css" href="{% static 'css/busca_producto.css'%}">
     </head>
 	<body>		
-		<div class="content-fluid">
+		
+		<div class="container-fluid">
 			<div class="row" id="encabezado_principal">
-				<div class="col-xs-6" >
+				<div class="col-xs-4" >
 					<a id="logo_peque">
 						<img src="{% static 'img/logo_peque.png' %}">
-						JassDel
-					</a>
-					
+						Empeño Express
+					</a>					
 				</div>
 
-				<div class="col-xs-2">
-					
-				</div>
-				<div class="col-xs-3" >
+				<div class="col-xs-7 text-right" >
 
-					<p id="usuario_logueado"  > 
-						<span class="glyphicon glyphicon  glyphicon-user" ></span>
-						 &nbsp; Javier Jasso Gallegos
-					</p>
+					{% block usuario %}
+
+					{% endblock %}
+
 				</div>
 				<div class="col-xs-1">
 					<a class="cls_icono" href="{% url 'seguridad:cerrar_session' %}">
 						<span class="glyphicon glyphicon glyphicon-off"></span>
 					</a>
 				</div>
-			</div>	
+			</div>
 		</div>
 		<div class="container-fluid" id="body">
 			<div class="row" >
@@ -58,6 +55,7 @@
 						  	</a>
 						  
 							</li>
+							<!--
 							 <li class="list-group-item ">
 							  	<a href="{% url 'seguridad:admin_user' %}">
 							  		<span class="glyphicon glyphicon-list-alt"></span>					  	
@@ -89,6 +87,29 @@
 						  		<span class="glyphicon glyphicon glyphicon-tags"></span>			Ventas
 						  	</a>						  	
 						  </li>
+-->
+						   <li class="list-group-item">
+						  	<a href="{% url 'seguridad:admin_cajas'%}">
+						  		<span class="glyphicon glyphicon glyphicon-inbox"></span>			Cajas
+						  	</a>						  	
+						  </li>
+						  <li class="list-group-item">
+						  	<a href="{% url 'seguridad:admin_empenos'%}">
+						  		<span class="glyphicon glyphicon-euro">
+						  			
+						  		</span>			
+						  		Empeños
+						  	</a>						  	
+						  </li>
+						   <li class="list-group-item">
+						  	<a href="{% url 'seguridad:admin_reportes'%}">
+						  		<span class="glyphicon glyphicon-list-alt">
+						  			
+						  		</span>			
+						  		Reportes
+						  	</a>						  	
+						  </li>
+
 						</ul>
 					</div>
 				</div>
@@ -108,7 +129,7 @@
 
 
 
-
+<!--
 
 
 		<div class="content container">
@@ -282,6 +303,7 @@
 				</div>
 			</div>
 		</div>
+	-->
 		<script>
 			var estatus_menu=0;
 			$(document).ready(

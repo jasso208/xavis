@@ -1,0 +1,405 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% block usuario %}
+						<p id="usuario_logueado"  > 
+							<strong>Usuario:</strong> {{user_2.user.username}}
+							&nbsp; / &nbsp;
+							<strong>Perfil:</strong> {{user_2.perfil}}
+							&nbsp; / &nbsp;
+							<strong>Sucursal:</strong> {{user_2.sucursal}}
+							&nbsp; / &nbsp;
+							<strong>Caja:</strong> {{c}}
+						</p>
+{% endblock  %}
+
+{% block content %}
+	<div class="col-xs-12 cls_encabezado_body">	
+		<a >
+			Retiro de Efectivo
+		</a>			
+	</div>
+
+	<div class="col-xs-12">
+		<form method="post" action="#" class="cls_form_1">
+			{%csrf_token%}
+			
+			<div class="row cls_form_consulta">
+				<div class="col-xs-12">
+					<div class="panel panel-default">						
+						<div class="panel-body">
+							<div class="col-xs-6 ">
+								<div class="col-xs-12" style="text-align: center;">
+									<h4 class="page-header">Teorico</h4>
+								</div>
+
+								<div class="col-xs-12">
+									<div class="col-xs-6">
+										<p>
+											<strong>
+												Descripción Ingresos
+											</strong>
+										</p>
+									</div>
+									<div class="col-xs-3  text-right">
+										<p>
+											<strong>
+												Movtos.
+											</strong>
+										</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>
+											<strong>
+												Importe
+											</strong>
+										</p>
+									</div>
+								</div>
+								<div class="col-xs-12">
+									<div class="col-xs-6">
+										<p>Fondo Inicial:</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>1</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>${{fondo_inicial}}</p>
+									</div>
+								</div>
+								<div class="col-xs-12">
+									<div class="col-xs-6">
+										<p>Otros Ingresos:</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>{{cont_otros_ingresos}}</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>${{otros_ingresos}}</p>
+									</div>
+								</div>
+
+
+								<div class="col-xs-12">
+									<div class="col-xs-6">
+										<p>Refrendos:</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>{{cont_refrendos}}</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>${{importe_refrendo}}</p>
+									</div>
+								</div>
+
+								<div class="col-xs-12">
+									<div class="col-xs-6">
+										<p>Comisiónes PG:</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>{{cont_com_pg}}</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>${{comisiones_pg}}</p>
+									</div>
+								</div>
+
+								<div class="col-xs-12">
+									<div class="col-xs-6">
+										<p>Pago Capital:</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>{{cont_pc}}</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>${{pago_capital}}</p>
+									</div>
+								</div>
+								<div class="col-xs-12">
+									<div class="col-xs-6">
+										<p>Desempeño:</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>{{cont_desemp}}</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>${{importe_desemp}}</p>
+									</div>
+								</div>
+
+
+
+								<div class="col-xs-12">
+									<br>
+								</div>
+									<div class="col-xs-12">
+									<div class="col-xs-6">
+										<p>
+											<strong>
+												Descripción Retiros
+											</strong>
+										</p>
+									</div>
+									<div class="col-xs-3  text-right">
+										<p>
+											<strong>
+												Movtos.
+											</strong>
+										</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>
+											<strong>
+												Importe
+											</strong>
+										</p>
+									</div>
+								</div>
+								<div class="col-xs-12">
+									<div class="col-xs-6">
+										<p>Retiros de Efectivo:</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>{{cont_retiros}}</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>${{retiros}}</p>
+									</div>
+								</div>
+								<div class="col-xs-12">
+									<div class="col-xs-6">
+										<p>Pagos Empeño:</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>{{cont_empenos}}</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>${{empenos}}</p>
+									</div>
+								</div>
+
+								<div class="col-xs-12">
+									<div class="col-xs-12">
+										<h4 class="page-header"></h4>
+									</div>
+								</div>
+								<div class="col-xs-12">
+									<div class="col-xs-6">
+										<p>Total Efectivo en Caja:</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>{{total_movs}}</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>${{total_efectivo}}</p>
+									</div>
+								</div>
+							</div>
+
+							<div class="col-xs-6 ">
+								<div class="panel panel-default">						
+									<div class="panel-body">
+										<h4 class="page-header" style="padding-top: 0; margin-top: 20px;text-align: center;">Retiro Efectivo</h4>
+										<div class="col-xs-4">
+											<label for=""> Importe</label>
+											{% bootstrap_field form.importe  show_label=False%}
+
+											<div class="help-block" id="error_importe_cero">
+												Debe ingresar el importe a retirar.
+											</div>
+      										<div class="help-block" id="error_importe_excedido">
+												No puedes disponer mas del efectivo que tienes en caja.
+											</div>
+											
+									
+											{% if error_no_fondos == '1' %}
+												<div class="help-block" >
+												No puedes disponer mas del efectivo que tienes en caja.
+												</div>						
+											{% endif %}
+
+										</div>
+										<div class="col-xs-12">
+											<label for=""> Motivo</label>
+											{% bootstrap_field form.comentario  show_label=False%}
+
+											<div class="help-block" id="error_comentario">
+												Debe ingresar el motivo del retiro.
+											</div>
+
+											
+										</div>
+										<div class="col-xs-4">
+											<label for=""> Token Seguridad</label>
+											{% bootstrap_field form.token  show_label=False%}
+											{% if error_token == '1' %}
+												<div class="help-block">
+													El token de seguridad no es valido.
+												</div>								
+											{% endif %}
+										</div>
+										<div class="col-xs-4">								
+											<label for=""> 
+													&nbsp
+											</label>
+											<br>
+											<a class="btn btn-default" style="float: right;"   id="generar_codigo">
+												Generar Codigo
+											</a>		
+										</div>
+										<div class="col-xs-12" id="tipo_movimiento">
+											<label for=""> Tipo Movimiento</label>
+											{% bootstrap_field form.tipo_movimiento  show_label=False%}
+										</div>
+
+										<div class="col-xs-12" >
+											<br>
+											<button class="btn btn-primary" style="float: right;"   id="retirar">Retirar</button>	
+										</div>
+									</div>
+								</div>
+							</div>
+							
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+	<div id="fondo_preloader">
+	<div class="preloader" id="preloader">
+	
+	</div>
+</div>
+
+
+	{% if caja_abierta == '0' %}
+	<div class="fondo_mensaje" >
+		
+	</div >
+	<div class="mensaje" >
+			
+			<div class="panel panel-default">	
+				<h3 class="page-header">Para retirar dinero debes abrir caja.</h3>
+				<a class="btn btn-primary" href="{% url 'seguridad:admin_cajas' %}">Aceptar</a>
+				<br>
+				<br>
+			</div>
+	</div>
+	{% endif %}
+	<div class="fondo_mensaje cls_notificacion" >
+		
+	</div >
+	<div class="mensaje cls_notificacion" >
+			
+			<div class="panel panel-default">	
+				<h3 class="page-header" id="msj_notificacion"></h3>
+				<a class="btn btn-primary" id="btn_aceptar_notificacion">Aceptar</a>
+				<br>
+				<br>
+			</div>
+	</div>
+	<script type="text/javascript">
+			$(document).ready(
+					function()
+					{
+						$("#fondo_preloader").hide();
+						read_only="{{read_only}}";
+						//esta condicion es cuando se intenta guardar el formulario y falla
+						//para que mantenga bloqueado el formulario
+						//en caso de que se requiera editar el cmotivo o importe debera refrescar la pagina
+						if(read_only=="1")
+						{
+								$("#id_importe").prop("readonly",true);
+								$("#id_comentario").prop("readonly",true);
+						}
+						$("#btn_retirar").hide();
+						$("#error_importe_cero").hide();
+						$("#error_comentario").hide();
+						$("#error_importe_excedido").hide();
+						$("#id_tipo_movimiento").val("3");
+						$("#tipo_movimiento").hide();
+						$(".cls_notificacion").hide();
+						$("#btn_aceptar_notificacion").click(
+								function()
+								{
+									$(".cls_notificacion").hide();
+								}
+						);
+
+						$("#generar_codigo").click(
+							function()
+							{		
+								
+
+
+								var importe=$("#id_importe").val();
+								var comentario=$("#id_comentario").val();
+								$("#error_importe_cero").hide();
+								$("#error_comentario").hide();
+								if( importe==0.00)
+								{
+									
+									$("#error_importe_cero").show();
+									return 0;
+								}
+								if(comentario=="")
+								{
+
+									$("#error_comentario").show();
+									return 0;	
+								}
+
+								if(importe>{{total_efectivo}})
+								{
+									$("#error_importe_excedido").show();
+									return 0;
+								}
+								$("#fondo_preloader").show();
+							   $.ajax({
+							        type: "GET",
+							        url: "http://127.0.0.1:8000/empenos/envia_token/",
+							        data: { 'asunto':'{{asunto}}' , 'usuario':'{{usuario}}' ,'sucursal':'{{sucursal}}' ,'caja':'{{caja}} ','importe': $("#id_importe").val(),'comentarios':$("#id_comentario").val(),'token':'{{token}}'},
+							        contentType: "application/json; charset=utf-8",
+							        dataType: "json",
+							        success: function (r) {
+
+							            $("#error_importe_cero").hide();
+										$("#error_comentario").hide();
+										$("#error_importe_excedido").hide();
+										$("#id_importe").prop("readonly",true);
+										$("#id_comentario").prop("readonly",true);
+
+										$(".cls_notificacion").show();
+										$("#msj_notificacion").text("El código de confirmación se envío al gerente regional.");
+										$("#fondo_preloader").hide();
+
+							        },
+							        error: function (r) {
+							           
+										$("#error_importe_cero").hide();
+										$("#error_comentario").hide();
+										$("#error_importe_excedido").hide();
+
+										$(".cls_notificacion").show();
+										$("#msj_notificacion").text("Error al generar el código de confirmación.");
+										$("#fondo_preloader").hide();
+
+							        },
+							        failure: function (r) {
+							           
+										$("#error_importe_cero").hide();
+										$("#error_comentario").hide();
+										$("#error_importe_excedido").hide();
+										$(".cls_notificacion").show();
+										$("#msj_notificacion").text("Error al generar el código de confirmación.");
+										$("#fondo_preloader").hide();
+							        }
+							    });
+						   	}
+						);
+
+					}
+				);
+	</script>
+{% endblock %}

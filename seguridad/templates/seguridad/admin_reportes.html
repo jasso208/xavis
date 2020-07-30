@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% block usuario %}
+						<p id="usuario_logueado"  > 
+							<strong>Usuario:</strong> {{user_2.user.username}}
+							&nbsp;/&nbsp;
+							<strong>Perfil:</strong> {{user_2.perfil}}
+							&nbsp;/&nbsp;
+							<strong>Sucursal:</strong> {{user_2.sucursal}}
+														&nbsp;/&nbsp;
+							<strong>Caja:</strong> {{c}}
+						</p>
+{% endblock  %}
+
+{%block content%}
+<div class="col-xs-12 cls_encabezado_body">
+	<a>
+		Cajas
+	</a>	
+</div>
+<div class="col-xs-12">
+	<div class="row" >
+			<div class="col-xs-12 cls_encabezado_body_2">
+				<a>
+					Cajas
+				</a>
+				<br>
+			</div>
+			<div class="row cls_row_body"  >
+				<div class="col-xs-2">
+					<div class="cls_boton_body">
+						<a href="{% url 'empenos:reportes_caja' %}">
+							<span class="glyphicon glyphicon-inbox"></span>
+							<br>
+							<br>
+							Rep. Caja
+						</a>	
+					</div>
+					
+				</div>
+			</div>
+	</div>
+</div>
+{% endblock %}

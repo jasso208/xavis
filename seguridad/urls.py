@@ -4,7 +4,9 @@ from seguridad.views import api_direccion_envio_temporal,api_e_mail_notificacion
 from seguridad.views import api_envia_token,api_cambia_psw_token,api_kill_session
 from seguridad.views import api_reinicia_direccion_temporal,api_consulta_ventas_invitado,cerrar_session
 from seguridad.views import admin_user,permisos,admin_productos,admin_catalogos,admin_ventas,alta_usuario
-from seguridad.views import consulta_usuarios,admin_miperfil,cambio_psw_usr
+from seguridad.views import consulta_usuarios,admin_miperfil,cambio_psw_usr,admin_cajas,admin_reportes
+from seguridad.views import admin_empenos
+
 app_name="seguridad"
 
 urlpatterns=[
@@ -17,6 +19,9 @@ urlpatterns=[
 	url(r'^admin_productos$',admin_productos,name="admin_productos"),	
 	url(r'^admin_ventas$',admin_ventas,name="admin_ventas"),	
 	url(r'^admin_catalogos$',admin_catalogos,name="admin_catalogos"),
+	url(r'^admin_cajas$',admin_cajas,name="admin_cajas"),
+	url(r'^admin_reportes$',admin_reportes,name="admin_reportes"),
+	url(r'^admin_empenos$',admin_empenos,name="admin_empenos"),
 
 	url(r'^modifica_usr/(?P<id>\d+)/$',alta_usuario,name="modifica_usr"),	
 	url(r'^alta_usuario/$',alta_usuario,name="alta_usuario"),
@@ -41,5 +46,6 @@ urlpatterns=[
 
 
 ]
+
 
 
