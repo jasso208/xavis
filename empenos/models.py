@@ -334,10 +334,19 @@ class Dia_No_Laboral(models.Model):
         unique_together=("fecha",)
 
 class Abono(models.Model):
+	folio=models.CharField(max_length=7,null=True)
+	tipo_movimiento=models.ForeignKey(Tipo_Movimiento,on_delete=models.PROTECT,null=True,blank=True)
+	sucursal=models.ForeignKey(Sucursal,on_delete=models.PROTECT,null=True,blank=True)	
 	fecha=models.DateTimeField(default=timezone.now)
 	usuario=models.ForeignKey(User,on_delete=models.PROTECT)
 	importe=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)	
 	caja=models.ForeignKey(Cajas,on_delete=models.PROTECT,blank=True,null=True)
+	boleta=models.ForeignKey(Boleta_Empeno,on_delete=models.PROTECT,blank=True,null=True)
+
+
+class Imprime_Abono(models.Model):
+	usuario=models.ForeignKey(User,on_delete=models.PROTECT)
+	abono=models.ForeignKey(Abono,on_delete=models.PROTECT)
 
 #no manejamos importe ya que un pago tiene que ser cubierto totalmente, no parcialmente.
 class Rel_Abono_Pago(models.Model):

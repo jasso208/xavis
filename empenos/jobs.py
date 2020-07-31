@@ -10,8 +10,8 @@ def fn_job_diario():
 	hoy=datetime.now()#fecha actual
 	hoy=datetime.combine(hoy, time.min)
 
-	hoy=datetime(2020,8,14,0,0)	
-	fecha_fin=datetime(2020,9,16,0,0)
+	hoy=datetime(2020,7,31,0,0)	
+	fecha_fin=datetime(2020,9,8,0,0)
 
 	cont=30
 

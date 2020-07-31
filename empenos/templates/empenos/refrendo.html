@@ -348,7 +348,9 @@
 		<div class="mensaje" >				
 				<div class="panel panel-default">	
 					<h3 class="page-header">El abono se aplico correctamente.</h3>
-					<a class="btn btn-primary" href="{% url 'seguridad:admin_empenos' %}">Aceptar</a>
+					<a class="btn btn-primary" href="{% url 'seguridad:admin_empenos' %}" >Aceptar</a>
+
+					<a class="btn btn-primary" href="{% url 'empenos:imprime_abono' %}" id="imprime_abono" style="display: none;">Aceptar</a>
 					<br>
 					<br>
 
@@ -584,12 +586,22 @@
 	{
 		var abono_aplicado="{{abono_aplicado}}"
 
+
+
 		if (parseInt(abono_aplicado)==0)
 		{
 			$(".cls_error_aplicar_abono").show();
 		}
 		else
 		{
+			if (parseInt(abono_aplicado)==1)
+			{
+				url =$("#imprime_abono").attr("href");
+		      	window.open(url, '_blank');		
+			}
+			  
+					
+
 			$(".cls_error_aplicar_abono").hide();	
 		}
 		$("#error_multiplo_refrendo").hide();
@@ -733,7 +745,8 @@
 			//si el refrendo es mayor que el importe maximo permitido para refrendos, devuelve cero
 			if (refrendo>importe_maximo)
 			{
-				$("#id_refrendo").val("{{monto_minimo_refrendo}}");
+				$("#id_numero_semanas").val("0")
+				$("#id_refrendo").val("0");
 
 				var refrendo=parseInt($("#id_refrendo").val());
 

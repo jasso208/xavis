@@ -6,6 +6,7 @@ from datetime import date, datetime, time,timedelta
 import math
 from django.db import transaction
 from django.db.models import Max
+import decimal
 def fn_calcula_refrendo(mutuo,tipo_producto):
 	almacenaje=0
 	interes=0
@@ -154,6 +155,65 @@ def fn_saldo_comisionpg(boleta):
 		importe_comisionpg=importe_comisionpg+x.importe
 		
 	return importe_comisionpg	
+
+
+#recivimos el abono y determinamos el importe que afecto a refrendos.
+def fn_importe_a_refrendo(abono):
+	importe=0.00
+
+	importe_r=Rel_Abono_Pago.objects.filter(abono=abono)
+
+	ir=0.00
+	for x in importe_r:
+		if x.pago.tipo_pago.id!=2:#validamos quel pago no sea comsiion pg
+			ir=ir+x.pago.importe
+
+	return ir
+
+
+#recivimos el abono y determinamos el importe que afecto a comision pg.
+def fn_importe_a_pg(abono):	
+
+	importe_r=Rel_Abono_Pago.objects.filter(abono=abono)
+
+	print("importe_r")
+	print(importe_r.count())
+	ir=0.00
+	for x in importe_r:
+		if x.pago.tipo_pago.id==2:#validamos quel pago no sea comsiion pg
+			ir=ir+x.pago.importe
+
+	return ir
+
+def fn_importe_a_cap(abono):
+	importe=0.00
+	try:
+		ra=Rel_Abono_Capital.objects.get(abono=abono)
+		
+		if decimal.Decimal(ra.capital_restante)!=decimal.Decimal(0):#si es cero, es que fue desempeño, por lo tanto no es abono a capital
+			importe=decimal.Decimal(importe)+decimal.Decimal(ra.importe)
+	except Exception as e:
+		print(e)
+		print("no abono a capital")
+
+	return importe
+
+
+def fn_importe_desemp(abono):
+	importe=0.00
+	try:
+		ra=Rel_Abono_Capital.objects.get(abono=abono)
+		
+		if decimal.Decimal(ra.capital_restante)==decimal.Decimal(0):#si el capital restanto no es cero, es que es abono a capital, y no se considera aqui
+			importe=decimal.Decimal(importe)+decimal.Decimal(ra.importe)
+	except Exception as e:
+		print(e)
+		print("no abono a capital")
+
+	return importe
+
+
+
 
 #antes de aceptar un refrendo, en la pantalla existe un boton que simula como quedaria la boeleta del cliente.
 # es este boton el que ejecuta esta funcion.
@@ -460,11 +520,31 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 	hoy=datetime.combine(hoy, time.min)
 
 	if abono==None:
+
+		try:
+			Imprime_Abono.objects.get(usuario=usuario,abono=abono).delete()
+		except:
+			print("")
+		tm=Tipo_Movimiento.objects.get(id=5)
+		
+		folio=fn_folios(tm,boleta.sucursal)
+
 		abono=Abono()
 		abono.usuario=usuario
 		abono.importe=importe_abono
 		abono.caja=caja
+		abono.boleta=boleta
+		abono.folio=folio
+		abono.tipo_movimiento=tm
+		abono.sucursal=boleta.sucursal
+
 		abono.save()
+
+		ia=Imprime_Abono()
+		ia.usuario=usuario
+		ia.abono=abono
+		ia.save()
+
 
 	est_refrendo=Tipo_Pago.objects.get(id=1)
 	est_comisionpg=Tipo_Pago.objects.get(id=2)
@@ -487,10 +567,12 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 		boleta.save()
 
 		try:
-			refrendopg=Pagos.objects.filter(tipo_pago=est_refrendopg)
+			refrendopg=Pagos.objects.filter(tipo_pago=est_refrendopg,boleta=boleta)
 
 			if refrendopg.exists():
 				fe_ve=Pagos.objects.filter(tipo_pago=est_refrendopg,boleta=boleta).aggregate(Max("fecha_vencimiento"))
+				p=Pagos.objects.filter(tipo_pago=est_refrendopg,boleta=boleta).order_by("fecha_vencimiento")
+
 				fecha_vencimiento=fe_ve["fecha_vencimiento__max"]
 			else:
 				fecha_vencimiento=boleta.fecha_vencimiento	
@@ -529,7 +611,7 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 			for pt in pagos_t_refrendo:
 
 				if int(importe_abono)>=pt.importe and int(pag_ac)==0 and refrendo_pendiente>0:
-
+					
 					pt.pagado="S"
 					pt.fecha_pago=timezone.now()
 					pt.save()
@@ -542,10 +624,13 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 					rel.save()
 
 					#por cada pago tipo refrendo pagado, generamos uno nuevo.
-					dias = timedelta(days=7)		                
+					dias = timedelta(days=7)	
+					print("llego")
+					print(fecha_vencimiento)
 					fecha_vencimiento=datetime.combine(fecha_vencimiento+dias, time.min)
+					print("llego 2")
 					fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
-
+					print("llego 3")
 					pgo=Pagos()					
 					pgo.tipo_pago=pt.tipo_pago
 					pgo.boleta=pt.boleta
@@ -559,13 +644,13 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 					pgo.save()
 					importe_abono=int(importe_abono)-int(pt.importe)#disminuimos el saldo del importe abonado
 					
-
+						
 					if pag_actual==pt:
 						pag_ac=1
 
 
 
-			
+				
 
 			num_pagos_no_vencidos=int(Pagos.objects.filter(vencido="N",pagado='N',tipo_pago=est_refrendo,boleta=boleta).count())
 
@@ -829,3 +914,33 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 	
 
 
+#funcion para generar folio de movimiento
+def fn_folios(tipo_movimiento,sucursal):
+	try:
+		cf=Control_Folios.objects.get(tipo_movimiento=tipo_movimiento,sucursal=sucursal)
+		folio=cf.folio+1
+		cf.folio=folio
+		cf.save()		
+	except:
+		#si no existe registro, crea uno
+		Control_Folios.objects.create(tipo_movimiento=tipo_movimiento,sucursal=sucursal,folio=1)
+		cf=Control_Folios.objects.get(tipo_movimiento=tipo_movimiento,sucursal=sucursal)
+		folio=cf.folio
+	return folio
+
+
+def fn_str_clave(id):
+	if len(str(id))==1:
+		return '000000'+str(id)
+	if len(str(id))==2:
+		return '00000'+str(id)
+	if len(str(id))==3:
+		return '0000'+str(id)
+	if len(str(id))==4:
+		return '000'+str(id)
+	if len(str(id))==5:
+		return '00'+str(id)
+	if len(str(id))==6:
+		return '0'+str(id)
+	if len(str(id))==7:
+		return str(id)

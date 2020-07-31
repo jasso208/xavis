@@ -665,39 +665,43 @@ def consulta_boleta(request):
 
 	if request.method=="POST":
 		
-		id_sucursal=request.POST.get("sucursal")		
+		try:
+			id_sucursal=request.POST.get("sucursal")		
 
-		no_boleta=request.POST.get("boleta")
-		fecha_inicial=request.POST.get("fecha_inicial")
-		fecha_final=request.POST.get("fecha_final")
-		estatus_boleta=request.POST.get("estatus_boleta")
-		cliente=request.POST.get("cliente").upper()
+			no_boleta=request.POST.get("boleta")
+			fecha_inicial=request.POST.get("fecha_inicial")
+			fecha_final=request.POST.get("fecha_final")
+			estatus_boleta=request.POST.get("estatus_boleta")
+			cliente=request.POST.get("cliente").upper()
 
 
-		sucursal=Sucursal.objects.get(id=id_sucursal)
+			sucursal=Sucursal.objects.get(id=id_sucursal)
 
-		if cliente!="":
-			cl=Cliente.objects.filter(nombre__contains=cliente) | Cliente.objects.filter(apellido_p__contains=cliente) | Cliente.objects.filter(apellido_m__contains=cliente)
-			
-			boletas=Boleta_Empeno.objects.filter(sucursal=sucursal) & Boleta_Empeno.objects.filter(cliente__in=cl).order_by("-folio")
+			if cliente!="":
+				cl=Cliente.objects.filter(nombre__contains=cliente) | Cliente.objects.filter(apellido_p__contains=cliente) | Cliente.objects.filter(apellido_m__contains=cliente)
+				
+				boletas=Boleta_Empeno.objects.filter(sucursal=sucursal) & Boleta_Empeno.objects.filter(cliente__in=cl).order_by("-folio")
 
-		elif no_boleta!="":		
-			boletas=Boleta_Empeno.objects.filter(folio=int(no_boleta),sucursal=sucursal).order_by("-folio")
+			elif no_boleta!="":		
+				boletas=Boleta_Empeno.objects.filter(folio=int(no_boleta),sucursal=sucursal).order_by("-folio")
 
-		elif fecha_inicial!="" and fecha_final!="":
-			fecha_inicial=datetime.strptime(request.POST.get("fecha_inicial"), "%Y-%m-%d").date()
-			fecha_final=datetime.strptime(request.POST.get("fecha_final"), "%Y-%m-%d").date()
+			elif fecha_inicial!="" and fecha_final!="":
+				fecha_inicial=datetime.strptime(request.POST.get("fecha_inicial"), "%Y-%m-%d").date()
+				fecha_final=datetime.strptime(request.POST.get("fecha_final"), "%Y-%m-%d").date()
 
-			fecha_inicial=datetime.combine(fecha_inicial,time.min)
-			fecha_final=datetime.combine(fecha_final,time.min)
+				fecha_inicial=datetime.combine(fecha_inicial,time.min)
+				fecha_final=datetime.combine(fecha_final,time.min)
 
-			boletas=Boleta_Empeno.objects.filter(fecha_vencimiento__range=(fecha_inicial,fecha_final),sucursal=sucursal).order_by("-folio")
-		elif estatus_boleta!="":
-			estatus_boleta=Estatus_Boleta.objects.get(id=int(estatus_boleta))
+				boletas=Boleta_Empeno.objects.filter(fecha_vencimiento__range=(fecha_inicial,fecha_final),sucursal=sucursal).order_by("-folio")
+			elif estatus_boleta!="":
+				estatus_boleta=Estatus_Boleta.objects.get(id=int(estatus_boleta))
 
-			boletas=Boleta_Empeno.objects.filter(estatus=estatus_boleta,sucursal=sucursal).order_by("-folio")
+				boletas=Boleta_Empeno.objects.filter(estatus=estatus_boleta,sucursal=sucursal).order_by("-folio")
+		except Exception as e:
+			print(e)
 
 	else:
+
 		print("es metodo GET")
 	form=Consulta_Boleta_Form()
 
@@ -1184,6 +1188,439 @@ def refrendo(request,id_boleta):
 
 	form=Refrendo_Form()	
 	return render(request,'empenos/refrendo.html',locals())
+
+#*******************************************************************************************************************************************************
+#*¨**************************************************************************************************************************************************************
+
+def imprime_abono(request):	
+	# Create the HttpResponse object with the appropriate PDF headers.
+	response = HttpResponse(content_type='application/pdf')
+	response['Content-Disposition'] = f'inline; filename=hello.pdf'
+
+	#obtenemos el abono a imprimir.
+	abono=Imprime_Abono.objects.get(usuario=request.user).abono
+	buffer=BytesIO()
+
+	p=canvas.Canvas(buffer,pagesize=A4)
+
+	heigth_row=20#cada renglon es de 20.
+	current_row=800#aqui iniciamos escribir, y por cada renglon, disminuimos heigth_row
+
+
+
+	cop=0
+	while cop<2:
+
+		if cop==1:
+
+			p.setFont("Helvetica",15)
+			p.drawString(250,current_row,"Copia de Cliente")
+
+		current_row=current_row-heigth_row
+		current_row=current_row-heigth_row
+
+		p.setFont("Helvetica",10)
+		p.drawString(55,current_row,"Folio Abono:- "+str(abono.folio))
+
+		p.setFont("Helvetica",25)
+		p.drawString(350,current_row,"REFRENDO")
+
+		
+
+		current_row=current_row-heigth_row
+		p.setFont("Helvetica",15)
+		p.drawString(55,current_row,"Empeños Express $")
+
+		current_row=current_row-heigth_row
+		
+
+
+
+		p.setFont("Helvetica-Bold",10)
+		p.drawString(350,current_row,str(abono.fecha))
+
+		current_row=current_row-heigth_row
+
+		p.setFont("Helvetica-Bold",10)
+		p.drawString(55,current_row,"Cliente:- ")
+		p.setFont("Helvetica",10)
+		p.drawString(130,current_row,str(abono.boleta.cliente))
+
+
+
+		importe_a_refrendo=round(fn_importe_a_refrendo(abono),2)
+
+		p.setFont("Helvetica",10)
+		p.drawString(350,current_row,"Abono a Refrendo:- ")
+		p.drawString(480,current_row,"$"+str(importe_a_refrendo)+"")
+
+		current_row=current_row-heigth_row
+
+		p.setFont("Helvetica-Bold",10)
+		p.drawString(55,current_row,"Folio Boleta:- ")
+		p.setFont("Helvetica",10)
+		p.drawString(130,current_row,str(abono.boleta.folio))
+
+		
+		importe_a_pg=round(fn_importe_a_pg(abono),2)
+
+		p.setFont("Helvetica",10)
+		p.drawString(350,current_row,"Abono a PG:- ")
+
+		p.drawString(480,current_row,"$"+str(importe_a_pg)+"")
+
+
+		#nueva linea
+		current_row=current_row-heigth_row
+
+		p.setFont("Helvetica-Bold",10)
+		p.drawString(55,current_row,"Sucursal:- ")
+		p.setFont("Helvetica",10)
+		p.drawString(130,current_row,abono.boleta.sucursal.sucursal)
+
+
+		importe_a_cap=round(fn_importe_a_cap(abono),2)
+		p.setFont("Helvetica",10)
+		p.drawString(350,current_row,"Abono a Capital:- ")
+		p.drawString(480,current_row,"$"+str(importe_a_cap)+"")
+
+		#nueva linea
+		current_row=current_row-heigth_row
+
+
+		
+		p.setFont("Helvetica",7)
+		p.drawString(130,current_row,abono.boleta.caja.sucursal.calle+' No. Int. '+str(abono.boleta.caja.sucursal.numero_interior)+' No. ext. '+str(abono.boleta.caja.sucursal.numero_exterior)+' CP '+str(abono.boleta.caja.sucursal.codigo_postal))
+
+
+
+		importe_desemp=round(fn_importe_desemp(abono),2)
+		p.setFont("Helvetica",10)
+		p.drawString(350,current_row,"Desempeño:- ")
+		p.drawString(480,current_row,"$"+str(importe_desemp)+"")
+		p.line(350,current_row-2,530,current_row-2)
+
+		#nueva linea
+		current_row=current_row-heigth_row	
+		p.setFont("Helvetica",7)
+		p.drawString(130,current_row,abono.boleta.caja.sucursal.colonia+', '+abono.boleta.caja.sucursal.ciudad+' '+abono.boleta.caja.sucursal.estado+', '+abono.boleta.caja.sucursal.pais)
+
+
+
+		p.setFont("Helvetica-Bold",10)
+		p.drawString(350,current_row,"Total Abono:- ")
+		p.drawString(480,current_row,"$"+str(abono.importe))
+
+		#nueva linea
+		current_row=current_row-heigth_row	
+		current_row=current_row-heigth_row	
+		
+
+		p.setFont("Helvetica-Bold",10)
+		p.drawString(55,current_row,"Fecha ven.:- ")
+		p.setFont("Helvetica",10)
+		p.drawString(130,current_row,str(abono.boleta.fecha_vencimiento))
+
+		p.setFont("Helvetica",10)
+		p.drawString(350,current_row,"Nuevo Mutuo:- ")
+		p.drawString(480,current_row,"$"+str(abono.boleta.mutuo))
+
+		current_row=current_row-heigth_row	
+
+
+		articulo=""
+		if abono.boleta.tipo_producto==3:
+			articulo=Det_Boleto_Empeno.objects.get(boleta=abono.boleta).descripcion
+		else:
+			articulo=abono.boleta.tipo_producto.tipo_producto
+
+		p.setFont("Helvetica-Bold",10)
+		p.drawString(55,current_row,"Artículo:- ")
+		p.setFont("Helvetica",10)
+		p.drawString(130,current_row,articulo)
+
+		
+
+		#todos los abonos que no han sido pagados y que ya estan vencidos.
+		
+		pag_vencido=Pagos.objects.filter(boleta=abono.boleta,pagado='N',vencido="S").aggregate(Sum("importe"))
+
+		if pag_vencido["importe__sum"]==None:
+			importe_saldo_vencido=0.00
+		else:
+			importe_saldo_vencido=pag_vencido["importe__sum"]
+
+
+		p.setFont("Helvetica-Bold",10)
+		p.drawString(350,current_row,"Saldo Vencido:- ")
+		p.drawString(480,current_row,"$"+str(importe_saldo_vencido))
+
+
+
+
+		current_row=current_row-heigth_row	
+
+		p.setFont("Helvetica-Bold",10)
+		p.drawString(55,current_row,"Fechas Pago")
+
+		current_row=current_row-heigth_row	
+
+		p.line(55,current_row,550,current_row)	
+		p.line(55,current_row,55,current_row-80)	
+		p.line(55,current_row-80,550,current_row-80)			
+		p.line(550,current_row,550,current_row-80)	
+
+		
+
+		#encabezado
+		p.setFont("Helvetica-Bold",10)
+		p.drawString(60,current_row+2,"No.Pago")
+		
+		p.drawString(131,current_row+2,"Fecha")
+		p.drawString(202,current_row+2,"Almacenaje")
+		p.drawString(273,current_row+2,"Interes")		
+		p.drawString(344,current_row+2,"Impuesto")
+		p.drawString(415,current_row+2,"Refrendo")
+		p.drawString(486,current_row+2,"Desempeño")
+
+
+		current_row=current_row-heigth_row	
+
+		p.line(55,current_row,550,current_row)	
+		current_row=current_row-heigth_row	
+
+		p.line(55,current_row,550,current_row)	
+		current_row=current_row-heigth_row	
+
+		p.line(55,current_row,550,current_row)		
+		current_row=current_row-heigth_row	
+		p.line(55,current_row,550,current_row)
+
+
+
+
+
+		est_comisionpg=Tipo_Pago.objects.get(id=2)
+
+		pa=Pagos.objects.filter(boleta=abono.boleta,pagado='N',vencido="N").exclude(tipo_pago=est_comisionpg).order_by("id")
+
+		cont=0
+		if cop==0:
+			linea=502
+		else:
+			linea=102
+
+		for x in pa:		
+			cont=cont+1
+			p.setFont("Helvetica",7)
+			p.drawString(60,linea,str(cont))
+			p.drawString(131,linea,str(x.fecha_vencimiento.strftime('%d/%m/%Y')))
+			almacenaje=x.almacenaje*decimal.Decimal(cont)
+			p.drawString(202,linea,"$"+str(almacenaje))
+			interes=x.interes*decimal.Decimal(cont)
+			p.drawString(273,linea,"$"+str(interes))
+			iva=x.iva*decimal.Decimal(cont)
+			p.drawString(344,linea,"$"+str(iva))
+			#refrendo=iva+interes+almacenaje
+			p.drawString(415,linea,"$"+str(x.importe*cont))
+			p.drawString(486,linea,"$"+str(math.ceil((x.importe*cont)+x.boleta.mutuo)))
+			linea=linea-20
+
+		current_row=current_row-heigth_row	
+
+
+
+
+		u=0
+		pinta=0
+		while u<600:
+			if pinta==0:
+				p.line(u,current_row,u+10,current_row)#pintamos linea de corte
+				pinta=1
+			else:
+				pinta=0
+
+			u=u+10
+		current_row=current_row-heigth_row	
+		
+		cop=cop+1
+
+	
+
+	try:
+		rac=Rel_Abono_Capital.objects.get(abono=abono)		
+		capital_restante=rac.capital_restante
+	except:
+		print("no abono a capital")
+		capital_restante=-1
+
+
+	
+	#si el el abono dejo el capital de la boleta en cero, imprimimos recibo de desempeño
+	if int(capital_restante)==int(0):
+		p.showPage()#terminar pagina actual
+		heigth_row=20#cada renglon es de 20.
+		current_row=800#aqui iniciamos escribir, y por cada renglon, disminuimos heigth_row
+
+
+
+		cop=0
+		while cop<2:
+
+			if cop==1:
+				
+				p.setFont("Helvetica",15)
+				p.drawString(250,current_row,"Copia de Cliente")
+			current_row=current_row-heigth_row
+			current_row=current_row-heigth_row
+
+			p.setFont("Helvetica",10)
+			p.drawString(55,current_row,"Folio Abono:- "+str(abono.folio))
+
+			p.setFont("Helvetica",25)
+			p.drawString(350,current_row,"DESEMPEÑO")
+
+			
+
+			current_row=current_row-heigth_row
+			p.setFont("Helvetica",15)
+			p.drawString(55,current_row,"Empeños Express $")
+
+			current_row=current_row-heigth_row
+			
+
+
+
+			p.setFont("Helvetica-Bold",10)
+			p.drawString(350,current_row,str(abono.fecha))
+
+			current_row=current_row-heigth_row
+
+			p.setFont("Helvetica-Bold",10)
+			p.drawString(55,current_row,"Cliente:- ")
+			p.setFont("Helvetica",10)
+			p.drawString(130,current_row,str(abono.boleta.cliente))
+
+
+
+			importe_a_refrendo=round(fn_importe_a_refrendo(abono),2)
+
+			p.setFont("Helvetica",10)
+			p.drawString(350,current_row,"Abono a Refrendo:- ")
+			p.drawString(480,current_row,"$"+str(importe_a_refrendo)+"")
+
+			current_row=current_row-heigth_row
+
+			p.setFont("Helvetica-Bold",10)
+			p.drawString(55,current_row,"Folio Boleta:- ")
+			p.setFont("Helvetica",10)
+			p.drawString(130,current_row,str(abono.boleta.folio))
+
+			
+			importe_a_pg=round(fn_importe_a_pg(abono),2)
+
+			p.setFont("Helvetica",10)
+			p.drawString(350,current_row,"Abono a PG:- ")
+
+			p.drawString(480,current_row,"$"+str(importe_a_pg)+"")
+
+
+			#nueva linea
+			current_row=current_row-heigth_row
+
+			p.setFont("Helvetica-Bold",10)
+			p.drawString(55,current_row,"Sucursal:- ")
+			p.setFont("Helvetica",10)
+			p.drawString(130,current_row,abono.boleta.sucursal.sucursal)
+
+
+			importe_a_cap=round(fn_importe_a_cap(abono),2)
+			p.setFont("Helvetica",10)
+			p.drawString(350,current_row,"Abono a Capital:- ")
+			p.drawString(480,current_row,"$"+str(importe_a_cap)+"")
+
+			#nueva linea
+			current_row=current_row-heigth_row
+
+
+			
+			p.setFont("Helvetica",7)
+			p.drawString(130,current_row,abono.boleta.caja.sucursal.calle+' No. Int. '+str(abono.boleta.caja.sucursal.numero_interior)+' No. ext. '+str(abono.boleta.caja.sucursal.numero_exterior)+' CP '+str(abono.boleta.caja.sucursal.codigo_postal))
+
+
+
+			importe_desemp=round(fn_importe_desemp(abono),2)
+			p.setFont("Helvetica",10)
+			p.drawString(350,current_row,"Desempeño:- ")
+			p.drawString(480,current_row,"$"+str(importe_desemp)+"")
+			p.line(350,current_row-2,530,current_row-2)
+
+			#nueva linea
+			current_row=current_row-heigth_row	
+			p.setFont("Helvetica",7)
+			p.drawString(130,current_row,abono.boleta.caja.sucursal.colonia+', '+abono.boleta.caja.sucursal.ciudad+' '+abono.boleta.caja.sucursal.estado+', '+abono.boleta.caja.sucursal.pais)
+
+
+
+			p.setFont("Helvetica-Bold",10)
+			p.drawString(350,current_row,"Total Abono:- ")
+			p.drawString(480,current_row,"$"+str(abono.importe))
+			current_row=current_row-heigth_row	
+
+
+			articulo=""
+
+			if abono.boleta.tipo_producto==3:
+				articulo=Det_Boleto_Empeno.objects.get(boleta=abono.boleta).descripcion
+			else:
+				articulo=abono.boleta.tipo_producto.tipo_producto
+
+			p.setFont("Helvetica-Bold",10)
+			p.drawString(55,current_row,"Artículo:- ")
+			p.setFont("Helvetica",10)
+			p.drawString(130,current_row,articulo)
+
+			current_row=current_row-heigth_row	
+			current_row=current_row-heigth_row	
+			current_row=current_row-heigth_row	
+			current_row=current_row-heigth_row	
+
+			p.line(100,current_row,250,current_row)
+			p.line(350,current_row,500,current_row)
+			current_row=current_row-heigth_row	
+			p.drawString(150,current_row,"Cliente")
+			p.drawString(400,current_row,"Proveedor")
+
+
+			current_row=current_row-heigth_row	
+			current_row=current_row-heigth_row	
+			u=0
+			pinta=0
+			while u<600:
+				if pinta==0:
+					p.line(u,current_row,u+10,current_row)#pintamos linea de corte
+					pinta=1
+				else:
+					pinta=0
+
+				u=u+10
+
+			cop=cop+1
+			current_row=current_row-heigth_row	
+			current_row=current_row-heigth_row	
+
+	p.showPage()#terminar pagina actual
+
+	p.save()
+
+	pdf=buffer.getvalue()
+
+	buffer.close()
+
+	response.write(pdf)
+	Imprime_Abono.objects.get(usuario=request.user).delete()
+	return response
+
 
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
@@ -1969,36 +2406,7 @@ def days_between(d1, d2):
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
 
-#funcion para generar folio de movimiento
-def fn_folios(tipo_movimiento,sucursal):
-	try:
-		cf=Control_Folios.objects.get(tipo_movimiento=tipo_movimiento,sucursal=sucursal)
-		folio=cf.folio+1
-		cf.folio=folio
-		cf.save()		
-	except:
-		#si no existe registro, crea uno
-		Control_Folios.objects.create(tipo_movimiento=tipo_movimiento,sucursal=sucursal,folio=1)
-		cf=Control_Folios.objects.get(tipo_movimiento=tipo_movimiento,sucursal=sucursal)
-		folio=cf.folio
-	return folio
 
-
-def fn_str_clave(id):
-	if len(str(id))==1:
-		return '000000'+str(id)
-	if len(str(id))==2:
-		return '00000'+str(id)
-	if len(str(id))==3:
-		return '0000'+str(id)
-	if len(str(id))==4:
-		return '000'+str(id)
-	if len(str(id))==5:
-		return '00'+str(id)
-	if len(str(id))==6:
-		return '0'+str(id)
-	if len(str(id))==7:
-		return str(id)
 
 def fn_nueva_caja(sucursal):
 	pub_date = date.today()
