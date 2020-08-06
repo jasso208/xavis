@@ -8,10 +8,10 @@ from django.db import transaction
 from django.db.models import Max
 import decimal
 def fn_calcula_refrendo(mutuo,tipo_producto):
-	almacenaje=0
-	interes=0
-	iva=0
-	refrendo=0
+	almacenaje=0.00
+	interes=0.00
+	iva=0.00
+	refrendo=0.00
 	respuesta=[]
 	if tipo_producto==1 or tipo_producto==2:#oro o plata
 		almacenaje=(mutuo*0.05)
@@ -25,6 +25,94 @@ def fn_calcula_refrendo(mutuo,tipo_producto):
 		refrendo=(almacenaje+interes+iva)
 	respuesta.append({"almacenaje":almacenaje,"interes":interes,"iva":iva,"refrendo":refrendo})
 	return respuesta
+
+#solo para periodos mensuales
+def fn_pago_parcial(boleta,hoy,refrendo,pago):
+
+	#primer periodo
+	print("periodo 1")
+	#dias fijos
+	periodo_7=Tipo_Periodo.objects.get(id=1)
+	days = timedelta(days=7)
+	
+	fecha_vencimiento = datetime.combine(hoy+days, time.min) 
+	print("fecha_vencimiento")
+	print(fecha_vencimiento)
+	fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
+	print("fecha_vencimiento")
+	print(fecha_vencimiento)
+
+	consecutivo=Periodo.objects.filter(boleta=boleta).aggregate(Max("consecutivo"))
+
+	if consecutivo["consecutivo__max"]==None:
+		contador=1
+	else:
+		contador=int(consecutivo["consecutivo__max"])+1
+
+	per=Periodo()
+	per.boleta=boleta
+	per.fecha_vencimiento=fecha_vencimiento
+	per.importe=decimal.Decimal(refrendo)/decimal.Decimal(4.00)
+	per.tipo_periodo=periodo_7
+	per.pago=pago
+	per.consecutivo=contador
+	per.save()
+
+	contador=contador+1
+
+	print("periodo 2")
+	#segundo periodo
+	#dias fijos
+	periodo_7=Tipo_Periodo.objects.get(id=1)
+	days = timedelta(days=14)
+	
+	fecha_vencimiento = datetime.combine(hoy+days, time.min) 
+	fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
+
+	per=Periodo()
+	per.boleta=boleta
+	per.fecha_vencimiento=fecha_vencimiento
+	per.importe=decimal.Decimal(refrendo)/decimal.Decimal(4.0)					
+	per.tipo_periodo=periodo_7
+	per.pago=pago
+	per.consecutivo=contador
+	per.save()
+
+	contador=contador+1
+	print("periodo 3")
+	#tercer periodo
+	#dias fijos
+	periodo_7=Tipo_Periodo.objects.get(id=1)
+	days = timedelta(days=21)
+	
+	fecha_vencimiento = datetime.combine(hoy+days, time.min) 
+	fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
+
+	per=Periodo()
+	per.boleta=boleta
+	per.fecha_vencimiento=fecha_vencimiento
+	per.importe=decimal.Decimal(refrendo)/decimal.Decimal(4.0)					
+	per.tipo_periodo=periodo_7
+	per.pago=pago
+	per.consecutivo=contador
+	per.save()
+
+	contador=contador+1
+
+	print("periodo 4")
+	#cuarto periodo
+	#dias variable
+	periodo_variable=Tipo_Periodo.objects.get(id=1)
+
+	per=Periodo()
+	per.boleta=boleta
+	per.fecha_vencimiento=pago.fecha_vencimiento
+	per.importe=decimal.Decimal(refrendo)/decimal.Decimal(4.0)					
+	per.tipo_periodo=periodo_variable
+	per.pago=pago
+	per.consecutivo=contador
+	per.save()
+
 
 def fn_add_months(sourcedate, months):
 	month = sourcedate.month - 1 + months
@@ -126,7 +214,9 @@ def fn_calcula_saldo_refrendo(boleta,hoy):
 		#cuando la boleta esta vencida todos los pagos tipo refrendo estan vencidos.
 		pagos=Pagos.objects.filter(tipo_pago=est_refrendo,vencido="S",pagado="N",boleta=boleta)
 		for x in pagos:
-			importe_refrendo=importe_refrendo+x.importe
+			type(importe_refrendo)
+			type(x.importe)
+			importe_refrendo=decimal.Decimal(importe_refrendo)+decimal.Decimal(x.importe)
 
 	return importe_refrendo
 
@@ -140,7 +230,7 @@ def fn_saldo_refrendopg(boleta):
 	importe_refrendopg=0.00
 
 	for x in pago:
-		importe_refrendopg=importe_refrendopg+x.importe
+		importe_refrendopg=decimal.Decimal(importe_refrendopg)+decimal.Decimal(x.importe)
 	return importe_refrendopg
 
 
@@ -152,7 +242,7 @@ def fn_saldo_comisionpg(boleta):
 	importe_comisionpg=0.00
 
 	for x in pago:
-		importe_comisionpg=importe_comisionpg+x.importe
+		importe_comisionpg=decimal.Decimal(importe_comisionpg)+decimal.Decimal(x.importe)
 		
 	return importe_comisionpg	
 
@@ -161,14 +251,24 @@ def fn_saldo_comisionpg(boleta):
 def fn_importe_a_refrendo(abono):
 	importe=0.00
 
-	importe_r=Rel_Abono_Pago.objects.filter(abono=abono)
+	#plazo semanal
+	if abono.boleta.plazo.id==2:
+		importe_r=Rel_Abono_Pago.objects.filter(abono=abono)
 
-	ir=0.00
-	for x in importe_r:
-		if x.pago.tipo_pago.id!=2:#validamos quel pago no sea comsiion pg
-			ir=ir+x.pago.importe
+		ir=0.00
+		for x in importe_r:
+			if x.pago.tipo_pago.id!=2:#validamos quel pago no sea comsiion pg
+				ir=ir+x.pago.importe
 
-	return ir
+	#plazo mensual
+	if abono.boleta.plazo.id==3:
+		importe_p=Rel_Abono_Periodo.objects.filter(abono=abono)
+		ir=decimal.Decimal(0.00)
+		for x in importe_p:
+			ir=ir+decimal.Decimal(x.periodo.importe)
+
+
+	return math.ceil(ir)
 
 
 #recivimos el abono y determinamos el importe que afecto a comision pg.
@@ -176,12 +276,10 @@ def fn_importe_a_pg(abono):
 
 	importe_r=Rel_Abono_Pago.objects.filter(abono=abono)
 
-	print("importe_r")
-	print(importe_r.count())
 	ir=0.00
 	for x in importe_r:
 		if x.pago.tipo_pago.id==2:#validamos quel pago no sea comsiion pg
-			ir=ir+x.pago.importe
+			ir=decimal.Decimal(ir)+decimal.Decimal(x.pago.importe)
 
 	return ir
 
@@ -944,3 +1042,4 @@ def fn_str_clave(id):
 		return '0'+str(id)
 	if len(str(id))==7:
 		return str(id)
+

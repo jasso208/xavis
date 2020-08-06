@@ -1,0 +1,770 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% block usuario %}
+						<p id="usuario_logueado"  > 
+							<strong>Usuario:</strong> {{user_2.user.username}}
+							&nbsp; / &nbsp;
+							<strong>Perfil:</strong> {{user_2.perfil}}
+							&nbsp; / &nbsp;
+							<strong>Sucursal:</strong> {{user_2.sucursal}}
+							&nbsp; / &nbsp;
+							<strong>Caja:</strong> {{c}}
+						</p>
+{% endblock  %}
+
+{% block content %}
+	<div class="col-xs-12 cls_encabezado_body">
+	
+		<a >
+			Pago de Refrendo.
+		</a>		
+	
+	</div>
+
+
+	<div class="col-xs-12">
+		<form method="post" action="#" class="cls_form_1">
+			{%csrf_token%}	
+			<div class="row cls_form_consulta">
+				<div class="col-xs-12">
+					<div class="panel panel-default">						
+						<div class="panel-body">
+							<div class="col-xs-12" style="text-align: center;">
+								<h4 class="page-header">Información de boleta.</h4>
+							</div>
+							<div class="row">
+									
+								<div class="col-xs-6">
+									<label>Sucursal: </label> {{boleta.sucursal.sucursal}}
+								</div>											
+								<div class="col-xs-6">
+									<label>Folio:</label>	{{boleta.folio}}
+								</div>	
+							</div>
+							<div class="row">
+								<div class="col-xs-12">
+									
+										<label>Cliente: &nbsp;</label>{{boleta.cliente}}
+									
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-xs-12">
+				
+									<div class="panel panel-default">						
+										<div class="panel-body">
+											
+												<div class="col-xs-9">
+													<p><strong>Calle: </strong><span id="span_calle"> {{boleta.cliente.calle}}</span> </p>
+												</div>
+												<div class="col-xs-3">
+													<p><strong>C.P.: </strong><span id="span_cp">{{boleta.cliente.codigo_postal}}</span> </p>
+												</div>	
+												<div class="col-xs-3">									
+													<p><strong>No. Int: </strong><span id="span_int">{{boleta.cliente.numero_interior}}</span> </p>
+												</div>
+
+												<div class="col-xs-9">
+													
+													<p><strong>No. Ext: </strong><span id="span_ext">{{boleta.cliente.numero_exterior}}</span> </p>
+												</div>	
+
+												<div class="col-xs-4">
+													
+													<p><strong>Colonia: </strong><span id="span_colonia">{{boleta.cliente.colonia}}</span> </p>
+												</div>								
+
+												<div class="col-xs-4">
+													
+													<p><strong>Ciudad: </strong><span id="span_ciudad">{{boleta.cliente.ciudad}}</span> </p>
+												</div>
+
+												<div class="col-xs-4">
+													<p><strong>Estado: </strong><span id="span_estado">{{boleta.cliente.estado}}</span> </p>
+												</div>
+
+												<div class="col-xs-12">
+													<p><strong>País: </strong><span id="span_pais">{{boleta.cliente.pais}}</span> </p>
+												</div>
+
+												<div class="col-xs-6">
+													
+													<p><strong>Teléfono Fijo: </strong><span id="span_telefono_fijo">{{boleta.cliente.telefono_fijo}}</span> </p>
+												</div>
+												<div class="col-xs-6">
+													<p><strong>Teléfono Celular: </strong><span id="span_telefono_celuar">{{boleta.cliente.telefono_celular}}</span> </p>
+												</div>
+
+										</div>
+									</div>													
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-xs-12">
+									<label>
+										Informacón de Empeño:
+									</label>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-xs-12">
+									
+
+									<div class="panel panel-default">						
+										<div class="panel-body">
+											<div class="col-xs-12">							
+												<p><strong>Tipo de Producto: </strong><span id="span_tipo_producto">{{boleta.tipo_producto}}</span> </p>
+											</div>
+
+											<div class="col-xs-4">
+												<p><strong>Avalúo: </strong><span id="span_avaluo">{{boleta.avaluo}}</span> </p>
+											</div>
+
+											<div class="col-xs-4">
+												<p><strong>Mutuo: </strong><span id="span_mutuo"> {{boleta.mutuo}}</span> </p>
+											</div>
+
+											<div class="col-xs-4">
+												<p><strong>Refrendo: </strong><span id="span_refrendo">{{boleta.refrendo}}</span> </p>
+
+											</div>
+											<div class="col-xs-6">							
+												<p><strong>Fecha Emisión: </strong><span id="span_fecha_emision">{{boleta.fecha}}</span> </p>
+											</div>
+											<div class="col-xs-6">							
+												<p><strong>Fecha Vencimiento: </strong><span id="span_fecha_vencimiento">{{boleta.fecha_vencimiento}}</span> </p>
+											</div>
+
+											<div class="col-xs-12">
+												
+												<p><strong>Cotitular: </strong><span id="span_cotitular">
+													
+													{{boleta.nombre_cotitular }} {{boleta.apellido_p_cotitular }} {{boleta.apellido_m_cotitular }}
+
+												</span> </p>
+											</div>
+
+											<div class="col-xs-12">
+												
+												<p><strong>Estatus Boleta: </strong><span id="span_estatus">{{boleta.estatus}}</span> </p>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="row">
+								<div clasS="col-xs-12">
+									<label>Pagos Pendientes:</label>
+
+								</div>	
+							</div>
+
+							<div class="row">
+								<div class="col-xs-12">
+									
+
+									<div class="panel panel-default">						
+										<div class="panel-body">
+
+											
+												<div class="col-xs-4">
+													<strong>
+														Mutuo:
+													</strong>									
+													${{boleta.mutuo}}.00
+												</div>
+											
+
+											
+												<div class="col-xs-4">
+													<strong>
+														Refrendo:
+													</strong>
+													${{importe_refrendo_total}}
+													
+												</div>
+											
+
+
+
+											
+												<div class="col-xs-4">
+													<strong>
+														Comisión PG:
+													</strong>
+													${{importe_comision_pg}}
+												</div>
+												
+											
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div clasS="col-xs-12">
+									<label>A pagar:</label>
+
+								</div>	
+							</div>
+
+							<div class="row">
+								<div class="col-xs-12">
+									
+
+									<div class="panel panel-default">						
+										<div class="panel-body">
+											<div class="col-xs-4">
+												
+												
+												<div class="col-xs-12">
+													<label>
+														Comisión PG Obligatorio:
+													</label>
+													${{importe_comision_pg}}	
+												</div>	
+													
+											</div>
+											<div class="col-xs-4">
+												<div class="col-xs-4">
+														<label>Pagar:</label>
+												</div>
+												<div class="col-xs-8">
+
+													<select name="id_periodos" class="form-control"title="" id="id_periodos" required="">
+														
+														{% for x in lista_periodo %}										
+															<option value="{{x.id}}">{{ x.txt }}</option>
+														{% endfor %}
+													</select>	
+												</div>
+												<div class="col-xs-4">
+														<label>Importe:</label>
+												</div>
+												<div class="col-xs-8">
+														<input type="number" class="form-control" name="" id="id_refrendo" value="0.00">
+												</div>
+
+											
+
+											</div>
+											<div class="col-xs-4">
+												<div class="col-xs-4">
+														<label>A capital:</label>
+												</div>
+												<div class="col-xs-8">
+														<input type="number" class="form-control" name="" id="id_abono" value="0.00">
+												</div>
+
+												<div class="help-block" id="id_error_capital">
+													<p id="error_refrendo">El importe abonado a capital ingresado es mayor que el saldo del mutuo.</p>
+												</div>
+
+											</div>
+											<div class="col-xs-12">
+												<hr>
+											</div>
+											<div class="col-xs-12 ">
+												<div class="col-xs-4">
+												</div>
+												<div class="col-xs-4">
+													<div class="col-xs-4">
+													<label>Descuento: </label>
+													</div>
+													<div class="col-xs-8">
+														<span id="span_descuento"></span>
+													</div>
+
+												</div>
+												<div class="col-xs-4">
+												</div>
+												
+											</div>
+											<div class="col-xs-12 ">
+												<div class="col-xs-4">
+													
+												</div>
+												<div class="col-xs-4">
+													<div class="col-xs-4">
+														<label>Total a pagar:</label>	
+													</div>
+													<div class="col-xs-8">
+														<input type="number"  name="total_refrendo" id="id_total_refrendo" class="form-control" name="" readonly="true" value="0" placeholder="Total refrendo" title="" required="">
+													</div>
+												
+
+													
+												</div>
+												<div class="col-xs-4">
+													<a class="btn btn-default" onclick="fn_simula_refrendo()">Simular</a>
+												</div>
+												
+											</div>
+
+											<div class="col-xs-12 ">
+												<div class="col-xs-4">
+													
+												</div>
+												<div class="col-xs-4">
+													<div class="col-xs-4">
+														<label>Pago:</label>	
+													</div>
+													<div class="col-xs-8">
+														<input type="number" id="id_su_pago" class="form-control" name=""  value="0">
+													</div>
+													<div class="help-block" id="id_error_cambio">
+														<p id="error_refrendo">El importe ingresado es incorrecto.</p>
+													</div>
+													
+												</div>
+												<div class="col-xs-4">
+												</div>
+												
+											</div>
+											<div class="col-xs-12 ">
+												<div class="col-xs-4">
+													
+												</div>
+												<div class="col-xs-4">
+													<div class="col-xs-4">
+														<label>Cambio:</label>	
+													</div>
+													<div class="col-xs-8">
+														<input type="number" id="id_cambio" class="form-control" name=""  value="0" readonly="true">
+													</div>
+
+														
+												</div>
+												<div class="col-xs-4">
+													<button class="btn btn-primary" id="btn_pagar">Pagar</button>
+												</div>
+												
+											</div>
+
+
+										</div>
+									</div>
+								</div>
+							</div>
+
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+		<div id="simulacion" class="cls_form_emergente cls_simulacion">
+
+					<div class="row">
+						<div class="col-xs-12">
+							<h4 class="page-header" style="text-align: center;">Simulación</h4>
+						</div>
+						<div class="col-xs-6">
+							<label>Mutuo: <span id="nuevo_mutuo"></span></label>
+						</div>
+						<div class="col-xs-6" id="estatus_boleta">
+							<label id="estatus_boleta"></label>
+						</div>
+
+					</div>
+						<div class="row">
+							<div class="col-xs-12">
+								<label>Fecha Vencimiento: <span id="fecha_vencimiento"></span> </label>
+							</div>
+						</div>
+					<div class="row">
+						<div class="col-xs-12">
+							<h5 class="page-header">Pagos Pendientes</h5>
+						</div>
+						<div class="col-xs-12">
+							<table id="tabla_pagos" class="table table-bordered">
+							    <thead>
+							      <tr>
+							        <th>Fecha de Venc.</th>
+							        <th>Importe</th>				        
+							        				        
+							      </tr>
+							    </thead>
+							    <tbody>
+						
+							    </tbody>
+							</table>
+							
+						</div>
+						
+					</div>
+					<div class="row">
+						<div class="col-xs-12" style="text-align: center;">
+							<a class="btn btn-primary" id="btn_aceptar_simulacion">Aceptar</a>
+							
+						</div>
+					</div>
+		
+		</div>
+	<div class="fondo_mensaje cls_simulacion"  id="fondo_form_emergente">
+		
+	</div >
+
+	<div class="fondo_mensaje_2 cls_msj_error" >
+
+		</div >
+		<div class="mensaje_2 cls_msj_error" >
+			
+			<div class="panel panel-default">	
+				<h3 class="page-header" id="msj_error"></h3>
+				<a class="btn btn-primary" id="btn_aceptar">Aceptar</a>
+				<br>
+				<br>
+
+			</div>
+		</div>
+		<div id="fondo_preloader">
+	<div class="preloader" id="preloader">
+	
+	</div>
+</div>
+{% bootstrap_field form.descuento %}
+{% ifequal abono_aplicado '1' %}
+		<div class="fondo_mensaje" >
+			
+		</div >
+		<div class="mensaje" >				
+				<div class="panel panel-default">	
+					<h3 class="page-header">El abono se aplico correctamente.</h3>
+					<a class="btn btn-primary" href="{% url 'seguridad:admin_empenos' %}" >Aceptar</a>
+
+					<a class="btn btn-primary" href="{% url 'empenos:imprime_abono' %}" id="imprime_abono" style="display: none;">Aceptar</a>
+					<br>
+					<br>
+
+				</div>
+		</div>
+{% endifequal  %}
+		<div class="fondo_mensaje cls_error_aplicar_abono" >
+			
+		</div >
+		<div class="mensaje cls_error_aplicar_abono" >				
+				<div class="panel panel-default">	
+					<h3 class="page-header">Error al aplicar el pago.</h3>
+					<a class="btn btn-primary" id="btn_aceptar_error_aplicar_abono">Aceptar</a>
+					<br>
+					<br>
+
+				</div>
+		</div>
+
+
+	<script type="text/javascript">
+		var descuento_comision_pg=0.00;
+		$(document).ready(
+				function()
+				{
+					var contador="{{contador}}";
+					fn_inicio();
+				$(".cls_error_aplicar_abono").click(
+						function()
+						{
+							$(".cls_error_aplicar_abono").hide();				
+						}
+					);	
+
+					$("#btn_aceptar,.cls_msj_error").click(
+							function(){
+								$(".cls_msj_error").hide();
+							}
+						);
+					$("#btn_aceptar_simulacion,.cls_simulacion").click(
+							function()
+							{
+								$(".cls_simulacion").hide();
+							}
+						);
+					$("#id_su_pago").change(
+							function()
+							{
+								fn_cambio();
+							}
+						);
+					$("#id_periodos").change(
+							function()
+							{
+								//solo cuando cubras todos los periodos se permite abonar a capital.
+								if(parseInt(contador)==parseInt($("#id_periodos").val()))
+								{
+									$("#id_abono").prop("readonly",false);
+								}
+								else
+								{
+									$("#id_abono").prop("readonly",true);
+								}
+
+								importe_periodo="{{importe_periodo}}";
+								importe_refrendo=Math.ceil(parseFloat(importe_periodo)*parseFloat($("#id_periodos").val()));
+								$("#id_refrendo").val(importe_refrendo.toString());
+
+								fn_total_pagar();
+
+							}
+						);
+					$("#id_abono").change(
+							function()
+							{
+								
+
+								fn_total_pagar();
+							}
+						);
+				}
+			);
+
+		function fn_inicio()
+		{	
+
+				var abono_aplicado="{{abono_aplicado}}"
+
+				if (parseInt(abono_aplicado)==0)
+				{
+					$(".cls_error_aplicar_abono").show();
+				}
+				else
+				{
+					if (parseInt(abono_aplicado)==1)
+					{
+						url =$("#imprime_abono").attr("href");
+				      	window.open(url, '_blank');		
+					}
+					  
+							
+
+					$(".cls_error_aplicar_abono").hide();	
+				}
+
+
+		//determinamos si tiene periodos pendientes de saldar,
+		//en caso de no tener, habilitamos el abono a capital
+		//y desactivamos el select de refrendos.
+			var contador=parseInt("{{contador}}");
+
+			if (contador==0)
+			{
+				$("#id_abono").prop("readonly",false);
+				$("#id_periodos").prop("disabled",true);
+			}
+			else
+			{
+				$("#id_abono").prop("readonly",true);
+			}
+
+
+
+
+			$("#id_refrendo").prop("readonly",true);
+			$(".cls_simulacion").hide();
+			importe_periodo="{{importe_periodo}}";
+			importe_refrendo=Math.ceil(parseFloat(importe_periodo)*parseFloat($("#id_periodos").val()));
+			$("#id_refrendo").val(importe_refrendo.toString());
+			$("#id_error_capital").hide();	
+			$("#id_error_cambio").hide()	
+			$("#btn_pagar").prop("disabled",true);
+			$(".cls_msj_error").hide();
+			$("#fondo_preloader").hide();
+			fn_total_pagar();
+
+		}
+		function fn_total_pagar()
+		{
+			$("#id_error_capital").hide();	
+			var capital=$("#id_abono").val();
+			var refrendo=$("#id_refrendo").val();
+			var importe_comision_pg="{{importe_comision_pg}}";
+			
+			
+			
+			if(isNaN(capital) || capital=="")
+			{
+				capital=0;	
+			}
+
+			if(isNaN(refrendo) || refrendo=="")
+			{
+				refrendo=0;	
+			}
+
+
+
+			var mutuo="{{boleta.mutuo}}";
+			if(parseInt(capital)>parseInt(mutuo))
+			{
+				$("#id_abono").val("0");
+				$("#id_error_capital").show();
+			}
+
+
+
+			if(capital=="")
+			{
+				capital=0.00;
+			}
+			var aplicamos_descuento=parseInt("{{aplicamos_descuento}}");
+			var cont_periodos_vencidos=parseInt("{{cont_periodos_vencidos}}");
+
+			if ($("#id_periodos").val()==null)
+			{
+				periodos_pagar=parseInt("0");	
+			}
+			else
+			{
+				periodos_pagar=parseInt($("#id_periodos").val());	
+			}
+			
+
+
+			if(aplicamos_descuento==1)
+			{
+				//si el minimos de periodos para pagar descuento de comision pg es igual a los periodos seleccionados para pagar
+				//aplicamos el descuento
+
+				if (cont_periodos_vencidos<=periodos_pagar)
+				{
+
+					$("#span_descuento").text("${{importe_comision_pg}}");
+					importe_comision_pg=0;
+					descuento_comision_pg=parseInt("{{importe_comision_pg}}");
+					$("#id_descuento").val(descuento_comision_pg.toString());
+
+				}
+				else
+				{
+					$("#span_descuento").text("$0.00");
+					descuento_comision_pg=0;
+					$("#id_descuento").val(descuento_comision_pg.toString());
+				}
+
+
+			}
+
+
+			total_refrendo=parseInt(capital)+parseInt(refrendo)+parseInt(importe_comision_pg);
+			$("#id_total_refrendo").val(total_refrendo.toString()+".00");
+			fn_cambio();
+
+		}
+		function fn_cambio()
+		{
+			var total_pagar=parseInt($("#id_total_refrendo").val());
+			var supago=parseInt($("#id_su_pago").val());
+			var cambio=supago-total_pagar;
+
+			$("#id_cambio").val(cambio.toString());
+			if (cambio<0)
+			{
+				$("#id_error_cambio").show()
+				$("#btn_pagar").prop("disabled",true);
+			}
+			else
+			{
+				$("#id_error_cambio").hide()	
+				$("#btn_pagar").prop("disabled",false);
+			}
+		}
+
+
+
+	function fn_simula_refrendo()
+	{
+		
+
+	
+
+
+		$("#fondo_preloader").show();
+		$("#tabla_pagos tbody tr").remove();
+
+		if ($("#id_periodos").val()==null)
+		{
+			id_periodo="0";	
+		}
+		else
+		{
+			id_periodo=$("#id_periodos").val().toString();	
+		}
+		
+
+
+		
+		$.ajax({
+			type: "GET",
+	        url: "http://{{IP_LOCAL}}/empenos/api_simula_refrendo_mensual/",
+	        data: {"username":"{{username}}","folio_boleta":"{{boleta.folio}}","importe":parseInt($("#id_total_refrendo").val()).toString(),"id_sucursal":"{{boleta.sucursal.id}}","numero_refrendos":id_periodo,"comision_pg":"{{importe_comision_pg}}","descuento_comision_pg":descuento_comision_pg},
+	        contentType: "application/json; charset=utf-8",
+	        dataType: "json",
+	        success: function (r) {
+    			if (r[0].estatus=="0")
+	        	{
+	        		$("#msj_error").text(r[0].msj);
+					$(".cls_msj_error").show();
+	        	}
+	        	else
+	        	{
+
+	        		
+	        		cont=r[2].lista.length;
+
+	        		for(x=0;x<cont;x++)
+	        		{
+	        			var htmlTags = '<tr>'+
+
+						       // '<td>'+r[3].lista[x].tipo_pago+'</td>'+
+						        
+						        '<td>'+r[2].lista[x].fecha_vencimiento+'</td>'+
+						        '<td>$'+r[2].lista[x].importe+'</td>'+
+						        //'<td>'+r[0].lista[x].vencido+'</td>'+
+						        //'<td>'+r[0].lista[x].pagado+'</td>'+
+						        //'<td>'+r[3].lista[x].pagado+'</td>'+
+						        //'<td>'+r[3].lista[x].fecha_pago+'</td>'+
+						      '</tr>';
+			      
+			  	 			$('#tabla_pagos tbody').append(htmlTags);
+
+	        		}
+
+					$("#nuevo_mutuo").text("$"+r[1].nuevo_mutuo+".00");
+
+					$("#estatus_boleta").text(r[1].estatus);
+
+					if(parseInt(r[1].nuevo_mutuo)>0)
+					{
+						$("#fecha_vencimiento").text(r[1].fecha_vencimiento);	
+					}
+					else
+					{
+						$("#fecha_vencimiento").text("");
+					}
+					
+
+					
+
+	        		$(".cls_simulacion").show();
+	        	}
+    	
+	        	$("#fondo_preloader").hide();
+	        },
+	        error: function (r) {
+	        		$("#msj_error").text("Error al consultar la boleta.");
+					$(".cls_msj_error").show();
+					$("#fondo_preloader").hide();
+	        },
+	        failure: function (r) {
+	        		$("#msj_error").text("Error al consultar la boleta.");
+					$(".cls_msj_error").show();
+					$("#fondo_preloader").hide();
+	        }
+		});
+	}
+
+	</script>
+{% endblock %}

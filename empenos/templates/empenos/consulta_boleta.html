@@ -161,7 +161,7 @@
 									    	<tr>
 									    		<td>
 									    			
-									    			<a onClick='fn_consulta_boleta({{b.id}})' class='btn btn-default btn-sm'>
+									    			<a onClick='fn_consulta_boleta({{b.id}},{{b.plazo.id}})' class='btn btn-default btn-sm'>
 									    				<span class='glyphicon glyphicon-search'>
 									    					
 									    				</span>    					
@@ -169,12 +169,21 @@
 
 									    			{% if b.plazo.id != 1  %}
 										    			 {%  if b.estatus.id != 4 %}
+										    			 	{% if b.plazo.id == 2 %}
+											    			<a href='/empenos/refrendo/{{b.id}}' class='btn btn-default btn-sm'>
+											    				<span class='glyphicon glyphicon-euro'>
+											    					
+											    				</span>    					
+											    			</a>
+											    			{% endif %}
+											    			{% if b.plazo.id == 3 %}
+											    			<a href='/empenos/refrendo_plazo_mensual/{{b.id}}' class='btn btn-default btn-sm'>
+											    				<span class='glyphicon glyphicon-euro'>
+											    					
+											    				</span>    					
+											    			</a>
+											    			{% endif %}
 
-										    			<a href='/empenos/refrendo/{{b.id}}' class='btn btn-default btn-sm'>
-										    				<span class='glyphicon glyphicon-euro'>
-										    					
-										    				</span>    					
-										    			</a>
 										    			{%endif%}
 
 									    			{%endif%}
@@ -393,7 +402,7 @@
 					<div class="panel-body">
 						<table id="tabla_pagos" class="table table-bordered">
 						    <thead>
-						      <tr>
+						      <tr style="background-color: #79aec8">
 						        <th>Tipo de Pago</th>
 						        
 						        <th>Fecha de Venc.</th>
@@ -532,16 +541,27 @@
 		$(".cls_msj_error").hide();
 		$("#fondo_preloader").hide();
 	}
-	function fn_consulta_boleta(id)
+	function fn_consulta_boleta(id,plazo)
 	{
 		
+
 		id_boleta=id;
-		$("#btn_refrendar").attr("href","/empenos/refrendo/"+id_boleta.toString());
+
+		if (plazo==2)
+		{
+			$("#btn_refrendar").attr("href","/empenos/refrendo/"+id_boleta.toString());
+		}
+		else
+		{
+			$("#btn_refrendar").attr("href","/empenos/refrendo_plazo_mensual/"+id_boleta.toString());			
+		}
+		
 
 		$("#fondo_preloader").show();
 		$("#tabla_pagos tbody tr").remove();
 		$("#tabla_articulos tbody tr").remove();
-
+		
+		console.log("http://{{IP_LOCAL}}/empenos/api_consulta_boleta/");
 		
 		$.ajax({
 			type: "GET",
@@ -598,7 +618,24 @@
 
 	        		for(x=0;x<cont;x++)
 	        		{
-	        			var htmlTags = '<tr>'+
+
+	        			htmlTags_aux="";
+						cont2=r[3].lista[x].lista_periodos.length;
+						htmlTags_aux=""
+						for (y=0;y<cont2;y++)
+						{
+							 htmlTags_aux = htmlTags_aux+"<tr style='font-size:7px;'>"+
+
+							'<td>'+r[3].lista[x].lista_periodos[y].tipo_pago+'</td>'+
+							'<td>'+r[3].lista[x].lista_periodos[y].fecha_vencimiento+'</td>'+
+							'<td>$'+r[3].lista[x].lista_periodos[y].importe+'</td>'+
+							'<td>'+r[3].lista[x].lista_periodos[y].vencido+'</td>'+
+							'<td>'+r[3].lista[x].lista_periodos[y].pagado+'</td>'+
+							'<td>'+r[3].lista[x].lista_periodos[y].fecha_pago+'</td>'+					        
+							'</tr>';
+						  }
+
+	        			var htmlTags = "<tr style='background-color:#ddffdd'>"+
 
 						        '<td>'+r[3].lista[x].tipo_pago+'</td>'+
 						        
@@ -606,9 +643,9 @@
 						        '<td>$'+r[3].lista[x].importe+'.00</td>'+
 						        '<td>'+r[3].lista[x].vencido+'</td>'+
 						        '<td>'+r[3].lista[x].pagado+'</td>'+
-						        '<td>'+r[3].lista[x].fecha_pago+'</td>'+
-						      '</tr>';
-			      
+						        '<td>'+r[3].lista[x].fecha_pago+'</td>'+					        
+						        
+						      '</tr>'+htmlTags_aux;
 			  	 			$('#tabla_pagos tbody').append(htmlTags);			  	 			
 
 			  	 			

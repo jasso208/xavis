@@ -66,16 +66,38 @@
 	</div>
 	
 
+{% ifequal exito '1' %}
+		<div class="fondo_mensaje" >
+			
+		</div >
+		<div class="mensaje" >				
+				<div class="panel panel-default">	
+					<h3 class="page-header">La caja se abrio correctamente.</h3>
+					<a class="btn btn-primary" href="{% url 'seguridad:admin_cajas' %}" >Aceptar</a>				
+				</div>
+		</div>
+{% endifequal  %}
+		<div class="fondo_mensaje cls_error_abrir_caja" >
+			
+		</div >
+		<div class="mensaje cls_error_abrir_caja" >				
+				<div class="panel panel-default">	
+					<h3 class="page-header">Error al abrir caja.</h3>
+					<a class="btn btn-primary" id="btn_aceptar_error_aplicar_abono">Aceptar</a>
+					<br>
+					<br>
+
+				</div>
+		</div>
 
 	<script type="text/javascript">
 		$(document).ready(
 				function()
 				{
-					$("#id_tipo_movimiento").val("1");
-					$("#tipo_mov").hide();
-					$("#diferencia").val("0");
-					$("#diferencia").hide();
-					$("#usuario").hide();
+
+
+					fn_inicio();
+
 					v_id_sucursal="{{id_sucursal}}";
 					//si del back nos mandan el id_sucursal, lo ponemos por default
 					if (v_id_sucursal!=0)
@@ -100,6 +122,26 @@
 					$("#id_usuario").val("{{user_2.user.id}}");
 				}
 			);
+
+		function fn_inicio()
+		{
+			var exito="{{exito}}";
+
+
+				if (parseInt(exito)==0 )
+				{
+					$(".cls_error_abrir_caja").show();
+				}
+				else
+				{	
+					$(".cls_error_abrir_caja").hide();	
+				}
+					$("#id_tipo_movimiento").val("1");
+					$("#tipo_mov").hide();
+					$("#diferencia").val("0");
+					$("#diferencia").hide();
+					$("#usuario").hide();
+		}
 	</script>
 	
 

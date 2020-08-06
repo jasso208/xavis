@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from empenos.models import Tipo_Producto,Linea,Sub_Linea,Marca,Costo_Kilataje,Empenos_Temporal,Joyeria_Empenos_Temporal,Cliente,Boleta_Empeno
-from empenos.models import Pagos,Det_Boleto_Empeno
+from empenos.models import Pagos,Det_Boleto_Empeno,Periodo_Temp
 from django.contrib.auth.models import User
 from empenos.funciones import fn_calcula_refrendo
 import math
@@ -293,8 +293,19 @@ def api_consulta_boleta(request):
 			if x.fecha_pago==None:
 				fecha_pago=" "
 			else:
-				fecha_pago=x.fecha_pago.strftime('%d/%m/%Y')			
-			lista.append({"tipo_pago":x.tipo_pago.tipo_pago,"fecha_vencimiento":x.fecha_vencimiento.strftime('%d/%m/%Y'),"importe":x.importe,"fecha_pago":fecha_pago,"vencido":x.vencido,"pagado":x.pagado})
+				fecha_pago=x.fecha_pago.strftime('%d/%m/%Y')	
+			lista_periodos=[]
+			periodos=Periodo.objects.filter(pago=x).order_by("-fecha_vencimiento")	
+			for y in periodos:
+				fecha_pago_p=" "
+				if y.fecha_pago==None:
+					fecha_pago_p=" "
+				else:
+					fecha_pago_p=y.fecha_pago.strftime('%d/%m/%Y')	
+				lista_periodos.append({"tipo_pago":str(y.consecutivo)+" Refrendo Parcial","fecha_vencimiento":y.fecha_vencimiento.strftime('%d/%m/%Y'),"importe":y.importe,"fecha_pago":fecha_pago_p,"vencido":y.vencido,"pagado":y.pagado})
+
+
+			lista.append({"tipo_pago":x.tipo_pago.tipo_pago,"fecha_vencimiento":x.fecha_vencimiento.strftime('%d/%m/%Y'),"importe":x.importe,"fecha_pago":fecha_pago,"vencido":x.vencido,"pagado":x.pagado,"lista_periodos":lista_periodos})
 
 		respuesta.append({"lista":lista})
 		
@@ -314,6 +325,121 @@ def api_consulta_boleta(request):
 	return Response(respuesta)
 
 
+#simula refrendo mensual
+@api_view(['GET'])
+def api_simula_refrendo_mensual(request):
+	respuesta=[]
+	try:
+		sucursal=Sucursal.objects.get(id=int(request.GET.get("id_sucursal")))
+		hoy=datetime.now()#fecha actual
+		hoy=datetime.combine(hoy, time.min)
+		usuario=User.objects.get(username=request.GET.get("username"))
+		boleta=Boleta_Empeno.objects.get(folio=int(request.GET.get("folio_boleta")),sucursal=sucursal)
+		importe_abono=request.GET.get("importe")
+		numero_refrendos=request.GET.get("numero_refrendos")
+		comision_pg=int(round(decimal.Decimal(request.GET.get("comision_pg"))))
+
+		descuento_comision_pg=int(round(decimal.Decimal(request.GET.get("descuento_comision_pg"))))
+
+		Periodo_Temp.objects.filter(usuario=usuario).delete()
+		periodos=Periodo.objects.filter(boleta=boleta,pagado="N")
+
+
+		for p in periodos:
+			per=Periodo_Temp()
+			per.usuario=usuario
+			per.consecutivo=p.consecutivo
+			per.boleta=p.boleta
+			per.fecha_vencimiento=p.fecha_vencimiento
+			per.importe=p.importe
+			per.tipo_periodo=p.tipo_periodo
+			per.pago=p.pago
+			per.fecha_pago=p.fecha_pago
+			per.vencido=p.vencido
+			per.pagado=p.pagado
+			per.save()
+
+		periodos=Periodo_Temp.objects.filter(usuario=usuario).order_by("fecha_vencimiento")
+
+		fecha_vencimiento=boleta.fecha_vencimiento
+		mutuo=boleta.mutuo
+
+		importe_abono=int(importe_abono)-(int(comision_pg)-descuento_comision_pg)
+
+		#liquidamos los periodos.
+		for p in periodos:
+			if decimal.Decimal(importe_abono)>=decimal.Decimal(p.importe):
+				p.pagado="S"
+				p.save()
+
+				residuo=p.consecutivo%4
+
+				#si residuo es cero, esque  es el cuarto periodo de algun mes,
+				# y la fecha de vencimiento se calcula en base a la fecha de vencimiento.
+				if residuo==0:
+					boleta=p.boleta
+					refrendo=Tipo_Pago.objects.get(id=1)
+					refrendopg=Tipo_Pago.objects.get(id=3)
+
+					#calculamos el numero de meses
+					meses_agregar=int((p.consecutivo/4)+1)
+
+					fecha_emision=datetime.combine(p.boleta.fecha, time.min)					
+
+					fecha_vencimiento=fn_add_months(fecha_emision,meses_agregar)
+
+				else:
+					#se calcula la nueva fecha de vencimiento.
+					fecha_vencimiento=fn_add_months(p.fecha_vencimiento,1)
+
+				importe_abono=decimal.Decimal(importe_abono)-decimal.Decimal(p.importe)
+
+			
+		importe_abono=int(round(importe_abono))
+
+		cont_periodos_vencidos=Periodo_Temp.objects.filter(usuario=usuario,pagado="N").count()
+
+		if int(cont_periodos_vencidos)==0:
+			if int(importe_abono)>0 :			
+				mutuo=mutuo-int(importe_abono)
+
+		#por los redondeos aplicados en el formulario, puede darse el caso de que el mutuo termine con importe menor a cero.
+		if mutuo<0:
+			mutuo=0
+
+		
+		fecha_vencimiento=datetime.combine(fecha_vencimiento, time.min)
+
+		#validamos que la fecha de vencimiento no sea dia de asueto.
+		fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
+
+		if mutuo==0:
+			estatus_boleta="Desempeñada"			
+		else:
+			if fecha_vencimiento<hoy:
+				estatus_boleta="Almoneda"
+			elif fecha_vencimiento==hoy:
+				estatus_boleta="Abierta"
+			else:
+				estatus_boleta="Abierta"
+
+		respuesta.append({"estatus":"1","msj":""})
+		respuesta.append({"fecha_vencimiento":fecha_vencimiento.strftime('%d/%m/%Y'),"nuevo_mutuo":mutuo,"estatus":estatus_boleta})
+		periodos=Periodo_Temp.objects.filter(usuario=usuario,pagado="N").order_by("-fecha_vencimiento")
+
+		lista=[]
+		for p in periodos:
+			lista.append({"fecha_vencimiento":p.fecha_vencimiento.strftime('%d/%m/%Y'),"importe":p.importe})
+		respuesta.append({"lista":lista})
+	except Exception as e:
+		print(e)
+		respuesta=[]
+		respuesta.append({"estatus":"0","msj":"Error al simular el refrendo."})
+
+	return Response(respuesta)
+
+
+#simula refrendo semanal
 @api_view(['GET'])
 def api_simula_refrendo(request):	
 	respuesta=[]

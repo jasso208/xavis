@@ -96,7 +96,7 @@ class Cajas(models.Model):
 	sucursal=models.ForeignKey(Sucursal,on_delete=models.PROTECT)
 	fecha=models.DateTimeField(default=timezone.now)
 	usuario=models.ForeignKey(User,on_delete=models.PROTECT)#usuario que abrio caja.
-	importe=models.IntegerField(default=0, validators=[MinValueValidator(Decimal('1'))])
+	importe=models.IntegerField(default=0, validators=[MinValueValidator(Decimal('0'))])
 	caja=models.CharField(max_length=1,null=False)
 	real_tarjeta=models.IntegerField(default=0)
 	real_efectivo=models.IntegerField(default=0)
@@ -263,7 +263,7 @@ class Boleta_Empeno(models.Model):
 	apellido_p_cotitular=models.CharField(max_length=20,default='NA')
 	apellido_m_cotitular=models.CharField(max_length=20,default='NA')
 	plazo=models.ForeignKey(Plazo,on_delete=models.PROTECT)
-	refrendo=models.IntegerField(default=0)
+	refrendo=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)
 	estatus=models.ForeignKey(Estatus_Boleta,on_delete=models.PROTECT,default=1)
 	sucursal=models.ForeignKey(Sucursal,on_delete=models.PROTECT,blank=True,null=True)
 	mutuo_original=models.IntegerField(default=0)	#este campo no se actualiza, nos sirve para saber cual fue el mutuo original de la boleta.
@@ -305,15 +305,42 @@ class Pagos(models.Model):
 	almacenaje=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)
 	interes=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)
 	iva=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)
-	importe=models.IntegerField()
+	importe=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)
 	vencido=models.CharField(max_length=1,default='N')
 	pagado=models.CharField(max_length=1,default='N',null=False)
 	fecha_pago=models.DateTimeField(null=True,blank=True)
+
+class Tipo_Periodo(models.Model):
+	tipo_periodo=models.CharField(max_length=20,null=False)
+
+	def __str__(self):
+		return self.tipo_periodo
+
+class Periodo(models.Model):
+	consecutivo=models.IntegerField(default=0)
+	boleta=models.ForeignKey(Boleta_Empeno,on_delete=models.PROTECT,null=False,blank=True)
+	fecha_vencimiento=models.DateTimeField(null=False)
+	importe=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)
+	tipo_periodo=models.ForeignKey(Tipo_Periodo,on_delete=models.PROTECT,null=False)
+	pago=models.ForeignKey(Pagos,on_delete=models.PROTECT,null=True,blank=True)
+	fecha_pago=models.DateTimeField(null=True,blank=True)
+	vencido=models.CharField(max_length=1,default='N')
+	pagado=models.CharField(max_length=1,default='N',null=False)
+
+#tabla usada para la simulacion de pagos mensual.
+class Periodo_Temp(models.Model):
+	usuario=models.ForeignKey(User,on_delete=models.PROTECT)
+	consecutivo=models.IntegerField(default=0)
+	boleta=models.ForeignKey(Boleta_Empeno,on_delete=models.PROTECT,null=False,blank=True)
+	fecha_vencimiento=models.DateTimeField(null=False)
+	importe=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)
+	tipo_periodo=models.ForeignKey(Tipo_Periodo,on_delete=models.PROTECT,null=False)
+	pago=models.ForeignKey(Pagos,on_delete=models.PROTECT,null=True,blank=True)
+	fecha_pago=models.DateTimeField(null=True,blank=True)
+	vencido=models.CharField(max_length=1,default='N')
+	pagado=models.CharField(max_length=1,default='N',null=False)
 	
-
-
-
-#tabla usada para la simulacion de pagos.
+#tabla usada para la simulacion de pagos semanal
 class Pagos_Temp(models.Model):
 	usuario=models.ForeignKey(User,on_delete=models.PROTECT)
 	tipo_pago=models.ForeignKey(Tipo_Pago,on_delete=models.PROTECT,null=False,blank=True)
@@ -349,9 +376,14 @@ class Imprime_Abono(models.Model):
 	abono=models.ForeignKey(Abono,on_delete=models.PROTECT)
 
 #no manejamos importe ya que un pago tiene que ser cubierto totalmente, no parcialmente.
+#aplica solo para pago semanal
 class Rel_Abono_Pago(models.Model):
 	abono=models.ForeignKey(Abono,on_delete=models.PROTECT)
 	pago=models.ForeignKey(Pagos,on_delete=models.PROTECT)
+
+class Rel_Abono_Periodo(models.Model):
+	abono=models.ForeignKey(Abono,on_delete=models.PROTECT)
+	periodo=models.ForeignKey(Periodo,on_delete=models.PROTECT)	
 
 #cuando un abono afecta a capital, aqui almacenamos a que boleta le afecto el capital y el importe.
 class Rel_Abono_Capital(models.Model):
@@ -359,6 +391,8 @@ class Rel_Abono_Capital(models.Model):
 	boleta=models.ForeignKey(Boleta_Empeno,on_delete=models.PROTECT)
 	importe=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)
 	capital_restante=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)#cuando se afecte el capital, aqui almacenamos el historial de como quedo al aplicar el abono.
+
+
 
 
 

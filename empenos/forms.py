@@ -40,6 +40,10 @@ class Cierra_Caja_Form(forms.Form):
 class Refrendo_Form(forms.Form):
 	importe_abono=forms.IntegerField()
 
+class Refrendo_Mensual_Form(forms.Form):
+	total_refrendo=forms.IntegerField()
+	descuento=forms.IntegerField()
+
 class Reportes_Caja_Form(forms.Form):
 	id_tipo_mov=forms.ModelChoiceField(queryset=Tipo_Movimiento.objects.all())
 	fecha_inicial=forms.DateTimeField(initial=timezone.now())
