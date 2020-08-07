@@ -276,7 +276,7 @@ def retiro_efectivo(request):
 				print("1 ciclo")
 				if p.pago.tipo_pago==est_refrendo:#si afecto a refrendo acumulamos el importe.
 					cont_refrendos=cont_refrendos+1
-					importe_refrendo=importe_refrendo+p.pago.importe
+					importe_refrendo=decimal.Decimal(importe_refrendo)+decimal.Decimal(p.pago.importe)
 
 				print("2 ciclo")
 				if p.pago.tipo_pago==est_com_pg:#si afecto a comision pg acumulamos el importe.
@@ -286,7 +286,7 @@ def retiro_efectivo(request):
 				print("3 ciclo")
 				if p.pago.tipo_pago==est_ref_pg:#si afecto a refrebdis pg acumulamos el importe.
 					cont_refrendos=cont_refrendos+1
-					importe_refrendo=importe_refrendo+p.pago.importe
+					importe_refrendo=decimal.Decimal(importe_refrendo)+decimal.Decimal(p.pago.importe)
 
 			print("primer ciclo")
 			#las boletas de plazo mensual se pagan en periodos			
@@ -835,21 +835,27 @@ def nvo_empeno(request):
 					iva_semanal=((almacenaje_semanal+interes_semanal)*0.16)
 					importe_semanal=(almacenaje_semanal+interes_semanal+iva_semanal)
 
-					Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=round(importe_semanal),almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
+					if round(importe_semanal)==0:
+						importe_semanal=1
+					else:
+						importe_semanal=round(importe_semanal)
+
+
+					Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=importe_semanal,almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
 
 					days = timedelta(days=14)					
 					fecha_vencimiento = datetime.combine(hoy+days, time.min) 
 					fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
-					Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=round((importe_semanal)),almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
+					Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=importe_semanal,almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
 
 					days = timedelta(days=21)					
 					fecha_vencimiento = datetime.combine(hoy+days, time.min) 
-					Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=round((importe_semanal)),almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
+					Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=importe_semanal,almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
 
 					days = timedelta(days=28)					
 					fecha_vencimiento = datetime.combine(hoy+days, time.min) 
 					fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
-					Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=round((importe_semanal)),almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
+					Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=importe_semanal,almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
 
 					boleta.refrendo=math.ceil((importe_semanal*4.00))
 					boleta.save()
@@ -955,22 +961,28 @@ def nvo_empeno(request):
 					iva_semanal=((almacenaje_semanal+interes_semanal)*0.16)
 					importe_semanal=(almacenaje_semanal+interes_semanal+iva_semanal)
 
-					Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=round(importe_semanal),almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
+					if round(importe_semanal)==0:
+						importe_semanal=1
+					else:
+						importe_semanal=round(importe_semanal)
+
+
+					Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=importe_semanal,almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
 
 					days = timedelta(days=14)					
 					fecha_vencimiento = datetime.combine(hoy+days, time.min) 
 					fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
-					Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=round((importe_semanal)),almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
+					Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=importe_semanal,almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
 
 					days = timedelta(days=21)					
 					fecha_vencimiento = datetime.combine(hoy+days, time.min) 
 					fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
-					Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=round((importe_semanal)),almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
+					Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=importe_semanal,almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
 
 					days = timedelta(days=28)					
 					fecha_vencimiento = datetime.combine(hoy+days, time.min) 
 					fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
-					Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=round((importe_semanal)),almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
+					Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=importe_semanal,almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
 
 					boleta.refrendo=math.ceil((importe_semanal*4.00))
 					boleta.save()
@@ -1064,22 +1076,28 @@ def nvo_empeno(request):
 						iva_semanal=((almacenaje_semanal+interes_semanal)*0.16)
 						importe_semanal=(almacenaje_semanal+interes_semanal+iva_semanal)
 
-						Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=round(importe_semanal),almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
+						if round(importe_semanal)==0:
+							importe_semanal=1
+						else:
+							importe_semanal=round(importe_semanal)
+
+
+						Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=importe_semanal,almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
 
 						days = timedelta(days=14)					
 						fecha_vencimiento = datetime.combine(hoy+days, time.min) 
 						fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
-						Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=round((importe_semanal)),almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
+						Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=importe_semanal,almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
 
 						days = timedelta(days=21)					
 						fecha_vencimiento = datetime.combine(hoy+days, time.min) 
 						fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
-						Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=round((importe_semanal)),almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
+						Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=importe_semanal,almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
 
 						days = timedelta(days=28)					
 						fecha_vencimiento = datetime.combine(hoy+days, time.min) 
 						fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
-						Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=round((importe_semanal)),almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
+						Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=importe_semanal,almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
 						boleta.refrendo=math.ceil((importe_semanal*4.00))
 						boleta.save()
 
@@ -1091,7 +1109,7 @@ def nvo_empeno(request):
 						pago.tipo_pago=refrendo
 						pago.boleta=boleta
 						pago.fecha_vencimiento=fecha_vencimiento
-						pago.importe=int(ref[0]["refrendo"])
+						pago.importe=round(ref[0]["refrendo"])
 						pago.almacenaje=ref[0]["almacenaje"]
 						pago.interes=ref[0]["interes"]
 						pago.iva=ref[0]["iva"]
@@ -1656,8 +1674,8 @@ def imprime_abono(request):
 
 
 		articulo=""
-		if abono.boleta.tipo_producto==3:
-			articulo=Det_Boleto_Empeno.objects.get(boleta=abono.boleta).descripcion
+		if abono.boleta.tipo_producto.id==3:
+			articulo=Det_Boleto_Empeno.objects.get(boleta_empeno=abono.boleta).descripcion
 		else:
 			articulo=abono.boleta.tipo_producto.tipo_producto
 
@@ -1936,8 +1954,8 @@ def imprime_abono(request):
 
 			articulo=""
 
-			if abono.boleta.tipo_producto==3:
-				articulo=Det_Boleto_Empeno.objects.get(boleta=abono.boleta).descripcion
+			if abono.boleta.tipo_producto.id==3:
+				articulo=Det_Boleto_Empeno.objects.get(boleta_empeno=abono.boleta).descripcion
 			else:
 				articulo=abono.boleta.tipo_producto.tipo_producto
 
@@ -1984,7 +2002,7 @@ def imprime_abono(request):
 	buffer.close()
 
 	response.write(pdf)
-	#Imprime_Abono.objects.get(usuario=request.user).delete()
+	Imprime_Abono.objects.get(usuario=request.user).delete()
 	return response
 
 
@@ -2644,15 +2662,15 @@ def api_consulta_corte_caja(request):
 			for p in rel_ab_pagos:
 				if p.pago.tipo_pago==est_refrendo:#si afecto a refrendo acumulamos el importe.
 					cont_refrendos=cont_refrendos+1
-					importe_refrendo=importe_refrendo+p.pago.importe
+					importe_refrendo=decimal.Decimal(importe_refrendo)+decimal.Decimal(p.pago.importe)
 
 				if p.pago.tipo_pago==est_com_pg:#si afecto a comision pg acumulamos el importe.
 					cont_com_pg=cont_com_pg+1
-					comisiones_pg=comisiones_pg+p.pago.importe
+					comisiones_pg=decimal.Decimal(comisiones_pg)+decimal.Decimal(p.pago.importe)
 
 				if p.pago.tipo_pago==est_ref_pg:#si afecto a refrebdis pg acumulamos el importe.
 					cont_refrendos=cont_refrendos+1
-					importe_refrendo=importe_refrendo+p.pago.importe
+					importe_refrendo=decimal.Decimal(importe_refrendo)+decimal.Decimal(p.pago.importe)
 
 			#las boletas de plazo mensual se pagan en periodos			
 			rap=Rel_Abono_Periodo.objects.filter(abono=ab)

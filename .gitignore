@@ -5,10 +5,14 @@ myvenv
 db.sqlite3
 /static
 .DS_Store
-Xavis/Cantora_Qa.db
+/Xavis/Cantora_Qa.db
 *.db
 Xavis/settings.py
 Xavis/ventas/migrations/
 Xavis/seguridad/migrations/
 Xavis/inventario/migrations/
 Xavis/blog/migrations/
+Xavis/empenos/migrations/
+empenos/migrations/
+Xavis/seguridad/migrations/
+seguridad/migrations/

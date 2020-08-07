@@ -76,7 +76,7 @@ class User_2(models.Model):
 	user=models.ForeignKey(User,on_delete=models.PROTECT)
 	sucursal=models.ForeignKey(Sucursal,on_delete=models.PROTECT)
 	perfil=models.ForeignKey(Perfil,on_delete=models.PROTECT)
-	sesion=models.IntegerField()
+	sesion=models.IntegerField(blank=True,null=True)
 
 	class Meta:
 		unique_together=('user',)
@@ -166,6 +166,11 @@ class Linea(models.Model):
 
 	def __str__(self):
 		return self.linea
+	class Meta:
+		# sort by "fecha" in descending order unless
+		# overridden in the query with order_by()
+		ordering = ['linea']
+		
 
 class Sub_Linea(models.Model):
 	linea=models.ForeignKey(Linea,on_delete=models.PROTECT)
@@ -174,11 +179,21 @@ class Sub_Linea(models.Model):
 	def __str__(self):
 		return self.sub_linea
 
+	class Meta:
+		# sort by "fecha" in descending order unless
+		# overridden in the query with order_by()
+		ordering = ['sub_linea']
+
+
 class Marca(models.Model):	
 	marca=models.CharField(max_length=100,null=False)
 
 	def __str__(self):
 		return self.marca
+	class Meta:
+		# sort by "fecha" in descending order unless
+		# overridden in the query with order_by()
+		ordering = ['marca']
 
 class Costo_Kilataje(models.Model):	
 	tipo_producto=models.ForeignKey(Tipo_Producto,on_delete=models.PROTECT,blank=True,null=False)

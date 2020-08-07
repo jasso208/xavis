@@ -102,7 +102,7 @@ def fn_pago_parcial(boleta,hoy,refrendo,pago):
 	print("periodo 4")
 	#cuarto periodo
 	#dias variable
-	periodo_variable=Tipo_Periodo.objects.get(id=1)
+	periodo_variable=Tipo_Periodo.objects.get(id=2)
 
 	per=Periodo()
 	per.boleta=boleta
@@ -182,7 +182,7 @@ def fn_calcula_saldo_refrendo(boleta,hoy):
 						fecha_abono=datetime.combine(p.fecha_vencimiento-d,time.min)
 						
 						if fecha_abono==hoy:#validamos que el primer abono a liqudar sea el primer abono generado
-							importe_refrendo=importe_refrendo+p.importe
+							importe_refrendo=decimal.Decimal(importe_refrendo)+decimal.Decimal(p.importe)
 					cont=1
 			else:				
 				for p in pagos:
@@ -258,7 +258,7 @@ def fn_importe_a_refrendo(abono):
 		ir=0.00
 		for x in importe_r:
 			if x.pago.tipo_pago.id!=2:#validamos quel pago no sea comsiion pg
-				ir=ir+x.pago.importe
+				ir=decimal.Decimal(ir)+decimal.Decimal(x.pago.importe)
 
 	#plazo mensual
 	if abono.boleta.plazo.id==3:
