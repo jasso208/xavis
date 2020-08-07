@@ -48,16 +48,16 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 	'seguridad',
-	'inventario',
-	'ventas',
-	'blog',
+	#'inventario',
+	#'ventas',
+	#'blog',
     'empenos',
-    'smart_selects',
-    'contabilidad',
+    #'smart_selects',
+    #'contabilidad',
 	'rest_framework',
 	'corsheaders',	
 	'bootstrap3',
-    'rolepermissions',
+    #'rolepermissions',
 ]
 
 
@@ -110,7 +110,7 @@ PROJECT_DIR = os.path.abspath(os.path.dirname(__file__))
 DATABASES = {
  'default': {
  'ENGINE': 'django.db.backends.postgresql',
- 'NAME': 'jassdel',
+ 'NAME': 'empeno_express',
  'USER': 'postgres',
  'PASSWORD': 'Blanca1985',
  'HOST': 'localhost',

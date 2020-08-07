@@ -19,11 +19,7 @@ from django.conf.urls import include, url
 app_name="Xavis"
 
 urlpatterns = [
-    url('admin/', admin.site.urls),	    
-   	url(r'inventario/',include('inventario.urls')),
-	url(r'ventas/',include('ventas.urls')),
-	url(r'blog/',include('blog.urls')),
-	url(r'contabilidad/',include('contabilidad.urls')),
+    url('admin/', admin.site.urls),	       	
     url(r'empenos/',include('empenos.urls')),
 	url(r'',include('seguridad.urls')),
 ]

@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from seguridad.models import Cliente,Direccion_Envio_Cliente,Clientes_Logueados,Direccion_Envio_Cliente_Temporal
 from seguridad.models import E_Mail_Notificacion,Recupera_pws
 from django.core.mail import EmailMessage
-from ventas.models import Venta,Detalle_Venta
+#from ventas.models import Venta,Detalle_Venta
 from django.conf import settings
 import smtplib
 import email.message
@@ -596,68 +596,6 @@ def api_envia_token(request):
 		print(e)
 		estatus.append({"estatus":"0","msj":"Ocurrio un error, intentelo nuevamente."})
 
-	return Response(estatus)
-
-#para los clientes que hacen compras como invitados, se les envia un token a su correo para que puedan consultar sus ventas-
-@api_view(['GET'])
-def api_consulta_ventas_invitado(request):
-	estatus=[]	
-	token=request.GET.get("token")
-	
-	ventas=[]
-	#validamos que el token exista
-	try:
-		try:
-			r=Recupera_pws.objects.get(session=token)
-		except:
-			estatus.append({"estatus":"0","msj":"El token es incorrecto."})
-			return Response(estatus)
-		try:
-		#obtenemos el cliente del correo
-			c=Cliente.objects.get(e_mail=r.e_mail)
-		except:
-			estatus.append({"estatus":"0","msj":"El Email no existe."})
-			return Response(estatus)
-		vtas=Venta.objects.filter(cliente=c).order_by("-id")
-	
-		for v in vtas:		
-			if v.link_seguimiento=='No Disponible':
-				enviado=False
-			else:
-				enviado=True
-
-			dv=Detalle_Venta.objects.filter(id_venta=v)
-			img_1=""
-			img_2=""	
-			img_3=""
-			img_4=""
-			cont=1
-			for d in dv:
-
-				if cont==4:
-					img_4=fn_concatena_folio(str(d.id_producto.id))+"_1"
-					cont=cont+1
-				if cont==3:
-					img_3=fn_concatena_folio(str(d.id_producto.id))+"_1"
-					cont=cont+1
-				if cont==2:
-					img_2=fn_concatena_folio(str(d.id_producto.id))+"_1"
-					cont=cont+1
-				if cont==1:
-					img_1=fn_concatena_folio(str(d.id_producto.id))+"_1"
-					cont=cont+1
-				
-			if (cont-1)==1:
-				solo_1=True
-			else:
-				solo_1=False
-
-			ventas.append({"solo_1":solo_1,"img_1":img_1,"img_2":img_2,"img_3":img_3,"img_4":img_4,"enviado":enviado,"folio":v.id,"folio_0":fn_concatena_folio(str(v.id)),"fecha":str(v.fecha.day)+"-"+str(v.fecha.month)+"-"+str(+v.fecha.year),"total":v.total,"estatus":v.id_estatus_venta.estatus_venta,"seguimiento":v.link_seguimiento})
-	
-		estatus.append({"estatus":1,'ventas':ventas})
-	except Exception as e:
-		print(e)
-		estatus.append({"estatus":"0","msj":"No existen ventas para el Correo electronico indicado indicado."})
 	return Response(estatus)
 
 

@@ -7,7 +7,7 @@ db.sqlite3
 .DS_Store
 Xavis/Cantora_Qa.db
 *.db
-settings.py
+Xavis/settings.py
 Xavis/ventas/migrations/
 Xavis/seguridad/migrations/
 Xavis/inventario/migrations/
