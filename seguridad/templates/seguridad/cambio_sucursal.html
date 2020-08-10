@@ -1,0 +1,226 @@
+<!--
+	A esta pantalla solo tiene acceso el Administrador del sistema.
+	desde aqui podra cambiar de sucursal a cualquier usuario.
+
+-->
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% block usuario %}
+						<p id="usuario_logueado"  > 
+							<strong>Usuario:</strong> {{user_2.user.username}}
+							&nbsp; / &nbsp;
+							<strong>Perfil:</strong> {{user_2.perfil}}
+							&nbsp; / &nbsp;
+							<strong>Sucursal:</strong> {{user_2.sucursal}}
+							&nbsp; / &nbsp;
+							<strong>Caja:</strong> {{c}}
+						</p>
+{% endblock  %}
+
+{% block content %}
+	<div class="col-xs-12 cls_encabezado_body">
+	
+		<a >
+			Cambio de Sucursal
+		</a>		
+	
+	</div>
+	<div class="col-xs-12">
+
+	<form method="post" action="#" class="cls_form_1">
+		{%csrf_token%}
+		
+		<div class="row cls_form_consulta">
+			<div class="col-xs-12">
+				<div class="panel panel-default">
+					
+					<div class="panel-body">
+						<div class="col-xs-4">
+							{% bootstrap_field form.usuario %}
+							
+						</div>
+						<div class="col-xs-4">
+							{% bootstrap_field form.sucursal %}
+							
+						</div>
+						<div class="col-xs-4">
+							<br>
+
+							<button class=" btn btn-primary">Guardar</button>
+						</div>
+							
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</form>
+	</div>
+
+
+{% ifequal tiene_permiso '0' %}
+
+		<div class="fondo_mensaje cls_mensaje_notificacion" >
+			
+		</div >
+		<div class="mensaje cls_mensaje_notificacion" >				
+				<div class="panel panel-default">	
+					<h3 class="page-header">No tiene permiso para acceder a esta opción.</h3>
+					<a class="btn btn-primary" href="{% url 'seguridad:admin_perfil' %}" >Aceptar</a>
+
+			
+					<br>
+					<br>
+
+				</div>
+		</div>
+
+{% endifequal  %}
+{% ifequal exito '1' %}
+
+		<div class="fondo_mensaje cls_mensaje_notificacion" >
+			
+		</div >
+		<div class="mensaje cls_mensaje_notificacion" >				
+				<div class="panel panel-default">	
+					<h3 class="page-header">Se actualizo correctamente.</h3>
+					<a class="btn btn-primary" href="{% url 'seguridad:admin_perfil' %}" >Aceptar</a>
+
+			
+					<br>
+					<br>
+
+				</div>
+		</div>
+
+{% endifequal  %}
+
+{% ifequal exito '0' %}
+
+		<div class="fondo_mensaje cls_mensaje_notificacion" >
+			
+		</div >
+		<div class="mensaje cls_mensaje_notificacion" >				
+				<div class="panel panel-default">	
+					<h3 class="page-header">Error al actualizar la sucursal.</h3>
+					<a class="btn btn-primary" href="{% url 'seguridad:admin_perfil' %}" >Aceptar</a>
+
+			
+					<br>
+					<br>
+
+				</div>
+		</div>
+
+{% endifequal  %}
+
+<div id="fondo_preloader">
+	<div class="preloader" id="preloader">
+	
+	</div>
+</div>
+<div class="fondo_mensaje_2 cls_msj_error" >
+
+		</div >
+		<div class="mensaje_2 cls_msj_error" >
+			
+			<div class="panel panel-default">	
+				<h3 class="page-header" id="msj_error"></h3>
+				<a class="btn btn-primary" id="btn_aceptar">Aceptar</a>
+				<br>
+				<br>
+
+			</div>
+		</div>
+
+
+	
+<script type="text/javascript">
+	$(document).ready(
+		function()
+		{
+			fn_inicio();
+
+			$("#id_usuario").change(
+					function()
+					{
+						fn_consulta_sucursales();
+					}
+				);
+
+			$("#btn_aceptar").click(
+				function()
+				{
+					$(".cls_msj_error").hide();
+				}
+			);
+		}
+	);
+
+	function fn_inicio()
+	{
+		$("#fondo_preloader").hide();
+		$(".cls_msj_error").hide();
+	}
+
+
+	function fn_consulta_sucursales()
+	{
+
+		
+
+		$("#fondo_preloader").show();
+		
+		$("#id_sucursal option").remove();
+
+		$.ajax({
+			type: "GET",
+	        url: "http://{{IP_LOCAL}}/empenos/api_consulta_sucurales_usuario/",
+	        data: {"id":$("#id_usuario").val()},
+	        contentType: "application/json; charset=utf-8",
+	        dataType: "json",
+	        success: function (r) {
+    
+    			if (parseInt(r[0].estatus)==0)
+    			{
+    				$("#msj_error").text(r[0].msj);
+					$(".cls_msj_error").show();
+    			}
+    			else
+    			{
+
+    				cont=r[1].lista.length;
+
+    				
+    				for(x=0; x<cont; x++)
+    				{   					    					
+    					htmlTags_aux="";
+    					htmlTags_aux = htmlTags_aux+"<option value='"+r[1].lista[x].id_sucursal+"'>"+r[1].lista[x].sucursal+"</option";
+    					$("#id_sucursal").append(htmlTags_aux);
+
+    				}
+    				
+    				
+    				
+    				$("#id_sucursal").val(r[2].id_sucursal_actual);
+    			}
+    	
+	        	$("#fondo_preloader").hide();
+	        },
+	        error: function (r) {
+	        		$("#msj_error").text("Error al consultar las sucursales");
+					$(".cls_msj_error").show();
+					$("#fondo_preloader").hide();
+	        },
+	        failure: function (r) {
+	        		$("#msj_error").text("Error al consultar las sucursales.");
+					$(".cls_msj_error").show();
+					$("#fondo_preloader").hide();
+	        }
+		});
+
+	}
+</script>
+
+{% endblock %}

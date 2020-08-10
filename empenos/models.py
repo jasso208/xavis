@@ -14,7 +14,6 @@ GENERO_CHOICES = (
 ESTADO_CIVIL_CHOICES = (
     ('1','SOLTERO'),
     ('2', 'CASADO'),
-    
 )
 
 
@@ -61,8 +60,6 @@ class Control_Folios(models.Model):
 	class Meta:
 		unique_together=('tipo_movimiento','sucursal',)
 	
-
-
 
 class Sucursales_Regional(models.Model):
 	user=models.ForeignKey(User,on_delete=models.PROTECT)

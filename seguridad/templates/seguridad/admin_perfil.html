@@ -1,6 +1,18 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load bootstrap3 %}
+{% block usuario %}
+						<p id="usuario_logueado"  > 
+							<strong>Usuario:</strong> {{user_2.user.username}}
+							&nbsp; / &nbsp;
+							<strong>Perfil:</strong> {{user_2.perfil}}
+							&nbsp; / &nbsp;
+							<strong>Sucursal:</strong> {{user_2.sucursal}}
+							&nbsp; / &nbsp;
+							<strong>Caja:</strong> {{c}}
+						</p>
+{% endblock  %}
+
 {%block content%}
 <div class="col-xs-12 cls_encabezado_body">
 	<a >
@@ -28,7 +40,23 @@
 						</a>	
 					</div>
 					
+					
 				</div>	
+				<div class="col-xs-2">
+					<div class="cls_boton_body">
+						<a href="{% url 'seguridad:cambio_sucursal' %}">
+							<span class="glyphicon glyphicon-home"></span>
+							<br>
+							<br>
+							Cambio de Sucursal
+						</a>	
+					</div>
+				</div>	
+
+
+
+
+				
 				
 			</div>
 			

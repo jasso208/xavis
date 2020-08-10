@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.models  import Permission,User
+from empenos.models import *
 
 class Login_Form(forms.Form):
 	usuario=forms.CharField(max_length=30)
@@ -27,3 +28,8 @@ class User_Form(forms.ModelForm):
 	class Meta:
 		model=User
 		fields=("username","first_name","last_name","email","password","groups","is_staff","is_active","is_superuser")
+
+class Cambio_Sucursal_Form(forms.Form):
+	usuario=forms.ModelChoiceField(queryset=User.objects.all())
+	sucursal=forms.ModelChoiceField(queryset=Sucursal.objects.all())
+

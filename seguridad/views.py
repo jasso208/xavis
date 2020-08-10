@@ -15,13 +15,17 @@ from django.core.mail import EmailMessage
 from django.conf import settings
 import smtplib
 import email.message
-from .forms import Login_Form,Permisos_Form,User_Form,Busca_Usuario_Form,Cambia_Psw_Form
+from .forms import *
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models  import Permission,User
 from empenos.models import User_2,Cajas
 from datetime import date, datetime, time
 from random import randint
+
+IP_LOCAL = settings.IP_LOCAL
+
 encabezado_link_consulta_venta_1="""
+
 <html>
     <head>           
     </head>
@@ -145,8 +149,36 @@ def admin_productos(request):
 def admin_ventas(request):
 	return render(request,'seguridad/admin_ventas.html',{})
 
-def admin_miperfil(request):
-	return render(request,'seguridad/admin_mi_perfil.html',{})
+def admin_perfil(request):
+	#si no esta logueado mandamos al login
+	if not request.user.is_authenticated:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+	
+	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
+	try:
+		user_2=User_2.objects.get(user=request.user)
+	except Exception as e:		
+		form=Login_Form(request.POST)
+		estatus=0
+		msj="La cuenta del usuario esta incompleta."			
+		return render(request,'login.html',locals())
+	IP_LOCAL = settings.IP_LOCAL
+	id_usuario=user_2.user.id
+
+	c=""
+
+
+	msj_error=""	
+	try:
+		#validamos si el usuaario tiene caja abierta para mostrarla en el encabezado.
+		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+		print(caja.sucursal)
+		c=caja.caja
+	except Exception as e:
+		msj_error="No cuentas con caja abierta."
+		print(e)
+
+	return render(request,'seguridad/admin_perfil.html',locals())
 
 def admin_cajas(request):
 	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
@@ -242,6 +274,34 @@ def permisos(request):
 	return render(request,'seguridad/consulta_permisos.html',locals())
 
 def cambio_psw_usr(request):
+	#si no esta logueado mandamos al login
+	if not request.user.is_authenticated:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+	
+	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
+	try:
+		user_2=User_2.objects.get(user=request.user)
+	except Exception as e:		
+		form=Login_Form(request.POST)
+		estatus=0
+		msj="La cuenta del usuario esta incompleta."			
+		return render(request,'login.html',locals())
+	IP_LOCAL = settings.IP_LOCAL
+	id_usuario=user_2.user.id
+
+	c=""
+
+
+	msj_error=""	
+	try:
+		#validamos si el usuaario tiene caja abierta para mostrarla en el encabezado.
+		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+		print(caja.sucursal)
+		c=caja.caja
+	except Exception as e:
+		msj_error="No cuentas con caja abierta."
+		print(e)
+
 
 	if request.method=="POST":
 		
@@ -253,11 +313,74 @@ def cambio_psw_usr(request):
 		user=authenticate (request,username=usr.username,password=psw)
 		
 		login(request,user)
-		return HttpResponseRedirect(reverse('seguridad:admin_miperfil'))
-	
+
+		actualizado="1"
 	else:
-		form=Cambia_Psw_Form()
+		
+		actualizado="0"
+	form=Cambia_Psw_Form()
 	return render(request,'seguridad/cambio_psw_usr.html',locals())
+
+
+def cambio_sucursal(request):
+
+	#si no esta logueado mandamos al login
+	if not request.user.is_authenticated:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+	
+	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
+	try:
+		user_2=User_2.objects.get(user=request.user)
+	except Exception as e:		
+		form=Login_Form(request.POST)
+		estatus=0
+		msj="La cuenta del usuario esta incompleta."			
+		return render(request,'login.html',locals())
+	IP_LOCAL = settings.IP_LOCAL
+	id_usuario=user_2.user.id
+
+	c=""
+
+
+	msj_error=""	
+	try:
+		#validamos si el usuaario tiene caja abierta para mostrarla en el encabezado.
+		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+
+		c=caja.caja
+	except Exception as e:
+		msj_error="No cuentas con caja abierta."
+		print(e)
+
+	#si es Gerente Regional o Administrador de Sistema
+	tiene_permiso="1"
+	if user_2.perfil.id==3 or user_2.perfil.id==4:
+		tiene_permiso="1"
+	else:
+		tiene_permiso="0"
+
+	exito="2"
+	if request.method=="POST":
+		try:
+			id_usuario=request.POST.get("usuario")
+			id_sucursal=request.POST.get("sucursal")
+
+			sucursal=Sucursal.objects.get(id=id_sucursal)
+			usuario=User.objects.get(id=id_usuario)
+
+			u2=User_2.objects.get(user=usuario)
+			u2.sucursal=sucursal
+			u2.save()
+
+			form=Cambio_Sucursal_Form()
+			exito="1"
+		except:
+			exito="0"
+	else:
+		exito="2"
+		form=Cambio_Sucursal_Form()
+	return render(request,'seguridad/cambio_sucursal.html',locals())
+
 
 def alta_usuario(request,id=None):
 

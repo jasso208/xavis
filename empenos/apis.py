@@ -277,6 +277,7 @@ def api_consulta_boleta(request):
 	respuesta=[]
 	id_boleta=request.GET.get("id_boleta")
 	try:
+
 		respuesta.append({"estatus":"1"})
 		boleta=Boleta_Empeno.objects.get(id=id_boleta)
 
@@ -438,6 +439,74 @@ def api_simula_refrendo_mensual(request):
 
 	return Response(respuesta)
 
+
+#Buscamos las sucursales alas que tiene acceso un usuario
+@api_view(['GET'])
+def api_consulta_sucurales_usuario(request):
+	respuesta=[]
+
+
+	
+	try:
+		print(request.GET.get("id"))
+		user_id=request.GET.get("id")
+		user=User.objects.get(id=user_id)
+	except Exception as e:
+		print(e)
+		respuesta=[]
+		respuesta.append({"estatus":"0","msj":"El usuario no existe."})
+		return Response(respuesta)
+
+	try:
+
+
+
+		pub_date = date.today()
+		min_pub_date_time = datetime.combine(pub_date, time.min) 
+		max_pub_date_time = datetime.combine(pub_date, time.max)  
+
+		#validamos si el usuario tiene caja abierta en el dia actual.
+		caja=Cajas.objects.filter(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=user)
+
+		if caja.exists():			
+			respuesta.append({"estatus":"0","msj":"El usuario cuenta con caja abierta, no puede cambiar de sucursal."})			
+
+	except Exception as e:
+		print(e)
+		respuesta=[]
+		respuesta.append({"estatus":"0","msj":"Error al consultar las sucursales."})
+		return Response(respuesta)
+
+	try:
+
+		respuesta.append({"estatus":"1","msj":""})
+		sucursales=Sucursales_Regional.objects.filter(user=user)
+
+		lista=[]
+		if sucursales.exists():
+			#obtanemos las sucursales a lasque tiene acceso el usuario.
+			for s in sucursales:
+				lista.append({"id_sucursal":s.sucursal.id,"sucursal":s.sucursal.sucursal})
+			respuesta.append({"lista":lista})
+
+			u2=User_2.objects.get(user=user)
+
+			#buscamos la sucursal actual.
+			respuesta.append({"id_sucursal_actual":u2.sucursal.id})
+
+		else:
+			respuesta=[]
+			respuesta.append({"estatus":"0","msj":"Error al consultar las sucursales."})
+			return Response(respuesta)
+
+	except Exception as e:
+		print(e)
+		respuesta=[]
+		respuesta.append({"estatus":"0","msj":"Error al consultar las sucursales."})
+
+		return Response(respuesta)
+
+	return Response(respuesta)
 
 #simula refrendo semanal
 @api_view(['GET'])

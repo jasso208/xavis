@@ -28,7 +28,7 @@ from reportlab.lib.pagesizes import letter, landscape
 from reportlab.lib.pagesizes import A4
 import math
 from empenos.funciones import *
-
+IP_LOCAL = settings.IP_LOCAL
 
 def abrir_caja(request):
 	if not request.user.is_authenticated:
@@ -56,7 +56,7 @@ def abrir_caja(request):
 	if caja.exists():
 		caja_abierta="1"#si tiene caja abierta enviamos este estatus para no dejar entrar a la pantalla.
 
-	sucursales=Sucursales_Regional.objects.filter(user=user_2.user)
+	sucursales=Sucursales_Regional.objects.filter(user=user_2.user,sucursal=user_2.sucursal)
 	
 	id_sucursal=0
 	if user_2.perfil.id==1 or user_2.perfil.id==2:
@@ -433,7 +433,7 @@ def corte_caja(request):
 	except Exception as e:
 		print(e)
 
-	sucursales=Sucursales_Regional.objects.filter(user=user_2.user)
+	sucursales=Sucursales_Regional.objects.filter(user=user_2.user,sucursal=user_2.sucursal)
 
 	is_post="0"
 	error_guardar=""
@@ -723,7 +723,7 @@ def consulta_boleta(request):
 		print("es metodo GET")
 	form=Consulta_Boleta_Form()
 
-	sucursales=Sucursal.objects.all()
+	sucursales=Sucursal.objects.filter(id=user_2.sucursal.id)
 
 	return render(request,'empenos/consulta_boleta.html',locals())
 
