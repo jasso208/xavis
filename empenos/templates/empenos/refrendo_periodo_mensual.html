@@ -698,7 +698,7 @@
 		
 		$.ajax({
 			type: "GET",
-	        url: "http://{{IP_LOCAL}}/empenos/api_simula_refrendo_mensual/",
+	        url: "https://{{IP_LOCAL}}/empenos/api_simula_refrendo_mensual/",
 	        data: {"username":"{{username}}","folio_boleta":"{{boleta.folio}}","importe":parseInt($("#id_total_refrendo").val()).toString(),"id_sucursal":"{{boleta.sucursal.id}}","numero_refrendos":id_periodo,"comision_pg":"{{importe_comision_pg}}","descuento_comision_pg":descuento_comision_pg},
 	        contentType: "application/json; charset=utf-8",
 	        dataType: "json",

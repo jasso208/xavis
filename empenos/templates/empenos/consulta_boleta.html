@@ -562,11 +562,10 @@
 		$("#tabla_pagos tbody tr").remove();
 		$("#tabla_articulos tbody tr").remove();
 		
-		console.log("http://{{IP_LOCAL}}/empenos/api_consulta_boleta/");
-		
+
 		$.ajax({
 			type: "GET",
-	        url: "http://{{IP_LOCAL}}/empenos/api_consulta_boleta/",
+	        url: "https://{{IP_LOCAL}}/empenos/api_consulta_boleta/",
 	        data: {"id_boleta":id},
 	        contentType: "application/json; charset=utf-8",
 	        dataType: "json",

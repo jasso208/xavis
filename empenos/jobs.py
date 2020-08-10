@@ -11,26 +11,26 @@ def fn_job_diario():
 	hoy=datetime.now()#fecha actual
 	hoy=datetime.combine(hoy, time.min)
 
-	hoy=datetime(2020,8,6,0,0)	
-	fecha_fin=datetime(2020,9,7,0,0)
+	#hoy=datetime(2020,8,6,0,0)	
+	#fecha_fin=datetime(2020,9,7,0,0)
 
-	cont=30
+	#cont=30
 
-	while hoy<=fecha_fin:
-		print("fecha ejecucion")
-		print(hoy)
-		fn_boletas_vencidas_semanal(hoy)
-		fn_pagos_vencidos(hoy)
-		fn_comision_pg(hoy)
-
-		dias = timedelta(days=1)	
-		hoy=datetime.combine(hoy+dias, time.min)                
+	#while hoy<=fecha_fin:
+	#	print("fecha ejecucion")
+	#	print(hoy)
+	#	fn_boletas_vencidas_semanal(hoy)
+	#	fn_pagos_vencidos(hoy)
+	#	fn_comision_pg(hoy)
+	#
+	#	dias = timedelta(days=1)	
+	#	hoy=datetime.combine(hoy+dias, time.min)                
 		
 
 	#estas tres lineas son las que se pondran en prodcutivo
-	#fn_boletas_vencidas(hoy)
-	#fn_pagos_vencidos(hoy)
-	#fn_comision_pg(hoy)
+	fn_boletas_vencidas(hoy)
+	fn_pagos_vencidos(hoy)
+	fn_comision_pg(hoy)
 
 	return True
 

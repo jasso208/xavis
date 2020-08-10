@@ -11,6 +11,7 @@ GENERO_CHOICES = (
     ('2', 'MUJER'),
     
 )
+
 ESTADO_CIVIL_CHOICES = (
     ('1','SOLTERO'),
     ('2', 'CASADO'),

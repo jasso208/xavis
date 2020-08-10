@@ -647,7 +647,7 @@
 
 					$.ajax({
 					type: "GET",
-			        url: "http://{{IP_LOCAL}}/empenos/re_abre_caja/",
+			        url: "https://{{IP_LOCAL}}/empenos/re_abre_caja/",
 			        data: { "token":token},
 			        contentType: "application/json; charset=utf-8",
 			        dataType: "json",
@@ -698,7 +698,7 @@
 			$("#fondo_preloader").show();	
 			$.ajax({
 				type: "GET",
-		        url: "http://{{IP_LOCAL}}/empenos/cierra_caja/",
+		        url: "https://{{IP_LOCAL}}/empenos/cierra_caja/",
 		        data: { "token":token,"username":username},
 		        contentType: "application/json; charset=utf-8",
 		        dataType: "json",
@@ -748,7 +748,7 @@
 				$("#fondo_preloader").show();
 				 $.ajax({
 					        type: "GET",
-					        url: "http://{{IP_LOCAL}}/empenos/api_consulta_corte_caja/",
+					        url: "https://{{IP_LOCAL}}/empenos/api_consulta_corte_caja/",
 					        data: { 'id_sucursal':id_sucursal , 'caja':caja ,'fecha':fecha ,'usuario':usuario},
 					        contentType: "application/json; charset=utf-8",
 					        dataType: "json",
