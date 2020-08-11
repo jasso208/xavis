@@ -133,6 +133,7 @@ def api_guarda_producto_temporal(request):
 	avaluo=request.GET.get("avaluo")
 	mutuo_sugerido=request.GET.get("mutuo_sugerido")
 	mutuo=request.GET.get("mutuo")
+	observaciones=request.GET.get("observaciones")
 	error="0"
 	try:
 		respuesta.append({"estatus":"1"})
@@ -142,7 +143,7 @@ def api_guarda_producto_temporal(request):
 		linea=Linea.objects.get(id=id_linea)
 		sub_linea=Sub_Linea.objects.get(id=id_sublinea)
 		marca=Marca.objects.get(id=id_marca)		
-		cotizacion=Empenos_Temporal(usuario=usuario,tipo_producto=tipo_producto,linea=linea,sub_linea=sub_linea,marca=marca,descripcion=descripcion,avaluo=avaluo,mutuo_sugerido=mutuo_sugerido,mutuo=mutuo)
+		cotizacion=Empenos_Temporal(usuario=usuario,tipo_producto=tipo_producto,linea=linea,sub_linea=sub_linea,marca=marca,descripcion=descripcion,avaluo=avaluo,mutuo_sugerido=mutuo_sugerido,mutuo=mutuo,observaciones=observaciones)
 		cotizacion.save()
 		#si es oro o plata cargamos el kilataje
 		if id_tipo_producto=="1" or id_tipo_producto=="2":

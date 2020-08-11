@@ -315,6 +315,12 @@
 					</div>
 
 				</div>
+
+				<div class="col-xs-12">
+					<label for="">Observaciónes</label>					
+					<textarea id="txt_observaciones" name="textarea" rows="3" class="form-control" cols="50" placeholder="" maxlength="50"></textarea>					
+				</div>
+
 				<div class="col-xs-12">									
 					<br>
 					<div class="panel panel-default">						
@@ -533,6 +539,8 @@
 								$("#id_kilataje,#id_peso").prop("disabled",false);
 								fn_carga_kilataje( $("#id_tipo_producto").val());	
 								$("#id_avaluo").prop("disabled",true);
+								$("#txt_observaciones").prop("readonly",true)
+
 								
 							}
 							else
@@ -540,7 +548,11 @@
 								$("#id_avaluo").prop("disabled",false);
 								$("#id_avaluo").prop("readonly",false);
 								$("#id_kilataje,#id_peso").prop("disabled",true);								
-							}							
+								$("#txt_observaciones").prop("readonly",false)
+							}
+
+							$("#txt_observaciones").val("");														
+
 						}
 					);
 
@@ -676,7 +688,7 @@
 				$('#id_marca').empty();
 				$.ajax({
 					type: "GET",
-			        url: "https://{{IP_LOCAL}}/empenos/api_limpia_cotizacion/",
+			        url: "{{IP_LOCAL}}/empenos/api_limpia_cotizacion/",
 			        data: {
 			        		"id_usuario":"{{id_usuario}}"
 			    			},
@@ -812,7 +824,7 @@
 				$('#id_marca').empty();
 				$.ajax({
 					type: "GET",
-			        url: "https://{{IP_LOCAL}}/empenos/api_tipo_producto/",
+			        url: "{{IP_LOCAL}}/empenos/api_tipo_producto/",
 			        data: {},
 			        contentType: "application/json; charset=utf-8",
 			        dataType: "json",
@@ -869,7 +881,7 @@
 				$("#fondo_preloader").show();
 				$.ajax({
 					type: "GET",
-			        url: "https://{{IP_LOCAL}}/empenos/api_consulta_linea/",
+			        url: "{{IP_LOCAL}}/empenos/api_consulta_linea/",
 			        data: {"id_tipo_producto":id_tipo_producto},
 			        contentType: "application/json; charset=utf-8",
 			        dataType: "json",
@@ -932,7 +944,7 @@
 				$("#fondo_preloader").show();
 				$.ajax({
 					type: "GET",
-			        url: "https://{{IP_LOCAL}}/empenos/api_consulta_sublinea/",
+			        url: "{{IP_LOCAL}}/empenos/api_consulta_sublinea/",
 			        data: {"id_linea":id_linea},
 			        contentType: "application/json; charset=utf-8",
 			        dataType: "json",
@@ -998,7 +1010,7 @@
 				$("#fondo_preloader").show();
 				$.ajax({
 					type: "GET",
-			        url: "https://{{IP_LOCAL}}/empenos/api_consulta_marcas/",
+			        url: "{{IP_LOCAL}}/empenos/api_consulta_marcas/",
 			        data: {},
 			        contentType: "application/json; charset=utf-8",
 			        dataType: "json",
@@ -1062,7 +1074,7 @@
 				$("#fondo_preloader").show();
 				$.ajax({
 					type: "GET",
-			        url: "https://{{IP_LOCAL}}/empenos/api_consulta_kilataje/",
+			        url: "{{IP_LOCAL}}/empenos/api_consulta_kilataje/",
 			        data: {"id_tipo_producto":id_tipo_producto},
 			        contentType: "application/json; charset=utf-8",
 			        dataType: "json",
@@ -1114,7 +1126,7 @@
 				$("#fondo_preloader").show();
 				$.ajax({
 					type: "GET",
-			        url: "https://{{IP_LOCAL}}/empenos/api_consulta_costo_kilataje/",
+			        url: "{{IP_LOCAL}}/empenos/api_consulta_costo_kilataje/",
 			        data: {"id_kilataje":id_kilataje},
 			        contentType: "application/json; charset=utf-8",
 			        dataType: "json",
@@ -1203,7 +1215,7 @@
 				$("#fondo_preloader").show();
 				$.ajax({
 					type: "GET",
-			        url: "https://{{IP_LOCAL}}/empenos/api_guarda_producto_temporal/",
+			        url: "{{IP_LOCAL}}/empenos/api_guarda_producto_temporal/",
 			        data: {
 
 						"id_usuario":"{{id_usuario}}",
@@ -1216,7 +1228,8 @@
 						"peso":$("#id_peso").val(),
 						"avaluo":$("#id_avaluo").val(),
 						"mutuo_sugerido":$("#id_mutuo_sugerido").val(),
-						"mutuo":$("#id_mutuo").val()
+						"mutuo":$("#id_mutuo").val(),
+						"observaciones":$("#txt_observaciones").val()
 
 			        },
 			        contentType: "application/json; charset=utf-8",
@@ -1263,7 +1276,7 @@
 				$("#fondo_preloader").show();
 				$.ajax({
 					type: "GET",
-			        url: "https://{{IP_LOCAL}}/empenos/api_consulta_cotizacion/",
+			        url: "{{IP_LOCAL}}/empenos/api_consulta_cotizacion/",
 			        data: {
 
 						"id_usuario":"{{id_usuario}}"
@@ -1349,7 +1362,7 @@
 				$("#fondo_preloader").show();
 				$.ajax({
 					type: "GET",
-			        url: "https://{{IP_LOCAL}}/empenos/api_consulta_cliente/",
+			        url: "{{IP_LOCAL}}/empenos/api_consulta_cliente/",
 			        data: {
 
 						"palabra":$("#id_cliente_nomapp").val()
@@ -1448,7 +1461,7 @@
 				$("#fondo_preloader").show();
 				$.ajax({
 					type: "GET",
-			        url: "https://{{IP_LOCAL}}/empenos/api_elimina_producto_cotizacion/",
+			        url: "{{IP_LOCAL}}/empenos/api_elimina_producto_cotizacion/",
 			        data: {
 
 						"id_producto":producto_eliminar

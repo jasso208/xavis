@@ -822,7 +822,7 @@
 		$("#tabla_pagos tbody tr").remove();
 		$.ajax({
 			type: "GET",
-	        url: "https://{{IP_LOCAL}}/empenos/api_simula_refrendo/",
+	        url: "{{IP_LOCAL}}/empenos/api_simula_refrendo/",
 	        data: {"username":"{{username}}","folio_boleta":"{{boleta.folio}}","importe":total_pagar.toString(),"id_sucursal":"{{boleta.sucursal.id}}"},
 	        contentType: "application/json; charset=utf-8",
 	        dataType: "json",

@@ -211,6 +211,8 @@ class Empenos_Temporal(models.Model):
 	avaluo=models.IntegerField()
 	mutuo_sugerido=models.IntegerField()
 	mutuo=models.IntegerField()
+	observaciones=models.TextField(null=True,blank=True)
+
 	
 class Joyeria_Empenos_Temporal(models.Model):
 	empeno_temporal=models.ForeignKey(Empenos_Temporal,on_delete=models.PROTECT)
@@ -297,6 +299,7 @@ class Det_Boleto_Empeno(models.Model):
 	avaluo=models.IntegerField()
 	mutuo_sugerido=models.IntegerField()
 	mutuo=models.IntegerField()
+	observaciones=models.TextField(null=True,blank=True)
 
 ##se llena al generar un empeño
 #lo usamos como auxiliar para imprimir las boletas.

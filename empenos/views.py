@@ -1133,6 +1133,7 @@ def nvo_empeno(request):
 					db.avaluo=x.avaluo
 					db.mutuo_sugerido=x.mutuo_sugerido
 					db.mutuo=x.mutuo
+					db.observaciones=x.observaciones
 
 					#db.costo_kilataje=je.costo_kilataje
 					#db.peso=je.peso
@@ -2031,8 +2032,11 @@ def imprime_boleta(request):
 		cont_pag=1
 		while cont_pag<=no_paginas:
 
-			p.setFont("Helvetica",20)
-			p.drawString(55,770,"Empeños Express $")
+			#p.setFont("Helvetica",20)
+			#p.drawString(55,770,"Empeños Express $")
+
+			p.drawImage('http://127.0.0.1:8000/static/img/logo.jpg', 55, 750,200, 60)
+
 			#cuadro 1] Informaciond de la empresa
 			p.line(50,750,50,665)	
 			p.line(50,750,280,750)
@@ -2059,9 +2063,9 @@ def imprime_boleta(request):
 			p.setFont("Helvetica-Bold",7)
 			p.drawString(55,690,"Dirección:")
 			p.setFont("Helvetica",7)
-			p.drawString(100,690,x.boleta.caja.sucursal.calle+' No. Int. '+str(x.boleta.caja.sucursal.numero_interior)+' No. ext. '+str(x.boleta.caja.sucursal.numero_exterior)+' CP '+str(x.boleta.caja.sucursal.codigo_postal))
+			p.drawString(100,690,x.boleta.caja.sucursal.calle+' No. Int. '+str(x.boleta.caja.sucursal.numero_interior)+' No. ext. '+str(x.boleta.caja.sucursal.numero_exterior))
 			p.setFont("Helvetica",7)
-			p.drawString(55,680,x.boleta.caja.sucursal.colonia+', '+x.boleta.caja.sucursal.ciudad+' '+x.boleta.caja.sucursal.estado+', '+x.boleta.caja.sucursal.pais)
+			p.drawString(55,680,' CP '+str(x.boleta.caja.sucursal.codigo_postal)+' '+x.boleta.caja.sucursal.colonia+', '+x.boleta.caja.sucursal.ciudad+' '+x.boleta.caja.sucursal.estado+', '+x.boleta.caja.sucursal.pais)
 
 
 
@@ -2076,43 +2080,43 @@ def imprime_boleta(request):
 
 			p.drawString(455,790,"Pag: "+str(cont_pag)+' de '+str(no_paginas))
 
-			p.setFont("Helvetica-Bold",7)
-			p.drawString(405,750,"No. Boleta:")
-			p.setFont("Helvetica",7)
-			p.drawString(465,750,str(x.boleta.folio))
+			p.setFont("Helvetica-Bold",15)
+			p.drawString(355,750,"No. Boleta:")
+			p.setFont("Helvetica",20)
+			p.drawString(455,750,str(x.boleta.folio))
 
 
 
-			p.setFont("Helvetica-Bold",7)
+			p.setFont("Helvetica-Bold",10)
 			p.drawString(305,730,"Avaluo:")
-			p.setFont("Helvetica",7)
+			p.setFont("Helvetica",10)
 			p.drawString(365,730,"$"+str(x.boleta.avaluo)+".00")
 
-			p.setFont("Helvetica-Bold",7)
+			p.setFont("Helvetica-Bold",10)
 			p.drawString(305,715,"Refrendo:")
 
-			p.setFont("Helvetica",7)
-			p.drawString(365,715,"$"+str(x.boleta.refrendo)+".00")
+			p.setFont("Helvetica",10)
+			p.drawString(365,715,"$"+str(x.boleta.refrendo)+"")
 
-			p.setFont("Helvetica-Bold",7)
+			p.setFont("Helvetica-Bold",10)
 			p.drawString(305,700,"Mutuo:")
-			p.setFont("Helvetica",7)
+			p.setFont("Helvetica",10)
 			p.drawString(365,700,"$"+str(x.boleta.mutuo)+".00")
 
 
 
-			p.setFont("Helvetica-Bold",7)
+			p.setFont("Helvetica-Bold",10)
 			p.drawString(305,685,"Fecha Emi.:")
-			p.setFont("Helvetica",7)
-			p.drawString(365,685,str(x.boleta.fecha))
+			p.setFont("Helvetica",10)
+			p.drawString(365,685,str(x.boleta.fecha.strftime("%Y-%m-%d %H:%M:%S")))
 
 
-			p.setFont("Helvetica-Bold",7)
+			p.setFont("Helvetica-Bold",10)
 			p.drawString(305,670,"Fecha Ven.:")
-			p.setFont("Helvetica",7)
+			p.setFont("Helvetica",10)
 			
 			fecha_vencimiento = datetime.combine(x.boleta.fecha_vencimiento, time.min) 
-			p.drawString(365,670,str(fecha_vencimiento))
+			p.drawString(365,670,str(fecha_vencimiento.strftime("%Y-%m-%d %H:%M:%S")))
 
 
 			#cuadro 3] Informacion de Cliente
@@ -2258,8 +2262,10 @@ def imprime_boleta(request):
 			impuesto_total=0.00
 
 
+			cont=0
 			str_linea=""
 			for y in db:
+				cont=cont+1
 				str_linea=y.linea.linea
 				linea=linea-15
 				#calculamos el impuesto
@@ -2280,7 +2286,7 @@ def imprime_boleta(request):
 				
 
 				p.setFont("Helvetica",7)
-				p.drawString(60,linea,str(y.id))		
+				p.drawString(60,linea,str(cont))		
 				p.drawString(95,linea,y.descripcion)
 				if y.tipo_producto.id==1 or  y.tipo_producto.id==2:
 					p.drawString(305,linea,y.costo_kilataje.kilataje)
@@ -2288,6 +2294,10 @@ def imprime_boleta(request):
 				p.drawString(405,linea,"$"+str(y.avaluo)+".00")
 				p.drawString(455,linea,"$"+str(round(impuesto,2)))
 				p.drawString(505,linea,"$"+str(y.mutuo)+".00")
+
+			if x.boleta.tipo_producto.id==3:				
+				linea=linea-15				
+				p.drawString(95,linea,"Obser: "+str(y.observaciones))
 
 
 			p.setFont("Helvetica-Bold",7)

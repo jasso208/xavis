@@ -94,10 +94,11 @@ font-size: 12px;
 
 }
 #usuario_logueado{
-	color: white;
+	color: #003698;
+
+
 	
-	text-align: center;
-	font-family: cambria;
+	text-align: center;	
 	font-size: 15px;
 	padding-top:3px;
 
