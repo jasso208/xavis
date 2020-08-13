@@ -21,7 +21,10 @@ font-size: 12px;
 {
 	position: fixed;top:10%;left: 30%;width: 40%;z-index: 111;background-color: white;border-radius: 5px; box-shadow: 4px 4px 4px black;padding:10px; text-align: center;
 }
-
+#panel_principal
+{
+	min-height: 80%;
+}
 .fondo_mensaje_2
 {
 	position:fixed;

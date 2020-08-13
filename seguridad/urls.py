@@ -1,11 +1,5 @@
 from django.conf.urls import url
-from seguridad.views import Login,bienvenidos,api_alta_cliente,api_login_usuario,api_esta_logueado
-from seguridad.views import api_direccion_envio_temporal,api_e_mail_notificacion,api_actualiza_contrasena
-from seguridad.views import api_envia_token,api_cambia_psw_token,api_kill_session
-from seguridad.views import api_reinicia_direccion_temporal,cerrar_session
-from seguridad.views import admin_user,permisos,admin_productos,admin_catalogos,admin_ventas,alta_usuario
-from seguridad.views import consulta_usuarios,admin_perfil,cambio_psw_usr,admin_cajas,admin_reportes
-from seguridad.views import admin_empenos,cambio_sucursal
+from seguridad.views import *
 
 app_name="seguridad"
 

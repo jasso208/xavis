@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% block usuario %}
+						<p id="usuario_logueado"  > 
+							<strong>Usuario: {{user_2.user.username}}
+							&nbsp; / &nbsp;
+							Perfil: {{user_2.perfil}}
+							&nbsp; / &nbsp;
+							Sucursal: {{user_2.sucursal}}
+							&nbsp; / &nbsp;
+							Caja: {{c}}</strong>
+						</p>
+{% endblock  %}
+{% block content %}
+	<div class="col-xs-12 cls_encabezado_body">
+	
+		<a >
+			Consulta Abono
+		</a>		
+	
+	</div>
+		<div class="col-xs-12">
+		<form method="post" action="#" class="cls_form_1">
+			{%csrf_token%}
+	
+			<div class="row cls_form_consulta">
+				<div class="col-xs-12">
+					<div class="panel panel-default" id="panel_principal" >						 
+						<div class="panel-body">
+
+							<div class="col-xs-12">
+								<div class="panel panel-default">						
+									<div class="panel-body">
+
+										<div class="col-xs-3">
+											<label for="">Sucursal</label>					
+											<select name="sucursal" class="form-control" title="" id="id_sucursal" required="">
+											
+											{% for x in sucursales %}										
+											<option value="{{x.id}}">{{ x.sucursal }}</option>
+											{% endfor %}
+											</select>	
+											<br>
+										</div>
+
+										<div class="col-xs-3">
+											<label>
+												Fecha Inciial
+											</label>
+											<input type="date" name="fecha_inicial" class="form-control" placeholder="Fecha inicial" title=""  id="id_fecha_inicial">
+										</div>
+
+										<div class="col-xs-3">
+											<label>
+												Fecha Final
+											</label>
+											<input type="date" name="fecha_final" class="form-control" placeholder="Fecha final" title=""  id="id_fecha_final">
+											
+										</div>
+										<div class="col-xs-3">
+											<br>
+											<button class="btn btn-primary">
+												Consultar
+											</button>
+										</div>
+
+									</div>
+								</div>
+							</div>
+
+
+							<div class="col-xs-12">
+								<label>
+									Resultado de busqueda.
+								</label>
+
+									<table id="tabla_cotizacion" class="table table-bordered">
+									    <thead>
+									      <tr>
+									      	<th></th>
+									        <th>Folio Abono</th>
+									        <th>Sucursal</th>
+									        <th>Fecha</th>
+									        <th>importe</th>									        
+									        <th>Cliente</th>
+									      </tr>
+									    </thead>
+									    <tbody>
+									    	{% for b in abonos %}
+									    	<tr>
+									    		<td>
+									    			
+									    			<a href="/empenos/re_imprimir_abono/{{b.id}}" class='btn btn-default btn-sm'>
+									    				<span class='glyphicon glyphicon-print'>
+									    					
+									    				</span>    					
+									    			</a> 
+
+
+									    		</td>
+									    		<td>
+									    			<a>{{b.folio}}</a>
+									    		</td>
+									    		<td><a>{{b.sucursal.sucursal}}</a></td>									    		
+									    		<td><a>{{b.fecha | date:"d/m/Y" }}</a></td>
+									    		<td><a>{{b.importe}}</a></td>									    		
+									    		<td><a>{{b.boleta.cliente.nombre}} {{b.boleta.cliente.apellido_p}} {{b.boleta.cliente.apellido_m}}</a></td>
+
+									    	</tr>
+									     	{% endfor %}
+									    </tbody>
+									</table>
+							</div>					
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+
+{%endblock%}

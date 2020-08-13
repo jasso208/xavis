@@ -400,9 +400,11 @@ class Abono(models.Model):
 	boleta=models.ForeignKey(Boleta_Empeno,on_delete=models.PROTECT,blank=True,null=True)
 
 
+
 class Imprime_Abono(models.Model):
 	usuario=models.ForeignKey(User,on_delete=models.PROTECT)
 	abono=models.ForeignKey(Abono,on_delete=models.PROTECT)
+	reimpresion=models.IntegerField(default=0)
 
 #no manejamos importe ya que un pago tiene que ser cubierto totalmente, no parcialmente.
 #aplica solo para pago semanal

@@ -49,6 +49,19 @@ class Reportes_Caja_Form(forms.Form):
 	fecha_inicial=forms.DateTimeField(initial=timezone.now())
 	fecha_final=forms.DateTimeField(initial=timezone.now())
 
+
+class Consulta_Abono_Form(forms.Form):
+	sucursal=forms.ModelChoiceField(queryset=Sucursal.objects.all())
+	fecha_inicial=forms.DateTimeField()
+	fecha_final=forms.DateTimeField()
+	
+	def __init__(self, *args, **kwargs):
+		super(self.__class__, self).__init__(*args, **kwargs)
+		# asi vuelves tus campos no requeridos
+		self.fields['sucursal'].required = False		
+		self.fields['fecha_inicial'].required = False
+		self.fields['fecha_final'].required = False
+		
 class Consulta_Boleta_Form(forms.Form):
 	sucursal=forms.ModelChoiceField(queryset=Sucursal.objects.all())
 	cliente=forms.CharField(max_length=30)

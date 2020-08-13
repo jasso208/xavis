@@ -470,8 +470,14 @@ def corte_caja(request):
 			caja.diferencia=request.POST.get("diferencia")
 			caja.real_efectivo=request.POST.get("real_efectivo")
 			caja.comentario=request.POST.get("comentario")
-			caja.estatus_guardado=1
+			caja.estatus_guardado=1			
+			caja.fecha_cierre=datetime.now()
+			caja.user_cierra_caja=request.user
 			caja.save()		
+
+			print("entro")
+			fn_envia_mail_diferencia_cierre_caja(caja)
+			print("entro 2")
 
 			if caja.fecha.day<10:
 				day='0'+str(caja.fecha.day)
@@ -488,9 +494,11 @@ def corte_caja(request):
 			
 			today = date.today()
 
+			
+			
 
 		except Exception as e:
-			error_guardar="Error al guardar la informacion de la caja."
+			error_guardar="Error al cerrar la caja."
 			print(e)
 			print("no pudo guardar")
 		form=Cierra_Caja_Form()
@@ -662,6 +670,69 @@ def alta_cliente(request,id_cliente=None):
 	else:
 		form=Cliente_Form(instance=cliente)
 	return render(request,'empenos/alta_cliente.html',locals())
+
+#*******************************************************************************************************************************************************
+#*¨**************************************************************************************************************************************************************
+def consulta_abono(request):
+	#si no esta logueado mandamos al login
+	if not request.user.is_authenticated:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+	
+	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
+	try:
+		user_2=User_2.objects.get(user=request.user)
+	except Exception as e:		
+		form=Login_Form(request.POST)
+		estatus=0
+		msj="La cuenta del usuario esta incompleta."			
+		return render(request,'login.html',locals())
+
+	IP_LOCAL = settings.IP_LOCAL
+
+	c=""
+	pub_date = date.today()
+	min_pub_date_time = datetime.combine(pub_date, time.min) 
+	max_pub_date_time = datetime.combine(pub_date, time.max)  	
+
+	msj_error=""	
+
+	try:
+		costo_reimpresion=Costo_Extra.objects.get(id=1).costo
+	except:
+		costo_reimpresion=0
+
+
+	try:
+		#validamos si el usuaario tiene caja abierta para mostrarla en el encabezado.
+		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+		c=caja.caja
+		id_caja=caja.id
+
+	except Exception as e:
+		msj_error="No cuentas con caja abierta."
+		print(e)
+
+
+	if request.method=="POST":
+		fecha_inicial=request.POST.get("fecha_inicial")
+		fecha_final=request.POST.get("fecha_final")		
+
+		fecha_inicial=datetime.strptime(request.POST.get("fecha_inicial"), "%Y-%m-%d").date()
+		fecha_final=datetime.strptime(request.POST.get("fecha_final"), "%Y-%m-%d").date()
+
+		fecha_inicial = datetime.combine(fecha_inicial, time.min) 
+		fecha_final = datetime.combine(pub_date, time.max)  
+
+		abonos=Abono.objects.filter(fecha__range=(fecha_inicial,fecha_final),sucursal=caja.sucursal)	
+
+	else:
+		print("na")
+
+	sucursales=Sucursal.objects.filter(id=user_2.sucursal.id)
+	form=Consulta_Abono_Form()
+
+	return render(request,'empenos/consulta_abono.html',locals())
+
 
 
 #*******************************************************************************************************************************************************
@@ -1309,6 +1380,7 @@ def refrendo_plazo_mensual(request,id_boleta):
 		msj="La cuenta del usuario esta incompleta."			
 		return render(request,'login.html',locals())
 	
+
 	id_usuario=user_2.user.id
 
 	IP_LOCAL=settings.IP_LOCAL
@@ -1350,7 +1422,7 @@ def refrendo_plazo_mensual(request,id_boleta):
 		importe_comision_pg=0.00
 	else:
 		importe_comision_pg=ref_com_pg["importe__sum"]
-
+	
 	#obtenemos todos los periodos que no han sido pagados.
 	periodos=Periodo.objects.filter(boleta=boleta,pagado="N")
 	importe_max_periodo=Periodo.objects.filter(boleta=boleta,pagado="N").aggregate(Max("importe"))
@@ -1360,6 +1432,8 @@ def refrendo_plazo_mensual(request,id_boleta):
 		importe_periodo=0.00
 	else:
 		importe_periodo=importe_max_periodo["importe__max"]
+
+	
 
 	contador=0
 
@@ -1394,8 +1468,12 @@ def refrendo_plazo_mensual(request,id_boleta):
 	#si es post aplicamos el refrendo.
 	if request.method=="POST":
 		try:
+			
+			if request.POST.get("id_periodos")==None:
+				periodos_pagados=int(0)
+			else:
+				periodos_pagados=int(request.POST.get("id_periodos"))
 
-			periodos_pagados=int(request.POST.get("id_periodos"))
 			total_refrendo=int(round(decimal.Decimal(request.POST.get("total_refrendo"))))
 			
 
@@ -1406,6 +1484,7 @@ def refrendo_plazo_mensual(request,id_boleta):
 
 			tm=Tipo_Movimiento.objects.get(id=5)		
 			folio=fn_folios(tm,boleta.sucursal)
+			
 
 			abono=Abono()
 			abono.usuario=request.user
@@ -1421,7 +1500,6 @@ def refrendo_plazo_mensual(request,id_boleta):
 			Imprime_Abono.objects.filter(usuario=request.user).delete()
 
 			Imprime_Abono.objects.create(usuario=request.user,abono=abono)
-			
 
 			#buscamos las comisiones pg para saldarlas.
 			com_pg=Pagos.objects.filter(tipo_pago=est_comisionpg,pagado="N",boleta=boleta)
@@ -1557,6 +1635,15 @@ def refrendo_plazo_mensual(request,id_boleta):
 
 
 
+#*******************************************************************************************************************************************************
+#*¨**************************************************************************************************************************************************************
+
+def re_imprimir_abono(request,id_abono):
+	abono=Abono.objects.get(id=id_abono)
+	Imprime_Abono.objects.filter(usuario=request.user).delete()
+	Imprime_Abono.objects.create(usuario=request.user,abono=abono,reimpresion=1)
+	return imprime_abono(request)
+
 
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
@@ -1566,6 +1653,7 @@ def imprime_abono(request):
 	response = HttpResponse(content_type='application/pdf')
 	response['Content-Disposition'] = f'inline; filename=hello.pdf'
 
+	im=Imprime_Abono.objects.get(usuario=request.user)
 	#obtenemos el abono a imprimir.
 	abono=Imprime_Abono.objects.get(usuario=request.user).abono
 	buffer=BytesIO()
@@ -1575,10 +1663,21 @@ def imprime_abono(request):
 	heigth_row=20#cada renglon es de 20.
 	current_row=800#aqui iniciamos escribir, y por cada renglon, disminuimos heigth_row
 
+	if im.reimpresion==0:
+		reimpresion=""
+	else:				
+		reimpresion="REIMPRESION"
+		p.drawImage(settings.IP_LOCAL+'/static/img/img_reimpresion.jpg', 50, -80,500, 500)
+		p.drawImage(settings.IP_LOCAL+'/static/img/img_reimpresion.jpg', 50, 350,500, 500)
 
-
+	p.drawImage(settings.IP_LOCAL+'/static/img/logo.jpg', 55, 730,200, 60)
+	p.drawImage(settings.IP_LOCAL+'/static/img/logo.jpg', 55, 330,200, 60)
 	cop=0
 	while cop<2:
+		#p.setFont("Helvetica",20)
+		#p.drawString(55,770,"Empeños Express $")
+
+		
 
 		if cop==1:
 
@@ -1589,7 +1688,7 @@ def imprime_abono(request):
 		current_row=current_row-heigth_row
 
 		p.setFont("Helvetica",10)
-		p.drawString(55,current_row,"Folio Abono:- "+str(abono.folio))
+		p.drawString(55,current_row-40,"Folio Abono:- "+str(abono.folio))
 
 		p.setFont("Helvetica",25)
 		p.drawString(350,current_row,"REFRENDO")
@@ -1597,8 +1696,7 @@ def imprime_abono(request):
 		
 
 		current_row=current_row-heigth_row
-		p.setFont("Helvetica",15)
-		p.drawString(55,current_row,"Empeños Express $")
+
 
 		current_row=current_row-heigth_row
 		
@@ -1606,7 +1704,7 @@ def imprime_abono(request):
 
 
 		p.setFont("Helvetica-Bold",10)
-		p.drawString(350,current_row,str(abono.fecha))
+		p.drawString(350,current_row,str(abono.fecha.strftime("%Y-%m-%d %H:%M:%S")))
 
 		current_row=current_row-heigth_row
 
@@ -1621,6 +1719,9 @@ def imprime_abono(request):
 
 		p.setFont("Helvetica",10)
 		p.drawString(350,current_row,"Abono a Refrendo:- ")
+
+		importe_a_refrendo="{:0,.2f}".format(importe_a_refrendo)
+
 		p.drawString(480,current_row,"$"+str(importe_a_refrendo)+"")
 
 		current_row=current_row-heigth_row
@@ -1635,6 +1736,9 @@ def imprime_abono(request):
 
 		p.setFont("Helvetica",10)
 		p.drawString(350,current_row,"Abono a PG:- ")
+
+		importe_a_pg="{:0,.2f}".format(importe_a_pg)
+
 
 		p.drawString(480,current_row,"$"+str(importe_a_pg)+"")
 
@@ -1651,7 +1755,9 @@ def imprime_abono(request):
 		importe_a_cap=round(fn_importe_a_cap(abono),2)
 		p.setFont("Helvetica",10)
 		p.drawString(350,current_row,"Abono a Capital:- ")
-		p.drawString(480,current_row,"$"+str(importe_a_cap)+"")
+		importe_a_cap="{:0,.2f}".format(importe_a_cap)
+
+		p.drawString(480,current_row,"$"+str(importe_a_cap))
 
 		#nueva linea
 		current_row=current_row-heigth_row
@@ -1666,6 +1772,9 @@ def imprime_abono(request):
 		importe_desemp=round(fn_importe_desemp(abono),2)
 		p.setFont("Helvetica",10)
 		p.drawString(350,current_row,"Desempeño:- ")
+
+		importe_desemp="{:0,.2f}".format(importe_desemp)
+
 		p.drawString(480,current_row,"$"+str(importe_desemp)+"")
 		p.line(350,current_row-2,530,current_row-2)
 
@@ -1678,7 +1787,9 @@ def imprime_abono(request):
 
 		p.setFont("Helvetica-Bold",10)
 		p.drawString(350,current_row,"Total Abono:- ")
-		p.drawString(480,current_row,"$"+str(abono.importe))
+		importe="{:0,.2f}".format(abono.importe)
+
+		p.drawString(480,current_row,"$"+str(importe))
 
 		#nueva linea
 		current_row=current_row-heigth_row	
@@ -1691,8 +1802,11 @@ def imprime_abono(request):
 		p.drawString(130,current_row,str(abono.boleta.fecha_vencimiento))
 
 		p.setFont("Helvetica",10)
+
 		p.drawString(350,current_row,"Nuevo Mutuo:- ")
-		p.drawString(480,current_row,"$"+str(abono.boleta.mutuo))
+		mutuo="{:0,.2f}".format(abono.boleta.mutuo)
+
+		p.drawString(480,current_row,"$"+str(mutuo))
 
 		current_row=current_row-heigth_row	
 
@@ -1731,8 +1845,11 @@ def imprime_abono(request):
 
 
 		p.setFont("Helvetica-Bold",10)
+
+		importe_saldo_vencido="{:0,.2f}".format(math.ceil(importe_saldo_vencido))
+		
 		p.drawString(350,current_row,"Saldo Vencido:- ")
-		p.drawString(480,current_row,"$"+str(math.ceil(importe_saldo_vencido)))
+		p.drawString(480,current_row,"$"+str(importe_saldo_vencido))
 
 
 
@@ -1870,7 +1987,15 @@ def imprime_abono(request):
 		heigth_row=20#cada renglon es de 20.
 		current_row=800#aqui iniciamos escribir, y por cada renglon, disminuimos heigth_row
 
+		if im.reimpresion==0:
+			reimpresion=""
+		else:				
+			reimpresion="REIMPRESION"
+			p.drawImage(settings.IP_LOCAL+'/static/img/img_reimpresion.jpg', 50, -80,500, 500)
+			p.drawImage(settings.IP_LOCAL+'/static/img/img_reimpresion.jpg', 50, 350,500, 500)
 
+		p.drawImage(settings.IP_LOCAL+'/static/img/logo.jpg', 55, 730,200, 60)
+		p.drawImage(settings.IP_LOCAL+'/static/img/logo.jpg', 55, 340,200, 60)
 
 		cop=0
 		while cop<2:
@@ -1883,17 +2008,14 @@ def imprime_abono(request):
 			current_row=current_row-heigth_row
 
 			p.setFont("Helvetica",10)
-			p.drawString(55,current_row,"Folio Abono:- "+str(abono.folio))
+			p.drawString(55,current_row-40,"Folio Abono:- "+str(abono.folio))
 
 			p.setFont("Helvetica",25)
 			p.drawString(350,current_row,"DESEMPEÑO")
 
 			
 
-			current_row=current_row-heigth_row
-			p.setFont("Helvetica",15)
-			p.drawString(55,current_row,"Empeños Express $")
-
+			current_row=current_row-heigth_row			
 			current_row=current_row-heigth_row
 			
 
@@ -2028,6 +2150,7 @@ def imprime_abono(request):
 	response.write(pdf)
 	Imprime_Abono.objects.get(usuario=request.user).delete()
 	return response
+
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
 
@@ -2571,9 +2694,10 @@ def api_envia_token(request):
 		html = html.replace("\xda", "U")
 		server = smtplib.SMTP('smtp.gmail.com:587')
 		msg = email.message.Message()
-		msg['Subject'] = asunto		
-		msg['From']='j.jassdel@gmail.com'	
-		msg['To']='j.jassdel@gmail.com'		
+		msg['Subject'] = asunto	
+
+		msg['From']=settings.EMAIL_HOST_USER
+		msg['To']=settings.EMAIL_NOTIFICACIONES
 		password = settings.EMAIL_HOST_PASSWORD
 		print(password)
 		msg.add_header('Content-Type', 'text/html')
@@ -2587,9 +2711,11 @@ def api_envia_token(request):
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
 def fn_envia_mail_diferencia_cierre_caja(caja):
-	if caja.diferencia>0:
+	if int(caja.diferencia)!=0:
 		html="<html><head></head><body>"
-		html=html+"La caja <strong>"+caja.caja+"</strong> del usuario <strong>"+caja.usuario.first_name+" "+caja.usuario.last_name+"</strong> en la sucursal <strong>"+caja.sucursal.sucursal+"</strong> cerro con una diferencia de: $"+str(caja.diferencia)+"."
+		html=html+"La caja <strong>"+caja.caja+"</strong>, del usuario <strong>"+caja.usuario.first_name+" "+caja.usuario.last_name+"</strong>, en la sucursal <strong>"+caja.sucursal.sucursal+"</strong>, cerro con una diferencia de: $"+str(caja.diferencia)+"."
+		html=html+"<br><br><br>"
+		html=html+"<strong>Comentarios:</strong>: "+caja.comentario		
 		html=html+"</body></html>"
 
 
@@ -2615,8 +2741,8 @@ def fn_envia_mail_diferencia_cierre_caja(caja):
 		server = smtplib.SMTP('smtp.gmail.com:587')
 		msg = email.message.Message()
 		msg['Subject'] = "Cierre de caja con diferencia"
-		msg['From']='j.jassdel@gmail.com'	
-		msg['To']='j.jassdel@gmail.com'		
+		msg['From']=settings.EMAIL_HOST_USER
+		msg['To']=settings.EMAIL_NOTIFICACIONES	
 		password = settings.EMAIL_HOST_PASSWORD
 		print(password)
 		msg.add_header('Content-Type', 'text/html')
@@ -2638,7 +2764,7 @@ def api_consulta_corte_caja(request):
 	respuesta=[]
 
 	sucursal=Sucursal.objects.get(id=request.GET.get('id_sucursal'))
-	c=request.GET.get('caja')
+	c=request.GET.get('caja').upper()
 	f=request.GET.get('fecha')
 
 	fecha = parse_date(f)

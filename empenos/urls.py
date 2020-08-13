@@ -20,6 +20,11 @@ urlpatterns=[
 	url(r'^refrendo_plazo_mensual/(?P<id_boleta>\w+)/$',refrendo_plazo_mensual,name="refrendo_plazo_mensual"),
 	url(r'^imprime_abono/$',imprime_abono,name="imprime_abono"),
 	url(r'^re_imprimir_boleta/(?P<id_boleta>\w+)/$',re_imprimir_boleta,name="re_imprimir_boleta"),
+	url(r'^re_imprimir_abono/(?P<id_abono>\w+)/$',re_imprimir_abono,name="re_imprimir_abono"),
+
+
+
+	url(r'^consulta_abono$',consulta_abono,name="consulta_abono"),
 
 	url(r'^cierra_caja/$',api_cierra_caja,name="cierra_caja"),
 	url(r'^envia_token/$',api_envia_token),	
