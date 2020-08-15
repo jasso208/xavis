@@ -339,7 +339,7 @@ def retiro_efectivo(request):
 			#	importe_desemp=importe_desemp+int(rel_desem["importe__sum"])
 			
 			print("fin")
-		total_movs=total_movs+int(cont_com_pg)+int(cont_ref_pg)+int(cont_pc)+int(cont_refrendos)+int(cont_rebol)
+		total_movs=total_movs+int(cont_com_pg)+int(cont_ref_pg)+int(cont_pc)+int(cont_refrendos)+int(cont_rebol)+int(cont_desemp)
 	
 	except Exception as e:
 		print(e)
@@ -348,7 +348,7 @@ def retiro_efectivo(request):
 	
 
 	#total=fondo_inicial+otros_ingresos-retiros_caja
-	total_efectivo=decimal.Decimal(fondo_inicial)+decimal.Decimal(otros_ingresos)-decimal.Decimal(retiros)-decimal.Decimal(empenos)+decimal.Decimal(pago_capital)+decimal.Decimal(comisiones_pg)+decimal.Decimal(refrendos_pg)+decimal.Decimal(importe_refrendo)+decimal.Decimal(importe_rebol)
+	total_efectivo=decimal.Decimal(fondo_inicial)+decimal.Decimal(otros_ingresos)-decimal.Decimal(retiros)-decimal.Decimal(empenos)+decimal.Decimal(pago_capital)+decimal.Decimal(comisiones_pg)+decimal.Decimal(refrendos_pg)+decimal.Decimal(importe_refrendo)+decimal.Decimal(importe_rebol)+decimal.Decimal(importe_desemp)
 
 	#es la clave para retiros de caja.
 	tm=Tipo_Movimiento.objects.get(id=3)
