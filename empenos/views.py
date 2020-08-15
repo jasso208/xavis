@@ -2797,10 +2797,6 @@ def api_consulta_corte_caja(request):
 	total_movs=1
 	caja_abierta=0#1 indica que la caja esta abiera; 0 indica que esta cerrada
 	try:
-		print("min_pub_date_time")
-		print(user)
-		print(c)
-		print(sucursal)
 		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),usuario=user,caja__iexact=c,sucursal=sucursal)
 		imp_fondo_inicial=caja.importe
 
@@ -2928,14 +2924,22 @@ def api_consulta_corte_caja(request):
 				pago_capital=pago_capital+int(rel_ab_cap["importe__sum"])
 
 
-			rel_desem=Rel_Abono_Capital.objects.filter(abono=ab).exclude(capital_restante__gte=0).aggregate(Sum("importe"))#buscamos si el abono afecto a capital
-			cont_desemp=cont_desemp+Rel_Abono_Capital.objects.filter(abono=ab).exclude(capital_restante__gte=0).count()
+			rel_desem=Rel_Abono_Capital.objects.filter(abono=ab)#.exclude(capital_restante__gte=0).aggregate(Sum("importe"))#buscamos si el abono afecto a capital
+			#cont_desemp=cont_desemp+Rel_Abono_Capital.objects.filter(abono=ab).exclude(capital_restante__gte=0).count()
 
 
-			if rel_desem["importe__sum"]==None:
-				importe_desemp=importe_desemp+0
-			else:
-				importe_desemp=importe_desemp+int(rel_desem["importe__sum"])
+			importe_desemp=0.00
+			cont_desemp=0
+			for x in rel_desem:
+				if decimal.Decimal(x.capital_restante)==decimal.Decimal(0):
+					importe_desemp=decimal.Decimal(importe_desemp)+decimal.Decimal(x.importe)
+					cont_desemp=int(cont_desemp)+1
+
+
+			#if rel_desem["importe__sum"]==None:
+			#	importe_desemp=importe_desemp+0
+			#else:
+			#	importe_desemp=importe_desemp+int(rel_desem["importe__sum"])
 			
 
 		total_movs=int(total_movs+cont_com_pg+refrendos_pg+cont_pc+cont_refrendos+cont_desemp+cont_rebol)
