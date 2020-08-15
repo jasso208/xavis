@@ -321,14 +321,22 @@ def retiro_efectivo(request):
 			else:
 				pago_capital=pago_capital+int(rel_ab_cap["importe__sum"])
 
-			rel_desem=Rel_Abono_Capital.objects.filter(abono=ab).exclude(capital_restante__gte=0).aggregate(Sum("importe"))#buscamos si el abono afecto a capital
-			cont_desemp=cont_desemp+Rel_Abono_Capital.objects.filter(abono=ab).exclude(capital_restante__gte=0).count()
+			rel_desem=Rel_Abono_Capital.objects.filter(abono=ab)#.exclude(capital_restante__gte=0).aggregate(Sum("importe"))#buscamos si el abono afecto a capital
+			#cont_desemp=cont_desemp+Rel_Abono_Capital.objects.filter(abono=ab).exclude(capital_restante__gte=0).count()
+			importe_desemp=0.00
+			cont_desemp=0
+			for x in rel_desem:
+				if decimal.Decimal(x.capital_restante)==decimal.Decimal(0):
+					importe_desemp=decimal.Decimal(importe_desemp)+decimal.Decimal(x.importe)
+					cont_desemp=int(cont_desemp)+1
+
+
 
 			print("entro bien")
-			if rel_desem["importe__sum"]==None:
-				importe_desemp=importe_desemp+0
-			else:
-				importe_desemp=importe_desemp+int(rel_desem["importe__sum"])
+			#if rel_desem["importe__sum"]==None:
+			#	importe_desemp=importe_desemp+0
+			#else:
+			#	importe_desemp=importe_desemp+int(rel_desem["importe__sum"])
 			
 			print("fin")
 		total_movs=total_movs+int(cont_com_pg)+int(cont_ref_pg)+int(cont_pc)+int(cont_refrendos)+int(cont_rebol)
