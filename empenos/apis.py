@@ -7,6 +7,7 @@ from empenos.funciones import fn_calcula_refrendo
 import math
 from empenos.funciones import *
 from django.core import serializers
+from empenos.jobs import *
 @api_view(['GET'])
 def api_tipo_producto(request):
 	respuesta=[]
@@ -23,12 +24,23 @@ def api_tipo_producto(request):
 		respuesta.append({'estatus':"0",'msj':"Error al consultar el catalogo de tipo de productos"})#estatus de falla
 	return Response(respuesta)
 
+
+@api_view(['GET'])
+def api_job_diario(request):
+	respuesta=[]
+	try:
+		fn_job_diario()
+		fn_envia_mail("JOB Fechas vencimiento se ejecuto correctamente","Job Vencimientos","jasso.gallegos@gmail.com")
+	except Exception as e:
+		fn_envia_mail(str(e),"Fallo Job Vencimientos","jasso.gallegos@gmail.com")
+		
+	return Response(respuesta)
+
+
 @api_view(['GET'])
 def api_consulta_linea(request):
-	id_tipo_producto=request.GET.get("id_tipo_producto")
-	
+	id_tipo_producto=request.GET.get("id_tipo_producto")	
 	respuesta=[]
-
 	try:		
 		tipo_producto=Tipo_Producto.objects.get(id=id_tipo_producto)				
 		lista=[]

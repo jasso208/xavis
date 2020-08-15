@@ -135,6 +135,7 @@ def otros_ingresos(request):
 		caja_abierta="0"
 		caja=Cajas
 
+	exito="0"
 	if request.method=="POST":
 		form=Otros_Ingresos_Form(request.POST)
 
@@ -150,7 +151,9 @@ def otros_ingresos(request):
 			f.usuario=request.user
 			f.caja=c
 			f.save()
-			return HttpResponseRedirect(reverse('seguridad:admin_cajas'))
+			#return HttpResponseRedirect(reverse('seguridad:admin_cajas'))
+			exito="1"
+			form=Otros_Ingresos_Form()
 	else:
 		form=Otros_Ingresos_Form()
 	return render(request,'empenos/otros_ingresos.html',locals())

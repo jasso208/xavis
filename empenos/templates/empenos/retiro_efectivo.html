@@ -2,15 +2,20 @@
 {% load static %}
 {% load bootstrap3 %}
 {% block usuario %}
-						<p id="usuario_logueado"  > 
-							<strong>Usuario:</strong> {{user_2.user.username}}
-							&nbsp; / &nbsp;
-							<strong>Perfil:</strong> {{user_2.perfil}}
-							&nbsp; / &nbsp;
-							<strong>Sucursal:</strong> {{user_2.sucursal}}
-							&nbsp; / &nbsp;
-							<strong>Caja:</strong> {{c}}
-						</p>
+
+			<div class="col-xs-6">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{user_2.user.username}} {{user_2.perfil.perfil}}</label> 
+				
+			</div>
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-home"></span> Sucursal: {{user_2.sucursal}}</label> 	
+			</div>
+
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-inbox"></span> Caja: {{c}} </label> 	
+			</div>
+
+
 {% endblock  %}
 
 {% block content %}
@@ -289,10 +294,13 @@
 		
 	</div >
 	<div class="mensaje" >
-			
+			<div class="cls_encabezado_alert" >
+				Error!!
+			</div>	
 			<div class="panel panel-default">	
-				<h3 class="page-header">Para retirar dinero debes abrir caja.</h3>
-				<a class="btn btn-primary" href="{% url 'seguridad:admin_cajas' %}">Aceptar</a>
+				<label class="page-header">No cuentas con caja abierta.</label>
+				<br>
+				<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_cajas' %}"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
 				<br>
 				<br>
 			</div>
@@ -302,10 +310,13 @@
 		
 	</div >
 	<div class="mensaje cls_notificacion" >
-			
+			<div class="cls_encabezado_alert" >
+				Aviso
+			</div>	
 			<div class="panel panel-default">	
-				<h3 class="page-header" id="msj_notificacion"></h3>
-				<a class="btn btn-primary" id="btn_aceptar_notificacion">Aceptar</a>
+				<label class="page-header" id="msj_notificacion"></label>
+				<br>				
+				<a class="btn btn-primary btn-sm" id="btn_aceptar_notificacion"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
 				<br>
 				<br>
 			</div>

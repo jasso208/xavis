@@ -277,7 +277,13 @@ def cambio_psw_usr(request):
 	#si no esta logueado mandamos al login
 	if not request.user.is_authenticated:
 		return HttpResponseRedirect(reverse('seguridad:login'))
-	
+
+
+
+	pub_date = date.today()
+	min_pub_date_time = datetime.combine(pub_date, time.min) 
+	max_pub_date_time = datetime.combine(pub_date, time.max)  
+
 	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
 	try:
 		user_2=User_2.objects.get(user=request.user)
@@ -342,6 +348,11 @@ def cambio_sucursal(request):
 	c=""
 
 
+	pub_date = date.today()
+	min_pub_date_time = datetime.combine(pub_date, time.min) 
+	max_pub_date_time = datetime.combine(pub_date, time.max)  
+
+	
 	msj_error=""	
 	try:
 		#validamos si el usuaario tiene caja abierta para mostrarla en el encabezado.
@@ -351,6 +362,7 @@ def cambio_sucursal(request):
 	except Exception as e:
 		msj_error="No cuentas con caja abierta."
 		print(e)
+		c="CERRADA"
 
 	#si es Gerente Regional o Administrador de Sistema
 	tiene_permiso="1"

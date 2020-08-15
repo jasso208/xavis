@@ -2,15 +2,20 @@
 {% load static %}
 {% load bootstrap3 %}
 {% block usuario %}
-						<p id="usuario_logueado"  > 
-							<strong>Usuario:</strong> {{user_2.user.username}}
-							&nbsp; / &nbsp;
-							<strong>Perfil:</strong> {{user_2.perfil}}
-							&nbsp; / &nbsp;
-							<strong>Sucursal:</strong> {{user_2.sucursal}}
-							&nbsp; / &nbsp;
-							<strong>Caja:</strong> {{c}}
-						</p>
+
+			<div class="col-xs-6">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{user_2.user.username}} {{user_2.perfil.perfil}}</label> 
+				
+			</div>
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-home"></span> Sucursal: {{user_2.sucursal}}</label> 	
+			</div>
+
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-inbox"></span> Caja: {{c}} </label> 	
+			</div>
+
+
 {% endblock  %}
 
 {% block content %}
@@ -43,7 +48,7 @@
 								{% bootstrap_field form.tipo_movimiento  show_label=False%}
 							</div>
 							<div class="col-xs-12">								
-								<button class="btn btn-primary" style="float: right;"   id="abrir_caja">Aceptar</button>								
+								<button class="btn btn-primary btn-sm" style="float: right;"   id="abrir_caja"><span class="glyphicon glyphicon-ok"></span> Aceptar</button>								
 							</div>	
 
 						</div>
@@ -67,14 +72,36 @@
 			
 		</div >
 		<div class="mensaje" >
-				
+				<div class="cls_encabezado_alert" >
+					Error!!
+				</div>	
 				<div class="panel panel-default">	
-					<h3 class="page-header">No cuentas con caja Abierta</h3>
-					<a class="btn btn-primary" href="{% url 'seguridad:admin_cajas' %}">Aceptar</a>
+					<label class="page-header">No cuentas con caja Abierta</label>
+					<br>
+					<a class="btn btn-primary" href="{% url 'seguridad:admin_cajas' %}"> <span class="glyphicon glyphicon-ok"></span> Aceptar</a>
 					<br>
 					<br>
 
 				</div>
 		</div>
 	{% endif %}
+	{% if exito == '1' %}
+		<div class="fondo_mensaje" >
+			
+		</div >
+		<div class="mensaje" >
+				<div class="cls_encabezado_alert" >
+					Aviso
+				</div>	
+				<div class="panel panel-default">	
+					<label class="page-header">El ingreso se guardo correctamente.</label>
+					<br>
+					<a class="btn btn-primary" href="{% url 'seguridad:admin_cajas' %}"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+					<br>
+					<br>
+
+				</div>
+		</div>
+	{% endif %}
+
 {% endblock %}

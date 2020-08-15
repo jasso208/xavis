@@ -12,14 +12,35 @@ td
 {
 font-size: 12px;	
 }
-
+.cls_encabezado_alert
+{
+	background-color: #455a64;
+	padding-bottom: 5px;
+	padding-top: 10px;
+	color:white;
+}
 .fondo_mensaje
 {
-	position:fixed;top:0;left:0;z-index:100;width: 100%; height: 100%; background-color: black;opacity: 0.7;
+	position:fixed;
+	top:0;
+	left:0;
+	z-index:100;
+	width: 100%; 
+	height: 100%; 
+	background-color: black;
+	opacity: 0.7;
 }
 .mensaje
 {
-	position: fixed;top:10%;left: 30%;width: 40%;z-index: 111;background-color: white;border-radius: 5px; box-shadow: 4px 4px 4px black;padding:10px; text-align: center;
+	position: fixed;
+	top:10%;
+	left: 30%;
+	width: 40%;
+	z-index: 111;
+	background-color: white;
+	border-radius: 5px; 
+	box-shadow: 4px 4px 4px black;	
+	text-align: center;
 }
 #panel_principal
 {
@@ -46,7 +67,7 @@ font-size: 12px;
 	background-color: white;
 	border-radius: 5px; 
 	box-shadow: 4px 4px 4px black;
-	padding:10px; 
+	
 	text-align: center;
 }
 #logo_peque 
@@ -84,28 +105,44 @@ font-size: 12px;
 	width: 100%;
 	margin:0 auto;
 }
-
+.form-control,.btn
+{
+	font-weight: bold;
+	border-radius: 0;
+}
 .cls_icono
 {
 	color:white;
 	display: inline-block;
 	margin-top: 2px;
-	font-size: 15px;
-	border: 1px solid white;
+	font-size: 12px;
+	border: 1px solid #003698;
 	padding: 5px;
 	text-align: center;	
 	border-radius: 5px;
+	color: #003698;
 
+}
+.btn-primary
+{
+	margin-top: 5px;
+}
+.no-btn
+{
+	border: 0px;
+	color: #003698;
+}
+#btn_cerrar_session
+{
+	color: #003698;
 }
 #usuario_logueado{
 	color: #003698;
 
-
 	
 	text-align: center;	
-	font-size: 15px;
+	font-size: 12px;
 	padding-top:3px;
-
 }
 .cls_icono:hover
 {
@@ -114,7 +151,13 @@ font-size: 12px;
 	border: 2px solid white;
 	box-shadow: 1px 1px 1px black;
 }
-
+.no-btn:hover
+{
+	cursor: default;
+	border: 0px;
+	box-shadow: 0px 0px 0px;	
+	color: #003698;
+}
 #body
 {
 	background-color: white;

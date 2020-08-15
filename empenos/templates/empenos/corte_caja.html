@@ -2,15 +2,20 @@
 {% load static %}
 {% load bootstrap3 %}
 {% block usuario %}
-						<p id="usuario_logueado"  > 
-							<strong>Usuario:</strong> {{user_2.user.username}}
-							&nbsp; / &nbsp;
-							<strong>Perfil:</strong> {{user_2.perfil}}
-							&nbsp; / &nbsp;
-							<strong>Sucursal:</strong> {{user_2.sucursal}}
-							&nbsp; / &nbsp;
-							<strong>Caja:</strong> {{c}}
-						</p>
+
+			<div class="col-xs-6">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{user_2.user.username}} {{user_2.perfil.perfil}}</label> 
+				
+			</div>
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-home"></span> Sucursal: {{user_2.sucursal}}</label> 	
+			</div>
+
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-inbox"></span> Caja: {{c}} </label> 	
+			</div>
+
+
 {% endblock  %}
 
 {% block content %}
@@ -462,10 +467,12 @@
 			
 		</div >
 		<div class="mensaje" >
-				
+				<div class="cls_encabezado_alert" >
+					Aviso			
+				</div>
 				<div class="panel panel-default">	
-					<h3 class="page-header">No tienes permiso para acceder a esta opción.</h3>
-					<a class="btn btn-primary" href="{% url 'seguridad:admin_cajas' %}">Aceptar</a>
+					<label class="page-header">No tienes permiso para acceder a esta opción.</label>
+					<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_cajas' %}"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
 					<br>
 					<br>
 
@@ -477,10 +484,12 @@
 			
 		</div >
 		<div class="mensaje cls_error_guardar" >
-				
+				<div class="cls_encabezado_alert" >
+					Aviso			
+				</div>
 				<div class="panel panel-default">	
-					<h3 class="page-header">{{error_guardar}}</h3>
-					<a class="btn btn-primary" id="btn_error">Aceptar</a>
+					<label class="page-header">{{error_guardar}}</label>
+					<a class="btn btn-primary btn-sm" id="btn_error"><span class="glyphicon glyphicon-ok"></span>  Aceptar</a>
 					<br>
 					<br>
 
@@ -491,10 +500,13 @@
 			
 		</div >
 		<div class="mensaje cls_error" >
-				
+				<div class="cls_encabezado_alert" >
+					Aviso			
+				</div>
 				<div class="panel panel-default">	
-					<h3 class="page-header" id="msj_error"></h3>
-					<a class="btn btn-primary" id="btn_aceptar_error">Aceptar</a>
+					<label class="page-header" id="msj_error"></label>
+					<br>
+					<a class="btn btn-primary btn-sm" id="btn_aceptar_error"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
 					<br>
 					<br>
 
@@ -505,11 +517,14 @@
 			
 		</div >
 		<div class="mensaje cls_confirmacion_cierre" >
-				
+				<div class="cls_encabezado_alert" >
+					Aviso			
+				</div>
 				<div class="panel panel-default">	
-					<h3 class="page-header" id="msj_diferencia"></h3>
-					<a class="btn btn-primary" id="btn_confirmar_cierre">Aceptar</a>
-					<a class="btn btn-primary" id="btn_cancelar_cierre">Cancelar</a>
+					<label class="page-header" id="msj_diferencia"></label>
+					<br>
+					<a class="btn btn-primary btn-sm" id="btn_confirmar_cierre"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+					<a class="btn btn-primary btn-sm" id="btn_cancelar_cierre"><span class="glyphicon glyphicon-ok"></span> Cancelar</a>
 					<br>
 					<br>
 

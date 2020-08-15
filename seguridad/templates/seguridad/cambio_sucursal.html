@@ -7,15 +7,21 @@
 {% load static %}
 {% load bootstrap3 %}
 {% block usuario %}
-						<p id="usuario_logueado"  > 
-							<strong>Usuario:</strong> {{user_2.user.username}}
-							&nbsp; / &nbsp;
-							<strong>Perfil:</strong> {{user_2.perfil}}
-							&nbsp; / &nbsp;
-							<strong>Sucursal:</strong> {{user_2.sucursal}}
-							&nbsp; / &nbsp;
-							<strong>Caja:</strong> {{c}}
-						</p>
+
+			<div class="col-xs-6">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{user_2.user.username}} {{user_2.perfil.perfil}}</label> 
+				
+			</div>
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-home"></span> Sucursal: {{user_2.sucursal}}</label> 	
+			</div>
+
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-inbox"></span> Caja: {{c}} </label> 	
+			</div>
+
+
+		
 {% endblock  %}
 
 {% block content %}
@@ -47,7 +53,7 @@
 						<div class="col-xs-4">
 							<br>
 
-							<button class=" btn btn-primary">Guardar</button>
+							<button class=" btn btn-primary btn-sm"><span class="glyphicon glyphicon-ok"></span> Guardar</button>
 						</div>
 							
 					</div>
@@ -64,12 +70,16 @@
 		<div class="fondo_mensaje cls_mensaje_notificacion" >
 			
 		</div >
-		<div class="mensaje cls_mensaje_notificacion" >				
+		<div class="mensaje cls_mensaje_notificacion"  >				
+			<div class="cls_encabezado_alert" >
+				Error!! 				
+			</div>
 				<div class="panel panel-default">	
-					<h3 class="page-header">No tiene permiso para acceder a esta opción.</h3>
-					<a class="btn btn-primary" href="{% url 'seguridad:admin_perfil' %}" >Aceptar</a>
+					<label class="page-header">No tiene permiso para acceder a esta opción.</label>
+					<br>
 
-			
+					<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_perfil' %}" > <span class="glyphicon glyphicon-ok"></span>Aceptar</a>
+
 					<br>
 					<br>
 
@@ -82,12 +92,15 @@
 		<div class="fondo_mensaje cls_mensaje_notificacion" >
 			
 		</div >
-		<div class="mensaje cls_mensaje_notificacion" >				
-				<div class="panel panel-default">	
-					<h3 class="page-header">Se actualizo correctamente.</h3>
-					<a class="btn btn-primary" href="{% url 'seguridad:admin_perfil' %}" >Aceptar</a>
+		<div class="mensaje cls_mensaje_notificacion" >	
+			<div class="cls_encabezado_alert" >
+				Avisow			
+			</div>
 
-			
+				<div class="panel panel-default">	
+					<label class="page-header">Se actualizo correctamente.</label>
+					<br>
+					<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_perfil' %}" ><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
 					<br>
 					<br>
 
@@ -101,10 +114,14 @@
 		<div class="fondo_mensaje cls_mensaje_notificacion" >
 			
 		</div >
-		<div class="mensaje cls_mensaje_notificacion" >				
+		<div class="mensaje cls_mensaje_notificacion" >		
+				<div class="cls_encabezado_alert" >
+					Aviso			
+				</div>		
 				<div class="panel panel-default">	
-					<h3 class="page-header">Error al actualizar la sucursal.</h3>
-					<a class="btn btn-primary" href="{% url 'seguridad:admin_perfil' %}" >Aceptar</a>
+					<label class="page-header">Error al actualizar la sucursal.</label>
+					<br>
+					<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_perfil' %}" ><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
 
 			
 					<br>
@@ -123,11 +140,14 @@
 <div class="fondo_mensaje_2 cls_msj_error" >
 
 		</div >
-		<div class="mensaje_2 cls_msj_error" >
-			
+		<div class="mensaje_2 cls_msj_error cls_mensaje_notificacion" >
+				<div class="cls_encabezado_alert" >
+					Aviso	
+				</div>	
 			<div class="panel panel-default">	
-				<h3 class="page-header" id="msj_error"></h3>
-				<a class="btn btn-primary" id="btn_aceptar">Aceptar</a>
+				<label class="page-header" id="msj_error"></label>
+				<br>
+				<a class="btn btn-primary btn-sm" id="btn_aceptar"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
 				<br>
 				<br>
 
