@@ -307,7 +307,24 @@
 				</div>
 		</div>
 	{% endifequal  %}
+	{% ifequal est_error '2' %}
+		<div class="fondo_mensaje cls_msj_saldo_inicial" >
+			
+		</div >
+		<div class="mensaje cls_msj_saldo_inicial" >	
+				<div class="cls_encabezado_alert" >
+					Aviso			
+				</div>
 
+				<div class="panel panel-default">	
+					<label class="page-header">{{error}}</label>
+					<br>
+					<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_reportes'%}" ><span class="glyphicon glyphicon-ok"></span> Continuar</a>	
+					<br>
+					<br>			
+				</div>
+		</div>
+	{% endifequal  %}
 	<script type="text/javascript">
 		post="0";
 		$(document).ready(

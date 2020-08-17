@@ -172,6 +172,14 @@ def rep_flujo_caja(request):
 		estatus=0
 		msj="La cuenta del usuario esta incompleta."			
 		return render(request,'login.html',locals())
+
+
+	if user_2.perfil.id!=3:
+		error="No cuentas con permiso para acceder a esta opción."
+		est_error="2"
+		form=Flujo_Caja_Form()
+		return render(request,'empenos/rep_flujo_caja.html',locals())
+
 	IP_LOCAL = settings.IP_LOCAL
 
 	c=""
@@ -2683,6 +2691,9 @@ def imprime_boleta(request):
 
 			cont=0
 			str_linea=""
+
+			descripcion_talon=""
+			descripcion_talon_obser=""
 			for y in db:
 				cont=cont+1
 				str_linea=y.linea.linea
@@ -2705,7 +2716,10 @@ def imprime_boleta(request):
 				
 
 				p.setFont("Helvetica",7)
-				p.drawString(60,linea,str(cont))		
+				p.drawString(60,linea,str(cont))	
+
+				descripcion_talon=y.descripcion
+				
 				p.drawString(95,linea,y.descripcion)
 				if y.tipo_producto.id==1 or  y.tipo_producto.id==2:
 					p.drawString(305,linea,y.costo_kilataje.kilataje)
@@ -2719,8 +2733,8 @@ def imprime_boleta(request):
 
 			if x.boleta.tipo_producto.id==3:				
 				linea=linea-15				
+				descripcion_talon_obser=y.observaciones
 				p.drawString(95,linea,"Obser: "+str(y.observaciones))
-
 
 			p.setFont("Helvetica-Bold",7)
 			p.drawString(55,530,"Linea")		
@@ -2855,20 +2869,12 @@ def imprime_boleta(request):
 
 			p.drawString(255,130,"$"+str(avaluo))
 
-			p.setFont("Helvetica-Bold",7)
-			p.drawString(205,115,"Refrendo:")
-
-			refrendo="{:0,.2f}".format(x.boleta.refrendo)
 
 			p.setFont("Helvetica",7)
-			p.drawString(255,115,"$"+str(refrendo))
+			p.drawString(205,115,descripcion_talon)
+			p.drawString(205,100,descripcion_talon_obser)
 
-			p.setFont("Helvetica-Bold",7)
-			p.drawString(205,100,"Mutuo:")
-			mutuo="{:0,.2f}".format(x.boleta.mutuo)
 
-			p.setFont("Helvetica",7)
-			p.drawString(255,100,"$"+str(mutuo))
 
 			p.setFont("Helvetica-Bold",7)
 			p.drawString(205,85,"Fecha Emi.:")
