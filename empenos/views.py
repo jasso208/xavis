@@ -158,6 +158,242 @@ def otros_ingresos(request):
 		form=Otros_Ingresos_Form()
 	return render(request,'empenos/otros_ingresos.html',locals())
 
+def rep_flujo_caja(request):
+
+	#si no esta logueado mandamos al login
+	if not request.user.is_authenticated:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+	
+	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
+	try:
+		user_2=User_2.objects.get(user=request.user)
+	except Exception as e:		
+		form=Login_Form(request.POST)
+		estatus=0
+		msj="La cuenta del usuario esta incompleta."			
+		return render(request,'login.html',locals())
+	IP_LOCAL = settings.IP_LOCAL
+
+	c=""
+	pub_date = date.today()
+	min_pub_date_time = datetime.combine(pub_date, time.min) 
+	max_pub_date_time = datetime.combine(pub_date, time.max)  	
+
+	msj_error=""	
+
+	try:
+		costo_reimpresion=Costo_Extra.objects.get(id=1).costo
+	except:
+		costo_reimpresion=0
+
+
+	try:
+		#validamos si el usuaario tiene caja abierta para mostrarla en el encabezado.
+		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+		c=caja.caja
+		id_caja=caja.id
+
+	except Exception as e:
+		msj_error="No cuentas con caja abierta."
+		print(e)
+
+
+
+	error=""#en caso de error en esta variable se manda el mensaje de error.
+	est_error="0"#si es cero es que todo esta correcto.
+
+
+
+	post="0"
+
+	cont_desempenos=0
+	importe_desempenos=0.00
+
+	importe_capital=0.00
+	cont_capital=0
+
+	importe_refrendo=0.00
+	cont_refrendos=0
+
+	importe_com_pg=0.00
+	cont_com_pg=0
+
+	cont_empenos=0
+	importe_empenos=0.00
+	saldo_inicial=0.00
+
+	cont_otros=0
+	importe_otros=0.00
+
+	cont_activas=0
+	mutuo_activo=0.00
+	avaluo_activo=0.00
+
+
+	cont_almoneda=0
+	mutuo_almoneda=0.00
+	avaluo_almoneda=0.00
+
+	if request.method=="POST":
+		post="1"
+
+		est_activa=Estatus_Boleta.objects.get(id=1)
+		est_almoneda=Estatus_Boleta.objects.get(id=3)
+
+		sucursal=request.POST.get("sucursal")
+
+		fecha_inicial= datetime.strptime(request.POST.get("fecha_inicial"), "%Y-%m-%d").date()
+		fecha_final= datetime.strptime(request.POST.get("fecha_final"), "%Y-%m-%d").date()
+
+
+		fec_inicial_caja=datetime.combine(fecha_inicial, time.min) 
+		fec_final_caja=datetime.combine(fecha_inicial, time.max) 
+		
+		#solo puede haber una caja abierta durante el dia, si encuentra mas de uno marcara error
+		try:
+			caja=Cajas.objects.get(fecha__range=(fec_inicial_caja,fec_final_caja),sucursal=sucursal)
+			saldo_inicial=caja.importe
+		except Exception as e:
+			print(e)
+			error="Error al consultar el fondo incial"
+			est_error="1"
+			saldo_inicial=0.00				
+		
+		if request.POST.get("sucursal")!="":
+			sucursal=Sucursal.objects.get(id=sucursal)
+			txt_sucursal=sucursal.sucursal
+
+			fecha_inicial=datetime.combine(fecha_inicial,time.min)
+			fecha_final=datetime.combine(fecha_final,time.max)
+
+			b=Boleta_Empeno.objects.filter(sucursal=sucursal,fecha__range=(fecha_inicial,fecha_final))
+
+			#calculamos los empeños
+			importe_empenos=Boleta_Empeno.objects.filter(sucursal=sucursal,fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("mutuo_original"))
+			cont_empenos=Boleta_Empeno.objects.filter(sucursal=sucursal,fecha__range=(fecha_inicial,fecha_final)).count()
+
+			if importe_empenos["mutuo_original__sum"]==None:
+				importe_empenos=0.00
+			else:
+				importe_empenos=importe_empenos["mutuo_original__sum"]
+
+			#obtenemos los costos extras
+			rce=Reg_Costos_Extra.objects.filter(fecha__range=(fecha_inicial,fecha_final))
+
+			for x in rce:
+				if x.caja.sucursal==sucursal:
+					cont_otros=cont_otros+1
+					importe_otros=importe_otros+x.importe
+
+			#obtenemos el importe de boletas activas
+			bea=Boleta_Empeno.objects.filter(estatus=est_activa,sucursal=sucursal).aggregate(Sum("avaluo"))
+			be=Boleta_Empeno.objects.filter(estatus=est_activa,sucursal=sucursal).aggregate(Sum("mutuo"))
+			cont_activas=Boleta_Empeno.objects.filter(estatus=est_activa,sucursal=sucursal).count()
+
+			mutuo_activo=0.00
+			if be["mutuo__sum"]!=None:
+				mutuo_activo=be["mutuo__sum"]
+
+			avaluo_activo=0.00
+			if bea["avaluo__sum"]!=None:
+				avaluo_activo=bea["avaluo__sum"]
+
+			#obtenemos el importe de boletas en almoneda
+			bea=Boleta_Empeno.objects.filter(estatus=est_almoneda,sucursal=sucursal).aggregate(Sum("avaluo"))
+			be=Boleta_Empeno.objects.filter(estatus=est_almoneda,sucursal=sucursal).aggregate(Sum("mutuo"))
+			cont_almoneda=Boleta_Empeno.objects.filter(estatus=est_almoneda,sucursal=sucursal).count()
+
+			mutuo_almoneda=0.00
+			if be["mutuo__sum"]!=None:
+				mutuo_almoneda=be["mutuo__sum"]
+
+			avaluo_almoneda=0.00
+			if bea["avaluo__sum"]!=None:
+				avaluo_almoneda=bea["avaluo__sum"]
+
+			abonos=Abono.objects.filter(fecha__range=(fecha_inicial,fecha_final),sucursal=sucursal)
+
+			est_com_pg=Tipo_Pago.objects.get(id=2)
+
+			for a in abonos:
+				try:
+					ra=Rel_Abono_Capital.objects.get(abono=a)
+					if decimal.Decimal(ra.capital_restante)<=decimal.Decimal(0):
+						#buscams los desempeñs
+						cont_desempenos=cont_desempenos+1
+						importe_desempenos=decimal.Decimal(importe_desempenos)+decimal.Decimal(ra.importe)
+					else:
+						#buscamos los abonos  a capital
+						cont_capital=cont_capital+1
+						importe_capital=decimal.Decimal(importe_capital)+decimal.Decimal(ra.importe)
+				except:
+					cont_desempenos=cont_desempenos
+
+				#pagos de refrendo 4 semanas
+				try:	
+
+					ra=Rel_Abono_Pago.objects.filter(abono=a)
+					for x in ra:
+						if x.pago.tipo_pago!=est_com_pg:
+							importe_refrendo=decimal.Decimal(importe_refrendo)+x.pago.importe
+							cont_refrendos=cont_refrendos+1		
+
+						if x.pago.tipo_pago==est_com_pg:
+							importe_com_pg=decimal.Decimal(importe_com_pg)+x.pago.importe
+							cont_com_pg=cont_com_pg+1		
+				except Exception as e:
+					print(e)
+					importe_refrendo=importe_refrendo
+
+				#pago refrendo mensual
+				try:
+					rp=Rel_Abono_Periodo.objects.filter(abono=a)
+
+					for x in rp:												
+						importe_refrendo=decimal.Decimal(x.periodo.importe)+decimal.Decimal(importe_refrendo)						
+						cont_refrendos=cont_refrendos+1
+				except:
+					importe_refrendo=importe_refrendo
+		else:
+			txt_sucursal="TODAS"		
+
+	else:	
+		post="0"
+
+	form=Flujo_Caja_Form()
+
+	importe_total=decimal.Decimal(saldo_inicial)+decimal.Decimal(importe_empenos)+decimal.Decimal(importe_desempenos)+decimal.Decimal(importe_capital)+decimal.Decimal(importe_refrendo)+decimal.Decimal(importe_com_pg)+decimal.Decimal(importe_otros)
+
+	importe_total=math.ceil(importe_total)
+
+	cont_total=cont_otros+cont_com_pg+cont_refrendos+cont_capital+cont_desempenos+cont_empenos
+
+	cont_total_2=cont_almoneda+cont_activas
+
+
+	total_mutuo=mutuo_almoneda+mutuo_activo
+	total_almoneda=avaluo_almoneda+avaluo_activo
+	#damos formato a las variables
+	importe_empenos="{:0,.2f}".format(importe_empenos)
+	saldo_inicial="{:0,.2f}".format(saldo_inicial)
+	importe_desempenos="{:0,.2f}".format(importe_desempenos)
+	importe_capital="{:0,.2f}".format(importe_capital)
+	importe_refrendo=math.ceil(importe_refrendo)
+	importe_refrendo="{:0,.2f}".format(importe_refrendo)
+	importe_com_pg="{:0,.2f}".format(importe_com_pg)
+	importe_otros="{:0,.2f}".format(importe_otros)
+	mutuo_activo="{:0,.2f}".format(mutuo_activo)
+	avaluo_activo="{:0,.2f}".format(avaluo_activo)
+	mutuo_almoneda="{:0,.2f}".format(mutuo_almoneda)
+	avaluo_almoneda="{:0,.2f}".format(avaluo_almoneda)
+
+
+	importe_total="{:0,.2f}".format(importe_total)
+	total_mutuo="{:0,.2f}".format(total_mutuo)
+	total_almoneda="{:0,.2f}".format(total_almoneda)
+
+	return render(request,'empenos/rep_flujo_caja.html',locals())
+
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
 def retiro_efectivo(request):
@@ -878,9 +1114,11 @@ def nvo_empeno(request):
 
 			#calculamos la fecha de vemcimiento para 4 semanas
 			if int(request.POST.get("plazo"))==2:
+
 				dias = timedelta(days=28)		                
 				fecha_vencimiento=datetime.combine(hoy+dias, time.min)
 				fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
+
 			elif int(request.POST.get("plazo"))==1:
 				dias = timedelta(days=1)
 				fecha_vencimiento=hoy+dias
@@ -1590,7 +1828,8 @@ def refrendo_plazo_mensual(request,id_boleta):
 			if int(cont_periodos_vencidos)==0:
 				if int(total_refrendo)>0 :			
 					mutuo=mutuo-int(total_refrendo)
-
+					if mutuo<=0:
+						mutuo=0
 					rel_cap=Rel_Abono_Capital()
 					rel_cap.boleta=boleta
 					rel_cap.abono=abono

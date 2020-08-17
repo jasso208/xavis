@@ -78,7 +78,16 @@ class Consulta_Boleta_Form(forms.Form):
 		self.fields['fecha_inicial'].required = False
 		self.fields['fecha_final'].required = False
 		self.fields['estatus_boleta'].required = False
+
+class Flujo_Caja_Form(forms.Form):
+	sucursal=forms.ModelChoiceField(queryset=Sucursal.objects.all())	
+	fecha_inicial=forms.DateTimeField()
+	fecha_final=forms.DateTimeField()
 		
+	def __init__(self, *args, **kwargs):
+		super(self.__class__, self).__init__(*args, **kwargs)
+		# asi vuelves tus campos no requeridos
+		self.fields['sucursal'].required = False
 
 class Nuevo_Empeno_Form(forms.Form):
 	plazo=forms.ModelChoiceField(queryset=Plazo.objects.all())

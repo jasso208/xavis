@@ -21,6 +21,7 @@ urlpatterns=[
 	url(r'^imprime_abono/$',imprime_abono,name="imprime_abono"),
 	url(r'^re_imprimir_boleta/(?P<id_boleta>\w+)/$',re_imprimir_boleta,name="re_imprimir_boleta"),
 	url(r'^re_imprimir_abono/(?P<id_abono>\w+)/$',re_imprimir_abono,name="re_imprimir_abono"),
+	url(r'^rep_flujo_caja/$',rep_flujo_caja,name="rep_flujo_caja"),
 
 
 
