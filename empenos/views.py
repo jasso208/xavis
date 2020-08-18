@@ -234,7 +234,8 @@ def rep_flujo_caja(request):
 	cont_almoneda=0
 	mutuo_almoneda=0.00
 	avaluo_almoneda=0.00
-
+	importe_retiros=0.00			
+	cont_retiros=0
 	if request.method=="POST":
 		post="1"
 
@@ -249,20 +250,28 @@ def rep_flujo_caja(request):
 
 		fec_inicial_caja=datetime.combine(fecha_inicial, time.min) 
 		fec_final_caja=datetime.combine(fecha_inicial, time.max) 
-		
-		#solo puede haber una caja abierta durante el dia, si encuentra mas de uno marcara error
-		try:
-			caja=Cajas.objects.get(fecha__range=(fec_inicial_caja,fec_final_caja),sucursal=sucursal)
-			saldo_inicial=caja.importe
-		except Exception as e:
-			print(e)
-			error="Error al consultar el fondo incial"
-			est_error="1"
-			saldo_inicial=0.00				
+			
 		
 		if request.POST.get("sucursal")!="":
 			sucursal=Sucursal.objects.get(id=sucursal)
 			txt_sucursal=sucursal.sucursal
+
+
+			try:
+
+				cajas_dia_inicial=Cajas.objects.filter(fecha__range=(fec_inicial_caja,fec_final_caja),sucursal=sucursal).aggregate(Sum("importe"))
+
+				saldo_inicial=0.00
+
+				if cajas_dia_inicial["importe__sum"]!=None:
+					saldo_inicial=cajas_dia_inicial["importe__sum"]
+
+			except Exception as e:
+				print(e)
+				error="Error al consultar el fondo incial"
+				est_error="1"
+				saldo_inicial=0.00	
+
 
 			fecha_inicial=datetime.combine(fecha_inicial,time.min)
 			fecha_final=datetime.combine(fecha_final,time.max)
@@ -290,6 +299,16 @@ def rep_flujo_caja(request):
 
 			if oi["importe__sum"]!=None:
 				importe_otros=decimal.Decimal(importe_otros)+decimal.Decimal(oi["importe__sum"])
+
+			ret=Retiro_Efectivo.objects.filter(sucursal=sucursal,fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("importe"))
+
+			importe_retiros=0.00			
+			cont_retiros=0
+			if ret["importe__sum"]!=None:
+				importe_retiros=ret["importe__sum"]
+				cont_retiros=Retiro_Efectivo.objects.filter(sucursal=sucursal,fecha__range=(fecha_inicial,fecha_final)).count()
+
+
 
 			#obtenemos el importe de boletas activas
 			bea=Boleta_Empeno.objects.filter(estatus=est_activa,sucursal=sucursal).aggregate(Sum("avaluo"))
@@ -360,15 +379,148 @@ def rep_flujo_caja(request):
 						cont_refrendos=cont_refrendos+1
 				except:
 					importe_refrendo=importe_refrendo
-		else:
-			txt_sucursal="TODAS"		
+		else:#en caso de no seleccionar una sucursal, se calcula para todas las sucursales.			
+			txt_sucursal="TODAS"
+
+			
+			try:
+
+				cajas_dia_inicial=Cajas.objects.filter(fecha__range=(fec_inicial_caja,fec_final_caja)).aggregate(Sum("importe"))
+
+				saldo_inicial=0.00
+
+				if cajas_dia_inicial["importe__sum"]!=None:
+					saldo_inicial=cajas_dia_inicial["importe__sum"]
+
+			except Exception as e:
+				print(e)
+				error="Error al consultar el fondo incial"
+				est_error="1"
+				saldo_inicial=0.00	
+
+			fecha_inicial=datetime.combine(fecha_inicial,time.min)
+			fecha_final=datetime.combine(fecha_final,time.max)
+
+			#calculamos los empeños
+			importe_empenos=Boleta_Empeno.objects.filter(fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("mutuo_original"))
+			cont_empenos=Boleta_Empeno.objects.filter(fecha__range=(fecha_inicial,fecha_final)).count()
+
+			if importe_empenos["mutuo_original__sum"]==None:
+				importe_empenos=0.00
+			else:
+				importe_empenos=importe_empenos["mutuo_original__sum"]
+
+			#obtenemos los costos extras
+			rce=Reg_Costos_Extra.objects.filter(fecha__range=(fecha_inicial,fecha_final))
+
+			for x in rce:
+				cont_otros=cont_otros+1
+				importe_otros=importe_otros+x.importe
+
+			oi=Otros_Ingresos.objects.filter(fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("importe"))
+
+			cont_otros=cont_otros+Otros_Ingresos.objects.filter(fecha__range=(fecha_inicial,fecha_final)).count()
+
+			if oi["importe__sum"]!=None:
+				importe_otros=decimal.Decimal(importe_otros)+decimal.Decimal(oi["importe__sum"])
+
+			ret=Retiro_Efectivo.objects.filter(fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("importe"))
+
+			importe_retiros=0.00			
+			cont_retiros=0
+			if ret["importe__sum"]!=None:
+				importe_retiros=ret["importe__sum"]
+				cont_retiros=Retiro_Efectivo.objects.filter(fecha__range=(fecha_inicial,fecha_final)).count()
+
+
+
+			#obtenemos el importe de boletas activas
+			bea=Boleta_Empeno.objects.filter(estatus=est_activa).aggregate(Sum("avaluo"))
+			be=Boleta_Empeno.objects.filter(estatus=est_activa).aggregate(Sum("mutuo"))
+			cont_activas=Boleta_Empeno.objects.filter(estatus=est_activa).count()
+
+			mutuo_activo=0.00
+			if be["mutuo__sum"]!=None:
+				mutuo_activo=be["mutuo__sum"]
+
+			avaluo_activo=0.00
+			if bea["avaluo__sum"]!=None:
+				avaluo_activo=bea["avaluo__sum"]
+
+			#obtenemos el importe de boletas en almoneda
+			bea=Boleta_Empeno.objects.filter(estatus=est_almoneda).aggregate(Sum("avaluo"))
+			be=Boleta_Empeno.objects.filter(estatus=est_almoneda).aggregate(Sum("mutuo"))
+			cont_almoneda=Boleta_Empeno.objects.filter(estatus=est_almoneda).count()
+
+			mutuo_almoneda=0.00
+			if be["mutuo__sum"]!=None:
+				mutuo_almoneda=be["mutuo__sum"]
+
+			avaluo_almoneda=0.00
+			if bea["avaluo__sum"]!=None:
+				avaluo_almoneda=bea["avaluo__sum"]
+
+			abonos=Abono.objects.filter(fecha__range=(fecha_inicial,fecha_final))
+
+			est_com_pg=Tipo_Pago.objects.get(id=2)
+
+			for a in abonos:
+				try:
+					ra=Rel_Abono_Capital.objects.get(abono=a)
+					if decimal.Decimal(ra.capital_restante)<=decimal.Decimal(0):
+						#buscams los desempeñs
+						cont_desempenos=cont_desempenos+1
+						importe_desempenos=decimal.Decimal(importe_desempenos)+decimal.Decimal(ra.importe)
+					else:
+						#buscamos los abonos  a capital
+						cont_capital=cont_capital+1
+						importe_capital=decimal.Decimal(importe_capital)+decimal.Decimal(ra.importe)
+				except:
+					cont_desempenos=cont_desempenos
+
+				#pagos de refrendo 4 semanas
+				try:	
+
+					ra=Rel_Abono_Pago.objects.filter(abono=a)
+					for x in ra:
+						if x.pago.tipo_pago!=est_com_pg:
+							importe_refrendo=decimal.Decimal(importe_refrendo)+x.pago.importe
+							cont_refrendos=cont_refrendos+1		
+
+						if x.pago.tipo_pago==est_com_pg:
+							importe_com_pg=decimal.Decimal(importe_com_pg)+x.pago.importe
+							cont_com_pg=cont_com_pg+1		
+				except Exception as e:
+					print(e)
+					importe_refrendo=importe_refrendo
+
+				#pago refrendo mensual
+				try:
+					rp=Rel_Abono_Periodo.objects.filter(abono=a)
+
+					for x in rp:												
+						importe_refrendo=decimal.Decimal(x.periodo.importe)+decimal.Decimal(importe_refrendo)						
+						cont_refrendos=cont_refrendos+1
+				except:
+					importe_refrendo=importe_refrendo
+
+
+
+
+
+
+
+
+
+
+
 
 	else:	
 		post="0"
 
 	form=Flujo_Caja_Form()
 
-	importe_total=decimal.Decimal(saldo_inicial)-decimal.Decimal(importe_empenos)+decimal.Decimal(importe_desempenos)+decimal.Decimal(importe_capital)+decimal.Decimal(importe_refrendo)+decimal.Decimal(importe_com_pg)+decimal.Decimal(importe_otros)
+	importe_total=decimal.Decimal(saldo_inicial)-decimal.Decimal(importe_empenos)+decimal.Decimal(importe_desempenos)+decimal.Decimal(importe_capital)+decimal.Decimal(importe_refrendo)+decimal.Decimal(importe_com_pg)+decimal.Decimal(importe_otros)-decimal.Decimal(importe_retiros)
 
 	importe_total=math.ceil(importe_total)
 
@@ -397,6 +549,8 @@ def rep_flujo_caja(request):
 	importe_total="{:0,.2f}".format(importe_total)
 	total_mutuo="{:0,.2f}".format(total_mutuo)
 	total_almoneda="{:0,.2f}".format(total_almoneda)
+	importe_retiros="{:0,.2f}".format(importe_retiros)
+
 	#cuando eres gerente regiona, puedes entrar a todas las sucursales
 	if user_2.perfil.id==3:		
 		sucursales=Sucursal.objects.all()
@@ -404,6 +558,8 @@ def rep_flujo_caja(request):
 	else:#cuando no eres gerente regional, solo puedes acceder a tu sucursal.
 		sucursales=Sucursal.objects.filter(sucursal=user_2.sucursal)
 		sucursal_default=user_2.sucursal.id
+
+	perfil=str(user_2.perfil.id)
 
 	return render(request,'empenos/rep_flujo_caja.html',locals())
 

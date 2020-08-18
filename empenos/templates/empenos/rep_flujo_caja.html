@@ -204,6 +204,22 @@
 
 
 																		<div class="col-xs-12">
+																			<div class="col-xs-6">
+																				Retiros
+																			</div>
+																			<div class="col-xs-2">							
+																				{{cont_retiros}}
+																			</div>
+																			<div class="col-xs-4 text-right">
+																				${{importe_retiros}}
+																			</div>	
+																		</div>
+
+
+
+
+
+																		<div class="col-xs-12">
 																			<hr>
 																		</div>
 
@@ -388,6 +404,17 @@
 				
 			}
 			$("#id_sucursal").val("{{sucursal_default}}");
+
+			var perfil="{{perfil}}";
+
+			//si no es gerente regional.
+			//removemos la opcion de consultar todas las sucursales a la vez.
+			if (perfil!="3")
+			{
+				var id_sucursal=document.getElementById("id_sucursal");
+				id_sucursal.remove(0);
+
+			}
 
 
 		}
