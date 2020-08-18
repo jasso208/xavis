@@ -39,8 +39,16 @@
 													<div class="panel panel-default">						
 														<div class="panel-body">
 															<div class="col-xs-3">
-																<label>Sucursal</label>
-																{% bootstrap_field form.sucursal show_label=False%}
+																<label>Sucursal</label>										
+																<select name="sucursal" class="form-control" title="" id="id_sucursal">
+																  <option value="" selected="">---------</option>
+
+																  {% for s in sucursales %}
+																  <option value="{{s.id}}">{{s.sucursal}}</option>			
+																  {% endfor %}											  
+
+																</select>
+
 															</div>
 															<div class="col-xs-3">
 																<label>Fecha Inicial</label>
@@ -85,7 +93,7 @@
 
 																		<div class="col-xs-12">
 																			<div class="col-xs-6">
-																				
+																				<label>Entradas</label>
 																			</div>
 																			<div class="col-xs-2">
 																				<label>Cantidad</label>
@@ -109,17 +117,7 @@
 																		</div>
 
 
-																		<div class="col-xs-12">
-																			<div class="col-xs-6">
-																				Empeños
-																			</div>
-																			<div class="col-xs-2">											
-																				{{cont_empenos}}
-																			</div>
-																			<div class="col-xs-4 text-right">
-																				${{importe_empenos}}
-																			</div>	
-																		</div>
+
 																		<div class="col-xs-12">
 																			<div class="col-xs-6">
 																				Desempeño
@@ -167,7 +165,7 @@
 
 																		<div class="col-xs-12">
 																			<div class="col-xs-6">
-																				Otros
+																				Otros Ingresos
 																			</div>
 																			<div class="col-xs-2">											
 																				{{cont_otros}}
@@ -176,6 +174,35 @@
 																				${{importe_otros}}
 																			</div>	
 																		</div>
+																		<div class="col-xs-12">
+																			<div class="col-xs-6">
+																				<label>Salidas</label>
+																			</div>
+																			<div class="col-xs-2">
+																				<label>Cantidad</label>
+																				
+																			</div>
+																			<div class="col-xs-4 text-right">
+																				<label>Importe</label>
+																			</div>	
+																		</div>
+
+
+
+																		<div class="col-xs-12">
+																			<div class="col-xs-6">
+																				Empeños
+																			</div>
+																			<div class="col-xs-2">											
+																				{{cont_empenos}}
+																			</div>
+																			<div class="col-xs-4 text-right">
+																				${{importe_empenos}}
+																			</div>	
+																		</div>
+
+
+
 																		<div class="col-xs-12">
 																			<hr>
 																		</div>
@@ -360,6 +387,7 @@
 
 				
 			}
+			$("#id_sucursal").val("{{sucursal_default}}");
 
 
 		}

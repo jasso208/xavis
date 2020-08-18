@@ -173,13 +173,6 @@ def rep_flujo_caja(request):
 		msj="La cuenta del usuario esta incompleta."			
 		return render(request,'login.html',locals())
 
-
-	if user_2.perfil.id!=3:
-		error="No cuentas con permiso para acceder a esta opción."
-		est_error="2"
-		form=Flujo_Caja_Form()
-		return render(request,'empenos/rep_flujo_caja.html',locals())
-
 	IP_LOCAL = settings.IP_LOCAL
 
 	c=""
@@ -274,8 +267,6 @@ def rep_flujo_caja(request):
 			fecha_inicial=datetime.combine(fecha_inicial,time.min)
 			fecha_final=datetime.combine(fecha_final,time.max)
 
-			b=Boleta_Empeno.objects.filter(sucursal=sucursal,fecha__range=(fecha_inicial,fecha_final))
-
 			#calculamos los empeños
 			importe_empenos=Boleta_Empeno.objects.filter(sucursal=sucursal,fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("mutuo_original"))
 			cont_empenos=Boleta_Empeno.objects.filter(sucursal=sucursal,fecha__range=(fecha_inicial,fecha_final)).count()
@@ -292,6 +283,13 @@ def rep_flujo_caja(request):
 				if x.caja.sucursal==sucursal:
 					cont_otros=cont_otros+1
 					importe_otros=importe_otros+x.importe
+
+			oi=Otros_Ingresos.objects.filter(sucursal=sucursal,fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("importe"))
+
+			cont_otros=cont_otros+Otros_Ingresos.objects.filter(sucursal=sucursal,fecha__range=(fecha_inicial,fecha_final)).count()
+
+			if oi["importe__sum"]!=None:
+				importe_otros=decimal.Decimal(importe_otros)+decimal.Decimal(oi["importe__sum"])
 
 			#obtenemos el importe de boletas activas
 			bea=Boleta_Empeno.objects.filter(estatus=est_activa,sucursal=sucursal).aggregate(Sum("avaluo"))
@@ -370,7 +368,7 @@ def rep_flujo_caja(request):
 
 	form=Flujo_Caja_Form()
 
-	importe_total=decimal.Decimal(saldo_inicial)+decimal.Decimal(importe_empenos)+decimal.Decimal(importe_desempenos)+decimal.Decimal(importe_capital)+decimal.Decimal(importe_refrendo)+decimal.Decimal(importe_com_pg)+decimal.Decimal(importe_otros)
+	importe_total=decimal.Decimal(saldo_inicial)-decimal.Decimal(importe_empenos)+decimal.Decimal(importe_desempenos)+decimal.Decimal(importe_capital)+decimal.Decimal(importe_refrendo)+decimal.Decimal(importe_com_pg)+decimal.Decimal(importe_otros)
 
 	importe_total=math.ceil(importe_total)
 
@@ -399,6 +397,13 @@ def rep_flujo_caja(request):
 	importe_total="{:0,.2f}".format(importe_total)
 	total_mutuo="{:0,.2f}".format(total_mutuo)
 	total_almoneda="{:0,.2f}".format(total_almoneda)
+	#cuando eres gerente regiona, puedes entrar a todas las sucursales
+	if user_2.perfil.id==3:		
+		sucursales=Sucursal.objects.all()
+		sucursal_default=""
+	else:#cuando no eres gerente regional, solo puedes acceder a tu sucursal.
+		sucursales=Sucursal.objects.filter(sucursal=user_2.sucursal)
+		sucursal_default=user_2.sucursal.id
 
 	return render(request,'empenos/rep_flujo_caja.html',locals())
 
@@ -2735,6 +2740,8 @@ def imprime_boleta(request):
 				linea=linea-15				
 				descripcion_talon_obser=y.observaciones
 				p.drawString(95,linea,"Obser: "+str(y.observaciones))
+			else:
+				descripcion_talon_obser=y.tipo_producto.tipo_producto
 
 			p.setFont("Helvetica-Bold",7)
 			p.drawString(55,530,"Linea")		
@@ -2863,11 +2870,14 @@ def imprime_boleta(request):
 			p.drawString(205,140,"No. Boleta: "+str(x.boleta.folio))
 
 			p.setFont("Helvetica-Bold",7)
-			p.drawString(205,130,"Avaluo:")
-			p.setFont("Helvetica",7)
 			avaluo="{:0,.2f}".format(x.boleta.avaluo)
+			mutuo="{:0,.2f}".format(x.boleta.mutuo)
 
-			p.drawString(255,130,"$"+str(avaluo))
+			p.drawString(205,130,"Avaluo: "+"$"+str(avaluo)+"     Mutuo: $"+mutuo)
+			p.setFont("Helvetica",7)
+			
+
+			#p.drawString(255,130,"$"+str(avaluo))
 
 
 			p.setFont("Helvetica",7)
