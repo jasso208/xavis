@@ -27,6 +27,23 @@ def api_tipo_producto(request):
 	return Response(respuesta)
 
 
+@api_view(['GET'])
+def api_agrega_marca(request):
+	respuesta=[]
+	try:
+		marca=request.GET.get("marca").upper()
+		m=Marca.objects.filter(marca=marca)		
+		if m.exists():
+			print("la marca ya existe")
+			respuesta.append({"estatus":"0","msj":"La marca ya existe."})
+		else:
+			Marca.objects.create(marca=marca)
+		respuesta.append({"estatus":"1"})
+	except Exception as e:		
+		print(e)
+		respuesta.append({"estatus":"0","msj":"Error al registrar la marca."})
+	return Response(respuesta)
+
 
 @api_view(['GET'])
 def api_notificacion_cajas_abiertas(request):

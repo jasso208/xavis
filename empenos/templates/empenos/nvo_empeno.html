@@ -53,10 +53,11 @@
 											
 										</div>
 										<div class="row">
-												<div class="col-xs-12">
-													<h3 class="page-header">
-														Productos en cotización
-													</h3>	
+												<div class="col-xs-12">											
+													<div class="cls_encabezado_alert text-left" >
+														<label>Productos en cotización</label>
+													</div>
+
 												</div>
 											</div>
 											<div class="row">
@@ -92,56 +93,74 @@
 												{%csrf_token%}
 												<div class="row">
 													<div class="col-xs-12">
-														<h4 class="page-header">Plazo</h4>
+														<hr>
 													</div>
+												</div>
+												<div class="row">
+
 													<div class="col-xs-3">
-															{%bootstrap_field form.plazo show_label=False%}
+													<label >Plazo</label>											
+													
+														{%bootstrap_field form.plazo show_label=False%}
+													</div>
+													<div class="col-xs-9">
+														
+														<div class="col-xs-8">
+															<label>Cliente</label>
+															{%bootstrap_field form.cliente show_label=False%}														</div>
+														<div class="col-xs-4">
+
+															<br>
+															<a class="btn btn-default" id="btn_buscar_cliente" style="margin-top:5px;">Buscar Cliente</a>	
+														</div>
+														
+														
+
 													</div>
 
 												</div>
 												<div class="row">
 													<div class="col-xs-12">
-														<h4 class="page-header">Cliente</h4>
+														<hr>
 													</div>
-												
-													<div class="col-xs-6">
-															{%bootstrap_field form.cliente show_label=False%}
-													</div>
-													<div class="col-xs-3">
-														<a class="btn btn-default" id="btn_buscar_cliente">Buscar Cliente</a>
-													</div>
-													
 												</div>
 												<div class="row">
 													<div class="col-xs-12">
-														<h4 class="page-header">Cotitular</h4>
+														<label >Cotitular</label>
 													</div>
 													<div class="col-xs-4">
 														
-															<label for=""> Nombre</label>					
+																	
 															{%bootstrap_field form.nombre_cotitular show_label=False%}
 														
 
 													</div>
 													<div class="col-xs-4">
 														
-															<label for=""> Nombre</label>					
+															
 															{%bootstrap_field form.apellido_paterno show_label=False%}
 														
 
 													</div>
 													<div class="col-xs-4">
 														
-															<label for=""> Nombre</label>					
+															
 															{%bootstrap_field form.apellido_materno show_label=False%}
 														
 
+													</div>
+
+												</div>
+
+												<div class="row">
+													<div class="col-xs-12">
+														<hr>
 													</div>
 												</div>
 
 												<div class="row">
 													<div class="col-xs-12">
-														<h4 class="page-header">Resumen de Cotización</h4>
+														<label>Resumen de Cotización</label>
 													</div>
 													<div class="col-xs-6">
 														<table class="table table-bordered">
@@ -218,13 +237,16 @@
 	{% endif %}
 
 
-	<div class="cls_form_busca_cliente" style="width: 60%;left: 20%">		
+	<div class="cls_form_busca_cliente" style="width: 60%;left: 20%; overflow-x: hidden;">		
+			<div class="cls_encabezado_alert" >
+					<label>
+					Busca Cliente
+					</label>
+
+			</div>
+
 			<div class="row">
-				<div class="col-xs-12 " >
-					<h4 class="page-header" style="text-align: center;">
-						Busca Cliente
-					</h4>
-				</div>
+			<br>				
 				<div class="col-xs-6">
 					<label for=""> Apellido o Nombre</label>					
 					<input type="text" name="" id="id_cliente_nomapp" class="form-control">	
@@ -273,14 +295,33 @@
 			</div>
 	</div>	
 
-	<div class="cls_form_emergente">
+	<div class="cls_fondo_form_emergente_2 cls_agregar_marca" id="fondo_agregar_marca">
 		
-			<div class="row">
-				<div class="col-xs-12 " >
-					<h4 class="page-header" style="text-align: center;">
-						Cotizar Producto
-					</h4>
+	</div>
+	<div class="cls_form_emergente_2 cls_agregar_marca"  style="overflow: visible;top:15%">
+				<div class="cls_encabezado_alert" >
+					<label>Agregar marca</label>
 				</div>
+				<div class="col-xs-12">	
+				<br>				
+					<input type="text" name="" id="txt_marca" clasS="form-control" placeholder="Marca">
+						<div class="help-block" id="id_error_marca_2">
+								<span id="error_marca"></span>
+						</div>
+				</div>
+				<div class="col-xs-12 text-center">	
+					<a class="btn btn-primary btn-sm" id="btn_guardar_marca" ><span class="glyphicon glyphicon-ok"></span> Guardar</a>
+					<br><br>
+				</div>
+	</div>
+	<div class="  cls_form_emergente ">
+				<div class="cls_encabezado_alert" >
+					<label>Cotizar Producto	</label>
+				</div>
+				
+			<div class="row"  style="padding: 10px;">
+				
+
 				<div class="col-xs-12">
 					<label for=""> Tipo Producto</label>					
 					<select name="sucursal" class="form-control" title="" required="" id="id_tipo_producto">
@@ -309,13 +350,24 @@
 					</div>					
 				</div>
 				<div class="col-xs-12">
-					<label for="">Marca</label>					
-					<select name="sucursal" class="form-control" title="" required="" id="id_marca">
-					  
-					</select>	
-					<div class="help-block" id="id_error_marca">
-							Debe indicar una marca valida.
+					<div class="col-xs-8" style="padding: 0">
+						<label for="">Marca</label>	
+
+						<select name="sucursal" class="form-control" title="" required="" id="id_marca">
+						  
+						</select>	
+						<div class="help-block" id="id_error_marca">
+								Debe indicar una marca valida.
+						</div>	
+
+
 					</div>
+					<div class="col-xs-4">
+						<br>
+
+						<a id="btn_form_agregar_marca" class="btn btn-default btn-sm" style="margin-top: 5px"><span class="glyphicon glyphicon-plus"></span>Agregar</a>
+					</div>
+					
 				</div>
 				<div class="col-xs-12">
 					<label for="">Descripcion</label>					
@@ -403,10 +455,11 @@
 						<br>
 							<a class="btn btn-default" id="btn_cancelar">Cancelar</a>
 					</div>	
-				</div>
-				
+				</div>		
 		
-			</div>
+	
+			
+		</div>
 	</div>
 
 
@@ -414,10 +467,13 @@
 			
 		</div >
 		<div class="mensaje_2 cls_msj_error" >
-				
+				<div class="cls_encabezado_alert" >
+					Aviso			
+				</div>
 				<div class="panel panel-default">	
-					<h3 class="page-header" id="msj_error"></h3>
-					<a class="btn btn-primary" id="btn_aceptar">Aceptar</a>
+					<label class="page-header" id="msj_error"></label>
+					<br>
+					<a class="btn btn-primary" id="btn_aceptar"> <span class="glyphicon glyphicon-ok"></span> Aceptar</a>
 					<br>
 					<br>
 
@@ -428,9 +484,12 @@
 			
 		</div >
 		<div class="mensaje_2 cls_confirma_eliminar" >
+				<div class="cls_encabezado_alert" >
+					Aviso			
+				</div>
 				
 				<div class="panel panel-default">	
-					<h3 class="page-header">¿Desea eliminar el producto?</h3>
+					<label class="page-header">¿Desea eliminar el producto?</label>
 					<a class="btn btn-primary" id="btn_aceptar_eliminar">Aceptar</a>
 					<a class="btn btn-primary" id="btn_cancelar_eliminar">Cancelar</a>
 					<br>
@@ -490,8 +549,10 @@
 		$("#btn_nuevo_cliente").click(
 					function()
 					{
-							$("#msj_error").text("Deberá recargar la pantalla para que los nuevos clientes sean mostrados.");
+							$("#msj_error").text("Se actualizara la pantalla para que los nuevos clientes sean mostrados.");
 
+
+							$("#btn_aceptar").attr('href',"/empenos/nvo_empeno");
 							
 
 							$(".cls_msj_error").show();
@@ -663,6 +724,41 @@
 							fn_nueva_cotizacion();
 						}
 					);
+				$("#btn_guardar_marca").click(
+						function()
+						{
+							fn_guardar_marca();
+							
+						}
+					);
+				$("#fondo_agregar_marca").click(
+						function()
+						{
+
+							$(".cls_agregar_marca").hide();	
+						}
+					);
+				$("#btn_form_agregar_marca").click(
+						function()
+						{
+							$(".cls_agregar_marca").show();	
+						}
+					);
+				$("#txt_marca").change(
+						function()
+						{
+							if($("#txt_marca").val()=="")
+							{
+									$("#btn_guardar_marca").prop("disabled",true);
+							}
+							else
+							{
+								$("#btn_guardar_marca").prop("disabled",false);
+							}
+
+							
+						}
+					);
 
 //**********************************************************************************************
 //**********************************************************************************************
@@ -681,6 +777,8 @@
 //**********************************************************************************************
 			function fn_inicio()
 			{
+				$("#btn_guardar_marca").prop("disabled",true);
+
 				$("#fondo_form_emergente").hide();
 				$(".cls_form_emergente").hide();
 				$(".cls_msj_error").hide();
@@ -689,6 +787,10 @@
 				$(".cls_form_busca_cliente").hide();
 				fn_oculta_errores();
 				fn_consulta_cotizacion();
+				$(".cls_agregar_marca").hide();	
+				$("#id_error_marca_2").hide();
+				
+				
 
 
 			}
@@ -1522,6 +1624,56 @@
 			}
 //**********************************************************************************************
 //**********************************************************************************************
+
+function fn_guardar_marca()
+{
+
+	$("#fondo_preloader").show();
+				$.ajax({
+					type: "GET",
+			        url: "{{IP_LOCAL}}/empenos/api_agrega_marca/",
+			        data: {
+						"marca":$("#txt_marca").val()
+			        },
+			        contentType: "application/json; charset=utf-8",
+			        dataType: "json",
+			        success: function (r) {
+			        	
+			        	//fallo
+			        	if (r[0].estatus=="0")
+			        	{			        		
+
+							$("#id_error_marca_2").show();
+							$("#error_marca").text(r[0].msj);
+			        	}
+			        	else//todo correcto
+			        	{
+			        		$("#id_error_marca_2").hide();
+			        		if($("#id_sublinea").val()!="")
+			        		{
+			        			fn_carga_marca();
+			        		}
+			        		$(".cls_agregar_marca").hide();
+
+			        	}
+						
+			        	$("#fondo_preloader").hide();
+			        },
+			        error: function (r) {
+			        		$("#id_error_marca_2").show();
+			        		$("#error_marca").text("Error al registrar la marca.");
+			        		$(".cls_agregar_marca").hide();
+			        },
+			        failure: function (r) {
+			        		$("#id_error_marca_2").show();
+			        		$("#error_marca").text("Error al registrar la marca.");
+			        		$(".cls_agregar_marca").hide();
+			        }
+				});
+
+	
+}
+
 	</script>
 
 {% endblock %}

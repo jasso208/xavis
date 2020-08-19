@@ -47,10 +47,8 @@ urlpatterns=[
 	url(r'^api_simula_refrendo_mensual/$',api_simula_refrendo_mensual),	
 	url(r'^api_consulta_sucurales_usuario/$',api_consulta_sucurales_usuario),	
 	url(r'^api_reg_costo_reimpresion/$',api_reg_costo_reimpresion),	
-	url(r'^api_job_diario/$',api_job_diario),	
-	
+	url(r'^api_job_diario/$',api_job_diario),		
 	url(r'^api_notificacion_cajas_abiertas/$',api_notificacion_cajas_abiertas,name="api_notificacion_cajas_abiertas"),
-
-
+	url(r'^api_agrega_marca/$',api_agrega_marca,name="api_agrega_marca"),
 
 ]

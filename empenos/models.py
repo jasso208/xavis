@@ -193,6 +193,8 @@ class Marca(models.Model):
 		# overridden in the query with order_by()
 		ordering = ['marca']
 
+
+
 class Costo_Kilataje(models.Model):	
 	tipo_producto=models.ForeignKey(Tipo_Producto,on_delete=models.PROTECT,blank=True,null=False)
 	kilataje=models.CharField(max_length=10,null=False)
