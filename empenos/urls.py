@@ -48,7 +48,7 @@ urlpatterns=[
 	url(r'^api_reg_costo_reimpresion/$',api_reg_costo_reimpresion),	
 	url(r'^api_job_diario/$',api_job_diario),	
 	
-
+	url(r'^api_notificacion_cajas_abiertas/$',api_notificacion_cajas_abiertas,name="api_notificacion_cajas_abiertas"),
 
 
 

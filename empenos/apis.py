@@ -8,6 +8,8 @@ import math
 from empenos.funciones import *
 from django.core import serializers
 from empenos.jobs import *
+from django.conf import settings
+
 @api_view(['GET'])
 def api_tipo_producto(request):
 	respuesta=[]
@@ -23,6 +25,31 @@ def api_tipo_producto(request):
 		respuesta=[]
 		respuesta.append({'estatus':"0",'msj':"Error al consultar el catalogo de tipo de productos"})#estatus de falla
 	return Response(respuesta)
+
+
+
+@api_view(['GET'])
+def api_notificacion_cajas_abiertas(request):
+
+	hoy = date.today()
+	fecha_inicial_hoy = datetime.combine(hoy, time.min) 
+	fecha_final_hoy = datetime.combine(hoy, time.max)  
+
+	cajas=Cajas.objects.filter(fecha__range=(fecha_inicial_hoy,fecha_final_hoy),fecha_cierre__isnull=True)
+
+	str_html="<h3>Las siguientes cajas no fueron cerradas:</h3><br>"
+
+
+	for c in cajas:
+		str_html=str_html+"Caja "+c.caja+" del usuario <strong>"+c.usuario.username +"</strong> de la sucursal "+c.sucursal.sucursal+"<br>"
+
+	if cajas.exists():
+		fn_envia_mail(str_html,"Notificacion Cajas Abiertas",settings.EMAIL_NOTIFICACIONES)
+		fn_envia_mail(str_html,"Notificacion Cajas Abiertas","jasso.gallegos@gmail.com")
+	respuesta=[]
+	return Response(respuesta)	
+
+
 
 
 @api_view(['GET'])

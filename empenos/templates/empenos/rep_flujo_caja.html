@@ -1,0 +1,419 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% block usuario %}
+
+			<div class="col-xs-6">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{user_2.user.username}} {{user_2.perfil.perfil}}</label> 
+				
+			</div>
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-home"></span> Sucursal: {{user_2.sucursal}}</label> 	
+			</div>
+
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-inbox"></span> Caja: {{c}} </label> 	
+			</div>
+
+
+{% endblock  %}
+{% block content %}
+	<div class="col-xs-12 cls_encabezado_body">
+	
+		<a >
+			Flujo de Caja
+		</a>		
+	
+	</div>
+
+		<div class="col-xs-12">
+		<form method="post" action="#" class="cls_form_1">
+			{%csrf_token%}
+	
+			<div class="row cls_form_consulta">
+				<div class="col-xs-12">
+					<div class="panel panel-default" id="panel_principal" >						 
+											<div class="panel-body">
+
+												<div class="col-xs-12">
+													<div class="panel panel-default">						
+														<div class="panel-body">
+															<div class="col-xs-3">
+																<label>Sucursal</label>										
+																<select name="sucursal" class="form-control" title="" id="id_sucursal">
+																  <option value="" selected="">---------</option>
+
+																  {% for s in sucursales %}
+																  <option value="{{s.id}}">{{s.sucursal}}</option>			
+																  {% endfor %}											  
+
+																</select>
+
+															</div>
+															<div class="col-xs-3">
+																<label>Fecha Inicial</label>
+																<input type="date" name="fecha_inicial" class="form-control" placeholder="Fecha inicial" title="" required="" id="id_fecha_inicial">
+															</div>
+															<div class="col-xs-3">
+																<label>Fecha Final</label>
+																<input type="date" name="fecha_final" class="form-control" placeholder="Fecha final" title="" required="" id="id_fecha_final">
+															</div>
+															<div class="col-xs-3">
+																<br>
+																<button class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-ok"></span> Consultar</button>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+
+											<div class="col-xs-12">
+												<hr>
+											</div>
+
+											<div class="col-xs-12">								
+												<div class="col-xs-4">
+													<label>Sucursal: <span id="span_sucursal">{{txt_sucursal}}</span></label>
+												</div>
+												<div class="col-xs-4">
+													<label>Fecha Inicial: <span id="span_fecha_inicial">{{fecha_inicial}}</span></label>
+												</div>
+												<div class="col-xs-4">
+													<label>Fecha Final: <span id="span_fecha_final">{{fecha_inicial}}</span></label>
+												</div>
+											</div>
+															<div class="col-xs-12">
+																<br>
+																<br>
+																<div class="col-xs-5">
+																	<div class="cls_encabezado_alert text-center" >
+																		<label>Reporte de Periodo</label>
+																	</div>
+																	<div class="panel panel-default">
+
+																		<div class="col-xs-12">
+																			<div class="col-xs-6">
+																				<label>Entradas</label>
+																			</div>
+																			<div class="col-xs-2">
+																				<label>Cantidad</label>
+																				
+																			</div>
+																			<div class="col-xs-4 text-right">
+																				<label>Importe</label>
+																			</div>	
+																		</div>
+																		<div class="col-xs-12">
+																			<div class="col-xs-6">
+																				Saldo Inicial
+																			</div>
+																			<div class="col-xs-2">
+
+																				
+																			</div>
+																			<div class="col-xs-4 text-right">
+																				${{saldo_inicial}}
+																			</div>	
+																		</div>
+
+
+
+																		<div class="col-xs-12">
+																			<div class="col-xs-6">
+																				Desempeño
+																			</div>
+																			<div class="col-xs-2">											
+																				{{cont_desempenos}}
+																			</div>
+																			<div class="col-xs-4 text-right">
+																				${{importe_desempenos}}
+																			</div>	
+																		</div>
+																		<div class="col-xs-12">
+																			<div class="col-xs-6">
+																				Abono Capital
+																			</div>
+																			<div class="col-xs-2">											
+																				{{cont_capital}}
+																			</div>
+																			<div class="col-xs-4 text-right">
+																				${{importe_capital}}
+																			</div>	
+																		</div>
+																		<div class="col-xs-12">
+																			<div class="col-xs-6">
+																				Refrendos
+																			</div>
+																			<div class="col-xs-2">											
+																				{{cont_refrendos}}
+																			</div>
+																			<div class="col-xs-4 text-right">
+																				${{importe_refrendo}}
+																			</div>	
+																		</div>
+																		<div class="col-xs-12">
+																			<div class="col-xs-6">
+																				Comision PG
+																			</div>
+																			<div class="col-xs-2">											
+																				{{cont_com_pg}}
+																			</div>
+																			<div class="col-xs-4 text-right">
+																				${{importe_com_pg}}
+																			</div>	
+																		</div>
+
+																		<div class="col-xs-12">
+																			<div class="col-xs-6">
+																				Otros Ingresos
+																			</div>
+																			<div class="col-xs-2">											
+																				{{cont_otros}}
+																			</div>
+																			<div class="col-xs-4 text-right">
+																				${{importe_otros}}
+																			</div>	
+																		</div>
+																		<div class="col-xs-12">
+																			<div class="col-xs-6">
+																				<label>Salidas</label>
+																			</div>
+																			<div class="col-xs-2">
+																				<label>Cantidad</label>
+																				
+																			</div>
+																			<div class="col-xs-4 text-right">
+																				<label>Importe</label>
+																			</div>	
+																		</div>
+
+
+
+																		<div class="col-xs-12">
+																			<div class="col-xs-6">
+																				Empeños
+																			</div>
+																			<div class="col-xs-2">											
+																				{{cont_empenos}}
+																			</div>
+																			<div class="col-xs-4 text-right">
+																				${{importe_empenos}}
+																			</div>	
+																		</div>
+
+
+
+																		<div class="col-xs-12">
+																			<div class="col-xs-6">
+																				Retiros
+																			</div>
+																			<div class="col-xs-2">							
+																				{{cont_retiros}}
+																			</div>
+																			<div class="col-xs-4 text-right">
+																				${{importe_retiros}}
+																			</div>	
+																		</div>
+
+
+
+
+
+																		<div class="col-xs-12">
+																			<hr>
+																		</div>
+
+																		<div class="col-xs-12">
+																			<div class="col-xs-6">
+																				Total
+																			</div>
+																			<div class="col-xs-2">											
+																				{{cont_total}}
+																			</div>
+																			<div class="col-xs-4 text-right">
+																				${{importe_total}}
+																			</div>	
+																		</div>
+
+																		&nbsp;
+																	</div>
+																</div>	
+																			
+														<div class="col-xs-7">
+															<div class="cls_encabezado_alert text-center" >
+																<label>Estatus de Cartera</label>
+															</div>
+															<div class="panel panel-default">
+																<div class="col-xs-12">
+																	<div class="col-xs-6">
+																		
+																	</div>
+																	<div class="col-xs-2">											
+																		<label>Cantidad</label>
+																	</div>
+																	<div class="col-xs-2 text-right">
+																		
+																		<label>Mutuo</label>
+																	</div>	
+
+																	<div class="col-xs-2 text-right">
+																		<label>Avaluo</label>
+																		
+																	</div>	
+
+																</div>
+
+																<div class="col-xs-12">
+																	<div class="col-xs-6">
+																		Boleta Activa
+																	</div>
+																	<div class="col-xs-2">											
+																		{{cont_activas}}
+																	</div>
+																	<div class="col-xs-2 text-right">
+																		${{mutuo_activo}}
+																	</div>	
+
+																	<div class="col-xs-2 text-right">
+																		${{avaluo_activo}}
+																	</div>	
+								
+
+																</div>
+
+
+																<div class="col-xs-12">
+																	<div class="col-xs-6">
+																		Boleta Almoneda
+																	</div>
+																	<div class="col-xs-2">											
+																		{{cont_almoneda}}
+																	</div>
+																	<div class="col-xs-2 text-right">
+																		${{mutuo_almoneda}}
+																	</div>	
+
+																	<div class="col-xs-2 text-right">
+																		${{avaluo_almoneda}}
+																	</div>	
+																</div>
+																<div class="col-xs-12">
+																	<hr>
+																</div>
+
+
+																<div class="col-xs-12">
+																	<div class="col-xs-6">
+																		Total
+																	</div>
+																	<div class="col-xs-2">											
+																		{{cont_total_2}}
+																	</div>
+																	<div class="col-xs-2 text-right">
+																		${{total_mutuo}}
+																	</div>	
+
+																	<div class="col-xs-2 text-right">
+																		${{total_almoneda}}
+																	</div>	
+																</div>
+
+
+																&nbsp;
+															</div>
+													</div>
+													</div>	
+
+								&nbsp;
+					
+						</div>
+					</div>
+				</div>
+		</form>
+	</div>
+
+	{% ifequal est_error '1' %}
+		<div class="fondo_mensaje cls_msj_saldo_inicial" >
+			
+		</div >
+		<div class="mensaje cls_msj_saldo_inicial" >	
+				<div class="cls_encabezado_alert" >
+					Aviso			
+				</div>
+
+				<div class="panel panel-default">	
+					<label class="page-header">{{error}}</label>
+					<br>
+					<a class="btn btn-primary btn-sm" id="btn-continuar" ><span class="glyphicon glyphicon-ok"></span> Continuar</a>	
+					<br>
+					<br>			
+				</div>
+		</div>
+	{% endifequal  %}
+	{% ifequal est_error '2' %}
+		<div class="fondo_mensaje cls_msj_saldo_inicial" >
+			
+		</div >
+		<div class="mensaje cls_msj_saldo_inicial" >	
+				<div class="cls_encabezado_alert" >
+					Aviso			
+				</div>
+
+				<div class="panel panel-default">	
+					<label class="page-header">{{error}}</label>
+					<br>
+					<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_reportes'%}" ><span class="glyphicon glyphicon-ok"></span> Continuar</a>	
+					<br>
+					<br>			
+				</div>
+		</div>
+	{% endifequal  %}
+	<script type="text/javascript">
+		post="0";
+		$(document).ready(
+				function()
+				{
+					fn_inicio();
+
+					$("#btn-continuar").click(
+								function()
+								{
+									$(".cls_msj_saldo_inicial").hide();
+								}
+						);
+
+				}
+			);
+		function fn_inicio()
+		{
+			post="{{post}}";
+
+			$("#id_sucursal").prop("required",false);
+
+			if(post=="1")
+			{
+				if($("#id_sucursal").text()=="")
+				{
+					$("span").text("Todas");	
+				}
+				else
+				{
+					$("span_sucursal").text($("#id_sucursal").text());	
+				}
+
+				
+			}
+			$("#id_sucursal").val("{{sucursal_default}}");
+
+			var perfil="{{perfil}}";
+
+			//si no es gerente regional.
+			//removemos la opcion de consultar todas las sucursales a la vez.
+			if (perfil!="3")
+			{
+				var id_sucursal=document.getElementById("id_sucursal");
+				id_sucursal.remove(0);
+			}
+		}
+	</script>
+{% endblock%}
