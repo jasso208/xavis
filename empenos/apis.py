@@ -28,6 +28,19 @@ def api_tipo_producto(request):
 
 
 @api_view(['GET'])
+def api_elimina_costo_extra(request):
+	respuesta=[]
+	id=int(request.GET.get("id"))
+	try:
+		Reg_Costos_Extra.objects.get(id=id).delete()
+		respuesta.append({"estatus":"1"})
+	except:	
+		print(e)
+		respuesta.append({"estatus":"0","msj":"Error al eliminar el registro."})
+	return Response(respuesta)
+
+
+@api_view(['GET'])
 def api_agrega_marca(request):
 	respuesta=[]
 	try:

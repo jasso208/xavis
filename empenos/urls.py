@@ -22,6 +22,8 @@ urlpatterns=[
 	url(r'^re_imprimir_boleta/(?P<id_boleta>\w+)/$',re_imprimir_boleta,name="re_imprimir_boleta"),
 	url(r'^re_imprimir_abono/(?P<id_abono>\w+)/$',re_imprimir_abono,name="re_imprimir_abono"),
 	url(r'^rep_flujo_caja/$',rep_flujo_caja,name="rep_flujo_caja"),
+	url(r'^elimina_costo_extra/$',elimina_costo_extra,name="elimina_costo_extra"),
+
 
 
 
@@ -50,5 +52,8 @@ urlpatterns=[
 	url(r'^api_job_diario/$',api_job_diario),		
 	url(r'^api_notificacion_cajas_abiertas/$',api_notificacion_cajas_abiertas,name="api_notificacion_cajas_abiertas"),
 	url(r'^api_agrega_marca/$',api_agrega_marca,name="api_agrega_marca"),
+	url(r'^api_elimina_costo_extra/$',api_elimina_costo_extra,name="api_elimina_costo_extra"),
+
+
 
 ]

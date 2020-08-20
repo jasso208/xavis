@@ -140,6 +140,39 @@ def bienvenidos(request):
 def admin_user(request):
 	return render(request,'seguridad/admin_user.html',{})
 
+def admin_administracion(request):
+	#si no esta logueado mandamos al login
+	if not request.user.is_authenticated:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+	
+	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
+	try:
+		user_2=User_2.objects.get(user=request.user)
+	except Exception as e:		
+		form=Login_Form(request.POST)
+		estatus=0
+		msj="La cuenta del usuario esta incompleta."			
+		return render(request,'login.html',locals())
+	IP_LOCAL = settings.IP_LOCAL
+	id_usuario=user_2.user.id
+
+	pub_date = date.today()
+	min_pub_date_time = datetime.combine(pub_date, time.min) 
+	max_pub_date_time = datetime.combine(pub_date, time.max) 
+
+	try:
+		#validamos si el usuario tiene caja abierta en el dia actual.
+		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
+		suc=caja.sucursal
+		c=caja.caja
+	except Exception as e:
+		print(e)
+		caja_abierta="0"
+		caja=Cajas
+
+	return render(request,'seguridad/admin_administracion.html',locals())	
+
 def admin_catalogos(request):
 	return render(request,'seguridad/admin_catalogos.html',{})
 
@@ -165,19 +198,23 @@ def admin_perfil(request):
 	IP_LOCAL = settings.IP_LOCAL
 	id_usuario=user_2.user.id
 
+	pub_date = date.today()
+	min_pub_date_time = datetime.combine(pub_date, time.min) 
+	max_pub_date_time = datetime.combine(pub_date, time.max) 
+
 	c=""
-
-
-	msj_error=""	
-	try:
-		#validamos si el usuaario tiene caja abierta para mostrarla en el encabezado.
+	try:		
+		#validamos si el usuario tiene caja abierta en el dia actual.
 		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
-		print(caja.sucursal)
+		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
+		suc=caja.sucursal		
 		c=caja.caja
-	except Exception as e:
-		msj_error="No cuentas con caja abierta."
+	except Exception as e:		
 		print(e)
-
+		caja_abierta="0"
+		caja=Cajas
+	print("caja")
+	print(c)
 	return render(request,'seguridad/admin_perfil.html',locals())
 
 def admin_cajas(request):

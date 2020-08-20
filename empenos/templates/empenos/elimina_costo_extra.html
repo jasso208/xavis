@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% block usuario %}
+
+			<div class="col-xs-6">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{user_2.user.username}} {{user_2.perfil.perfil}}</label> 
+				
+			</div>
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-home"></span> Sucursal: {{user_2.sucursal}}</label> 	
+			</div>
+
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-inbox"></span> Caja: {{c}} </label> 	
+			</div>
+{% endblock  %}
+{% block content %}
+	<div class="col-xs-12 cls_encabezado_body">	
+		<a >
+			Baja Ingreso Extra
+		</a>			
+	</div>
+		<div class="col-xs-12">
+		<form method="post" action="#" class="cls_form_1">
+			{%csrf_token%}
+			
+			<div class="row cls_form_consulta">
+				<div class="col-xs-12">
+					<div class="panel panel-default">						
+						<div class="panel-body">
+							<div class="col-xs-3">
+								<label>Sucursal</label>
+								{% bootstrap_field form.sucursal show_label=False%}
+							</div>
+							<div class="col-xs-2">
+								<br>
+								<button class="btn btn-primary btn-sm" style="margin-top: 5px">
+
+
+									<span class="glyphicon glyphicon-search">
+										
+									</span>
+									 Consultar
+								</button>
+								
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-xs-12">
+					<label>
+						Resultado de busqueda.
+					</label>
+
+						<table  class="table table-bordered">
+						    <thead>
+						      <tr>
+						      	<th style="width: 2%"></th>
+						        <th style="width: 20%">Tipo</th>
+						        <th style="width: 10%">Fecha</th>
+						        <th style="width: 10%">Importe</th>
+						        <th style="width: 5%">Caja</th>
+						        <th style="width: 13%">Folio Boleta</th>
+						        <th style="width: 20%">Sucursal</th>									        
+						        <th style="width: 20%">Usuario</th>
+						      </tr>
+						    </thead>
+						    <tbody>
+						    	{% for b in rce %}
+
+						    		{% ifequal b.caja.sucursal.id id_sucursal%}
+								    	<tr>
+								    		<td style="width: 2%">
+								    			
+								    			<a onclick="fn_eliminar('{{b.id}}')" class='btn btn-default btn-sm'>
+								    				<span class='glyphicon glyphicon-remove'>
+								    					
+								    				</span>    					
+								    				
+								    			</a> 
+
+
+								    		</td>
+								    		<td style="width: 20%">
+								    			{{b.costo_extra.descripcion}}
+								    		</td>
+								    		    		
+								    		<td style="width: 10%">{{b.fecha | date:"d/m/Y" }}</td>
+								    		<td style="width: 10%">{{b.importe}}</td>									
+								    		<td style="width: 5%">{{b.caja.caja}}</td>									
+								    		<td style="width: 13%">{{b.boleta.folio}}</td>									    		
+								    		<td style="width: 20%">{{b.caja.sucursal.sucursal}} </td>
+								    		<td style="width: 20%">{{b.caja.usuario.username}}
+								    		</td>
+
+								    	</tr>
+								    {%endifequal%}
+						     	{% endfor %}
+						    </tbody>
+						</table>
+				</div>					
+
+			</div>
+		</form>
+	</div>
+
+
+		{% ifequal permiso "0" %}
+		<div class="fondo_mensaje "  >
+			
+		</div >
+		<div class="mensaje ">
+				<div class="cls_encabezado_alert" >
+					Aviso
+				</div>	
+				<div class="panel panel-default">	
+					<label class="page-header">No cuentas con permiso para acceder a esta opción.</label>
+					<br>
+					<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_administracion'%}"> <span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+					<br>
+					<br>
+
+				</div>
+		</div>
+		{%endifequal%}
+
+
+		<div class="fondo_mensaje cls_confirmacion_baja" id="fondo_confirmacion_baja" >
+			
+		</div >
+		<div class="mensaje cls_confirmacion_baja" id="confirmacion_baja">
+				<div class="cls_encabezado_alert" >
+					Aviso
+				</div>	
+				<div class="panel panel-default">	
+					<label class="page-header">¿Desea continuar con la cancelacion del registro?</label>
+					<br>
+					<a id="btn_no_eliminar" class="btn btn-default btn-sm" style="margin-top: 5px;"> <span class="glyphicon glyphicon-remove"></span> Cancelar</a>
+					<a class="btn btn-primary btn-sm" id="btn_aceptar_baja"> <span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+					<br>
+					<br>
+
+				</div>
+		</div>
+
+		<div class="fondo_mensaje cls_exito_baja" id="fondo_exito_baja" >
+			
+		</div >
+		<div class="mensaje cls_exito_baja" >
+				<div class="cls_encabezado_alert" >
+					Aviso
+				</div>	
+				<div class="panel panel-default">	
+					<label class="page-header">Se cancelo correctamente el registro</label>
+					<br>
+					<a class="btn btn-primary btn-sm" id="btn_exito_baja" > <span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+					<br>
+					<br>
+
+				</div>
+		</div>
+
+
+		<div class="fondo_mensaje cls_no_baja" id="fondo_no_baja" >
+			
+		</div >
+		<div class="mensaje cls_no_baja" >
+				<div class="cls_encabezado_alert" >
+					Error!!
+				</div>	
+				<div class="panel panel-default">	
+					<label class="page-header">Error al cancelar el registro.</label>
+					<br>
+					<a class="btn btn-primary btn-sm" id="btn_no_baja" > <span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+					<br>
+					<br>
+
+				</div>
+		</div>
+
+
+	<div id="fondo_preloader">
+		<div class="preloader" id="preloader">
+		
+		</div>
+	</div>
+		<script type="text/javascript">
+			
+			var id_registro=0;
+			$(document).ready(
+					function()
+					{
+						fn_inicio();
+
+						$("#btn_no_eliminar,#fondo_confirmacion_baja").click(
+								function()
+								{
+									$(".cls_confirmacion_baja").hide();
+								}
+							);
+
+						$("#fondo_exito_baja,#btn_exito_baja,#fondo_no_baja,#btn_no_baja").click(
+								function()
+								{
+									
+									location.reload();
+								}
+							);
+						$("#btn_aceptar_baja").click(
+								function()
+								{
+										$(".cls_confirmacion_baja").hide();
+									fn_elimina_costo();
+								}
+							);
+					}
+				);
+
+			function fn_eliminar(id)
+			{
+				id_registro=id;
+				$(".cls_confirmacion_baja").show();	
+			}
+			function fn_inicio()
+			{
+				$(".cls_confirmacion_baja").hide();
+				$(".cls_exito_baja").hide();
+				$(".cls_no_baja").hide();
+				
+				$("#fondo_preloader").hide();
+
+				
+			}
+			function fn_elimina_costo()
+			{
+				$("#fondo_preloader").show();
+				$.ajax({
+					type: "GET",
+			        url: "{{IP_LOCAL}}/empenos/api_elimina_costo_extra/",
+			        data: {"id":id_registro},
+			        contentType: "application/json; charset=utf-8",
+			        dataType: "json",
+			        success: function (r) {
+		    			if (r[0].estatus=="0")
+			        	{
+			        		
+							$(".cls_no_baja").show();				
+			        	}
+			        	else
+			        	{	        		
+
+			        		$(".cls_exito_baja").show();
+			        	}    	
+			        	$("#fondo_preloader").hide();
+			        },
+			        error: function (r) {
+			        		$(".cls_no_baja").show();				
+							$("#fondo_preloader").hide();
+			        },
+			        failure: function (r) {
+			        		$(".cls_no_baja").show();				
+							$("#fondo_preloader").hide();
+			        }
+				});
+			}
+		</script>
+
+{%endblock%}

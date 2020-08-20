@@ -16,6 +16,7 @@ urlpatterns=[
 	url(r'^admin_cajas$',admin_cajas,name="admin_cajas"),
 	url(r'^admin_reportes$',admin_reportes,name="admin_reportes"),
 	url(r'^admin_empenos$',admin_empenos,name="admin_empenos"),
+	url(r'^admin_administracion$',admin_administracion,name="admin_administracion"),
 	url(r'^cambio_sucursal$',cambio_sucursal,name="cambio_sucursal"),
 
 
