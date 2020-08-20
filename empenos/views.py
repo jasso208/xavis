@@ -236,11 +236,18 @@ def rep_flujo_caja(request):
 	avaluo_almoneda=0.00
 	importe_retiros=0.00			
 	cont_retiros=0
+
+
+	cont_remate=0
+	mutuo_remate=0.00
+	avaluo_remate=0.00
+
 	if request.method=="POST":
 		post="1"
 
 		est_activa=Estatus_Boleta.objects.get(id=1)
 		est_almoneda=Estatus_Boleta.objects.get(id=3)
+		est_remate=Estatus_Boleta.objects.get(id=5)
 
 		sucursal=request.POST.get("sucursal")
 
@@ -336,6 +343,19 @@ def rep_flujo_caja(request):
 			if bea["avaluo__sum"]!=None:
 				avaluo_almoneda=bea["avaluo__sum"]
 
+
+			bea=Boleta_Empeno.objects.filter(estatus=est_remate,sucursal=sucursal).aggregate(Sum("avaluo"))
+			be=Boleta_Empeno.objects.filter(estatus=est_remate,sucursal=sucursal).aggregate(Sum("mutuo"))
+			cont_remate=Boleta_Empeno.objects.filter(estatus=est_remate,sucursal=sucursal).count()
+
+			mutuo_remate=0.00
+			if be["mutuo__sum"]!=None:
+				mutuo_remate=be["mutuo__sum"]
+
+			avaluo_remate=0.00
+			if bea["avaluo__sum"]!=None:
+				avaluo_remate=bea["avaluo__sum"]
+
 			abonos=Abono.objects.filter(fecha__range=(fecha_inicial,fecha_final),sucursal=sucursal)
 
 			est_com_pg=Tipo_Pago.objects.get(id=2)
@@ -380,15 +400,10 @@ def rep_flujo_caja(request):
 				except:
 					importe_refrendo=importe_refrendo
 		else:#en caso de no seleccionar una sucursal, se calcula para todas las sucursales.			
-			txt_sucursal="TODAS"
-
-			
+			txt_sucursal="TODAS"			
 			try:
-
 				cajas_dia_inicial=Cajas.objects.filter(fecha__range=(fec_inicial_caja,fec_final_caja)).aggregate(Sum("importe"))
-
 				saldo_inicial=0.00
-
 				if cajas_dia_inicial["importe__sum"]!=None:
 					saldo_inicial=cajas_dia_inicial["importe__sum"]
 
@@ -459,6 +474,19 @@ def rep_flujo_caja(request):
 			avaluo_almoneda=0.00
 			if bea["avaluo__sum"]!=None:
 				avaluo_almoneda=bea["avaluo__sum"]
+
+			bea=Boleta_Empeno.objects.filter(estatus=est_remate).aggregate(Sum("avaluo"))
+			be=Boleta_Empeno.objects.filter(estatus=est_remate).aggregate(Sum("mutuo"))
+			cont_remate=Boleta_Empeno.objects.filter(estatus=est_remate).count()
+
+			mutuo_remate=0.00
+			if be["mutuo__sum"]!=None:
+				mutuo_remate=be["mutuo__sum"]
+
+			avaluo_remate=0.00
+			if bea["avaluo__sum"]!=None:
+				avaluo_remate=bea["avaluo__sum"]
+
 
 			abonos=Abono.objects.filter(fecha__range=(fecha_inicial,fecha_final))
 

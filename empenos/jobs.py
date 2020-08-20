@@ -13,27 +13,47 @@ def fn_job_diario():
 	hoy=datetime.now()#fecha actual
 	hoy=datetime.combine(hoy, time.min)
 
-	#hoy=datetime(2020,9,17,0,0)	
-	#fecha_fin=datetime(2020,9,23,0,0)
+	hoy=datetime(2020,9,29,0,0)	
+	fecha_fin=datetime(2020,9,30,0,0)
 	#cont=30
 
-	#while hoy<=fecha_fin:
-	#	print("fecha ejecucion")
-	#	print(hoy)
-	#	fn_boletas_vencidas_semanal(hoy)
-	#	fn_pagos_vencidos(hoy)
-	#	fn_comision_pg(hoy)
-	#
-	#	dias = timedelta(days=1)	
-	#	hoy=datetime.combine(hoy+dias, time.min)                
+	while hoy<=fecha_fin:
+		print("fecha ejecucion")
+		print(hoy)
+		fn_boletas_vencidas_semanal(hoy)
+		fn_pagos_vencidos(hoy)
+		fn_comision_pg(hoy)
+		fn_boletas_10d_alomneda(hoy)
+	
+		dias = timedelta(days=1)	
+		hoy=datetime.combine(hoy+dias, time.min)                
 		
 
 	#estas tres lineas son las que se pondran en prodcutivo
-	fn_boletas_vencidas_semanal(hoy)
-	fn_pagos_vencidos(hoy)
-	fn_comision_pg(hoy)
+	#fn_boletas_vencidas_semanal(hoy)
+	#fn_pagos_vencidos(hoy)
+	#fn_comision_pg(hoy)
+	#fn_boletas_10d_alomneda(hoy)
 
 	return True
+
+#buscamos las boletas que ya tienen 10 dias en almoneda,
+#y le cambiamos el estatus a remate.
+@transaction.atomic
+def fn_boletas_10d_alomneda(hoy):
+	estatus_remate=Estatus_Boleta.objects.get(id=5)
+	estatus_almoneda=Estatus_Boleta.objects.get(id=3)
+
+	#obtenemos todas las boletas que estan en almoneda
+	boletas=Boleta_Empeno.objects.filter(estatus=estatus_almoneda)
+
+	for b in boletas:
+		dias=abs((hoy-b.fecha_vencimiento).days)	
+		if int(dias)==10:
+			b.estatus=estatus_remate
+			b.save()
+	return True
+
 
 
 # buscamos las boletas que vencen el dia de hoy y las marcamos con estatus almoneda.
@@ -54,7 +74,8 @@ def fn_boletas_vencidas_semanal(hoy):
 	refrendo_pg=Tipo_Pago.objects.get(id=3)
 
 	#sacamos las boletas que vencen hoy  y que no han sido desempenadas
-	
+	#abs((hoy-boleta.fecha_vencimiento).days)
+
 	boletas=Boleta_Empeno.objects.filter(fecha_vencimiento=hoy).exclude(estatus=estatus_desempem)
 
 	for b in boletas:
@@ -293,11 +314,12 @@ def fn_pagos_vencidos(hoy):
 def fn_comision_pg(hoy):
 	#el estatus almoneda (boleta vencida)
 	estatus_almoneda=Estatus_Boleta.objects.get(id=3)
+	estatus_remate=Estatus_Boleta.objects.get(id=5)
 
 	plazo_1_dia=Plazo.objects.get(id=1)
 
-	#buscamos todas las boletas en almoneda,# las boletas con plazo de 1 dia no generan pagos.
-	boletas=Boleta_Empeno.objects.filter(estatus=estatus_almoneda).exclude(plazo=plazo_1_dia)
+	#buscamos todas las boletas en almoneda y remate,# las boletas con plazo de 1 dia no generan pagos.
+	boletas=Boleta_Empeno.objects.filter(estatus=estatus_almoneda).exclude(plazo=plazo_1_dia) | Boleta_Empeno.objects.filter(estatus=estatus_remate).exclude(plazo=plazo_1_dia)
 
 	for b in boletas:
 
