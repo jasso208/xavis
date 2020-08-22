@@ -45,6 +45,7 @@ class Sucursal(models.Model):
 	estado=models.CharField(max_length=50,null=True,default='')
 	pais=models.CharField(max_length=50,null=True,default='')
 	telefono=models.CharField(max_length=10,null=True,default='')
+	saldo=models.IntegerField(default=0)
 
 	def __str__(self):
 		return self.sucursal
@@ -94,7 +95,7 @@ class Cajas(models.Model):
 	sucursal=models.ForeignKey(Sucursal,on_delete=models.PROTECT)
 	fecha=models.DateTimeField(default=timezone.now)
 	usuario=models.ForeignKey(User,on_delete=models.PROTECT)#usuario que abrio caja.
-	importe=models.IntegerField(default=0, validators=[MinValueValidator(Decimal('0'))])
+	importe=models.IntegerField(default=0)
 	caja=models.CharField(max_length=1,null=False)
 	real_tarjeta=models.IntegerField(default=0)
 	real_efectivo=models.IntegerField(default=0)
@@ -121,7 +122,12 @@ class Cajas(models.Model):
 												   #no debemos mostrarle el boton de cierre de caja.
 												   #cuando es 1, es que ya se ha guardado al menos una vez, y ya podemos mostrar el boton de cerrar caja.
 
+	def __str__(self):
+		estatus="CERRADA"
+		if self.fecha_cierre==None:
+			estatus="Abierta"
 
+		return str(self.fecha)+' '+estatus
 
 class Otros_Ingresos(models.Model):
 	folio=models.CharField(max_length=7,null=True)

@@ -161,6 +161,9 @@
 					$("#usuario").hide();
 
 					$("#id_sucursal").val("{{user_2.sucursal.id}}");
+
+					$("#id_importe").val("{{user_2.sucursal.saldo}}");
+					$("#id_importe").prop("readonly",true);
 		}
 	</script>
 	
@@ -175,7 +178,7 @@
 			</div>		
 			
 			<div class="panel panel-default">	
-				<label class="page-header">Ya cuentas con caja abierta</label>
+				<label class="page-header">{{msj_caja}}</label>
 				<br>
 				<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_cajas' %}"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
 				<br>

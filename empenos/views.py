@@ -49,11 +49,23 @@ def abrir_caja(request):
 	min_pub_date_time = datetime.combine(pub_date, time.min) 
 	max_pub_date_time = datetime.combine(pub_date, time.max)  
 
-	#validamos si el usuario tiene caja abierta en el dia actual.
-	caja=Cajas.objects.filter(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+	#si la tienda ya cuenta con una caja abierta, no le permitimos abrir otra hasta
+	caja=Cajas.objects.filter(fecha_cierre__isnull=True,sucursal=user_2.sucursal)
 
+	msj_caja=""
 	if caja.exists():
 		caja_abierta="1"#si tiene caja abierta enviamos este estatus para no dejar entrar a la pantalla.
+		msj_caja="La sucursal cuenta con caja abierta, para seguir operando realice el corte de caja."
+
+	caja_2=Cajas.objects.filter(fecha__range=(min_pub_date_time,max_pub_date_time),sucursal=user_2.sucursal)
+
+	if caja_2.exists():
+		caja_abierta="1"#si tiene caja abierta enviamos este estatus para no dejar entrar a la pantalla.
+		msj_caja="Solo se puede abrir una caja por dia en la sucursal, si ya fue cerrada, solicite la reapertura para seguir operando."
+
+
+
+
 
 	sucursales=Sucursales_Regional.objects.filter(user=user_2.user,sucursal=user_2.sucursal)
 	
@@ -84,6 +96,7 @@ def abrir_caja(request):
 				c=caja
 				f.fecha=datetime.today()
 				f.diferencia=f.importe
+				f.importe=user_2.sucursal.saldo
 				f.save()
 
 				#cuando un gerente de sucursal abre caja, se le marca la tienda en la que abrio caja.
@@ -971,11 +984,13 @@ def corte_caja(request):
 			caja.estatus_guardado=1			
 			caja.fecha_cierre=datetime.now()
 			caja.user_cierra_caja=request.user
-			caja.save()		
+			caja.save()	
 
-			print("entro")
-			fn_envia_mail_diferencia_cierre_caja(caja)
-			print("entro 2")
+			#actualizamos el saldo de la sucursal
+			caja.sucursal.saldo=caja.teorico_efectivo
+			caja.sucursal.save()	
+
+			fn_envia_mail_diferencia_cierre_caja(caja)			
 
 			if caja.fecha.day<10:
 				day='0'+str(caja.fecha.day)
