@@ -688,7 +688,11 @@ def consulta_boleta(request):
 
 	msj_error=""	
 
-	costo_reimpresion=Costo_Extra.objects.get(id=1).costo
+	try:
+		costo_reimpresion=Costo_Extra.objects.get(id=1).costo
+	except:
+		costo_reimpresion=0
+
 
 	try:
 		#validamos si el usuaario tiene caja abierta para mostrarla en el encabezado.
