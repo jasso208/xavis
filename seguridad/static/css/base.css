@@ -12,6 +12,7 @@ td
 {
 font-size: 12px;	
 }
+
 .fondo_mensaje
 {
 	position:fixed;top:0;left:0;z-index:100;width: 100%; height: 100%; background-color: black;opacity: 0.7;
@@ -245,6 +246,7 @@ box-shadow: 0px 1px 7px 0px rgba(0,0,0,0.75);
 	list-style: none;
 	color:gray;
 }
+
 
 
 .content-grid

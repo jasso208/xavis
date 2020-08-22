@@ -183,7 +183,22 @@
 
 								</div>
 
+								<div class="col-xs-12">
+									<div class="col-xs-6">
+										<p>Reimpresión Boleta::</p>
+									</div>
+		
 
+
+									<div class="col-xs-3 text-right">
+										<p id="cont_rebol"></p>
+									</div>
+									
+									<div class="col-xs-3 text-right">
+										<p id="importe_rebol"></p>
+									</div>
+
+								</div>
 
 								<div class="col-xs-12">
 									<br>
@@ -778,7 +793,12 @@
 						            $("#cont_pc").text("0");
 						            $("#pago_capital").text("$0.00");
 						            $("#cont_refrendos").text("0");
-			            			$("#importe_refrendo").text("$0.00");						            						            
+			            			$("#importe_refrendo").text("$0.00");						            					
+
+
+						            $("#cont_rebol").text("0");
+			            			$("#importe_rebol").text("$0.00");	
+
 									$("#cont_desem").text("0");
 									$("#importe_desemp").text("$0.00");
 
@@ -844,6 +864,11 @@
 
 					            $("#total_efectivo").text("$"+r[0].total_efectivo);
 					            $("#total_movs").text(r[0].total_movs);
+
+
+					            $("#cont_rebol").text(r[0].cont_rebol);
+		            			$("#importe_rebol").text("$"+r[0].importe_rebol);	
+
 
 					            total_efectivo_global=r[0].total_efectivo;
 					            

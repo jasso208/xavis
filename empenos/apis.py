@@ -21,8 +21,6 @@ def api_tipo_producto(request):
 		print(e)
 		respuesta=[]
 		respuesta.append({'estatus':"0",'msj':"Error al consultar el catalogo de tipo de productos"})#estatus de falla
-
-
 	return Response(respuesta)
 
 @api_view(['GET'])
@@ -264,7 +262,7 @@ def api_consulta_cliente(request):
 		lista=[]
 		clientes=Cliente.objects.filter(nombre__contains=palabra) | Cliente.objects.filter(apellido_p__contains=palabra) | Cliente.objects.filter(apellido_m__contains=palabra)
 		for c in clientes:
-			lista.append({"id":c.id,"nombre":c.nombre+' '+c.apellido_p+' '+c.apellido_m})
+			lista.append({"id":c.id,"nombre":c.nombre+' '+c.apellido_p+' '+c.apellido_m,"telefono_fijo":c.telefono_fijo,"telefono_celular":c.telefono_celular})
 		respuesta.append({"lista":lista})
 	except Exception as e:
 		print(e)
@@ -326,6 +324,29 @@ def api_consulta_boleta(request):
 
 	return Response(respuesta)
 
+@api_view(['GET'])
+def api_reg_costo_reimpresion(request):
+	print("entro a api")
+	respuesta=[]
+	try:
+		
+		id_boleta=request.GET.get("id_boleta")
+		id_caja=request.GET.get("id_caja")
+		costo_reimpresion=Costo_Extra.objects.get(id=1)
+		caja=Cajas.objects.get(id=id_caja)
+		boleta=Boleta_Empeno.objects.get(id=id_boleta)
+
+		reg=Reg_Costos_Extra()
+		reg.costo_extra=costo_reimpresion		
+		reg.caja=caja
+		reg.importe=costo_reimpresion.costo
+		reg.boleta=boleta
+		reg.save()
+		respuesta.append({"estatus":"1"})
+	except:
+		respuesta=[]
+		respuesta.append({"estatus":"0",msj:"Error al reimprimir la boleta."})
+	return Response(respuesta)
 
 #simula refrendo mensual
 @api_view(['GET'])

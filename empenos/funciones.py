@@ -190,7 +190,7 @@ def fn_calcula_saldo_refrendo(boleta,hoy):
 					if p.fecha_vencimiento>=hoy and fecha_i<= hoy:
 						#este es el pago que esta corriendo actualmente.
 						pago_actual=p
-						importe_refrendo=importe_refrendo+p.importe
+						importe_refrendo=decimal.Decimal(importe_refrendo)+decimal.Decimal(p.importe)
 
 			#obtenemos los pagos que ya vencieron
 			pagos_2=Pagos.objects.filter(vencido="S",pagado="N",boleta=boleta)			

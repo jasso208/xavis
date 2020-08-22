@@ -1,7 +1,5 @@
 from django.shortcuts import render
-from empenos.models import Cajas,User_2,Sucursales_Regional,Sucursal,Tipo_Movimiento,Control_Folios,Otros_Ingresos,Token,Retiro_Efectivo,Plazo
-from empenos.models import Tipo_Producto,Cliente,Empenos_Temporal,Boleta_Empeno,Det_Boleto_Empeno,Joyeria_Empenos_Temporal,Imprimir_Boletas
-from empenos.models import Pagos,Tipo_Pago,Dia_No_Laboral,Pagos_Temp
+from empenos.models import *
 from seguridad.forms import Login_Form
 from django.http.response import HttpResponseRedirect
 from django.urls import reverse
@@ -29,6 +27,7 @@ from reportlab.lib.pagesizes import A4
 import math
 from empenos.funciones import *
 IP_LOCAL = settings.IP_LOCAL
+LOCALHOST=settings.LOCALHOST
 
 def abrir_caja(request):
 	if not request.user.is_authenticated:
@@ -202,6 +201,18 @@ def retiro_efectivo(request):
 		form=Retiro_Efectivo_Form()
 		return render(request,'empenos/retiro_efectivo.html',locals())
 
+	#buscamos las reimpresiones de boleta
+	cont_rebol=Reg_Costos_Extra.objects.filter(caja=caja).count()
+	sum_importe_rebol=Reg_Costos_Extra.objects.filter(caja=caja).aggregate(Sum('importe'))
+
+	importe_rebol=0.00
+	if sum_importe_rebol["importe__sum"]==None:
+		importe_rebol=0.00
+	else:
+		importe_rebol=int(sum_importe_rebol["importe__sum"])
+
+
+
 	#buscamos si el cajero tubo otros ingresos
 	try:
 		oi=Otros_Ingresos.objects.filter(sucursal=suc,usuario=request.user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c).aggregate(Sum('importe'))
@@ -317,14 +328,16 @@ def retiro_efectivo(request):
 				importe_desemp=importe_desemp+int(rel_desem["importe__sum"])
 			
 			print("fin")
-		total_movs=total_movs+int(cont_com_pg)+int(cont_ref_pg)+int(cont_pc)+int(cont_refrendos)
+		total_movs=total_movs+int(cont_com_pg)+int(cont_ref_pg)+int(cont_pc)+int(cont_refrendos)+int(cont_rebol)
 	
 	except Exception as e:
 		print(e)
 		print("No se han registrado abonos.")
 
+	
+
 	#total=fondo_inicial+otros_ingresos-retiros_caja
-	total_efectivo=decimal.Decimal(fondo_inicial)+decimal.Decimal(otros_ingresos)-decimal.Decimal(retiros)-decimal.Decimal(empenos)+decimal.Decimal(pago_capital)+decimal.Decimal(comisiones_pg)+decimal.Decimal(refrendos_pg)+decimal.Decimal(importe_refrendo)
+	total_efectivo=decimal.Decimal(fondo_inicial)+decimal.Decimal(otros_ingresos)-decimal.Decimal(retiros)-decimal.Decimal(empenos)+decimal.Decimal(pago_capital)+decimal.Decimal(comisiones_pg)+decimal.Decimal(refrendos_pg)+decimal.Decimal(importe_refrendo)+decimal.Decimal(importe_rebol)
 
 	#es la clave para retiros de caja.
 	tm=Tipo_Movimiento.objects.get(id=3)
@@ -602,11 +615,15 @@ def reportes_caja(request):
 
 
 #todos los usuarios tiene acceso.
-def alta_cliente(request):
+def alta_cliente(request,id_cliente=None):
 	#si no esta logueado mandamos al login
 	if not request.user.is_authenticated:
 		return HttpResponseRedirect(reverse('seguridad:login'))
 
+	if id_cliente!=None:
+		cliente=Cliente.objects.get(id=id_cliente)
+	else:
+		cliente=Cliente()
 	
 	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
 	try:
@@ -636,14 +653,14 @@ def alta_cliente(request):
 		print(e)
 
 	if request.method=="POST":
-		form=Cliente_Form(request.POST)
+		form=Cliente_Form(request.POST,instance=cliente)
 		if form.is_valid():
 			f=form.save(commit=False)
 			f.usuario=request.user
 			f.save()
 			return HttpResponseRedirect(reverse('seguridad:bienvenidos'))
 	else:
-		form=Cliente_Form()
+		form=Cliente_Form(instance=cliente)
 	return render(request,'empenos/alta_cliente.html',locals())
 
 
@@ -671,11 +688,13 @@ def consulta_boleta(request):
 
 	msj_error=""	
 
+	costo_reimpresion=Costo_Extra.objects.get(id=1).costo
+
 	try:
 		#validamos si el usuaario tiene caja abierta para mostrarla en el encabezado.
 		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
 		c=caja.caja
-
+		id_caja=caja.id
 
 	except Exception as e:
 		msj_error="No cuentas con caja abierta."
@@ -2005,10 +2024,18 @@ def imprime_abono(request):
 	response.write(pdf)
 	Imprime_Abono.objects.get(usuario=request.user).delete()
 	return response
+#*******************************************************************************************************************************************************
+#*¨**************************************************************************************************************************************************************
 
+def re_imprimir_boleta(request,id_boleta):
+	boleta=Boleta_Empeno.objects.get(id=id_boleta)
+	Imprimir_Boletas.objects.filter(usuario=request.user).delete()
+	Imprimir_Boletas.objects.create(usuario=request.user,boleta=boleta,reimpresion=1)
+	return imprime_boleta(request)
 
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
+
 def imprime_boleta(request):
 	#buscamos las boletas que se van a imprimir
 	boletas=Imprimir_Boletas.objects.filter(usuario=request.user)
@@ -2024,6 +2051,8 @@ def imprime_boleta(request):
 
 	for x in boletas:
 
+
+
 		#obtenemos el numero de ojas que saldran de esta boleta.
 		ndet=Det_Boleto_Empeno.objects.filter(boleta_empeno=x.boleta).count()
 		rinicial=0
@@ -2034,8 +2063,13 @@ def imprime_boleta(request):
 
 			#p.setFont("Helvetica",20)
 			#p.drawString(55,770,"Empeños Express $")
+			if x.reimpresion==0:
+				reimpresion=""
+			else:				
+				reimpresion="REIMPRESION"
+				p.drawImage(settings.IP_LOCAL+'/static/img/img_reimpresion.jpg', 50, 300,500, 500)
 
-			p.drawImage('http://127.0.0.1:8000/static/img/logo.jpg', 55, 750,200, 60)
+			p.drawImage(settings.IP_LOCAL+'/static/img/logo.jpg', 55, 750,200, 60)
 
 			#cuadro 1] Informaciond de la empresa
 			p.line(50,750,50,665)	
@@ -2076,6 +2110,8 @@ def imprime_boleta(request):
 			p.line(300,665,550,665)
 
 			p.setFont("Helvetica-Bold",10)
+
+
 			p.drawString(305,770,"BOLETA DE EMPEÑO")
 
 			p.drawString(455,790,"Pag: "+str(cont_pag)+' de '+str(no_paginas))
@@ -2090,18 +2126,24 @@ def imprime_boleta(request):
 			p.setFont("Helvetica-Bold",10)
 			p.drawString(305,730,"Avaluo:")
 			p.setFont("Helvetica",10)
-			p.drawString(365,730,"$"+str(x.boleta.avaluo)+".00")
+			type(x.boleta.refrendo)
+			type(x.boleta.avaluo)
+
+			avaluo=format(x.boleta.avaluo,',d')
+			p.drawString(365,730,"$"+avaluo+".00")
 
 			p.setFont("Helvetica-Bold",10)
 			p.drawString(305,715,"Refrendo:")
 
 			p.setFont("Helvetica",10)
-			p.drawString(365,715,"$"+str(x.boleta.refrendo)+"")
+			refrendo=format(int(x.boleta.refrendo),',d')
+			p.drawString(365,715,"$"+str(refrendo)+".00")
 
 			p.setFont("Helvetica-Bold",10)
 			p.drawString(305,700,"Mutuo:")
 			p.setFont("Helvetica",10)
-			p.drawString(365,700,"$"+str(x.boleta.mutuo)+".00")
+			mutuo=format(int(x.boleta.mutuo),',d')
+			p.drawString(365,700,"$"+mutuo+".00")
 
 
 
@@ -2175,7 +2217,7 @@ def imprime_boleta(request):
 			p.drawString(315,560,"Refrendo: ")
 
 			p.setFont("Helvetica",7)
-			p.drawString(400,560,"$"+str(x.boleta.refrendo)+".00")
+			p.drawString(400,560,"$"+str(x.boleta.refrendo))
 
 
 
@@ -2291,9 +2333,12 @@ def imprime_boleta(request):
 				if y.tipo_producto.id==1 or  y.tipo_producto.id==2:
 					p.drawString(305,linea,y.costo_kilataje.kilataje)
 					p.drawString(355,linea,str(y.peso))
-				p.drawString(405,linea,"$"+str(y.avaluo)+".00")
-				p.drawString(455,linea,"$"+str(round(impuesto,2)))
-				p.drawString(505,linea,"$"+str(y.mutuo)+".00")
+				avaluo=format(y.avaluo,',d')
+				p.drawString(405,linea,"$"+avaluo+".00")
+				impuesto=format(int(round(impuesto,2)),',d')
+				p.drawString(455,linea,"$"+str(impuesto)+'.00')
+				mutuo=format(y.mutuo,',d')
+				p.drawString(505,linea,"$"+mutuo+".00")
 
 			if x.boleta.tipo_producto.id==3:				
 				linea=linea-15				
@@ -2342,7 +2387,9 @@ def imprime_boleta(request):
 			p.drawString(415,312,"Refrendo")
 			p.drawString(486,312,"Desempeño")
 
-			pa=Pagos.objects.filter(boleta=x.boleta,pagado='N').order_by("id")
+			#tipo de pago refrendo
+			refrendo=Tipo_Pago.objects.get(id=1)
+			pa=Pagos.objects.filter(boleta=x.boleta,pagado='N',tipo_pago=refrendo).order_by("id")
 
 			cont=0
 			linea=297
@@ -2351,15 +2398,30 @@ def imprime_boleta(request):
 				p.setFont("Helvetica",7)
 				p.drawString(60,linea,str(cont))
 				p.drawString(131,linea,str(x.fecha_vencimiento.strftime('%d/%m/%Y')))
+
 				almacenaje=x.almacenaje*decimal.Decimal(cont)
+				almacenaje="{:0,.2f}".format(almacenaje)
+
 				p.drawString(202,linea,"$"+str(almacenaje))
 				interes=x.interes*decimal.Decimal(cont)
+				interes="{:0,.2f}".format(interes)
+
 				p.drawString(273,linea,"$"+str(interes))
 				iva=x.iva*decimal.Decimal(cont)
+
+				iva="{:0,.2f}".format(iva)
+
 				p.drawString(344,linea,"$"+str(iva))
 				#refrendo=iva+interes+almacenaje
-				p.drawString(415,linea,"$"+str(x.importe*cont))
-				p.drawString(486,linea,"$"+str(math.ceil((x.importe*cont)+x.boleta.mutuo)))
+
+
+				refrendo="{:0,.2f}".format(x.importe*cont)
+
+				p.drawString(415,linea,"$"+str(refrendo))
+
+				desempeno="{:0,.2f}".format(math.ceil((x.importe*cont)+x.boleta.mutuo))
+
+				p.drawString(486,linea,"$"+str(desempeno))
 				linea=linea-15
 
 			#cuadro 6] Firma Cliente
@@ -2392,6 +2454,15 @@ def imprime_boleta(request):
 
 				u=u+10
 
+
+			p.line(55,100,180,100)
+			p.drawString(100,80,"Cliente")
+
+			p.line(420,100,545,100)
+
+			p.drawString(465,80,"Valuador")
+
+
 			p.line(200,160,400,160)
 			p.line(200,55,200,160)
 			p.line(200,55,400,55)		
@@ -2403,23 +2474,29 @@ def imprime_boleta(request):
 			p.setFont("Helvetica-Bold",7)
 			p.drawString(205,130,"Avaluo:")
 			p.setFont("Helvetica",7)
-			p.drawString(255,130,"$"+str(x.boleta.avaluo)+".00")
+			avaluo="{:0,.2f}".format(x.boleta.avaluo)
+
+			p.drawString(255,130,"$"+str(avaluo))
 
 			p.setFont("Helvetica-Bold",7)
 			p.drawString(205,115,"Refrendo:")
 
+			refrendo="{:0,.2f}".format(x.boleta.refrendo)
+
 			p.setFont("Helvetica",7)
-			p.drawString(255,115,"$"+str(x.boleta.refrendo)+".00")
+			p.drawString(255,115,"$"+str(refrendo))
 
 			p.setFont("Helvetica-Bold",7)
 			p.drawString(205,100,"Mutuo:")
+			mutuo="{:0,.2f}".format(x.boleta.mutuo)
+
 			p.setFont("Helvetica",7)
-			p.drawString(255,100,"$"+str(x.boleta.mutuo)+".00")
+			p.drawString(255,100,"$"+str(mutuo))
 
 			p.setFont("Helvetica-Bold",7)
 			p.drawString(205,85,"Fecha Emi.:")
 			p.setFont("Helvetica",7)
-			p.drawString(255,85,str(x.boleta.fecha))
+			p.drawString(255,85,str(x.boleta.fecha.strftime("%Y-%m-%d %H:%M:%S")))
 
 
 			p.setFont("Helvetica-Bold",7)
@@ -2614,6 +2691,17 @@ def api_consulta_corte_caja(request):
 	caja.token_cierre_caja=token
 	caja.save()
 
+
+	#buscamos las reimpresiones de boleta
+	cont_rebol=Reg_Costos_Extra.objects.filter(caja=caja).count()
+	sum_importe_rebol=Reg_Costos_Extra.objects.filter(caja=caja).aggregate(Sum('importe'))
+
+	importe_rebol=0.00
+	if sum_importe_rebol["importe__sum"]==None:
+		importe_rebol=0.00
+	else:
+		importe_rebol=int(sum_importe_rebol["importe__sum"])
+
 	#buscamos los retiros
 	try:
 		ret=Retiro_Efectivo.objects.filter(sucursal=sucursal,usuario=user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c).aggregate(Sum('importe'))
@@ -2709,7 +2797,10 @@ def api_consulta_corte_caja(request):
 				importe_desemp=importe_desemp+int(rel_desem["importe__sum"])
 			
 
-		total_movs=int(total_movs+cont_com_pg+refrendos_pg+cont_pc+cont_refrendos+cont_desemp)
+		total_movs=int(total_movs+cont_com_pg+refrendos_pg+cont_pc+cont_refrendos+cont_desemp+cont_rebol)
+
+
+
 
 	except Exception as e:
 
@@ -2717,7 +2808,7 @@ def api_consulta_corte_caja(request):
 
 
 	total_efectivo=0.00
-	total_efectivo=decimal.Decimal(imp_fondo_inicial)+decimal.Decimal(otros_ingresos)-decimal.Decimal(retiros)-decimal.Decimal(empenos)+decimal.Decimal(refrendos_pg)+decimal.Decimal(comisiones_pg)+decimal.Decimal(importe_refrendo)+decimal.Decimal(pago_capital)+decimal.Decimal(importe_desemp)
+	total_efectivo=decimal.Decimal(imp_fondo_inicial)+decimal.Decimal(otros_ingresos)-decimal.Decimal(retiros)-decimal.Decimal(empenos)+decimal.Decimal(refrendos_pg)+decimal.Decimal(comisiones_pg)+decimal.Decimal(importe_refrendo)+decimal.Decimal(pago_capital)+decimal.Decimal(importe_desemp)+decimal.Decimal(importe_rebol)
 	caja.teorico_efectivo=total_efectivo
 	caja.save()
 
@@ -2738,9 +2829,9 @@ def api_consulta_corte_caja(request):
 
 	respuesta=[]	
 
-	respuesta.append({'nombre_cajero':caja.usuario.first_name+' '+caja.usuario.last_name,'estatus_guardado':caja.estatus_guardado,'dia_valido':dia_valido,'caja_abierta':caja_abierta,'token':str(token),'estatus':1,'fondo_inicial':str(imp_fondo_inicial),'cont_fondo_inicial':'1','otros_ingresos':str(otros_ingresos),'cont_otros_ingresos':str(cont_otros_ingresos),'retiros':str(retiros),'cont_retiros':str(cont_retiros),'total_movs':str(total_movs),'total_efectivo':str(total_efectivo),'real_efectivo':caja.real_efectivo,'empenos':str(empenos),'cont_empenos':str(cont_empenos),'cont_refrendos':str(cont_refrendos),'cont_com_pg':str(cont_com_pg),'cont_ref_pg':str(cont_ref_pg),'importe_refrendo':str(importe_refrendo),'comisiones_pg':str(comisiones_pg),'refrendos_pg':str(refrendos_pg),'cont_pc':cont_pc,		'pago_capital':pago_capital,"importe_desemp":importe_desemp,"cont_desemp":cont_desemp})
-	#agregamos una segunda lina con la informacion guardada ne el corte de caja
-
+	respuesta.append({'nombre_cajero':caja.usuario.first_name+' '+caja.usuario.last_name,'estatus_guardado':caja.estatus_guardado,'dia_valido':dia_valido,'caja_abierta':caja_abierta,'token':str(token),'estatus':1,'fondo_inicial':str(imp_fondo_inicial),'cont_fondo_inicial':'1','otros_ingresos':str(otros_ingresos),'cont_otros_ingresos':str(cont_otros_ingresos),'retiros':str(retiros),'cont_retiros':str(cont_retiros),'total_movs':str(total_movs),'total_efectivo':str(total_efectivo),'real_efectivo':caja.real_efectivo,'empenos':str(empenos),'cont_empenos':str(cont_empenos),'cont_refrendos':str(cont_refrendos),'cont_com_pg':str(cont_com_pg),'cont_ref_pg':str(cont_ref_pg),'importe_refrendo':str(importe_refrendo),'comisiones_pg':str(comisiones_pg),'refrendos_pg':str(refrendos_pg),'cont_pc':cont_pc,		'pago_capital':pago_capital,"importe_desemp":importe_desemp,"cont_desemp":cont_desemp,"importe_rebol":importe_rebol,"cont_rebol":cont_rebol})	
+	
+	#agregamos una segunda lina con la informacion guardada ne el corte de caja	
 	respuesta.append({'comentario':caja.comentario,'centavos_10':caja.centavos_10,'centavos_50':caja.centavos_50,'pesos_1':caja.pesos_1,'pesos_2':caja.pesos_2,'pesos_5':caja.pesos_5,'pesos_10':caja.pesos_10,'pesos_20':caja.pesos_20,'pesos_50':caja.pesos_50,'pesos_100':caja.pesos_100,'pesos_200':caja.pesos_200,'pesos_500':caja.pesos_500,'pesos_1000':caja.pesos_1000,'diferencia':caja.diferencia,'real_efectivo':caja.real_efectivo})
 
 	return Response(respuesta)

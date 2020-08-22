@@ -306,6 +306,8 @@ class Det_Boleto_Empeno(models.Model):
 class Imprimir_Boletas(models.Model):
 	usuario=models.ForeignKey(User,on_delete=models.PROTECT)
 	boleta=models.ForeignKey(Boleta_Empeno,on_delete=models.PROTECT)
+	reimpresion=models.IntegerField(default=0)#cuando tenga 1 es que es reimpresion y se le cobra 10 pesos.
+
 
 
 class Tipo_Pago(models.Model):
@@ -313,6 +315,17 @@ class Tipo_Pago(models.Model):
 
 	def __str__(self):
 		return self.tipo_pago
+
+class Costo_Extra(models.Model):
+	descripcion=models.CharField(max_length=50,null=False)
+	costo=models.IntegerField(default=0)
+
+class Reg_Costos_Extra(models.Model):
+	costo_extra=models.ForeignKey(Costo_Extra,on_delete=models.PROTECT)
+	fecha=models.DateTimeField(default=timezone.now)
+	caja=models.ForeignKey(Cajas,on_delete=models.PROTECT)
+	boleta=models.ForeignKey(Boleta_Empeno,on_delete=models.PROTECT)
+	importe=models.IntegerField()
 
 class Pagos(models.Model):
 	tipo_pago=models.ForeignKey(Tipo_Pago,on_delete=models.PROTECT,null=False,blank=True)

@@ -402,7 +402,7 @@
 					<div class="panel-body">
 						<table id="tabla_pagos" class="table table-bordered">
 						    <thead>
-						      <tr style="background-color: #79aec8">
+						      <tr >
 						        <th>Tipo de Pago</th>
 						        
 						        <th>Fecha de Venc.</th>
@@ -421,22 +421,23 @@
 			</div>
 		</div>
 		<div class="row">
-			<div class="col-xs-9">
-				
-			</div>
-
-			
-			
-					<div class="col-xs-3 text-right">
-
-						<a class="btn btn-primary" href="" id="btn_refrendar">Refrendar</a>
+				<div class="col-xs-6">
+				</div>
+					<div class="col-xs-2 text-right">
+						<a class="btn btn-default" id="btn_cancelar"> <span class="glyphicon glyphicon-remove-circle"></span> Cancelar</a>
 					</div>
-				
-			
-			<div class="col-xs-3 text-right">
-				<a class="btn btn-default" id="btn_cancelar">Cancelar</a>
-			</div>
-			
+
+					<div class="col-xs-2 text-right">
+						<a class="btn btn-primary"  id="btn_re_imprimir"> <span class="glyphicon glyphicon-print"></span> Re-Imprimir</a>
+					</div>
+					<div class="col-xs-2 text-right">
+						<a class="btn btn-primary" href="" id="btn_refrendar">
+							<span class="glyphicon glyphicon-euro"></span>
+							 Refrendar
+						</a>
+					</div>
+
+					
 		</div>
 	</div>
 
@@ -446,7 +447,7 @@
 		<div class="fondo_mensaje_2 cls_msj_error" >
 
 		</div >
-		<div class="mensaje_2 cls_msj_error" >
+		<div class="mensaje_2 cls_msj_error"  >
 			
 			<div class="panel panel-default">	
 				<h3 class="page-header" id="msj_error"></h3>
@@ -477,8 +478,26 @@
 			</div>
 	</div>
 	{% endif %}
+
+	<div class="fondo_mensaje cls_aceptar_reimpresion" style="z-index:4001">
+		
+	</div >
+	<div class="mensaje cls_aceptar_reimpresion" style="z-index:4002" >			
+			<div class="panel panel-default">	
+				<h3 class="page-header" id="txt_confirmacion_reimpresion">La reimpresión tiene un costo de ${{costo_reimpresion}}.00</h3>
+
+				<a class="btn btn-default "   id="btn_cancelar_reimpresion">Cancelar</a>
+				<a class="btn btn-primary "  id="btn_aceptar_resimpresion">Aceptar</a>
+				
+				<br>
+				<br>
+
+			</div>
+	</div>
+
 <script type="text/javascript">
 	var id_boleta=0;
+	var href_reimpresion="";
 	$(document).ready(
 			function()
 			{
@@ -533,6 +552,27 @@
 
 						}
 					);
+				$("#btn_re_imprimir").click(
+						function()
+						{
+							$(".cls_aceptar_reimpresion").show();
+
+						}
+
+					);
+				$("#btn_cancelar_reimpresion").click(
+						function()
+						{
+							$(".cls_aceptar_reimpresion").hide();
+						}
+					);
+
+				$("#btn_aceptar_resimpresion").click(
+						function()
+						{
+							fn_registra_costo_extra();
+						}
+					);
 			}
 		);
 	function fn_inicio()
@@ -541,7 +581,47 @@
 		$(".cls_msj_error").hide();
 		$("#fondo_preloader").hide();
 		$("#id_sucursal").val("{{user_2.sucursal.id}}");
+		$(".cls_aceptar_reimpresion").hide();
 	}
+	function fn_registra_costo_extra()
+	{
+		
+		$("#fondo_preloader").show();
+		$.ajax({
+			type: "GET",
+	        url: "{{IP_LOCAL}}/empenos/api_reg_costo_reimpresion/",
+	        data: {"id_boleta":id_boleta.toString(),"id_caja":"{{id_caja}}"},
+	        contentType: "application/json; charset=utf-8",
+	        dataType: "json",
+	        success: function (r) {
+    			if (r[0].estatus=="0")
+	        	{
+	        		$("#msj_error").text(r[0].msj);
+					$(".cls_msj_error").show();					
+	        	}
+	        	else
+	        	{	        		
+
+	        		window.location.replace(href_reimpresion);
+	        	}    	
+	        	$("#fondo_preloader").hide();
+	        },
+	        error: function (r) {
+	        		$("#msj_error").text("Error reimprimir la boleta.");
+					$(".cls_msj_error").show();
+					$("#fondo_preloader").hide();
+	        },
+	        failure: function (r) {
+	        		$("#msj_error").text("Error reimprimir la boleta.");
+					$(".cls_msj_error").show();
+					$("#fondo_preloader").hide();
+	        }
+		});
+
+
+
+	}
+
 	function fn_consulta_boleta(id,plazo)
 	{
 		
@@ -556,7 +636,10 @@
 		{
 			$("#btn_refrendar").attr("href","/empenos/refrendo_plazo_mensual/"+id_boleta.toString());			
 		}
+
 		
+		href_reimpresion="{{LOCALHOST}}/empenos/re_imprimir_boleta/"+id_boleta.toString();			
+
 
 		$("#fondo_preloader").show();
 		$("#tabla_pagos tbody tr").remove();
