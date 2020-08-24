@@ -45,7 +45,7 @@ class Refrendo_Mensual_Form(forms.Form):
 	descuento=forms.IntegerField()
 
 class Reportes_Caja_Form(forms.Form):
-	id_tipo_mov=forms.ModelChoiceField(queryset=Tipo_Movimiento.objects.all())
+	id_tipo_mov=forms.ModelChoiceField(queryset=Tipo_Movimiento.objects.filter().exclude(id=4).exclude(id=5))
 	fecha_inicial=forms.DateTimeField(initial=timezone.now())
 	fecha_final=forms.DateTimeField(initial=timezone.now())
 

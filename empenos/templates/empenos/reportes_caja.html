@@ -75,6 +75,26 @@
 				</div>
 		</div>
 	{% endif %}
+
+		{% ifequal permiso "0" %}
+		<div class="fondo_mensaje "  >
+			
+		</div >
+		<div class="mensaje ">
+				<div class="cls_encabezado_alert" >
+					Aviso
+				</div>	
+				<div class="panel panel-default">	
+					<label class="page-header">No cuentas con permiso para acceder a esta opción.</label>
+					<br>
+					<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_reportes'%}"> <span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+					<br>
+					<br>
+
+				</div>
+		</div>
+		{%endifequal%}
+		
 	<script type="text/javascript">
 		$(document).ready(
 				function()
