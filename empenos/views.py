@@ -169,6 +169,48 @@ def elimina_costo_extra(request):
 
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
+def admin_kilataje(request):
+	#si no esta logueado mandamos al login
+	if not request.user.is_authenticated:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+	
+	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
+	try:
+		user_2=User_2.objects.get(user=request.user)
+	except Exception as e:		
+		print(e)
+		form=Login_Form(request.POST)
+		estatus=0
+		msj="La cuenta del usuario esta incompleta."			
+		return render(request,'login.html',locals())
+
+	pub_date = date.today()
+	min_pub_date_time = datetime.combine(pub_date, time.min) 
+	max_pub_date_time = datetime.combine(pub_date, time.max)  
+
+	try:
+		#validamos si el usuario tiene caja abierta en el dia actual.
+		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
+		suc=caja.sucursal
+		c=caja.caja
+	except Exception as e:
+		print(e)
+		caja_abierta="0"
+		caja=Cajas
+
+	permiso="0"
+	if user_2.perfil.id==3:		
+		permiso="1"		
+
+	cat_kilataje=Costo_Kilataje.objects.filter(activo="S").order_by("kilataje")
+	cat_tipo_kilataje=Tipo_Kilataje.objects.all()
+	cat_tipo_producto=Tipo_Producto.objects.filter().exclude(id=3)
+	return render(request,'empenos/admin_kilataje.html',locals())
+
+
+#*******************************************************************************************************************************************************
+#*¨**************************************************************************************************************************************************************
 def otros_ingresos(request):
 	#si no esta logueado mandamos al login
 	if not request.user.is_authenticated:
@@ -1374,10 +1416,13 @@ def nvo_empeno(request):
 	tm=Tipo_Movimiento.objects.get(id=4)
 
 	empeno_exitoso="0"
+
 	if request.method=="POST":
 		try:
 			hoy = datetime.now()#fecha actual
 
+			print("temporal")
+			print(request.POST.get("plazo"))
 			#calculamos la fecha de vemcimiento para 4 semanas
 			if int(request.POST.get("plazo"))==2:
 
@@ -3387,6 +3432,11 @@ def api_consulta_corte_caja(request):
 	cont_desemp=0
 	importe_desemp=0.00
 
+	importe_desemp=0.00
+	cont_desemp=0		
+	
+
+
 	try:
 		#buscamos el pago a comisiones PG
 		abonos=Abono.objects.filter(caja=caja)#todos los abonos echos por la caja.
@@ -3436,12 +3486,14 @@ def api_consulta_corte_caja(request):
 			#cont_desemp=cont_desemp+Rel_Abono_Capital.objects.filter(abono=ab).exclude(capital_restante__gte=0).count()
 
 
-			importe_desemp=0.00
-			cont_desemp=0
-			for x in rel_desem:
-				if decimal.Decimal(x.capital_restante)==decimal.Decimal(0):
+	
+			for x in rel_desem:								
+				
+				if decimal.Decimal(x.capital_restante)==decimal.Decimal(0):					
+					
 					importe_desemp=decimal.Decimal(importe_desemp)+decimal.Decimal(x.importe)
 					cont_desemp=int(cont_desemp)+1
+					
 
 
 			#if rel_desem["importe__sum"]==None:
@@ -3453,12 +3505,9 @@ def api_consulta_corte_caja(request):
 		total_movs=int(total_movs+cont_com_pg+refrendos_pg+cont_pc+cont_refrendos+cont_desemp+cont_rebol)
 
 
-
-
 	except Exception as e:
-
+		print(e)
 		print("No se han registrado abonos.")
-
 
 	total_efectivo=0.00
 	total_efectivo=decimal.Decimal(imp_fondo_inicial)+decimal.Decimal(otros_ingresos)-decimal.Decimal(retiros)-decimal.Decimal(empenos)+decimal.Decimal(refrendos_pg)+decimal.Decimal(comisiones_pg)+decimal.Decimal(importe_refrendo)+decimal.Decimal(pago_capital)+decimal.Decimal(importe_desemp)+decimal.Decimal(importe_rebol)

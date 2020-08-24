@@ -23,9 +23,8 @@ urlpatterns=[
 	url(r'^re_imprimir_abono/(?P<id_abono>\w+)/$',re_imprimir_abono,name="re_imprimir_abono"),
 	url(r'^rep_flujo_caja/$',rep_flujo_caja,name="rep_flujo_caja"),
 	url(r'^elimina_costo_extra/$',elimina_costo_extra,name="elimina_costo_extra"),
-
-
-
+	url(r'^admin_kilataje$',admin_kilataje,name="admin_kilataje"),
+	
 
 	url(r'^consulta_abono$',consulta_abono,name="consulta_abono"),
 
@@ -53,6 +52,9 @@ urlpatterns=[
 	url(r'^api_notificacion_cajas_abiertas/$',api_notificacion_cajas_abiertas,name="api_notificacion_cajas_abiertas"),
 	url(r'^api_agrega_marca/$',api_agrega_marca,name="api_agrega_marca"),
 	url(r'^api_elimina_costo_extra/$',api_elimina_costo_extra,name="api_elimina_costo_extra"),
+	url(r'^api_elimina_costo_kilataje/$',api_elimina_costo_kilataje,name="api_elimina_costo_kilataje"),
+	url(r'^api_agregar_kilataje/$',api_agregar_kilataje,name="api_agregar_kilataje"),
+
 
 
 

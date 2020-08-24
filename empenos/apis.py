@@ -27,6 +27,48 @@ def api_tipo_producto(request):
 	return Response(respuesta)
 
 
+
+
+@api_view(['GET'])
+def api_agregar_kilataje(request):
+	respuesta=[]
+	try:
+		kilataje=request.GET.get("desc_kilataje")
+		avaluo=int(request.GET.get("importe"))
+		id_tipo_producto=request.GET.get("id_tipo_producto")
+		id_tipo_kilataje=request.GET.get("id_tipo_kilataje")
+
+		tipo_producto=Tipo_Producto.objects.get(id=int(id_tipo_producto))
+		tipo_kilataje=Tipo_Kilataje.objects.get(id=int(id_tipo_kilataje))
+
+		Costo_Kilataje.objects.create(tipo_producto=tipo_producto,kilataje=kilataje,avaluo=avaluo,tipo_kilataje=tipo_kilataje)
+		respuesta.append({"estatus":"1"})
+	except Exception as e:	
+		print(e)
+		respuesta.append({"estatus":"0","msj":"Error al agregar la marca."})
+
+	return Response(respuesta)	
+
+
+#no podemos eliminar los costo kilatake
+#ni modificarlos, ya que pueda estar ligado a boletas.
+@api_view(['GET'])
+def api_elimina_costo_kilataje(request):
+	respuesta=[]
+	id=int(request.GET.get("id"))
+	try:
+		ck=Costo_Kilataje.objects.get(id=id)
+		ck.activo="N"
+		ck.save()
+
+		respuesta.append({"estatus":"1"})
+	except Exception as e:	
+		print(e)
+		respuesta.append({"estatus":"0","msj":"Error al eliminar el registro."})
+	return Response(respuesta)
+
+
+
 @api_view(['GET'])
 def api_elimina_costo_extra(request):
 	respuesta=[]
@@ -160,7 +202,7 @@ def api_consulta_kilataje(request):
 		id_tipo_producto=Tipo_Producto.objects.get(id=id_tipo_producto)
 		lista=[]
 		respuesta.append({"estatus":"1"})
-		ck=Costo_Kilataje.objects.filter(tipo_producto=id_tipo_producto)
+		ck=Costo_Kilataje.objects.filter(tipo_producto=id_tipo_producto,activo="S").order_by("kilataje")
 		for x in ck:
 			lista.append({'id_kilataje':x.id,"kilataje":x.kilataje})
 		respuesta.append({"lista":lista})

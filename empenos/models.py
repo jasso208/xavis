@@ -19,6 +19,8 @@ ESTADO_CIVIL_CHOICES = (
 
 
 
+
+
 class Tipo_Movimiento(models.Model):
 	tipo_movimiento=models.CharField(max_length=50,null=False)
 	naturaleza=models.CharField(max_length=20,null=False)
@@ -200,12 +202,17 @@ class Marca(models.Model):
 		ordering = ['marca']
 
 
+class Tipo_Kilataje(models.Model):
+	tipo_kilataje=models.CharField(max_length=10,null=False)
+
 
 class Costo_Kilataje(models.Model):	
 	tipo_producto=models.ForeignKey(Tipo_Producto,on_delete=models.PROTECT,blank=True,null=False)
 	kilataje=models.CharField(max_length=10,null=False)
 	avaluo=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)
-
+	tipo_kilataje=models.ForeignKey(Tipo_Kilataje,on_delete=models.PROTECT,blank=True,null=True)
+	activo=models.CharField(max_length=1,default="S")
+	
 	def __str__(self):
 		return self.tipo_producto.tipo_producto+' '+self.kilataje+' $'+str(self.avaluo)
 
