@@ -1103,19 +1103,20 @@ def reportes_caja(request):
 	permiso="0"
 	if user_2.perfil.id==3:
 		permiso="1"
-
-
-	if request.method=="POST" and permiso=="0":		
-		id_tipo_movimiento=request.POST.get("id_tipo_mov")
 		
+	if request.method=="POST" and permiso=="1":		
+		print("aqui entro 1")
+		id_tipo_movimiento=request.POST.get("id_tipo_mov")
+		print("aqui entro 2")
 		fecha_inicial= datetime.strptime(request.POST.get("fecha_inicial"), "%Y-%m-%d").date()
 		fecha_final= datetime.strptime(request.POST.get("fecha_final"), "%Y-%m-%d").date()
 
-
+		
 		fecha_inicial = datetime.combine(fecha_inicial, time.min) 
 		fecha_final = datetime.combine(fecha_final, time.max)  
 
 		error="0"
+
 
 		#apertura de caja
 		if id_tipo_movimiento=="1":
