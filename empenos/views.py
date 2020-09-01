@@ -315,7 +315,7 @@ def venta_granel(request):
 			print(e)
 	else:		
 		#buscamos los estatus remate y almoneda.
-		boletas=(Boleta_Empeno.objects.filter(estatus=5,sucursal=user_2.sucursal) | Boleta_Empeno.objects.filter(estatus=3,sucursal=user_2.sucursal))
+		boletas=(Boleta_Empeno.objects.filter(estatus=5,sucursal=user_2.sucursal) | Boleta_Empeno.objects.filter(estatus=3,sucursal=user_2.sucursal)).exclude(tipo_producto=3)
 
 		#borramos todas las ventas temporales del usuario
 		vt=Venta_Temporal.objects.filter(usuario=user_2.user).delete()
