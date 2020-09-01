@@ -173,7 +173,7 @@
 									    			</a> 
 
 									    			{% if b.plazo.id != 1  %}
-										    			 {%  if b.estatus.id != 4 %}
+										    			 {%  if b.estatus.id != 4 and b.estatus.id != 6 %}
 										    			 	{% if b.plazo.id == 2 %}
 											    			<a href='/empenos/refrendo/{{b.id}}' class='btn btn-default btn-sm'>
 											    				<span class='glyphicon glyphicon-euro'>

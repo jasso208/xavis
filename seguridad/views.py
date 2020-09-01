@@ -180,7 +180,31 @@ def admin_productos(request):
 	return render(request,'seguridad/admin_stock.html',{})
 
 def admin_ventas(request):
-	return render(request,'seguridad/admin_ventas.html',{})
+		#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
+	try:
+		user_2=User_2.objects.get(user=request.user)
+	except:
+		form=Login_Form(request.POST)
+		estatus=0
+		msj="La cuenta del usuario esta incompleta."			
+		return render(request,'login.html',locals())
+
+
+	pub_date = date.today()
+	min_pub_date_time = datetime.combine(pub_date, time.min) 
+	max_pub_date_time = datetime.combine(pub_date, time.max)  
+
+	try:
+		#validamos si el usuario tiene caja abierta en el dia actual.
+		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
+		suc=caja.sucursal
+		c=caja.caja
+	except Exception as e:
+		print(e)
+		caja_abierta="0"
+		caja=Cajas
+	return render(request,'seguridad/admin_ventas.html',locals())
 
 def admin_perfil(request):
 	#si no esta logueado mandamos al login
@@ -234,7 +258,7 @@ def admin_cajas(request):
 
 	try:
 		#validamos si el usuario tiene caja abierta en el dia actual.
-		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+		caja=Cajas.objecfts.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
 		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
 		suc=caja.sucursal
 		c=caja.caja

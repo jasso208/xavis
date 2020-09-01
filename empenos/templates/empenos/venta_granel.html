@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% block usuario %}
+
+			<div class="col-xs-6">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{user_2.user.username}} {{user_2.perfil.perfil}}</label> 
+				
+			</div>
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-home"></span> Sucursal: {{user_2.sucursal}}</label> 	
+			</div>
+
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-inbox"></span> Caja: {{c}} </label> 	
+			</div>
+
+
+{% endblock  %}
+{% block content %}
+	<div class="col-xs-12 cls_encabezado_body">
+	
+		<a >
+			Venta Granel
+		</a>		
+	
+	</div>
+	<div class="col-xs-12">
+		<form method="post" action="#" class="cls_form_1">
+			{%csrf_token%}
+			<div class="row cls_form_consulta">
+				<div class="col-xs-12">
+					<div class="panel panel-default">						
+						<div class="panel-body">
+
+
+							<div class="col-xs-9">
+								<div class="cls_encabezado_alert text-center" >
+									<label>Boletas</label>
+								</div>
+																
+								<div class="panel panel-default" style="max-height: 80%;overflow-y: scroll;">
+										<table  class="table table-bordered">
+										    <thead>
+										      <tr>
+										      	<th style="width: 5%"><span class="glyphicon glyphicon-usd"></span></th>
+										        <th style="width: 5%">Folio</th>
+										        <th style="width: 10%">Estatus</th>
+										        <th style="width: 10%">Sucursal</th>
+										        <th style="width: 10%">Tipo Prod</th>
+										        <th style="width: 10%">F Empeño</th>
+										        <th style="width: 10%">F Venci.</th>
+										        <th style="width: 10%">Avaluo</th>
+										        <th style="width: 10%">Mutuo</th>
+										      </tr>
+										    </thead>
+										    <tbody>
+										    	{% for b in vt %}
+												    	<tr style="font-size: 7px">
+													      	<td style="width: 2%;font-size: 10px">
+																
+
+													      		<input type="checkbox" onchange="fn_selecciona('{{b.id}}')" name="vehicle1" value="Bike" id="ch_selecciona_{{b.id}}" >						
+													      						
+													      	</td>
+													        <td style="width: 5%;font-size: 10px">{{b.boleta.folio}}</td>
+													        <td style="width: 5%;font-size: 10px">{{b.boleta.estatus}}</td>
+													        <td style="width: 13%;font-size: 10px">{{b.boleta.sucursal.sucursal}}</td>
+													        <td style="width: 10%;font-size: 10px">{{b.boleta.tipo_producto.tipo_producto}}</td>
+													        <td style="width: 10%;font-size: 10px">{{b.boleta.fecha | date:"d/m/Y"}}</td>
+													        <td style="width: 10%;font-size: 10px">{{b.boleta.fecha_vencimiento | date:"d/m/Y"}}</td>
+													        <td style="width: 10%;font-size: 10px">{{b.boleta.avaluo |stringformat:".2f"}}</td>
+													        <td style="width: 10%;font-size: 10px">{{b.boleta.mutuo |stringformat:".2f" }}</td>	
+												    	</tr>												    
+										     	{% endfor %}
+										    </tbody>
+									</table>
+								</div>
+
+							</div>
+
+							<div class="col-xs-3">
+								<div class="cls_encabezado_alert text-center" >
+									<label>Total</label>
+								</div>
+								<div class="panel panel-default">
+										<table  class="table table-bordered">
+											<thead>
+											</thead>
+											<tbody>
+												<tr>
+													<td style="width: 30%">
+														<label>Mutuo:</label>
+													</td>
+													<td style="width: 70%">
+														<span id="total_mutuo"></span>
+													</td>
+												</tr>
+												
+												<tr>
+													<td style="width: 30%">
+														<label>Avaluo:</label>
+													</td>
+													<td style="width: 70%">
+														<span id="total_avaluo"></span>
+													</td>
+												</tr>
+											</tbody>
+
+										</table>
+								</div>
+								<div class="col-xs-12" style="padding: 0;">
+									<form method="post" action="#" >
+										{%csrf_token%}
+
+										<button class="btn btn-primary btn-block"><span class="glyphicon glyphicon-usd"></span> Confirmar Venta</button>
+									</form>
+								</div>
+
+								
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+		
+	<div class="fondo_mensaje cls_notificacion" >
+	</div >
+
+	<div class="mensaje cls_notificacion" >
+		<div class="cls_encabezado_alert" >
+			Error!!
+		</div>	
+		<div class="panel panel-default">	
+			<label class="page-header" id="msj_notificacion">La boleta no pudo ser marcada para venta, intente nuevamente.<br>Si el problema persiste contacte al administrador del sistema.</label>
+			<br>				
+			<a class="btn btn-primary btn-sm" id="btn_aceptar_error"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+			<br>
+			<br>
+		</div>
+	</div>
+
+
+{% ifequal error  '2' %}
+	<div class="fondo_mensaje  cls_error_guardar_venta" >
+
+	</div >
+
+	<div class="mensaje  cls_error_guardar_venta" >
+		<div class="cls_encabezado_alert" >
+			Error!!
+		</div>	
+		<div class="panel panel-default">	
+			<label class="page-header" id="msj_notificacion">Error al guardar la venta. Intente nuevamente.</label>
+			<br>				
+			<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_ventas'%}"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+			<br>
+			<br>
+		</div>
+	</div>
+
+{% endifequal %}
+
+
+
+
+{% ifequal error  '3' %}
+	<div class="fondo_mensaje  cls_error_guardar_venta" >
+
+	</div >
+
+	<div class="mensaje  cls_error_guardar_venta" >
+		<div class="cls_encabezado_alert" >
+			Aviso
+		</div>	
+		<div class="panel panel-default">	
+			<label class="page-header" id="msj_notificacion">La venta se realizo correctamente.</label>
+			<br>				
+			<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_ventas'%}"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+			<br>
+			<br>
+		</div>
+	</div>
+
+{% endifequal %}
+
+	<div id="fondo_preloader">
+		<div class="preloader" id="preloader">
+		
+		</div>
+	</div>
+	<script type="text/javascript">
+		$(document).ready(
+				function()
+				{
+					fn_inicio();
+
+					$("#btn_aceptar_error").click(
+							function()
+							{
+								$(".cls_notificacion").hide();
+							}
+						);
+					$("#btn_aceptar_error_guardar").click(
+							function()
+							{
+
+								$(".cls_error_guardar_venta").hide();
+							}
+						);
+				}
+			);
+		function fn_inicio()
+		{
+			$("#fondo_preloader").hide();
+			$(".cls_notificacion").hide();
+		}
+		function fn_selecciona(id)
+		{
+			$("#fondo_preloader").show();
+			$.ajax({
+	        type: "GET",
+	        url: "{{IP_LOCAL}}/empenos/api_agrega_boleta_venta_granel/",
+	        data: { 'id':id},
+	        contentType: "application/json; charset=utf-8",
+	        dataType: "json",
+	        success: function (r) {
+
+	        	if (r[0].estatus=="0")
+	        	{
+	        		$("#ch_selecciona_"+id).prop("checked",false);
+	        		$(".cls_notificacion").show();
+	        	}
+	        	else
+	        	{
+	        		if (r[1].marcado=="N")
+	        		{
+	        			$("#ch_selecciona_"+id).prop("checked",false);	
+	        		}
+	        		else
+	        		{
+	        			$("#ch_selecciona_"+id).prop("checked",true);		
+	        		}
+					$("#total_avaluo").text(r[1].avaluo);
+					$("#total_mutuo").text(r[1].mutuo);
+
+	        	}
+
+	        	$("#fondo_preloader").hide();
+	        },
+	        error: function (r) {
+	           
+				$("#ch_selecciona_"+id).prop("checked",false);
+				$(".cls_notificacion").show();
+				$("#fondo_preloader").hide();
+
+	        },
+	        failure: function (r) {
+	           $("#ch_selecciona_"+id).prop("checked",false);
+	           $(".cls_notificacion").show();
+	           $("#fondo_preloader").hide();
+			
+	        }
+	    });
+		}
+
+	</script>
+{%endblock%}

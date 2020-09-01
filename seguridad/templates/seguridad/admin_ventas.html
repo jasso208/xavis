@@ -1,43 +1,63 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load bootstrap3 %}
-{% block content%}
-	<div class="col-xs-12 cls_encabezado_body">
+{% block usuario %}
+
+			<div class="col-xs-6">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{user_2.user.username}} {{user_2.perfil.perfil}}</label> 
+				
+			</div>
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-home"></span> Sucursal: {{user_2.sucursal}}</label> 	
+			</div>
+
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-inbox"></span> Caja: {{c}} </label> 	
+			</div>
+
+
+{% endblock  %}
+{%block content%}
+<div class="col-xs-12 cls_encabezado_body">
 	<a>
-		Administración Ventas
+		Ventas
 	</a>	
 </div>
 <div class="col-xs-12">
 	<div class="row" >
-		<div class="col-xs-12 cls_encabezado_body_2">
-			<a>
-				Ventas
-			</a>
-			<br>
-		</div>
-	</div>
-	<div class="row cls_row_body"  >
-		<div class="col-xs-2">
-			<div class="cls_boton_body">
-				<a href="{%url 'ventas:guarda_venta_manual'%}">
-					<span class="glyphicon glyphicon-tags"></span>
-					<br>
-					<br>
-					Venta Manual
-				</a>	
+			<div class="col-xs-12 cls_encabezado_body_2">
+				<a>
+					Cajas
+				</a>
+				<br>
 			</div>
-		</div>
-		<div class="col-xs-2">
-			<div class="cls_boton_body">
-				<a href="{%url 'ventas:busca_ventas'%}">
-					<span class="glyphicon glyphicon-list"></span>
-					<br>
-					<br>
-					Reporte Ventas
-				</a>	
+			<div class="row cls_row_body"  >
+				<div class="col-xs-2">
+					<div class="cls_boton_body">
+						<a href="{% url 'empenos:venta_granel' %}">
+							<span class="glyphicon glyphicon-tags"></span>
+							<br>
+							<br>
+							Venta Granel
+						</a>	
+					</div>
+					
+				</div>
+				<div class="col-xs-2">
+					<div class="cls_boton_body">
+						<a href="{% url 'empenos:consulta_venta' %}">
+							<span class="glyphicon glyphicon-search"></span>
+							<br>
+							<br>
+							Busca Venta
+						</a>	
+					</div>
+					
+				</div>
+				
 			</div>
-		</div>
+
+
 	</div>
 </div>
-
-{% endblock %}
+{%endblock%}

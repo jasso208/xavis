@@ -24,7 +24,10 @@ urlpatterns=[
 	url(r'^rep_flujo_caja/$',rep_flujo_caja,name="rep_flujo_caja"),
 	url(r'^elimina_costo_extra/$',elimina_costo_extra,name="elimina_costo_extra"),
 	url(r'^admin_kilataje$',admin_kilataje,name="admin_kilataje"),
-	
+	url(r'^venta_granel$',venta_granel,name="venta_granel"),
+	url(r'^imprime_venta_granel$',imprime_venta_granel,name="imprime_venta_granel"),
+	url(r'^consulta_venta$',consulta_venta,name="consulta_venta"),
+	url(r'^re_imprimir_venta/(?P<id_venta>\w+)/$',re_imprimir_venta,name="re_imprimir_venta"),
 
 	url(r'^consulta_abono$',consulta_abono,name="consulta_abono"),
 
@@ -54,8 +57,7 @@ urlpatterns=[
 	url(r'^api_elimina_costo_extra/$',api_elimina_costo_extra,name="api_elimina_costo_extra"),
 	url(r'^api_elimina_costo_kilataje/$',api_elimina_costo_kilataje,name="api_elimina_costo_kilataje"),
 	url(r'^api_agregar_kilataje/$',api_agregar_kilataje,name="api_agregar_kilataje"),
-
-
-
+	url(r'^api_agrega_boleta_venta_granel/$',api_agrega_boleta_venta_granel,name="api_agrega_boleta_venta_granel"),
+	url(r'^api_agrega_importe_real_venta/$',api_agrega_importe_real_venta,name="api_agrega_importe_real_venta"),
 
 ]

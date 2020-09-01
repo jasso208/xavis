@@ -72,8 +72,9 @@ def fn_boletas_vencidas_semanal(hoy):
 
 
 	refrendo_pg=Tipo_Pago.objects.get(id=3)
+	vendida=Estatus_Boleta.objects.get(id=6)
 
-	#sacamos las boletas que vencen hoy  y que no han sido desempenadas
+	#sacamos las boletas que vencen hoy  y que no han sido desempenadas ni vendidas
 	#abs((hoy-boleta.fecha_vencimiento).days)
 
 	boletas=Boleta_Empeno.objects.filter(fecha_vencimiento=hoy).exclude(estatus=estatus_desempem)
@@ -152,6 +153,7 @@ def fn_pagos_vencidos(hoy):
 		#si el pago que esta venciendo es de periodo mensual.
 		#generamos el Refrendo Pg.
 		#el refrendo pg para plazo semanal se genera en la funcion de boletas vencidas.
+		#Asumimos que la boleta  que es considerada aqui, esa activa de lo contrario no deberia haber llegado aqui.
 		if p.boleta.plazo.id==3:
 			if p.boleta.fecha_vencimiento==hoy:
 				p.boleta.estatus=estatus_almoneda
@@ -276,10 +278,6 @@ def fn_pagos_vencidos(hoy):
 			#validmoas que la fecha de vencimiento no sea de azueto
 			fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
 
-
-
-
-
 			almacenaje=resp[0]["almacenaje"]
 			interes=resp[0]["interes"]
 			iva=resp[0]["iva"]
@@ -336,8 +334,6 @@ def fn_comision_pg(hoy):
 		fecha_vencimiento=datetime.combine(hoy+dias, time.min)
 
 
-		print("dias_vencidos")
-		print(dias_vencido)
 		if dias_vencido>=0:
 			compg=b.mutuo*0.0073
 			p=Pagos()

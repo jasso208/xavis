@@ -301,6 +301,34 @@ class Boleta_Empeno(models.Model):
 	class Meta:
 		unique_together=("folio",'sucursal',)
 
+class Venta_Temporal(models.Model):
+	usuario=models.ForeignKey(User,on_delete=models.PROTECT,null=True,blank=True)
+	boleta=models.ForeignKey(Boleta_Empeno,on_delete=models.PROTECT,null=True,blank=True)
+	fecha=models.DateTimeField(null=True,blank=True)#la venta temporal se almacena por un dia, al siguiente dia se elimina.q
+	vender=models.CharField(max_length=1,default='N')
+
+	class Meta:
+		unique_together=("usuario","boleta")
+
+class Venta_Granel(models.Model):
+	usuario=models.ForeignKey(User,on_delete=models.PROTECT,null=True,blank=True,related_name="usuario")#el usuario que realiza la venta en el sistema
+	fecha=models.DateTimeField(default=timezone.now)	
+	importe_mutuo=models.DecimalField(max_digits=20,decimal_places=2)
+	importe_avaluo=models.DecimalField(max_digits=20,decimal_places=2)
+	sucursal=models.ForeignKey(Sucursal,on_delete=models.PROTECT)	
+	importe_venta=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)#es elimporte real de la venta, en cuanto realmente se vendio el granel
+	usuario_finaliza=models.ForeignKey(User,on_delete=models.PROTECT,null=True,blank=True,related_name="usuario_finaliza")#el usuario que fisicamente realiza la venta y da ingreso al dinero de la venta		
+	caja=models.ForeignKey(Cajas,on_delete=models.PROTECT,blank=True,null=True)#es la caja que se tenia aberta cuando se ingreso el dinero.
+	fecha_importe_venta=models.DateTimeField(null=True,blank=True)
+
+class Det_Venta_Granel(models.Model):
+	venta=models.ForeignKey(Venta_Granel,on_delete=models.PROTECT)
+	boleta=models.ForeignKey(Boleta_Empeno,on_delete=models.PROTECT,unique=True)
+
+class Imprime_Venta_Granel(models.Model):
+	usuario=models.ForeignKey(User,on_delete=models.PROTECT,null=True,blank=True,unique=True)
+	venta_granel=models.ForeignKey(Venta_Granel,on_delete=models.PROTECT)
+
 
 class Det_Boleto_Empeno(models.Model):
 	boleta_empeno=models.ForeignKey(Boleta_Empeno,on_delete=models.PROTECT)

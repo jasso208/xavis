@@ -169,6 +169,165 @@ def elimina_costo_extra(request):
 
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
+def consulta_venta(request):
+	#si no esta logueado mandamos al login
+	if not request.user.is_authenticated:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+	
+	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
+	try:
+		user_2=User_2.objects.get(user=request.user)
+	except Exception as e:		
+		print(e)
+		form=Login_Form(request.POST)
+		estatus=0
+		msj="La cuenta del usuario esta incompleta."			
+		return render(request,'login.html',locals())
+
+	pub_date = date.today()
+	min_pub_date_time = datetime.combine(pub_date, time.min) 
+	max_pub_date_time = datetime.combine(pub_date, time.max)  
+
+	try:
+		#validamos si el usuario tiene caja abierta en el dia actual.
+		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
+		suc=caja.sucursal
+		c=caja.caja
+	except Exception as e:
+		print(e)
+		caja_abierta="0"
+		caja=Cajas
+
+	permiso="0"
+	if user_2.perfil.id==3:		
+		permiso="1"	
+
+	if request.method=="POST":		
+		fecha_inicial=datetime.strptime(request.POST.get("fecha_inicial"),"%Y-%m-%d").date()
+		fecha_final=datetime.strptime(request.POST.get("fecha_final"),"%Y-%m-%d").date()
+
+		fecha_inicial=datetime.combine(fecha_inicial,time.min)
+		fecha_final=datetime.combine(fecha_final,time.max)
+
+		vg=Venta_Granel.objects.filter(fecha__range=(fecha_inicial,fecha_final)).order_by("id")
+
+	else:
+		form=Buscar_Ventas_Form()
+
+	return render(request,'empenos/consulta_venta.html',locals())
+#*******************************************************************************************************************************************************
+#*¨**************************************************************************************************************************************************************
+@transaction.atomic
+def venta_granel(request):
+	#si no esta logueado mandamos al login
+	if not request.user.is_authenticated:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+	
+	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
+	try:
+		user_2=User_2.objects.get(user=request.user)
+	except Exception as e:		
+		print(e)
+		form=Login_Form(request.POST)
+		estatus=0
+		msj="La cuenta del usuario esta incompleta."			
+		return render(request,'login.html',locals())
+
+	pub_date = date.today()
+	min_pub_date_time = datetime.combine(pub_date, time.min) 
+	max_pub_date_time = datetime.combine(pub_date, time.max)  
+
+	try:
+		#validamos si el usuario tiene caja abierta en el dia actual.
+		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
+		suc=caja.sucursal
+		c=caja.caja
+	except Exception as e:
+		print(e)
+		caja_abierta="0"
+		caja=Cajas
+
+	print(caja_abierta)
+	permiso="0"
+	if user_2.perfil.id==3:		
+		permiso="1"	
+
+	error="0"#no muestra error
+	#validamos tambien el permiso al hacer post, por si modificaron el front para tener acceso a la pantalla
+	if request.method=="POST" and permiso=="1":
+		try:
+
+			error="1"#todo bien
+
+			#obtenemos todas las boletas que estan marcadas para venta.
+			vt2=Venta_Temporal.objects.filter(usuario=user_2.user,vender="S")
+
+			#en caso de que no se haya seleccionado al menos una boleta para la venta, 
+			#se regresa error al guardar
+			if not vt2.exists():
+				error="2"
+				return render(request,'empenos/venta_granel.html',locals())
+
+			avaluo=0.00
+			mutuo=0.00
+			for x in vt2:
+				avaluo=decimal.Decimal(avaluo)+decimal.Decimal(x.boleta.avaluo)
+				mutuo=decimal.Decimal(mutuo)+decimal.Decimal(x.boleta.mutuo)
+			
+			vg=Venta_Granel()
+			vg.usuario=user_2.user
+			vg.importe_mutuo=mutuo
+			vg.importe_avaluo=avaluo
+			vg.sucursal=user_2.sucursal
+			vg.save()
+
+			#obtenemos todas las boletas que estan marcadas para venta.
+			vt2=Venta_Temporal.objects.filter(usuario=user_2.user,vender="S")
+			
+			#estatus vendida
+			vendida=Estatus_Boleta.objects.get(id=6)
+
+			for x in vt2:
+				dvg=Det_Venta_Granel()
+				dvg.boleta=x.boleta
+				dvg.venta=vg
+				dvg.save()	
+
+				#todas las boletas que se incluyan el na venta, se marcara como boleta vendida.
+				x.boleta.estatus=vendida
+				x.boleta.save()					
+
+			#borramos las boletas que el usuario imprimio anterior mente, en caso de existir
+			Imprime_Venta_Granel.objects.filter(usuario=user_2.user).delete()
+
+			#almacenamos la venta en la tabla para imprimir.
+			Imprime_Venta_Granel.objects.create(usuario=user_2.user,venta_granel=vg)
+
+			#borramos la venta temporal
+			Venta_Temporal.objects.filter(usuario=user_2.user).delete()
+
+			error="3"
+			return imprime_venta_granel(request)
+		except Exception as e:
+			error="2"#indica que fallo al guardar y debera mostrar un mensaje de error en pantalla.
+			print(e)
+	else:		
+		#buscamos los estatus remate y almoneda.
+		boletas=(Boleta_Empeno.objects.filter(estatus=5,sucursal=user_2.sucursal) | Boleta_Empeno.objects.filter(estatus=3,sucursal=user_2.sucursal))
+
+		#borramos todas las ventas temporales del usuario
+		vt=Venta_Temporal.objects.filter(usuario=user_2.user).delete()
+
+		
+		for b in boletas:
+			Venta_Temporal.objects.create(usuario=user_2.user,boleta=b,fecha=min_pub_date_time)
+		vt=Venta_Temporal.objects.filter(usuario=user_2.user)
+	return render(request,'empenos/venta_granel.html',locals())
+
+#*******************************************************************************************************************************************************
+#*¨**************************************************************************************************************************************************************
 def admin_kilataje(request):
 	#si no esta logueado mandamos al login
 	if not request.user.is_authenticated:
@@ -351,6 +510,9 @@ def rep_flujo_caja(request):
 	mutuo_remate=0.00
 	avaluo_remate=0.00
 
+	cont_ventas=0
+	importe_ventas=0.00
+
 	if request.method=="POST":
 		post="1"
 
@@ -368,9 +530,21 @@ def rep_flujo_caja(request):
 		fec_final_caja=datetime.combine(fecha_inicial, time.max) 
 			
 		
+		#si indicamos la sucursal
 		if request.POST.get("sucursal")!="":
 			sucursal=Sucursal.objects.get(id=sucursal)
 			txt_sucursal=sucursal.sucursal
+
+
+			#buscamos ingresos por ventas
+			cont_ventas=Venta_Granel.objects.filter(fecha_importe_venta__range=(min_pub_date_time,max_pub_date_time),sucursal=sucursal).count()
+			imp_venta=Venta_Granel.objects.filter(fecha_importe_venta__range=(min_pub_date_time,max_pub_date_time),sucursal=sucursal).aggregate(Sum("importe_venta"))
+
+			importe_ventas=0	
+			if imp_venta["importe_venta__sum"]==None:
+				importe_ventas=0.00
+			else:
+				importe_ventas=imp_venta["importe_venta__sum"]
 
 
 			try:
@@ -525,6 +699,19 @@ def rep_flujo_caja(request):
 			fecha_inicial=datetime.combine(fecha_inicial,time.min)
 			fecha_final=datetime.combine(fecha_final,time.max)
 
+
+
+			#buscamos ingresos por ventas
+			cont_ventas=Venta_Granel.objects.filter(fecha_importe_venta__range=(min_pub_date_time,max_pub_date_time)).count()
+			imp_venta=Venta_Granel.objects.filter(fecha_importe_venta__range=(min_pub_date_time,max_pub_date_time)).aggregate(Sum("importe_venta"))
+
+			importe_ventas=0	
+			if imp_venta["importe_venta__sum"]==None:
+				importe_ventas=0.00
+			else:
+				importe_ventas=imp_venta["importe_venta__sum"]
+
+
 			#calculamos los empeños
 			importe_empenos=Boleta_Empeno.objects.filter(fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("mutuo_original"))
 			cont_empenos=Boleta_Empeno.objects.filter(fecha__range=(fecha_inicial,fecha_final)).count()
@@ -641,33 +828,22 @@ def rep_flujo_caja(request):
 				except:
 					importe_refrendo=importe_refrendo
 
-
-
-
-
-
-
-
-
-
-
-
 	else:	
 		post="0"
 
 	form=Flujo_Caja_Form()
 
-	importe_total=decimal.Decimal(saldo_inicial)-decimal.Decimal(importe_empenos)+decimal.Decimal(importe_desempenos)+decimal.Decimal(importe_capital)+decimal.Decimal(importe_refrendo)+decimal.Decimal(importe_com_pg)+decimal.Decimal(importe_otros)-decimal.Decimal(importe_retiros)
+	importe_total=decimal.Decimal(saldo_inicial)-decimal.Decimal(importe_empenos)+decimal.Decimal(importe_desempenos)+decimal.Decimal(importe_capital)+decimal.Decimal(importe_refrendo)+decimal.Decimal(importe_com_pg)+decimal.Decimal(importe_otros)-decimal.Decimal(importe_retiros)+decimal.Decimal(importe_ventas)
 
 	importe_total=math.ceil(importe_total)
 
-	cont_total=cont_otros+cont_com_pg+cont_refrendos+cont_capital+cont_desempenos+cont_empenos
+	cont_total=cont_otros+cont_com_pg+cont_refrendos+cont_capital+cont_desempenos+cont_empenos+cont_ventas
 
-	cont_total_2=cont_almoneda+cont_activas
+	cont_total_2=cont_almoneda+cont_activas+cont_remate
 
 
-	total_mutuo=mutuo_almoneda+mutuo_activo
-	total_almoneda=avaluo_almoneda+avaluo_activo
+	total_mutuo=mutuo_almoneda+mutuo_activo+mutuo_remate
+	total_almoneda=avaluo_almoneda+avaluo_activo+avaluo_remate
 	#damos formato a las variables
 	importe_empenos="{:0,.2f}".format(importe_empenos)
 	saldo_inicial="{:0,.2f}".format(saldo_inicial)
@@ -681,6 +857,7 @@ def rep_flujo_caja(request):
 	avaluo_activo="{:0,.2f}".format(avaluo_activo)
 	mutuo_almoneda="{:0,.2f}".format(mutuo_almoneda)
 	avaluo_almoneda="{:0,.2f}".format(avaluo_almoneda)
+	importe_ventas="{:0,.2f}".format(importe_ventas)
 
 
 	importe_total="{:0,.2f}".format(importe_total)
@@ -796,6 +973,18 @@ def retiro_efectivo(request):
 		print(e)
 		print("No tiene empenños")
 
+
+	#buscamos ingresos por ventas
+	cont_ventas=Venta_Granel.objects.filter(fecha_importe_venta__range=(min_pub_date_time,max_pub_date_time),caja=caja).count()
+	imp_venta=Venta_Granel.objects.filter(fecha_importe_venta__range=(min_pub_date_time,max_pub_date_time),caja=caja).aggregate(Sum("importe_venta"))
+
+	importe_ventas=0	
+	if imp_venta["importe_venta__sum"]==None:
+		importe_ventas=0.00
+	else:
+		importe_ventas=imp_venta["importe_venta__sum"]
+
+
 	cont_ref_pg=0
 	refrendos_pg=0.00
 
@@ -814,7 +1003,7 @@ def retiro_efectivo(request):
 			
 
 	try:
-		print("inicio ciclo")
+		
 		#buscamos el pago a comisiones PG
 		abonos=Abono.objects.filter(caja=caja)#todos los abonos echos por la caja.
 
@@ -881,7 +1070,7 @@ def retiro_efectivo(request):
 			#	importe_desemp=importe_desemp+int(rel_desem["importe__sum"])
 			
 			print("fin")
-		total_movs=total_movs+int(cont_com_pg)+int(cont_ref_pg)+int(cont_pc)+int(cont_refrendos)+int(cont_rebol)+int(cont_desemp)
+		total_movs=total_movs+int(cont_com_pg)+int(cont_ref_pg)+int(cont_pc)+int(cont_refrendos)+int(cont_rebol)+int(cont_desemp)+int(cont_ventas)
 	
 	except Exception as e:
 		print(e)
@@ -890,7 +1079,7 @@ def retiro_efectivo(request):
 	
 
 	#total=fondo_inicial+otros_ingresos-retiros_caja
-	total_efectivo=decimal.Decimal(fondo_inicial)+decimal.Decimal(otros_ingresos)-decimal.Decimal(retiros)-decimal.Decimal(empenos)+decimal.Decimal(pago_capital)+decimal.Decimal(comisiones_pg)+decimal.Decimal(refrendos_pg)+decimal.Decimal(importe_refrendo)+decimal.Decimal(importe_rebol)+decimal.Decimal(importe_desemp)
+	total_efectivo=decimal.Decimal(fondo_inicial)+decimal.Decimal(otros_ingresos)-decimal.Decimal(retiros)-decimal.Decimal(empenos)+decimal.Decimal(pago_capital)+decimal.Decimal(comisiones_pg)+decimal.Decimal(refrendos_pg)+decimal.Decimal(importe_refrendo)+decimal.Decimal(importe_rebol)+decimal.Decimal(importe_desemp)+decimal.Decimal(importe_ventas)
 
 	#es la clave para retiros de caja.
 	tm=Tipo_Movimiento.objects.get(id=3)
@@ -2234,6 +2423,187 @@ def refrendo_plazo_mensual(request,id_boleta):
 
 
 
+#*******************************************************************************************************************************************************
+#*¨**************************************************************************************************************************************************************
+
+def re_imprimir_venta(request,id_venta):
+	venta=Venta_Granel.objects.get(id=id_venta)
+	Imprime_Venta_Granel.objects.filter(usuario=request.user).delete()
+	Imprime_Venta_Granel.objects.create(usuario=request.user,venta_granel=venta)
+	return imprime_venta_granel(request)
+
+
+#*******************************************************************************************************************************************************
+#*¨**************************************************************************************************************************************************************
+def imprime_venta_granel(request):
+	# Create the HttpResponse object with the appropriate PDF headers.
+	response = HttpResponse(content_type='application/pdf')
+	response['Content-Disposition'] = f'inline; filename=hello.pdf'
+
+	im=Imprime_Venta_Granel.objects.get(usuario=request.user)
+
+	dv=Det_Venta_Granel.objects.filter(venta=im.venta_granel)
+
+	cont_boletas=dv.count()#numero de boletas en la venta
+
+	#cada 28 boletas salta de pagina
+	reg_x_pag=28
+	#obtenemos el numero de paginas
+	num_paginas=math.ceil(cont_boletas/27)
+
+	#obtenemos el abono a imprimir.
+	#abono=Imprime_Abono.objects.get(usuario=request.user).abono
+	buffer=BytesIO()
+
+	p=canvas.Canvas(buffer,pagesize=A4)
+
+	heigth_row=20#cada renglon es de 20.
+	
+
+	# de aqui parriba es el encabezad0
+	cont=0
+
+	for x in dv:						
+		cont=cont+1
+		if fn_modulo(cont,28)==0 or cont==1:				
+			current_row=800	
+			if cont!=1:			
+				p.showPage()
+			p.drawImage(settings.IP_LOCAL+'/static/img/logo.jpg', 55, 730,200, 60)
+
+			p.drawString(400,current_row-20,"Pagina 1 de "+str(num_paginas))
+
+			current_row=current_row-heigth_row
+			current_row=current_row-heigth_row
+
+			p.setFont("Helvetica",25)
+
+			p.drawString(350,current_row-20,"Venta Granel")
+
+			current_row=current_row-heigth_row-heigth_row
+
+			p.setFont("Helvetica-Bold",10)
+			p.drawString(55,current_row,"Folio Venta:")
+
+			p.setFont("Helvetica",10)
+			p.drawString(150,current_row,str(im.venta_granel.id))
+
+			current_row=current_row-heigth_row
+
+			p.setFont("Helvetica-Bold",10)
+			p.drawString(55,current_row,"Usuario:")
+
+
+			p.setFont("Helvetica",10)
+			p.drawString(150,current_row,im.venta_granel.usuario.username+' - '+im.venta_granel.usuario.first_name+' '+im.venta_granel.usuario.last_name)
+
+
+			p.setFont("Helvetica-Bold",10)
+			p.drawString(350,current_row,"Total Avaluo:")
+
+			p.setFont("Helvetica",10)
+			avaluo="{:0,.2f}".format(im.venta_granel.importe_avaluo)
+			p.drawString(450,current_row,"$"+avaluo)
+
+
+			current_row=current_row-heigth_row
+
+			p.setFont("Helvetica-Bold",10)
+			p.drawString(55,current_row,"Sucursal:")
+
+
+			p.setFont("Helvetica",10)
+			p.drawString(150,current_row,"SAN MARCOS")
+
+			p.setFont("Helvetica-Bold",10)
+			p.drawString(350,current_row,"Total Mutuo:")
+
+			mutuo="{:0,.2f}".format(im.venta_granel.importe_mutuo)
+			p.setFont("Helvetica",10)
+			p.drawString(450,current_row,"$"+mutuo)
+
+			current_row=current_row-heigth_row
+
+			p.setFont("Helvetica-Bold",10)
+			p.drawString(55,current_row,"Fecha:")
+
+			p.setFont("Helvetica",10)
+			p.drawString(150,current_row,str(im.venta_granel.fecha.strftime("%Y-%m-%d %H:%M:%S")))
+
+
+			p.setFont("Helvetica-Bold",10)
+			p.drawString(350,current_row,"Importe Real Venta:")
+
+			importe_venta="{:0,.2f}".format(im.venta_granel.importe_venta)
+
+			p.setFont("Helvetica",10)
+			p.drawString(450,current_row,"$"+importe_venta)
+
+			current_row=current_row-heigth_row
+			p.line(55,current_row,530,current_row)
+
+			current_row=current_row-heigth_row	
+
+			p.setFont("Helvetica-Bold",10)
+			p.drawString(55,current_row,"Cont")
+
+			p.setFont("Helvetica-Bold",10)
+			p.drawString(90,current_row,"F. Boleta")
+
+
+			p.setFont("Helvetica-Bold",10)
+			p.drawString(140,current_row,"Tipo Producto")
+
+			p.setFont("Helvetica-Bold",10)
+			p.drawString(250,current_row,"Fec.Venc")
+
+			p.setFont("Helvetica-Bold",10)
+			p.drawString(350,current_row,"Mutuo")
+
+			p.setFont("Helvetica-Bold",10)
+			p.drawString(450,current_row,"Avaluo")
+
+
+
+
+
+
+		current_row=current_row-heigth_row	
+
+		p.setFont("Helvetica",10)
+		p.drawString(55,current_row,str(cont))
+
+
+		p.setFont("Helvetica",10)
+		p.drawString(90,current_row,str(x.boleta.folio))
+
+		p.setFont("Helvetica",10)
+		p.drawString(140,current_row,x.boleta.tipo_producto.tipo_producto)
+
+		p.setFont("Helvetica",10)
+		p.drawString(250,current_row,str(x.boleta.fecha_vencimiento.strftime("%Y-%m-%d")))
+
+		mutuo="{:0,.2f}".format(x.boleta.mutuo)
+		p.setFont("Helvetica",10)
+		p.drawString(350,current_row,mutuo)
+		avaluo="{:0,.2f}".format(x.boleta.avaluo)
+		p.setFont("Helvetica",10)
+		p.drawString(450,current_row,avaluo)
+
+			
+
+
+	p.showPage()#terminar pagina actual
+
+	p.save()
+
+	pdf=buffer.getvalue()
+
+	buffer.close()
+
+	response.write(pdf)
+	Imprime_Venta_Granel.objects.get(usuario=request.user).delete()
+	return response
 
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
@@ -3453,6 +3823,17 @@ def api_consulta_corte_caja(request):
 		print("No tiene empenños")
 
 
+	#buscamos ingresos por ventas
+	cont_ventas=Venta_Granel.objects.filter(fecha_importe_venta__range=(min_pub_date_time,max_pub_date_time),caja=caja).count()
+	imp_venta=Venta_Granel.objects.filter(fecha_importe_venta__range=(min_pub_date_time,max_pub_date_time),caja=caja).aggregate(Sum("importe_venta"))
+
+	importe_ventas=0	
+	if imp_venta["importe_venta__sum"]==None:
+		importe_ventas=0.00
+	else:
+		importe_ventas=imp_venta["importe_venta__sum"]
+
+
 	cont_ref_pg=0
 	refrendos_pg=0.00
 
@@ -3541,7 +3922,9 @@ def api_consulta_corte_caja(request):
 			#	importe_desemp=importe_desemp+int(rel_desem["importe__sum"])
 			
 
-		total_movs=int(total_movs+cont_com_pg+refrendos_pg+cont_pc+cont_refrendos+cont_desemp+cont_rebol)
+		total_movs=int(total_movs+cont_com_pg+refrendos_pg+cont_pc+cont_refrendos+cont_desemp+cont_rebol+cont_ventas)
+
+
 
 
 	except Exception as e:
@@ -3549,7 +3932,7 @@ def api_consulta_corte_caja(request):
 		print("No se han registrado abonos.")
 
 	total_efectivo=0.00
-	total_efectivo=decimal.Decimal(imp_fondo_inicial)+decimal.Decimal(otros_ingresos)-decimal.Decimal(retiros)-decimal.Decimal(empenos)+decimal.Decimal(refrendos_pg)+decimal.Decimal(comisiones_pg)+decimal.Decimal(importe_refrendo)+decimal.Decimal(pago_capital)+decimal.Decimal(importe_desemp)+decimal.Decimal(importe_rebol)
+	total_efectivo=decimal.Decimal(imp_fondo_inicial)+decimal.Decimal(otros_ingresos)-decimal.Decimal(retiros)-decimal.Decimal(empenos)+decimal.Decimal(refrendos_pg)+decimal.Decimal(comisiones_pg)+decimal.Decimal(importe_refrendo)+decimal.Decimal(pago_capital)+decimal.Decimal(importe_desemp)+decimal.Decimal(importe_rebol)+decimal.Decimal(importe_ventas)
 	caja.teorico_efectivo=total_efectivo
 	caja.save()
 
@@ -3570,7 +3953,18 @@ def api_consulta_corte_caja(request):
 
 	respuesta=[]	
 
-	respuesta.append({'nombre_cajero':caja.usuario.first_name+' '+caja.usuario.last_name,'estatus_guardado':caja.estatus_guardado,'dia_valido':dia_valido,'caja_abierta':caja_abierta,'token':str(token),'estatus':1,'fondo_inicial':str(imp_fondo_inicial),'cont_fondo_inicial':'1','otros_ingresos':str(otros_ingresos),'cont_otros_ingresos':str(cont_otros_ingresos),'retiros':str(retiros),'cont_retiros':str(cont_retiros),'total_movs':str(total_movs),'total_efectivo':str(total_efectivo),'real_efectivo':caja.real_efectivo,'empenos':str(empenos),'cont_empenos':str(cont_empenos),'cont_refrendos':str(cont_refrendos),'cont_com_pg':str(cont_com_pg),'cont_ref_pg':str(cont_ref_pg),'importe_refrendo':str(importe_refrendo),'comisiones_pg':str(comisiones_pg),'refrendos_pg':str(refrendos_pg),'cont_pc':cont_pc,		'pago_capital':pago_capital,"importe_desemp":importe_desemp,"cont_desemp":cont_desemp,"importe_rebol":importe_rebol,"cont_rebol":cont_rebol})	
+
+	importe_ventas="{:0,.2f}".format(importe_ventas)
+	importe_rebol="{:0,.2f}".format(importe_rebol)
+	importe_desemp="{:0,.2f}".format(importe_desemp)
+	pago_capital="{:0,.2f}".format(pago_capital)
+	comisiones_pg="{:0,.2f}".format(comisiones_pg)
+	importe_refrendo="{:0,.2f}".format(importe_refrendo)
+	otros_ingresos="{:0,.2f}".format(otros_ingresos)
+	
+
+
+	respuesta.append({'nombre_cajero':caja.usuario.first_name+' '+caja.usuario.last_name,'estatus_guardado':caja.estatus_guardado,'dia_valido':dia_valido,'caja_abierta':caja_abierta,'token':str(token),'estatus':1,'fondo_inicial':str(imp_fondo_inicial),'cont_fondo_inicial':'1','otros_ingresos':str(otros_ingresos),'cont_otros_ingresos':str(cont_otros_ingresos),'retiros':str(retiros),'cont_retiros':str(cont_retiros),'total_movs':str(total_movs),'total_efectivo':str(total_efectivo),'real_efectivo':caja.real_efectivo,'empenos':str(empenos),'cont_empenos':str(cont_empenos),'cont_refrendos':str(cont_refrendos),'cont_com_pg':str(cont_com_pg),'cont_ref_pg':str(cont_ref_pg),'importe_refrendo':str(importe_refrendo),'comisiones_pg':str(comisiones_pg),'refrendos_pg':str(refrendos_pg),'cont_pc':cont_pc,		'pago_capital':pago_capital,"importe_desemp":importe_desemp,"cont_desemp":cont_desemp,"importe_rebol":importe_rebol,"cont_rebol":cont_rebol,'importe_ventas':importe_ventas,'cont_ventas':cont_ventas})	
 	
 	#agregamos una segunda lina con la informacion guardada ne el corte de caja	
 	respuesta.append({'comentario':caja.comentario,'centavos_10':caja.centavos_10,'centavos_50':caja.centavos_50,'pesos_1':caja.pesos_1,'pesos_2':caja.pesos_2,'pesos_5':caja.pesos_5,'pesos_10':caja.pesos_10,'pesos_20':caja.pesos_20,'pesos_50':caja.pesos_50,'pesos_100':caja.pesos_100,'pesos_200':caja.pesos_200,'pesos_500':caja.pesos_500,'pesos_1000':caja.pesos_1000,'diferencia':caja.diferencia,'real_efectivo':caja.real_efectivo})

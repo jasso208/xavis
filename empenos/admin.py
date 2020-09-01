@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import Tipo_Movimiento,Perfil,Sucursal,User_2,Sucursales_Regional,Cajas,Otros_Ingresos,Retiro_Efectivo,Token,Control_Folios
 from .models import Tipo_Producto,Linea,Sub_Linea,Marca,Costo_Kilataje,Empenos_Temporal,Joyeria_Empenos_Temporal,Plazo,Cliente
 from .models import Boleta_Empeno,Det_Boleto_Empeno,Estatus_Boleta,Imprimir_Boletas,Tipo_Pago,Pagos,Dia_No_Laboral,Pagos_Temp,Rel_Abono_Capital,Rel_Abono_Pago
-from .models import Abono,Imprime_Abono,Periodo,Tipo_Periodo,Tipo_Kilataje
+from .models import Abono,Imprime_Abono,Periodo,Tipo_Periodo,Tipo_Kilataje,Venta_Temporal,Venta_Granel,Det_Venta_Granel,Imprime_Venta_Granel
 # Register your models here.
 
 admin.site.register(Tipo_Movimiento)
@@ -38,6 +38,12 @@ admin.site.register(Imprime_Abono)
 admin.site.register(Periodo)
 admin.site.register(Tipo_Periodo)
 admin.site.register(Tipo_Kilataje)
+admin.site.register(Venta_Temporal)
+admin.site.register(Venta_Granel)
+admin.site.register(Det_Venta_Granel)
+admin.site.register(Imprime_Venta_Granel)
+
+
 
 
 

@@ -206,6 +206,19 @@
 								</div>
 
 								<div class="col-xs-12">
+									<div class="col-xs-6">
+										<p>Ventas:</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p id="cont_ventas"></p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p id="importe_ventas"></p>
+									</div>
+								</div>
+
+
+								<div class="col-xs-12">
 									<br>
 								</div>
 
@@ -804,6 +817,9 @@
 						            $("#cont_rebol").text("0");
 			            			$("#importe_rebol").text("$0.00");	
 
+						            $("#cont_ventas").text("0");
+			            			$("#importe_ventas").text("$0.00");	
+
 									$("#cont_desem").text("0");
 									$("#importe_desemp").text("$0.00");
 
@@ -879,13 +895,17 @@
 		            			$("#importe_rebol").text("$"+r[0].importe_rebol);	
 
 
+					            $("#cont_ventas").text(r[0].cont_ventas);
+		            			$("#importe_ventas").text("$"+r[0].importe_ventas);	
+
+
 					            total_efectivo_global=r[0].total_efectivo;
 					            
 					             str_msj="";
-					            //si la caja no esta abierta y no es del dia de hoy, escondemos el boton de guardar.
-					            if (r[0].caja_abierta=='0' || r[0].dia_valido=="0")
-					            {
-					            	$("#btn_guardar").hide();
+					            //si la caja no esta abierta o no es del dia de hoy, escondemos el boton de guardar.
+					            if (r[0].caja_abierta=='0')// || r[0].dia_valido=="0")
+					            {					            	
+									$("#btn_guardar").hide();
 
 					            	if(r[0].caja_abierta=="0")
 					            	{
@@ -893,11 +913,7 @@
 					            		$("#btn_cerrar_caja").hide();
 					            		$("#id_nota_1").hide()
 					            	}
-					            	if(r[0].dia_valido=="0")
-					            	{
-					            		str_msj="Esta caja no es del dia actual, no podras modificarla"
-					            	}
-
+					            	
 					            }
 					            else
 					            {

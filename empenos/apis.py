@@ -9,6 +9,7 @@ from empenos.funciones import *
 from django.core import serializers
 from empenos.jobs import *
 from django.conf import settings
+from django.utils import timezone
 
 @api_view(['GET'])
 def api_tipo_producto(request):
@@ -27,6 +28,78 @@ def api_tipo_producto(request):
 	return Response(respuesta)
 
 
+@api_view(['GET'])
+def api_agrega_importe_real_venta(request):
+	respuesta=[]
+
+	try:
+		
+		id_caja=request.GET.get("id_caja")		
+		id_usuario=request.GET.get("id_usuario")		
+
+		caja=Cajas.objects.get(id=id_caja)
+
+		usuario=User.objects.get(id=id_usuario)
+
+
+		venta=Venta_Granel.objects.get(id=int(request.GET.get("id_venta")))
+
+		venta.importe_venta=decimal.Decimal(request.GET.get("importe"))
+
+		venta.caja=caja
+
+		venta.usuario_finaliza=usuario
+
+		venta.fecha_importe_venta=timezone.now()
+
+		venta.save()
+
+		respuesta.append({"estatus":"1"})
+		
+	except Exception  as e:
+		print(e)
+		respuesta=[]
+		respuesta.append({"estatus":"0","msj":"Error al agregar el importe."})
+
+	return Response(respuesta)
+
+
+
+@api_view(['GET'])
+@transaction.atomic
+def api_agrega_boleta_venta_granel(request):
+	respuesta=[]
+
+	try:
+		id=int(request.GET.get("id"))		
+		respuesta.append({'estatus':"1"})#estatus de falla
+		vt=Venta_Temporal.objects.get(id=id)
+		usuario=vt.usuario
+
+		if vt.vender=="S":
+
+			vt.vender="N"			
+			
+		else:
+			vt.vender="S"			
+			
+		vt.save()
+
+		vt2=Venta_Temporal.objects.filter(usuario=usuario,vender="S")
+
+		avaluo=0.00
+		mutuo=0.00
+		for x in vt2:
+			avaluo=decimal.Decimal(avaluo)+decimal.Decimal(x.boleta.avaluo)
+			mutuo=decimal.Decimal(mutuo)+decimal.Decimal(x.boleta.mutuo)
+
+		respuesta.append({'marcado':vt.vender,"avaluo":"{:0,.2f}".format(avaluo) ,"mutuo": "{:0,.2f}".format(mutuo) })
+
+	except Exception as e:
+		print(e)
+		respuesta.append({'estatus':"0",'msj':"Error al agregar la boleta."})#estatus de falla
+
+	return Response(respuesta)
 
 
 @api_view(['GET'])

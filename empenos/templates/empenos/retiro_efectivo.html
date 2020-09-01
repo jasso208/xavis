@@ -140,6 +140,18 @@
 										<p>${{importe_rebol}}</p>
 									</div>
 								</div>
+								<div class="col-xs-12">
+									<div class="col-xs-6">
+										<p>Ventas:</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>{{cont_ventas}}</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>${{importe_ventas}}</p>
+									</div>
+								</div>
+
 
 
 
@@ -340,6 +352,7 @@
 						$("#id_tipo_movimiento").val("3");
 						$("#tipo_movimiento").hide();
 						$(".cls_notificacion").hide();
+						
 						$("#btn_aceptar_notificacion").click(
 								function()
 								{
@@ -349,9 +362,7 @@
 
 						$("#generar_codigo").click(
 							function()
-							{		
-								
-
+							{	
 
 								var importe=$("#id_importe").val();
 								var comentario=$("#id_comentario").val();

@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+{% load bootstrap3}
+{% load static%}
+{% block usuario %}
+
+			<div class="col-xs-6">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{user_2.user.username}} {{user_2.perfil.perfil}}</label> 
+				
+			</div>
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-home"></span> Sucursal: {{user_2.sucursal}}</label> 	
+			</div>
+
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-inbox"></span> Caja: {{c}} </label> 	
+			</div>
+
+
+{% endblock  %}
+{% block content %}
+	<div class="col-xs-12 cls_encabezado_body">
+	
+		<a >
+			Consulta Ventas
+		</a>		
+	
+	</div>
+	<div class="col-xs-12">
+		<form method="post" action="#" class="cls_form_1">
+			{%csrf_token%}
+	
+			<div class="row cls_form_consulta">
+				<div class="col-xs-12">
+					<div class="panel panel-default" id="panel_principal" >						 
+						<div class="panel-body">
+
+							<div class="col-xs-12">
+								<div class="panel panel-default">						
+									<div class="panel-body">
+
+									
+
+										<div class="col-xs-3">
+											<label>
+												Fecha Inciial
+											</label>
+											<input type="date" name="fecha_inicial" class="form-control" placeholder="Fecha inicial" title=""  id="id_fecha_inicial">
+										</div>
+
+										<div class="col-xs-3">
+											<label>
+												Fecha Final
+											</label>
+											<input type="date" name="fecha_final" class="form-control" placeholder="Fecha final" title=""  id="id_fecha_final">
+											
+										</div>
+										<div class="col-xs-3">
+											<br>
+											<button class="btn btn-primary">
+												Consultar
+											</button>
+										</div>
+
+									</div>
+								</div>
+							</div>
+
+							<div class="col-xs-12">
+								<div class="cls_encabezado_alert text-center" >
+									<label>Ventas</label>
+								</div>
+
+									<table id="tabla_cotizacion" class="table table-bordered">
+									    <thead>
+									      <tr>
+									      	<th></th>
+									        <th>F. Venta</th>
+									        <th>Sucursal</th>
+									        <th>Fecha</th>
+									        <th>Mutuo</th>									        
+									        <th>Avaluo</th>
+									        <th>Venta Real</th>
+									        <th>Usuario</th>
+									      </tr>
+									    </thead>
+									    <tbody>
+									    	{% for v in vg%}
+										    	<tr>
+											    	<td>
+										    			<a  class='btn btn-default btn-sm' href="/empenos/re_imprimir_venta/{{v.id}}">
+										    				<span class='glyphicon glyphicon-print'>
+
+										    				</span>    					
+										    			</a>
+										    			{% ifequal v.importe_venta 0 %}
+											    			<a class='btn btn-default btn-sm' onclick="fn_agrega_importe('{{v.id}}')">
+											    				<span class='glyphicon glyphicon-usd'>
+											    				</span>    					
+											    			</a>
+										    			{% endifequal %}
+
+											    	</td>
+											        <td>{{v.id}}</td>
+											        <td>{{v.sucursal.sucursal}}</td>
+											        <td>{{v.fecha | date:"d/m/Y"}}</td>
+											        <td>${{v.importe_mutuo}}</td>									        
+											        <td>${{v.importe_avaluo}}</td>
+											        <td>${{v.importe_venta}}</td>
+											        <td>{{v.usuario}} - {{v.usuario.first_name}} {{v.usuario.last_name}}</td>
+										    	</tr>
+									    	{%endfor%}
+									    </tbody>
+									</table>
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+
+	{% ifequal permiso "0" %}
+
+	<div class="fondo_mensaje  cls_error_guardar_venta" >
+
+	</div >
+
+	<div class="mensaje  cls_error_guardar_venta" >
+		<div class="cls_encabezado_alert" >
+			Error!!
+		</div>	
+		<div class="panel panel-default">	
+			<label class="page-header" id="msj_notificacion">No cuentas con permiso para acceder a esta opción</label>
+			<br>				
+			<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_ventas'%}"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+			<br>
+			<br>
+		</div>
+	</div>
+
+	{% endifequal %}
+
+	{% ifequal caja_abierta  '0' %}
+	<div class="fondo_mensaje  cls_error_caja_abierta" >
+
+	</div >
+
+	<div class="mensaje  cls_error_caja_abierta" >
+		<div class="cls_encabezado_alert" >
+			Error!!
+		</div>	
+		<div class="panel panel-default">	
+			<label class="page-header" id="msj_notificacion">Debes tener caja abierta para ingresar a esta opción.</label>
+			<br>				
+			<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_ventas'%}"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+			<br>
+			<br>
+		</div>
+	</div>
+
+{% endifequal %}
+
+
+	<div id="fondo_preloader">
+		<div class="preloader" id="preloader">		
+		</div>
+	</div>
+
+	<div class="cls_fondo_form_emergente_2 cls_agregar_importe_venta" id="fondo_emergente">
+		
+	</div>
+	<div class="cls_form_emergente_2 cls_agregar_importe_venta" style="overflow: hidden;" >
+
+				<div class="cls_encabezado_alert" >
+					<label id="encabezado_error">						
+					</label>
+				</div>
+
+				<div class="col-xs-12">	
+					<br>				
+					<input type="number" name="" id="txt_importe" clasS="form-control" placeholder="0.00">
+					<div class="help-block" id="id_error_importe">
+							<span id="error_importe">Error al guardar el importe.</span>
+					</div>
+				</div>
+
+				<div class="col-xs-12 text-center">	
+					<a class="btn btn-primary btn-sm" onclick="fn_agrega_importe_real_venta()" ><span class="glyphicon glyphicon-ok"></span> 		Guardar
+					</a>
+					<br><br>
+				</div>
+	</div>
+
+
+
+	<script type="text/javascript">
+		id_venta="";
+
+		$(document).ready(
+			function()
+			{
+				fn_inicio();
+
+				$("#fondo_emergente").click(
+					function()
+					{
+
+						$(".cls_agregar_importe_venta").hide();
+
+					}
+				);
+			}
+		);
+
+		function fn_inicio()
+		{
+
+			$(".cls_agregar_importe_venta").hide();
+			$("#fondo_preloader").hide();
+			$("#id_error_importe").hide();
+
+		}
+
+		function fn_agrega_importe(id)
+		{
+			id_venta=id;
+
+			$(".cls_agregar_importe_venta").show();
+			$("#encabezado_error").text("Importe real de venta de folio "+id_venta.toString());
+
+		}
+
+		function fn_agrega_importe_real_venta()
+		{			
+			
+			$("#fondo_preloader").show();
+			$.ajax({
+				type: "GET",
+		        url: "{{IP_LOCAL}}/empenos/api_agrega_importe_real_venta/",
+		        data: {
+
+					"id_venta":id_venta,"importe":$("#txt_importe").val(),'id_caja':"{{caja.id}}","id_usuario":"{{user_2.user.id}}"
+
+		        },
+		        contentType: "application/json; charset=utf-8",
+		        dataType: "json",
+		        success: function (r) {
+		        	
+		        	//fallo
+		        	if (r[0].estatus=="0")
+		        	{
+		        		$("#id_error_importe").show();
+
+		        	}
+		        	else//todo correcto
+		        	{
+
+		        		location.reload();
+
+		        	}
+
+		        	$("#fondo_preloader").hide();
+		        },
+		        error: function (r) {		        		
+						$("#id_error_importe").show();
+						$("#fondo_preloader").hide();
+		        },
+		        failure: function (r) {		        		
+						$("#id_error_importe").show();
+						$("#fondo_preloader").hide();
+		        }
+			});
+
+		}
+
+	</script>
+{%endblock%}

@@ -49,6 +49,9 @@ class Reportes_Caja_Form(forms.Form):
 	fecha_inicial=forms.DateTimeField(initial=timezone.now())
 	fecha_final=forms.DateTimeField(initial=timezone.now())
 
+class Buscar_Ventas_Form(forms.Form):
+	fecha_inicial=forms.DateTimeField(initial=timezone.now())
+	fecha_final=forms.DateTimeField(initial=timezone.now())
 
 class Costo_Extra_Form(forms.Form):
 	sucursal=forms.ModelChoiceField(queryset=Sucursal.objects.all())

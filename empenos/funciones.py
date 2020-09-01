@@ -29,6 +29,15 @@ def fn_calcula_refrendo(mutuo,tipo_producto):
 	respuesta.append({"almacenaje":almacenaje,"interes":interes,"iva":iva,"refrendo":refrendo})
 	return respuesta
 
+#funcion para determinar el modulo
+def fn_modulo(a, b):
+  '''Funcion que calcula el
+  residuo (modulo) de una division'''
+  residuo = 0
+  x = a // b
+  residuo = a - (x * b)
+  return residuo
+  
 #solo para periodos mensuales
 def fn_pago_parcial(boleta,hoy,refrendo,pago):
 
