@@ -1054,8 +1054,7 @@ def retiro_efectivo(request):
 
 			rel_desem=Rel_Abono_Capital.objects.filter(abono=ab)#.exclude(capital_restante__gte=0).aggregate(Sum("importe"))#buscamos si el abono afecto a capital
 			#cont_desemp=cont_desemp+Rel_Abono_Capital.objects.filter(abono=ab).exclude(capital_restante__gte=0).count()
-			importe_desemp=0.00
-			cont_desemp=0
+
 			for x in rel_desem:
 				if decimal.Decimal(x.capital_restante)==decimal.Decimal(0):
 					importe_desemp=decimal.Decimal(importe_desemp)+decimal.Decimal(x.importe)
