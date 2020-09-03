@@ -254,8 +254,9 @@ def venta_granel(request):
 
 	print(caja_abierta)
 	permiso="0"
-	if user_2.perfil.id==3:		
+	if user_2.perfil.id==3 or user_2.perfil.id==2:		
 		permiso="1"	
+
 
 	error="0"#no muestra error
 	#validamos tambien el permiso al hacer post, por si modificaron el front para tener acceso a la pantalla
@@ -263,6 +264,7 @@ def venta_granel(request):
 		try:
 
 			error="1"#todo bien
+
 
 			#obtenemos todas las boletas que estan marcadas para venta.
 			vt2=Venta_Temporal.objects.filter(usuario=user_2.user,vender="S")
