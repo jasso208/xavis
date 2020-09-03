@@ -200,7 +200,10 @@ def consulta_venta(request):
 		caja=Cajas
 
 	permiso="0"
-	if user_2.perfil.id==3:		
+
+	print(user_2.perfil.id)
+	if user_2.perfil.id==3 or user_2.perfil.id==2:
+		print("entr")		
 		permiso="1"	
 
 	if request.method=="POST":		
@@ -214,7 +217,7 @@ def consulta_venta(request):
 
 	else:
 		form=Buscar_Ventas_Form()
-
+	print(permiso)
 	return render(request,'empenos/consulta_venta.html',locals())
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
