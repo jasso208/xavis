@@ -143,7 +143,7 @@ def venta_piso(request):
 		print(e)
 		caja_abierta="0"
 		caja=Cajas
-		return render(request,'empenos/venta_piso.html',locals())
+		
 
 
 
