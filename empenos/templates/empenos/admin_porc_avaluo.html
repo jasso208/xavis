@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load bootstrap3 %}
+{% load static%}
+{% block usuario %}
+
+			<div class="col-xs-6">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{user_2.user.username}} {{user_2.perfil.perfil}}</label> 
+				
+			</div>
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-home"></span> Sucursal: {{user_2.sucursal}}</label> 	
+			</div>
+
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-inbox"></span> Caja: {{c}} </label> 	
+			</div>
+
+
+{% endblock  %}
+{% block content %}
+	<div class="col-xs-12 cls_encabezado_body">
+	
+		<a >
+			Porcentaje sobre avaluo.
+		</a>		
+	
+	</div>
+
+
+	<div class="col-xs-12">
+		<form method="post" action="#" class="cls_form_1">
+			{%csrf_token%}
+			<div class="row cls_form_consulta">
+				<div class="col-xs-6">
+					<div class="panel panel-default">						
+						<div class="panel-body">
+							
+
+							<div class="col-xs-12 col-md-6"  >
+								<label for="">Porcentaje</label>
+								{% bootstrap_field form.porcentaje show_label=False %}
+							</div>
+
+							<div class="col-xs-12">								
+								<button class="btn btn-primary btn-sm" style="float: right;"   id="guardar">Guardar</button>								
+							</div>	
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+
+
+
+
+	{% ifequal permiso "0" %}
+		<div class="fondo_mensaje  cls_error_guardar_venta" >
+
+		</div >
+
+		<div class="mensaje  cls_error_guardar_venta" >
+			<div class="cls_encabezado_alert" >
+				Error!!
+			</div>	
+			<div class="panel panel-default">	
+				<label class="page-header" id="msj_notificacion"> No cuentas con permiso para acceder a esta opción</label>
+				<br>				
+				<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_administracion'%}"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+				<br>
+				<br>
+			</div>
+		</div>
+	{% endifequal %}
+
+	{% ifequal error "1" %}
+		<div class="fondo_mensaje  cls_error_porcentaje_invalido" >
+		</div >
+		<div class="mensaje  cls_error_porcentaje_invalido" >
+			<div class="cls_encabezado_alert">
+				Error!!
+			</div>	
+			<div class="panel panel-default">	
+				<label class="page-header" id="msj_notificacion">El porcentaje ingresado no es valido.</label>
+				<br>				
+				<a class="btn btn-primary btn-sm" id="btn_aceptar"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+				<br>
+				<br>
+			</div>
+		</div>
+	{% endifequal %}
+
+	<div id="fondo_preloader">
+		<div class="preloader" id="preloader">
+		
+		</div>
+	</div>
+
+
+	<script type="text/javascript">
+		$(document).ready(
+				function()
+				{
+					
+					fn_inicio();
+					$("#id_porcentaje").val("{{porc}}");
+
+					$("#guardar").click(
+							function()
+							{
+								$("#fondo_preloader").show();
+							}
+						);
+					$("#btn_aceptar").click(
+							function()
+							{
+								$(".cls_error_porcentaje_invalido").hide();
+							}
+						);
+				}
+			);
+		function fn_inicio()
+		{
+			$("#fondo_preloader").hide();
+		}
+
+	</script>
+	
+{% endblock  %}

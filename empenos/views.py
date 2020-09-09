@@ -63,10 +63,6 @@ def abrir_caja(request):
 		caja_abierta="1"#si tiene caja abierta enviamos este estatus para no dejar entrar a la pantalla.
 		msj_caja="Solo se puede abrir una caja por dia en la sucursal, si ya fue cerrada, solicite la reapertura para seguir operando."
 
-
-
-
-
 	sucursales=Sucursales_Regional.objects.filter(user=user_2.user,sucursal=user_2.sucursal)
 	
 	id_sucursal=0
@@ -113,6 +109,287 @@ def abrir_caja(request):
 	else:
 		form=Abre_Caja_Form()
 	return render(request,'empenos/abre_caja.html',locals())
+
+#*******************************************************************************************************************************************************
+#*¨**************************************************************************************************************************************************************
+@transaction.atomic
+def venta_piso(request):
+	#si no esta logueado mandamos al login
+	if not request.user.is_authenticated:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+	
+	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
+	try:
+		user_2=User_2.objects.get(user=request.user)
+	except Exception as e:		
+		print(e)
+		form=Login_Form(request.POST)
+		estatus=0
+		msj="La cuenta del usuario esta incompleta."			
+		return render(request,'login.html',locals())
+
+	pub_date = date.today()
+	min_pub_date_time = datetime.combine(pub_date, time.min) 
+	max_pub_date_time = datetime.combine(pub_date, time.max)  
+
+	try:		
+		#validamos si el usuario tiene caja abierta en el dia actual.
+		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
+		suc=caja.sucursal
+		c=caja.caja
+
+	except Exception as e:
+		print(e)
+		caja_abierta="0"
+		caja=Cajas
+		return render(request,'empenos/venta_piso.html',locals())
+
+
+
+	username=request.user.username
+	id_sucursal=user_2.sucursal.id
+
+	est_Vendida=Estatus_Boleta.objects.get(id=6)
+
+	error="0"
+	if request.method=="POST":
+		try:
+		
+			
+			usuario=request.user
+			id_cliente=request.POST.get("id_cliente")
+			cliente=Cliente.objects.get(id=id_cliente)
+			#obtenemos todos los productos de la cotizacion del usuario
+			vtp=Venta_Temporal_Piso.objects.filter(usuario=usuario)
+
+			importe_mutuo=0.00
+			importe_avaluo=0.00
+			importe_total=0.00
+
+			#obtenemos los totales para crear la venta.
+			for v in vtp:
+				importe_mutuo=decimal.Decimal(importe_mutuo)+decimal.Decimal(v.boleta.mutuo)
+				importe_avaluo=decimal.Decimal(importe_avaluo)+decimal.Decimal(v.boleta.avaluo)
+				importe_total=decimal.Decimal(importe_total)+fn_calcula_precio_venta_producto(v.boleta)
+
+			#es la clave para vENTA pISO.
+			tm=Tipo_Movimiento.objects.get(id=6)
+			#generamos el folio para la venta piso.
+			folio=fn_folios(tm,suc)
+
+			#creamos la venta piso.
+			vp=Venta_Piso()
+			vp.folio=folio
+			vp.usuario=request.user
+			vp.importe_mutuo=importe_mutuo
+			vp.importe_avaluo=importe_avaluo
+			vp.sucursal=suc
+			vp.importe_venta=int(importe_total)
+			vp.caja=caja
+			vp.cliente=cliente
+			vp.save()
+
+			vtp=Venta_Temporal_Piso.objects.filter(usuario=usuario)
+
+			for v in vtp:
+				dvp=Det_Venta_Piso()
+				dvp.venta=vp
+				dvp.boleta=v.boleta
+				dvp.importe_venta=fn_calcula_precio_venta_producto(v.boleta)
+				dvp.save()
+
+				#cambiamos el estatus de la boleta a vendida.
+				v.boleta.estatus=est_Vendida
+				v.boleta.save()
+
+			Venta_Temporal_Piso.objects.filter(usuario=usuario).delete()
+
+			#como solo puede imprimirse una venta a la vez, se eliminan todas las que ya existan
+			Imprime_Venta_Piso.objects.filter(usuario=request.user).delete()
+
+			Imprime_Venta_Piso.objects.create(usuario=request.user,venta_piso=vp)
+
+			return HttpResponseRedirect(reverse('empenos:imprime_venta_piso'))
+		except Exception as e:
+			form=Venta_Piso_Form()
+			error="1"
+			return render(request,'empenos/venta_piso.html',locals())
+	form=Venta_Piso_Form()
+	return render(request,'empenos/venta_piso.html',locals())
+
+
+
+def re_imprimir_venta_piso(request,id_venta):
+	venta=Venta_Piso.objects.get(id=id_venta)
+	Imprime_Venta_Piso.objects.filter(usuario=request.user).delete()
+	Imprime_Venta_Piso.objects.create(usuario=request.user,venta_granel=venta)
+	return imprime_venta_granel(request)
+
+
+
+def imprime_venta_piso(request):
+	# Create the HttpResponse object with the appropriate PDF headers.
+	response = HttpResponse(content_type='application/pdf')
+	response['Content-Disposition'] = f'inline; filename=hello.pdf'
+
+	im=Imprime_Venta_Piso.objects.get(usuario=request.user)
+
+	dv=Det_Venta_Piso.objects.filter(venta=im.venta_piso)
+
+	cont_boletas=dv.count()#numero de boletas en la venta
+
+	#cada 28 boletas salta de pagina
+	reg_x_pag=28
+	#obtenemos el numero de paginas
+	num_paginas=math.ceil(cont_boletas/27)
+
+	#obtenemos el abono a imprimir.
+	#abono=Imprime_Abono.objects.get(usuario=request.user).abono
+	buffer=BytesIO()
+
+	p=canvas.Canvas(buffer,pagesize=A4)
+
+	heigth_row=20#cada renglon es de 20.
+
+	current_row=730
+
+	p.drawImage(settings.IP_LOCAL+'/static/img/logo.jpg',40,750,100, 30)
+	p.drawImage(settings.IP_LOCAL+'/static/img/logo.jpg',340,750,100, 30)
+
+	p.drawString(400,790,"Copia cliente")
+
+	p.drawString(200,760,"Folio: "+str(im.venta_piso.folio))
+	p.drawString(500,760,"Folio: "+str(im.venta_piso.folio))
+
+	p.setFont("Helvetica-Bold",12)
+	p.drawString(100,current_row,"TICKET VENTA")
+	p.drawString(400,current_row,"TICKET VENTA")
+
+	current_row=current_row-20
+	current_row=current_row-20
+	p.setFont("Helvetica",10)
+
+	p.drawString(35,current_row,"Fecha: ")
+	p.drawString(100,current_row,str(im.venta_piso.fecha.strftime("%Y-%m-%d %H:%M:%S")))
+	p.drawString(335,current_row,"Fecha: ")
+	p.drawString(400,current_row,str(im.venta_piso.fecha.strftime("%Y-%m-%d %H:%M:%S")))
+
+	current_row=current_row-20
+	p.drawString(35,current_row,"Sucursal:")
+	p.drawString(100,current_row,im.venta_piso.sucursal.sucursal)
+
+	p.drawString(335,current_row,"Sucursal:")
+	p.drawString(400,current_row,im.venta_piso.sucursal.sucursal)
+
+	current_row=current_row-20
+	p.setFont("Helvetica",10)
+	p.drawString(35,current_row,"Cliente: ")
+	p.setFont("Helvetica",7)
+	p.drawString(100,current_row,im.venta_piso.cliente.nombre+' '+im.venta_piso.cliente.apellido_p+' '+im.venta_piso.cliente.apellido_m)
+	p.setFont("Helvetica",10)
+	p.drawString(335,current_row,"Cliente: ")
+	p.setFont("Helvetica",7)
+	p.drawString(400,current_row,im.venta_piso.cliente.nombre+' '+im.venta_piso.cliente.apellido_p+' '+im.venta_piso.cliente.apellido_m)
+	p.setFont("Helvetica",10)
+	current_row=current_row-20
+	current_row=current_row-20
+
+	p.setFont("Helvetica-Bold",10)
+	p.drawString(35,current_row,"Artículo")
+	p.drawString(230,current_row,"Precio")
+
+	p.drawString(335,current_row,"Artículo")
+	p.drawString(530,current_row,"Precio")
+
+	p.setFont("Helvetica",7)
+	current_row=current_row-20
+
+	for d in dv:
+		boleta=d.boleta
+		dbe=Det_Boleto_Empeno.objects.filter(boleta_empeno=boleta)
+
+		importe="$"+"{:0,.2f}".format(int(d.importe_venta))
+
+		p.drawString(30,current_row,">")
+		p.drawString(330,current_row,">")
+
+		p.drawString(230,current_row,importe)
+		p.drawString(530,current_row,importe)
+
+		for db in dbe:
+			p.drawString(35,current_row,db.descripcion)
+			p.drawString(335,current_row,db.descripcion)
+			current_row=current_row-20
+
+	
+
+	p.setFont("Helvetica-Bold",10)	
+	p.drawString(170,current_row,"Total: ")		
+	p.drawString(470,current_row,"Total: ")		
+	importe_venta="$"+"{:0,.2f}".format(int(im.venta_piso.importe_venta))	
+	p.drawString(220,current_row,importe_venta)	
+	p.drawString(520,current_row,importe_venta)	
+
+	current_row=current_row-20
+
+	p.setFont("Helvetica-Bold",10)
+	p.drawString(40,current_row,"Nota: ")	
+	p.drawString(340,current_row,"Nota: ")	
+	p.setFont("Helvetica",10)
+	p.drawString(70,current_row,"El artículo fue probado en sucursal junto con ")	
+	p.drawString(370,current_row,"El artículo fue probado en sucursal junto con ")	
+	current_row=current_row-10
+	p.drawString(70,current_row,"el cliente y se entrega funcionando.")	
+	p.drawString(370,current_row,"el cliente y se entrega funcionando.")	
+	current_row=current_row-10
+	p.drawString(70,current_row,"Por ser un artículo usado no se da ningun ")	
+	p.drawString(370,current_row,"Por ser un artículo usado no se da ningun ")	
+	current_row=current_row-10
+	p.drawString(70,current_row,"tipo de garantia.")
+	p.drawString(370,current_row,"tipo de garantia.")		
+	
+
+	current_row=current_row-20	
+	current_row=current_row-20	
+	
+	p.line(50,current_row,250,current_row)
+	p.line(350,current_row,550,current_row)
+
+	current_row=current_row-20	
+	p.drawString(120,current_row,"Firma Cliente.")		
+	p.drawString(420,current_row,"Firma Cliente.")		
+
+	
+
+	linea_corte=800
+
+	pinta=0
+
+	while linea_corte>0:
+		if pinta==0:
+			p.line(300,linea_corte,300,linea_corte-20)		
+			pinta=1
+		else:
+			print("no pinta")
+			pinta=0
+
+		linea_corte=linea_corte-20
+	
+
+	p.showPage()#terminar pagina actual
+
+	p.save()
+
+	pdf=buffer.getvalue()
+
+	buffer.close()
+
+	response.write(pdf)
+	#Imprime_Venta_Granel.objects.get(usuario=request.user).delete()
+	return response
+
+	
 
 
 #*******************************************************************************************************************************************************
@@ -213,7 +490,9 @@ def consulta_venta(request):
 		fecha_inicial=datetime.combine(fecha_inicial,time.min)
 		fecha_final=datetime.combine(fecha_final,time.max)
 
-		vg=Venta_Granel.objects.filter(fecha__range=(fecha_inicial,fecha_final)).order_by("id")
+		vg=Venta_Granel.objects.filter(fecha__range=(fecha_inicial,fecha_final),sucursal=suc).order_by("id")
+
+		vp=Venta_Piso.objects.filter(fecha__range=(fecha_inicial,fecha_final),sucursal=suc).order_by("id")
 
 	else:
 		form=Buscar_Ventas_Form()
@@ -251,6 +530,7 @@ def venta_granel(request):
 		print(e)
 		caja_abierta="0"
 		caja=Cajas
+		return render(request,'empenos/venta_granel.html',locals())
 
 	print(caja_abierta)
 	permiso="0"
@@ -551,6 +831,16 @@ def rep_flujo_caja(request):
 			else:
 				importe_ventas=imp_venta["importe_venta__sum"]
 
+			#buscamos ingresos por ventas piso
+			cont_ventas=cont_ventas+Venta_Piso.objects.filter(fecha__range=(min_pub_date_time,max_pub_date_time),sucursal=sucursal).count()
+
+			imp_venta=Venta_Piso.objects.filter(fecha__range=(min_pub_date_time,max_pub_date_time),sucursal=sucursal).aggregate(Sum("importe_venta"))	
+			if imp_venta["importe_venta__sum"]==None:
+				print("")
+			else:
+				importe_ventas=decimal.Decimal(importe_ventas)+decimal.Decimal(imp_venta["importe_venta__sum"])
+
+
 
 			try:
 
@@ -716,6 +1006,15 @@ def rep_flujo_caja(request):
 			else:
 				importe_ventas=imp_venta["importe_venta__sum"]
 
+
+			#buscamos ingresos por ventas piso
+			cont_ventas=cont_ventas+Venta_Piso.objects.filter(fecha__range=(min_pub_date_time,max_pub_date_time)).count()
+
+			imp_venta=Venta_Piso.objects.filter(fecha__range=(min_pub_date_time,max_pub_date_time)).aggregate(Sum("importe_venta"))	
+			if imp_venta["importe_venta__sum"]==None:
+				print("")
+			else:
+				importe_ventas=decimal.Decimal(importe_ventas)+decimal.Decimal(imp_venta["importe_venta__sum"])
 
 			#calculamos los empeños
 			importe_empenos=Boleta_Empeno.objects.filter(fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("mutuo_original"))
@@ -988,6 +1287,15 @@ def retiro_efectivo(request):
 		importe_ventas=0.00
 	else:
 		importe_ventas=imp_venta["importe_venta__sum"]
+
+	#buscamos ingresos por ventas piso
+	cont_ventas=cont_ventas+Venta_Piso.objects.filter(caja=caja).count()
+
+	imp_venta=Venta_Piso.objects.filter(caja=caja).aggregate(Sum("importe_venta"))	
+	if imp_venta["importe_venta__sum"]==None:
+		print("")
+	else:
+		importe_ventas=decimal.Decimal(importe_ventas)+decimal.Decimal(imp_venta["importe_venta__sum"])
 
 
 	cont_ref_pg=0
@@ -1607,6 +1915,81 @@ def consulta_boleta(request):
 	sucursales=Sucursal.objects.filter(id=user_2.sucursal.id)
 
 	return render(request,'empenos/consulta_boleta.html',locals())
+
+
+#*******************************************************************************************************************************************************
+#*¨**************************************************************************************************************************************************************
+def admin_porc_avaluo(request):
+	#si no esta logueado mandamos al login
+	if not request.user.is_authenticated:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+	
+	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
+	try:
+		user_2=User_2.objects.get(user=request.user)
+	except Exception as e:		
+		form=Login_Form(request.POST)
+		estatus=0
+		msj="La cuenta del usuario esta incompleta."			
+		return render(request,'login.html',locals())
+
+	IP_LOCAL = settings.IP_LOCAL
+	id_usuario=user_2.user.id
+
+	c=""
+	pub_date = date.today()
+	min_pub_date_time = datetime.combine(pub_date, time.min) 
+	max_pub_date_time = datetime.combine(pub_date, time.max)  
+
+	plazos=Plazo.objects.all()
+
+	msj_error=""	
+	try:
+		#validamos si el usuaario tiene caja abierta para mostrarla en el encabezado.
+		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+		print(caja.sucursal)
+		c=caja.caja
+	except Exception as e:
+		msj_error="No cuentas con caja abierta."
+		print(e)
+	permiso="0"
+	if user_2.perfil.id==3:
+		permiso="1"#si tiene permiso para entrar a esta opcion.
+		
+
+	error="0"
+	if request.method=="POST":
+		if permiso=="1":
+			form=Porcentaje_Sobre_Avaluo_Form(request.POST)
+			if int(request.POST.get("porcentaje"))>100 or int(request.POST.get("porcentaje"))<0:
+				error="1"
+				porcentaje=Porcentaje_Sobre_Avaluo.objects.all()
+				porc=0
+				for x in porcentaje:
+					porc=x.porcentaje
+				form=Porcentaje_Sobre_Avaluo_Form()				
+				return render(request,'empenos/admin_porc_avaluo.html',locals())
+			if form.is_valid():
+				try:
+					Porcentaje_Sobre_Avaluo.objects.all().delete()
+				except:
+					print("no hay porcentaje registrado")
+				form.save()
+				return render(request,'seguridad/admin_administracion.html',locals())
+		else:
+			form=Porcentaje_Sobre_Avaluo_Form()
+			print("No hace algo ya que no tiene permiso.")
+	else:
+
+		porcentaje=Porcentaje_Sobre_Avaluo.objects.all()
+
+		porc=0
+		for x in porcentaje:
+			porc=x.porcentaje
+
+		form=Porcentaje_Sobre_Avaluo_Form()
+
+	return render(request,'empenos/admin_porc_avaluo.html',locals())
 
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
@@ -3827,7 +4210,7 @@ def api_consulta_corte_caja(request):
 		print("No tiene empenños")
 
 
-	#buscamos ingresos por ventas
+	#buscamos ingresos por ventas Granel
 	cont_ventas=Venta_Granel.objects.filter(fecha_importe_venta__range=(min_pub_date_time,max_pub_date_time),caja=caja).count()
 	imp_venta=Venta_Granel.objects.filter(fecha_importe_venta__range=(min_pub_date_time,max_pub_date_time),caja=caja).aggregate(Sum("importe_venta"))
 
@@ -3837,6 +4220,14 @@ def api_consulta_corte_caja(request):
 	else:
 		importe_ventas=imp_venta["importe_venta__sum"]
 
+	#buscamos ingresos por ventas piso
+	cont_ventas=cont_ventas+Venta_Piso.objects.filter(caja=caja).count()
+
+	imp_venta=Venta_Piso.objects.filter(caja=caja).aggregate(Sum("importe_venta"))	
+	if imp_venta["importe_venta__sum"]==None:
+		print("")
+	else:
+		importe_ventas=decimal.Decimal(importe_ventas)+decimal.Decimal(imp_venta["importe_venta__sum"])
 
 	cont_ref_pg=0
 	refrendos_pg=0.00

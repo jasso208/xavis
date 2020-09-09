@@ -19,6 +19,10 @@ ESTADO_CIVIL_CHOICES = (
 
 
 
+#al momendo de anunciar un producto para la venta piso, 
+#se le aumenta un % sobre el avaluo, ese porcentaje es configurable en esta tabla.
+class Porcentaje_Sobre_Avaluo(models.Model):
+	porcentaje=models.IntegerField()
 
 
 class Tipo_Movimiento(models.Model):
@@ -297,9 +301,42 @@ class Boleta_Empeno(models.Model):
 	estatus=models.ForeignKey(Estatus_Boleta,on_delete=models.PROTECT,default=1)
 	sucursal=models.ForeignKey(Sucursal,on_delete=models.PROTECT,blank=True,null=True)
 	mutuo_original=models.IntegerField(default=0)	#este campo no se actualiza, nos sirve para saber cual fue el mutuo original de la boleta.
+	fecha_vencimiento_real=models.DateTimeField(null=True,blank=True)#cuando la fecha de vencimiento cai en dia de asueto, la fecha de vencimienot se recorre un dia, esta fecha nos indica cual es la fecha de vencimiento real para calcular el las futuras fechas de vencimiento.
+
 
 	class Meta:
 		unique_together=("folio",'sucursal',)
+
+
+class Venta_Temporal_Piso(models.Model):
+	usuario=models.ForeignKey(User,on_delete=models.PROTECT,null=True,blank=True)
+	boleta=models.ForeignKey(Boleta_Empeno,on_delete=models.PROTECT)
+
+	class Meta:
+		unique_together=("usuario","boleta")
+
+
+class Venta_Piso(models.Model):
+	folio=models.CharField(max_length=7,null=True)
+	usuario=models.ForeignKey(User,on_delete=models.PROTECT,null=True,blank=True,related_name="usuario")#el usuario que realiza la venta en el sistema
+	fecha=models.DateTimeField(default=timezone.now)	
+	importe_mutuo=models.DecimalField(max_digits=20,decimal_places=2)
+	importe_avaluo=models.DecimalField(max_digits=20,decimal_places=2)
+	sucursal=models.ForeignKey(Sucursal,on_delete=models.PROTECT)	
+	importe_venta=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)#es elimporte real de la venta, en cuanto realmente se vendio el granel
+	caja=models.ForeignKey(Cajas,on_delete=models.PROTECT,blank=True,null=True)#es la caja que se tenia aberta cuando se ingreso el dinero.
+	cliente=models.ForeignKey(Cliente,on_delete=models.PROTECT,blank=True,null=True)
+
+class Det_Venta_Piso(models.Model):
+	venta=models.ForeignKey(Venta_Piso,on_delete=models.PROTECT)
+	boleta=models.OneToOneField(Boleta_Empeno,on_delete=models.PROTECT)
+	importe_venta=models.IntegerField(default=0)
+
+class Imprime_Venta_Piso(models.Model):
+	usuario=models.OneToOneField(User,on_delete=models.PROTECT,null=True,blank=True)
+	venta_piso=models.ForeignKey(Venta_Piso,on_delete=models.PROTECT)
+
+
 
 class Venta_Temporal(models.Model):
 	usuario=models.ForeignKey(User,on_delete=models.PROTECT,null=True,blank=True)
@@ -311,7 +348,7 @@ class Venta_Temporal(models.Model):
 		unique_together=("usuario","boleta")
 
 class Venta_Granel(models.Model):
-	usuario=models.ForeignKey(User,on_delete=models.PROTECT,null=True,blank=True,related_name="usuario")#el usuario que realiza la venta en el sistema
+	usuario=models.ForeignKey(User,on_delete=models.PROTECT,null=True,blank=True,related_name="usuario2")#el usuario que realiza la venta en el sistema
 	fecha=models.DateTimeField(default=timezone.now)	
 	importe_mutuo=models.DecimalField(max_digits=20,decimal_places=2)
 	importe_avaluo=models.DecimalField(max_digits=20,decimal_places=2)
@@ -323,10 +360,10 @@ class Venta_Granel(models.Model):
 
 class Det_Venta_Granel(models.Model):
 	venta=models.ForeignKey(Venta_Granel,on_delete=models.PROTECT)
-	boleta=models.ForeignKey(Boleta_Empeno,on_delete=models.PROTECT,unique=True)
+	boleta=models.OneToOneField(Boleta_Empeno,on_delete=models.PROTECT)
 
 class Imprime_Venta_Granel(models.Model):
-	usuario=models.ForeignKey(User,on_delete=models.PROTECT,null=True,blank=True,unique=True)
+	usuario=models.OneToOneField(User,on_delete=models.PROTECT,null=True,blank=True)
 	venta_granel=models.ForeignKey(Venta_Granel,on_delete=models.PROTECT)
 
 
@@ -381,6 +418,8 @@ class Pagos(models.Model):
 	vencido=models.CharField(max_length=1,default='N')
 	pagado=models.CharField(max_length=1,default='N',null=False)
 	fecha_pago=models.DateTimeField(null=True,blank=True)
+	fecha_vencimiento_real=models.DateTimeField(null=True,blank=True)#cuando la fecha de vencimiento cai en dia de asueto, la fecha de vencimienot se recorre un dia, esta fecha nos indica cual es la fecha de vencimiento real para calcular el las futuras fechas de vencimiento.
+
 
 class Tipo_Periodo(models.Model):
 	tipo_periodo=models.CharField(max_length=20,null=False)
@@ -425,6 +464,7 @@ class Pagos_Temp(models.Model):
 	vencido=models.CharField(max_length=1,default='N')
 	pagado=models.CharField(max_length=1,default='N',null=False)
 	fecha_pago=models.DateTimeField(null=True,blank=True)
+	fecha_vencimiento_real=models.DateTimeField(null=True,blank=True)
 
 #esta tabla debera llenarse cada inicio de año para marcar los dias no habiles del año y que la fecha de vencimiento no caiga en estos dias.
 class Dia_No_Laboral(models.Model):

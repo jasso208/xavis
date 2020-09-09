@@ -1,6 +1,6 @@
 from django import forms
 from django.forms.models import inlineformset_factory
-from empenos.models import Cajas,Otros_Ingresos,Retiro_Efectivo,Tipo_Movimiento,Plazo,Cliente,Sucursal,Estatus_Boleta
+from empenos.models import *
 from datetime import date, datetime, time
 from django.utils import timezone
 class Abre_Caja_Form(forms.ModelForm):
@@ -17,6 +17,14 @@ class Retiro_Efectivo_Form(forms.ModelForm):
 	class Meta:
 		model=Retiro_Efectivo
 		fields=('tipo_movimiento','importe','comentario','token',)
+
+
+class Venta_Piso_Form(forms.Form):
+	id_cliente=forms.IntegerField()
+	def __init__(self, *args, **kwargs):
+		super(self.__class__, self).__init__(*args, **kwargs)
+		# asi vuelves tus campos no requeridos
+		self.fields['id_cliente'].required = False
 
 
 class Cierra_Caja_Form(forms.Form):
@@ -39,6 +47,11 @@ class Cierra_Caja_Form(forms.Form):
 
 class Refrendo_Form(forms.Form):
 	importe_abono=forms.IntegerField()
+	
+class Porcentaje_Sobre_Avaluo_Form(forms.ModelForm):
+	class Meta:
+		model=Porcentaje_Sobre_Avaluo
+		fields=('porcentaje',)
 
 class Refrendo_Mensual_Form(forms.Form):
 	total_refrendo=forms.IntegerField()

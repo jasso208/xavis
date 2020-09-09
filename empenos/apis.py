@@ -10,6 +10,7 @@ from django.core import serializers
 from empenos.jobs import *
 from django.conf import settings
 from django.utils import timezone
+from django.db.models import Sum
 
 @api_view(['GET'])
 def api_tipo_producto(request):
@@ -27,6 +28,193 @@ def api_tipo_producto(request):
 		respuesta.append({'estatus':"0",'msj':"Error al consultar el catalogo de tipo de productos"})#estatus de falla
 	return Response(respuesta)
 
+
+
+@api_view(['GET'])
+def api_consulta_cliente_2(request):
+	respuesta=[]
+	try:
+
+		id=request.GET.get("id")
+		cliente=Cliente.objects.get(id=id)
+		respuesta.append({"cliente":cliente.nombre+' '+cliente.apellido_p+' '+cliente.apellido_m})
+
+
+	except Exception as e:
+		print(e)
+		respuesta=[]
+		respuesta.append({'estatus':"0",'msj':"Error al consultar el cliente."})#estatus de falla
+
+	return Response(respuesta)
+
+
+@api_view(['GET'])
+def api_limpia_venta_piso(request):
+	respuesta=[]
+	try:
+
+		username=request.GET.get("username")
+		usuario=User.objects.get(username=username)
+
+		Venta_Temporal_Piso.objects.filter(usuario=usuario).delete()
+		respuesta.append({"estatus":"1"})
+
+	except Exception as e:
+		respuesta=[]
+		print(e)
+		respuesta.append({"estatus":"0","msj":"Error al limpiar la cotización."})
+	return Response(respuesta)
+
+
+@api_view(['GET'])
+def api_elimina_prod_venta_piso(request):
+	respuesta=[]
+	try:
+		id=int(request.GET.get("id"))
+		Venta_Temporal_Piso.objects.get(id=id).delete()
+		respuesta.append({"estatus":"1"})
+	except Exception as e:
+		respuesta=[]
+		print(e)
+		respuesta.append({"estatus":"0","msj":"Error al eliminar el producto."})
+	return Response(respuesta)
+
+@api_view(['GET'])
+def api_consulta_prod_temporal_piso(request):
+	respuesta=[]
+		
+	
+
+	try:
+
+		username=request.GET.get("username")
+
+		usuario=User.objects.get(username=username)
+		
+		cont=Porcentaje_Sobre_Avaluo.objects.all().count()
+
+		print(cont)
+		#si cont es diferente de 1 es porque el porcentaje que se agregara sobre avaluo para calcular el precio de producto
+		#esta incorrecto
+		if cont!=1:
+			print("gallegos")
+			respuesta.append({"estatus":"0","msj":"Error al consultar los productos."})
+			return Response(respuesta)
+
+
+		porcentaje=Porcentaje_Sobre_Avaluo.objects.all().aggregate(Sum("porcentaje"))
+
+		porce=0;
+		if porcentaje["porcentaje__sum"]!=None:
+			porce=int(porcentaje["porcentaje__sum"])
+
+		
+
+		vtp=Venta_Temporal_Piso.objects.filter(usuario=usuario).order_by("boleta")
+
+		total_mutuo=0.00
+		total_avaluo=0.00
+		total_pagar=0.00
+
+		lista=[]
+
+		for v in vtp:
+			db=Det_Boleto_Empeno.objects.filter(boleta_empeno=v.boleta)
+			descripcion=""
+
+			for d in db:
+				if d.observaciones==None:
+					ob=""
+				else:
+					ob=d.observaciones
+
+				descripcion=descripcion+d.descripcion+", "+ob+"; "
+
+			total=fn_calcula_precio_venta_producto(v.boleta)#decimal.Decimal(d.avaluo)+(decimal.Decimal(d.avaluo)*(decimal.Decimal(porce)/decimal.Decimal(100.00)))
+
+			#trabajamos con el mutuo de la boleta no con el mutuo origina, ya que para fines de utilidad, nos barsaremos en lo que realmene se le dio al cliente.
+			total_mutuo=decimal.Decimal(total_mutuo)+decimal.Decimal(v.boleta.mutuo)
+			total_avaluo=decimal.Decimal(total_avaluo)+decimal.Decimal(v.boleta.avaluo)
+			total_pagar=decimal.Decimal(total_pagar)+decimal.Decimal(fn_calcula_precio_venta_producto(v.boleta))
+
+			total="{:0,.2f}".format(total)
+			mutuo="{:0,.2f}".format(v.boleta.mutuo)
+			avaluo="{:0,.2f}".format(v.boleta.avaluo)
+
+			lista.append({"id":v.id,"descripcion":descripcion,"folio":v.boleta.folio,"estatus":v.boleta.estatus.estatus,"tipo_producto":v.boleta.tipo_producto.tipo_producto,"avaluo":avaluo,"mutuo":mutuo,"total":str(total)})
+
+		respuesta.append({"estatus":"1"})
+		respuesta.append({"lista":lista})
+
+		inttotal_pagar=total_pagar
+
+		total_mutuo="{:0,.2f}".format(total_mutuo)
+		total_avaluo="{:0,.2f}".format(total_avaluo)
+		total_pagar="{:0,.2f}".format(total_pagar)
+
+
+
+		respuesta.append({"total_mutuo":total_mutuo,"total_avaluo":total_avaluo,"total_pagar":total_pagar,"inttotal_pagar":inttotal_pagar})
+
+
+	except Exception as e:
+		respuesta=[]
+		print(e)
+		respuesta.append({"estatus":"0","msj":"Error al consultar los productos."})
+
+	return Response(respuesta)
+
+@api_view(['GET'])
+def api_agrega_prod_venta_piso(request):
+	respuesta=[]
+	try:
+		
+		username=request.GET.get("username")
+		folio=int(request.GET.get("folio"))
+		id_sucursal=int(request.GET.get("id_sucursal"))
+
+		sucursal=Sucursal.objects.get(id=id_sucursal)
+
+		boleta=Boleta_Empeno.objects.get(sucursal=sucursal,folio=folio)
+
+
+		#si la boleta no esta en almoneda o en remate, no permitira agregarla.
+		if boleta.estatus.id==3 or boleta.estatus.id==5:
+			print("boleta valida")
+		else:
+			respuesta.append({"estatus":"0","msj":"La boleta no esta disponible para la venta."})
+			return Response(respuesta)
+
+		try:	
+			dvp=Det_Venta_Piso.objects.get(boleta=boleta)
+			respuesta.append({"estatus":"0","msj":"La boleta no esta disponible para la venta."})
+			return Response(respuesta)
+		except:
+			print("")
+
+
+
+		usuario=User.objects.get(username=username)
+
+		vtp=Venta_Temporal_Piso.objects.filter(boleta=boleta)
+
+		print(vtp)
+		#si existe la boleta, ya no debemos agregarla nuevamente.
+		if vtp.exists():
+			respuesta.append({"estatus":"0","msj":"La boleta ya ha sido agregada."})
+			return Response(respuesta)
+
+		Venta_Temporal_Piso.objects.create(usuario=usuario,boleta=boleta)
+
+		respuesta.append({"estatus":"1"})
+		print(respuesta);
+	except Exception as e:
+		print(e)
+		print("fallo")
+		respuesta=[]
+		respuesta.append({"estatus":"0","msj":"Error al agregar el producto."})
+
+	return Response(respuesta)
 
 @api_view(['GET'])
 def api_agrega_importe_real_venta(request):
@@ -746,6 +934,7 @@ def api_simula_refrendo(request):
 		npt.vencido=p.vencido
 		npt.fecha_pago=p.fecha_pago
 		npt.pagado=p.pagado
+		npt.fecha_vencimiento_real=p.fecha_vencimiento_real
 		npt.save()
 
 

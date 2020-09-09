@@ -81,6 +81,7 @@
 									        <th>Avaluo</th>
 									        <th>Venta Real</th>
 									        <th>Usuario</th>
+									        <th>Tipo Venta</th>
 									      </tr>
 									    </thead>
 									    <tbody>
@@ -107,8 +108,30 @@
 											        <td>${{v.importe_avaluo}}</td>
 											        <td>${{v.importe_venta}}</td>
 											        <td>{{v.usuario}} - {{v.usuario.first_name}} {{v.usuario.last_name}}</td>
+											        <td>Granel</td>
 										    	</tr>
 									    	{%endfor%}
+									    	{% for v in vp%}
+										    	<tr>
+											    	<td>
+										    			<a  class='btn btn-default btn-sm' href="/empenos/re_imprimir_venta_piso/{{v.id}}">
+										    				<span class='glyphicon glyphicon-print'>
+
+										    				</span>    					
+										    			</a>
+
+											    	</td>
+											        <td>{{v.folio}}</td>
+											        <td>{{v.sucursal.sucursal}}</td>
+											        <td>{{v.fecha | date:"d/m/Y"}}</td>
+											        <td>${{v.importe_mutuo}}</td>									        
+											        <td>${{v.importe_avaluo}}</td>
+											        <td>${{v.importe_venta}}</td>
+											        <td>{{v.usuario}} - {{v.usuario.first_name}} {{v.usuario.last_name}}</td>
+											        <td>Piso</td>
+										    	</tr>
+									    	{%endfor%}
+
 									    </tbody>
 									</table>
 							</div>

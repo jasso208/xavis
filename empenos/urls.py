@@ -28,6 +28,11 @@ urlpatterns=[
 	url(r'^imprime_venta_granel$',imprime_venta_granel,name="imprime_venta_granel"),
 	url(r'^consulta_venta$',consulta_venta,name="consulta_venta"),
 	url(r'^re_imprimir_venta/(?P<id_venta>\w+)/$',re_imprimir_venta,name="re_imprimir_venta"),
+	url(r'^admin_porc_avaluo/$',admin_porc_avaluo,name="admin_porc_avaluo"),
+	url(r'^venta_piso/$',venta_piso,name="venta_piso"),	
+	url(r'^imprime_venta_piso$',imprime_venta_piso,name="imprime_venta_piso"),
+	url(r'^re_imprimir_venta_piso$',re_imprimir_venta_piso,name="re_imprimir_venta_piso"),
+
 
 	url(r'^consulta_abono$',consulta_abono,name="consulta_abono"),
 
@@ -59,5 +64,12 @@ urlpatterns=[
 	url(r'^api_agregar_kilataje/$',api_agregar_kilataje,name="api_agregar_kilataje"),
 	url(r'^api_agrega_boleta_venta_granel/$',api_agrega_boleta_venta_granel,name="api_agrega_boleta_venta_granel"),
 	url(r'^api_agrega_importe_real_venta/$',api_agrega_importe_real_venta,name="api_agrega_importe_real_venta"),
+	url(r'^api_agrega_prod_venta_piso/$',api_agrega_prod_venta_piso,name="api_agrega_prod_venta_piso"),
+	url(r'^api_consulta_prod_temporal_piso/$',api_consulta_prod_temporal_piso,name="api_consulta_prod_temporal_piso"),
+	url(r'^api_elimina_prod_venta_piso/$',api_elimina_prod_venta_piso,name="api_elimina_prod_venta_piso"),
+	url(r'^api_limpia_venta_piso/$',api_limpia_venta_piso,name="api_limpia_venta_piso"),
+	url(r'^api_consulta_cliente_2/$',api_consulta_cliente_2,name="api_consulta_cliente_2"),
+
+	
 
 ]

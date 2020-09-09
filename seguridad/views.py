@@ -258,7 +258,7 @@ def admin_cajas(request):
 
 	try:
 		#validamos si el usuario tiene caja abierta en el dia actual.
-		caja=Cajas.objecfts.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
 		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
 		suc=caja.sucursal
 		c=caja.caja

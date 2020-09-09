@@ -10,6 +10,24 @@ import decimal
 import smtplib
 import email.message
 from django.conf import settings
+from django.db.models import Sum
+
+def fn_calcula_precio_venta_producto(boleta):
+	importe_venta=0.00
+
+	porcentaje=Porcentaje_Sobre_Avaluo.objects.all().aggregate(Sum("porcentaje"))
+
+	porce=0;
+	if porcentaje["porcentaje__sum"]!=None:
+		porce=int(porcentaje["porcentaje__sum"])
+
+	importe_venta=decimal.Decimal(boleta.avaluo)+(decimal.Decimal(boleta.avaluo)*(decimal.Decimal(porce)/decimal.Decimal(100.00)))
+	print(boleta.avaluo)
+	print(boleta.avaluo)
+	print(importe_venta)
+	return importe_venta
+
+
 def fn_calcula_refrendo(mutuo,tipo_producto):
 	almacenaje=0.00
 	interes=0.00
@@ -343,7 +361,7 @@ def fn_simula_refrendo(importe_abono,usuario,boleta,recursivo):
 
 	#si recursivo es 0 es que es un abono de boleta activa
 	if int(recursivo)==0:
-		fecha_vencimiento=boleta.fecha_vencimiento
+		fecha_vencimiento=boleta.fecha_vencimiento_real
 	else:# si recursivo es 1, es que viene de una boleta vencida.
 		#Cambiamos temporalemente el estatus de la boleta a activa para acceder al algoritmo de boletas activas.
 		estatus_activo=Estatus_Boleta.objects.get(id=1)
@@ -358,13 +376,13 @@ def fn_simula_refrendo(importe_abono,usuario,boleta,recursivo):
 			refrendopg=Pagos_Temp.objects.filter(tipo_pago=est_refrendopg,usuario=usuario)
 
 			if refrendopg.exists():
-				fe_ve=Pagos_Temp.objects.filter(tipo_pago=est_refrendopg,usuario=usuario).aggregate(Max("fecha_vencimiento"))
+				fe_ve=Pagos_Temp.objects.filter(tipo_pago=est_refrendopg,usuario=usuario).aggregate(Max("fecha_vencimiento_real"))
 
-				fecha_vencimiento=fe_ve["fecha_vencimiento__max"]
+				fecha_vencimiento=fe_ve["fecha_vencimiento_real__max"]
 			else:
-				fecha_vencimiento=boleta.fecha_vencimiento	
+				fecha_vencimiento=boleta.fecha_vencimiento_real	
 		except:
-			fecha_vencimiento=boleta.fecha_vencimiento
+			fecha_vencimiento=boleta.fecha_vencimiento_real
 
 	mutuo=boleta.mutuo
 
@@ -378,7 +396,7 @@ def fn_simula_refrendo(importe_abono,usuario,boleta,recursivo):
 
 		if boleta.plazo.id==2:#semanal			
 			#obtenemos todos los pagos tipo refrendo que no ha sido pagados.
-			pagos_t=Pagos_Temp.objects.filter(usuario=usuario,tipo_pago=est_refrendo,pagado="N").order_by("fecha_vencimiento")
+			pagos_t=Pagos_Temp.objects.filter(usuario=usuario,tipo_pago=est_refrendo,pagado="N").order_by("fecha_vencimiento_real")
 
 			fec_boleta=datetime.combine(boleta.fecha,time.min)
 
@@ -400,6 +418,7 @@ def fn_simula_refrendo(importe_abono,usuario,boleta,recursivo):
 					#este es el pago que esta corriendo actualmente.
 					pag_actual=p
 
+			fecha_vencimiento_real=fecha_vencimiento
 			refrendo_pendiente=fn_calcula_saldo_refrendo(boleta,hoy)
 
 			pag_ac=0#cuando es cero es que no se a cubierto el pago actual, cuando cambia a 1 esque ya se cubrio el pago actual.
@@ -417,8 +436,12 @@ def fn_simula_refrendo(importe_abono,usuario,boleta,recursivo):
 
 					#por cada pago tipo refrendo pagado, generamos uno nuevo.
 					dias = timedelta(days=7)		                
-					fecha_vencimiento=datetime.combine(fecha_vencimiento+dias, time.min)
+					fecha_vencimiento=datetime.combine(fecha_vencimiento_real+dias, time.min)
+
+					fecha_vencimiento_real=fecha_vencimiento
+
 					fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
+					
 
 					npt=Pagos_Temp()
 					npt.usuario=pt.usuario
@@ -665,7 +688,7 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 
 		#si recursivo es 0 es que es un abono de boleta activa
 	if int(recursivo)==0:
-		fecha_vencimiento=boleta.fecha_vencimiento
+		fecha_vencimiento=boleta.fecha_vencimiento_real
 	else:# si recursivo es 1, es que viene de una boleta vencida.
 		#Cambiamos temporalemente el estatus de la boleta a activa para acceder al algoritmo de boletas activas.
 		estatus_activo=Estatus_Boleta.objects.get(id=1)
@@ -680,14 +703,14 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 			refrendopg=Pagos.objects.filter(tipo_pago=est_refrendopg,boleta=boleta)
 
 			if refrendopg.exists():
-				fe_ve=Pagos.objects.filter(tipo_pago=est_refrendopg,boleta=boleta).aggregate(Max("fecha_vencimiento"))
-				p=Pagos.objects.filter(tipo_pago=est_refrendopg,boleta=boleta).order_by("fecha_vencimiento")
+				fe_ve=Pagos.objects.filter(tipo_pago=est_refrendopg,boleta=boleta).aggregate(Max("fecha_vencimiento_real"))
+				p=Pagos.objects.filter(tipo_pago=est_refrendopg,boleta=boleta).order_by("fecha_vencimiento_real")
 
-				fecha_vencimiento=fe_ve["fecha_vencimiento__max"]
+				fecha_vencimiento=fe_ve["fecha_vencimiento_real__max"]
 			else:
-				fecha_vencimiento=boleta.fecha_vencimiento	
+				fecha_vencimiento=boleta.fecha_vencimiento_real	
 		except:
-			fecha_vencimiento=boleta.fecha_vencimiento
+			fecha_vencimiento=boleta.fecha_vencimiento_real
 
 	#boleta activa
 	if boleta.estatus.id==1:
@@ -714,7 +737,9 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 
 			mutuo=boleta.mutuo
 
-			refrendo_pendiente=refrendo_pendiente=fn_calcula_saldo_refrendo(boleta,hoy)
+			fecha_vencimiento_real=fecha_vencimiento
+
+			refrendo_pendiente=fn_calcula_saldo_refrendo(boleta,hoy)
 
 			pag_ac=0
 			#marcamos los pagos afectados como pagados.
@@ -735,12 +760,15 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 
 					#por cada pago tipo refrendo pagado, generamos uno nuevo.
 					dias = timedelta(days=7)	
-					print("llego")
-					print(fecha_vencimiento)
-					fecha_vencimiento=datetime.combine(fecha_vencimiento+dias, time.min)
-					print("llego 2")
+					
+					
+					fecha_vencimiento=datetime.combine(fecha_vencimiento_real+dias, time.min)
+				
+					fecha_vencimiento_real=fecha_vencimiento
+
 					fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
-					print("llego 3")
+
+					
 					pgo=Pagos()					
 					pgo.tipo_pago=pt.tipo_pago
 					pgo.boleta=pt.boleta
@@ -751,6 +779,7 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 					pgo.importe=pt.importe
 					pgo.vencido="N"
 					pgo.pagado="N"
+					pgo.fecha_vencimiento_real=fecha_vencimiento_real
 					pgo.save()
 					importe_abono=int(importe_abono)-int(pt.importe)#disminuimos el saldo del importe abonado
 					
@@ -814,6 +843,7 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 
 			#actualizamos la fecha de vencimiento de la boleta.
 			boleta.fecha_vencimiento=fecha_vencimiento
+			boleta.fecha_vencimiento_real=fecha_vencimiento_real
 			boleta.mutuo=mutuo
 			boleta.save()
 		else:#mensual
