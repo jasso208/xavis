@@ -2900,7 +2900,7 @@ def imprime_venta_granel(request):
 
 
 			p.setFont("Helvetica",10)
-			p.drawString(150,current_row,"SAN MARCOS")
+			p.drawString(150,current_row,im.venta_granel.sucursal.sucursal)
 
 			p.setFont("Helvetica-Bold",10)
 			p.drawString(350,current_row,"Total Mutuo:")
