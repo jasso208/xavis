@@ -31,7 +31,7 @@ urlpatterns=[
 	url(r'^admin_porc_avaluo/$',admin_porc_avaluo,name="admin_porc_avaluo"),
 	url(r'^venta_piso/$',venta_piso,name="venta_piso"),	
 	url(r'^imprime_venta_piso$',imprime_venta_piso,name="imprime_venta_piso"),
-	url(r'^re_imprimir_venta_piso$',re_imprimir_venta_piso,name="re_imprimir_venta_piso"),
+	url(r'^re_imprimir_venta_piso/(?P<id_venta>\w+)/$',re_imprimir_venta_piso,name="re_imprimir_venta_piso"),
 
 
 	url(r'^consulta_abono$',consulta_abono,name="consulta_abono"),

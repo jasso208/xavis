@@ -212,6 +212,7 @@ def venta_piso(request):
 
 			return HttpResponseRedirect(reverse('empenos:imprime_venta_piso'))
 		except Exception as e:
+			print(e)
 			form=Venta_Piso_Form()
 			error="1"
 			return render(request,'empenos/venta_piso.html',locals())
@@ -223,8 +224,8 @@ def venta_piso(request):
 def re_imprimir_venta_piso(request,id_venta):
 	venta=Venta_Piso.objects.get(id=id_venta)
 	Imprime_Venta_Piso.objects.filter(usuario=request.user).delete()
-	Imprime_Venta_Piso.objects.create(usuario=request.user,venta_granel=venta)
-	return imprime_venta_granel(request)
+	Imprime_Venta_Piso.objects.create(usuario=request.user,venta_piso=venta)
+	return imprime_venta_piso(request)
 
 
 
