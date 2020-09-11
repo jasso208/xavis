@@ -103,6 +103,7 @@ def fn_boletas_vencidas_semanal(hoy):
 				#calculamos la fecha de vencimiento
 				dias = timedelta(days=7)		                
 				fecha_vencimiento=datetime.combine(hoy+dias, time.min)
+				fecha_vencimiento_real=fecha_vencimiento
 				fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
 
 				almacenaje=resp[0]["almacenaje"]/4.00
@@ -121,6 +122,7 @@ def fn_boletas_vencidas_semanal(hoy):
 				p.importe=refrendo
 				p.vencido="N"
 				p.pagado="N"
+				p.fecha_vencimiento_real=fecha_vencimiento_real
 				p.save()
 
 			elif b.plazo.id==3:#si es plazo de 1 mes
@@ -182,6 +184,7 @@ def fn_pagos_vencidos(hoy):
 			#como ya se pago el refrendo actual, se genera un nuevo pago tipo refrendo.
 			fecha_vencimiento=datetime.combine(fn_add_months(p.boleta.fecha,meses), time.min)
 
+			fecha_vencimiento_real=fecha_vencimiento
 			#fecha_vencimiento=datetime.combine(fn_add_months(hoy,1), time.min)	
 			#validmoas que la fecha de vencimiento no sea de azueto
 			fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
@@ -197,6 +200,7 @@ def fn_pagos_vencidos(hoy):
 			pago.importe=round(refrendo)
 			pago.vencido="N"
 			pago.pagado="N"
+			pago.fecha_vencimiento_real=fecha_vencimiento_real
 			pago.save()	
 
 			p.boleta.refrendo=round(refrendo)
@@ -274,6 +278,7 @@ def fn_pagos_vencidos(hoy):
 			#como ya se pago el refrendo actual, se genera un nuevo pago tipo refrendo.
 			fecha_vencimiento=datetime.combine(fn_add_months(p.boleta.fecha,meses), time.min)
 
+			fecha_vencimiento_real=fecha_vencimiento
 			#fecha_vencimiento=datetime.combine(fn_add_months(hoy,1), time.min)	
 			#validmoas que la fecha de vencimiento no sea de azueto
 			fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
@@ -296,6 +301,7 @@ def fn_pagos_vencidos(hoy):
 		pago.importe=refrendo
 		pago.vencido="N"
 		pago.pagado="N"
+		pago.fecha_vencimiento_real=fecha_vencimiento_real
 		pago.save()
 
 		#si el pago que esta venciendo es de periodo mensual.
@@ -346,6 +352,7 @@ def fn_comision_pg(hoy):
 			p.importe=math.ceil(compg)
 			p.vencido="N"
 			p.pagado="N"
+			p.fecha_vencimiento_real=fecha_vencimiento
 			p.save()
 
 
