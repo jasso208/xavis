@@ -815,7 +815,9 @@ def rep_flujo_caja(request):
 		fec_inicial_caja=datetime.combine(fecha_inicial, time.min) 
 		fec_final_caja=datetime.combine(fecha_inicial, time.max) 
 			
-		
+		fecha_inicial=datetime.combine(fecha_inicial,time.min)
+		fecha_final=datetime.combine(fecha_final,time.max)
+
 		#si indicamos la sucursal
 		if request.POST.get("sucursal")!="":
 			sucursal=Sucursal.objects.get(id=sucursal)
@@ -823,8 +825,8 @@ def rep_flujo_caja(request):
 
 
 			#buscamos ingresos por ventas
-			cont_ventas=Venta_Granel.objects.filter(fecha_importe_venta__range=(min_pub_date_time,max_pub_date_time),sucursal=sucursal).count()
-			imp_venta=Venta_Granel.objects.filter(fecha_importe_venta__range=(min_pub_date_time,max_pub_date_time),sucursal=sucursal).aggregate(Sum("importe_venta"))
+			cont_ventas=Venta_Granel.objects.filter(fecha_importe_venta__range=(fecha_inicial,fecha_final),sucursal=sucursal).count()
+			imp_venta=Venta_Granel.objects.filter(fecha_importe_venta__range=(fecha_inicial,fecha_final),sucursal=sucursal).aggregate(Sum("importe_venta"))
 
 			importe_ventas=0	
 			if imp_venta["importe_venta__sum"]==None:
@@ -832,10 +834,14 @@ def rep_flujo_caja(request):
 			else:
 				importe_ventas=imp_venta["importe_venta__sum"]
 
-			#buscamos ingresos por ventas piso
-			cont_ventas=cont_ventas+Venta_Piso.objects.filter(fecha__range=(min_pub_date_time,max_pub_date_time),sucursal=sucursal).count()
 
-			imp_venta=Venta_Piso.objects.filter(fecha__range=(min_pub_date_time,max_pub_date_time),sucursal=sucursal).aggregate(Sum("importe_venta"))	
+			print(sucursal)
+			#buscamos ingresos por ventas piso
+			cont_ventas=cont_ventas+Venta_Piso.objects.filter(fecha__range=(fecha_inicial,fecha_final),sucursal=sucursal).count()
+
+	
+
+			imp_venta=Venta_Piso.objects.filter(fecha__range=(fecha_inicial,fecha_final),sucursal=sucursal).aggregate(Sum("importe_venta"))	
 			if imp_venta["importe_venta__sum"]==None:
 				print("")
 			else:
@@ -859,8 +865,7 @@ def rep_flujo_caja(request):
 				saldo_inicial=0.00	
 
 
-			fecha_inicial=datetime.combine(fecha_inicial,time.min)
-			fecha_final=datetime.combine(fecha_final,time.max)
+
 
 			#calculamos los empeños
 			importe_empenos=Boleta_Empeno.objects.filter(sucursal=sucursal,fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("mutuo_original"))
@@ -998,8 +1003,8 @@ def rep_flujo_caja(request):
 
 
 			#buscamos ingresos por ventas
-			cont_ventas=Venta_Granel.objects.filter(fecha_importe_venta__range=(min_pub_date_time,max_pub_date_time)).count()
-			imp_venta=Venta_Granel.objects.filter(fecha_importe_venta__range=(min_pub_date_time,max_pub_date_time)).aggregate(Sum("importe_venta"))
+			cont_ventas=Venta_Granel.objects.filter(fecha_importe_venta__range=(fecha_inicial,fecha_final)).count()
+			imp_venta=Venta_Granel.objects.filter(fecha_importe_venta__range=(fecha_inicial,fecha_final)).aggregate(Sum("importe_venta"))
 
 			importe_ventas=0	
 			if imp_venta["importe_venta__sum"]==None:
@@ -1009,9 +1014,9 @@ def rep_flujo_caja(request):
 
 
 			#buscamos ingresos por ventas piso
-			cont_ventas=cont_ventas+Venta_Piso.objects.filter(fecha__range=(min_pub_date_time,max_pub_date_time)).count()
+			cont_ventas=cont_ventas+Venta_Piso.objects.filter(fecha__range=(fecha_inicial,fecha_final)).count()
 
-			imp_venta=Venta_Piso.objects.filter(fecha__range=(min_pub_date_time,max_pub_date_time)).aggregate(Sum("importe_venta"))	
+			imp_venta=Venta_Piso.objects.filter(fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("importe_venta"))	
 			if imp_venta["importe_venta__sum"]==None:
 				print("")
 			else:
