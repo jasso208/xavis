@@ -799,6 +799,18 @@ def rep_flujo_caja(request):
 	cont_ventas=0
 	importe_ventas=0.00
 
+
+	importe_venta_piso=0.00
+	importe_avaluo_piso=0.00
+	importe_mutuo_piso=0.00
+
+	cont_venta_piso=0
+
+	importe_venta_granel=0.00
+	importe_avaluo_granel=0.00
+	importe_mutuo_granel=0.00
+	cont_venta_granel=0
+
 	if request.method=="POST":
 		post="1"
 
@@ -846,6 +858,57 @@ def rep_flujo_caja(request):
 				print("")
 			else:
 				importe_ventas=decimal.Decimal(importe_ventas)+decimal.Decimal(imp_venta["importe_venta__sum"])
+
+
+
+
+			#calculamos el resumen de la venta piso
+			cont_venta_piso=Venta_Piso.objects.filter(fecha__range=(fecha_inicial,fecha_final),sucursal=sucursal).count()
+			imp_venta=Venta_Piso.objects.filter(fecha__range=(fecha_inicial,fecha_final),sucursal=sucursal).aggregate(Sum("importe_venta"))	
+			imp_av_vp=Venta_Piso.objects.filter(fecha__range=(fecha_inicial,fecha_final),sucursal=sucursal).aggregate(Sum("importe_avaluo"))	
+			imp_mut_vp=Venta_Piso.objects.filter(fecha__range=(fecha_inicial,fecha_final),sucursal=sucursal).aggregate(Sum("importe_mutuo"))	
+
+			if imp_venta["importe_venta__sum"]==None:
+				print("")
+			else:
+				importe_venta_piso=decimal.Decimal(imp_venta["importe_venta__sum"])
+
+			if imp_av_vp["importe_avaluo__sum"]==None:
+				print("")
+			else:
+				importe_avaluo_piso=decimal.Decimal(imp_av_vp["importe_avaluo__sum"])
+
+			if imp_mut_vp["importe_mutuo__sum"]==None:
+				print("")
+			else:
+				importe_mutuo_piso=decimal.Decimal(imp_mut_vp["importe_mutuo__sum"])
+
+
+
+
+			#calculamos el resumen de la venta piso
+			cont_venta_granel=Venta_Granel.objects.filter(fecha__range=(fecha_inicial,fecha_final),sucursal=sucursal).count()
+			imp_venta=Venta_Granel.objects.filter(fecha__range=(fecha_inicial,fecha_final),sucursal=sucursal).aggregate(Sum("importe_venta"))	
+			imp_av_vg=Venta_Granel.objects.filter(fecha__range=(fecha_inicial,fecha_final),sucursal=sucursal).aggregate(Sum("importe_avaluo"))	
+			imp_mut_vg=Venta_Granel.objects.filter(fecha__range=(fecha_inicial,fecha_final),sucursal=sucursal).aggregate(Sum("importe_mutuo"))	
+
+			if imp_venta["importe_venta__sum"]==None:
+				print("")
+			else:
+				importe_venta_granel=decimal.Decimal(imp_venta["importe_venta__sum"])
+
+			if imp_av_vg["importe_avaluo__sum"]==None:
+				print("")
+			else:
+				importe_avaluo_granel=decimal.Decimal(imp_av_vg["importe_avaluo__sum"])
+
+			if imp_mut_vg["importe_mutuo__sum"]==None:
+				print("")
+			else:
+				importe_mutuo_granel=decimal.Decimal(imp_mut_vg["importe_mutuo__sum"])
+
+
+
 
 
 
@@ -1022,6 +1085,54 @@ def rep_flujo_caja(request):
 			else:
 				importe_ventas=decimal.Decimal(importe_ventas)+decimal.Decimal(imp_venta["importe_venta__sum"])
 
+
+			#calculamos el resumen de la venta piso
+			cont_venta_piso=Venta_Piso.objects.filter(fecha__range=(fecha_inicial,fecha_final)).count()
+			imp_venta=Venta_Piso.objects.filter(fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("importe_venta"))	
+			imp_av_vp=Venta_Piso.objects.filter(fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("importe_avaluo"))	
+			imp_mut_vp=Venta_Piso.objects.filter(fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("importe_mutuo"))	
+
+			if imp_venta["importe_venta__sum"]==None:
+				print("")
+			else:
+				importe_venta_piso=decimal.Decimal(imp_venta["importe_venta__sum"])
+
+			if imp_av_vp["importe_avaluo__sum"]==None:
+				print("")
+			else:
+				importe_avaluo_piso=decimal.Decimal(imp_av_vp["importe_avaluo__sum"])
+
+			if imp_mut_vp["importe_mutuo__sum"]==None:
+				print("")
+			else:
+				importe_mutuo_piso=decimal.Decimal(imp_mut_vp["importe_mutuo__sum"])
+
+
+			#calculamos el resumen de la venta piso
+			cont_venta_granel=Venta_Granel.objects.filter(fecha__range=(fecha_inicial,fecha_final)).count()
+			imp_venta=Venta_Granel.objects.filter(fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("importe_venta"))	
+			imp_av_vg=Venta_Granel.objects.filter(fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("importe_avaluo"))	
+			imp_mut_vg=Venta_Granel.objects.filter(fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("importe_mutuo"))	
+
+
+			if imp_venta["importe_venta__sum"]==None:
+				print("")
+			else:
+				importe_venta_granel=decimal.Decimal(imp_venta["importe_venta__sum"])
+
+			if imp_av_vg["importe_avaluo__sum"]==None:
+				print("")
+			else:
+				importe_avaluo_granel=decimal.Decimal(imp_av_vg["importe_avaluo__sum"])
+
+			if imp_mut_vg["importe_mutuo__sum"]==None:
+				print("")
+			else:
+				importe_mutuo_granel=decimal.Decimal(imp_mut_vg["importe_mutuo__sum"])
+
+
+
+
 			#calculamos los empeños
 			importe_empenos=Boleta_Empeno.objects.filter(fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("mutuo_original"))
 			cont_empenos=Boleta_Empeno.objects.filter(fecha__range=(fecha_inicial,fecha_final)).count()
@@ -1174,6 +1285,38 @@ def rep_flujo_caja(request):
 	total_mutuo="{:0,.2f}".format(total_mutuo)
 	total_almoneda="{:0,.2f}".format(total_almoneda)
 	importe_retiros="{:0,.2f}".format(importe_retiros)
+
+	utilidad_vta_piso=decimal.Decimal(importe_venta_piso)-decimal.Decimal(importe_mutuo_piso)
+	utilidad_vta_granel=decimal.Decimal(importe_venta_granel)-decimal.Decimal(importe_mutuo_granel)
+
+	tot_venta="{:0,.2f}".format(decimal.Decimal(importe_venta_piso)+decimal.Decimal(importe_venta_granel))
+	tot_avaluo="{:0,.2f}".format(decimal.Decimal(importe_avaluo_piso)+decimal.Decimal(importe_avaluo_granel))
+	tot_mutuo="{:0,.2f}".format(decimal.Decimal(importe_mutuo_piso)+decimal.Decimal(importe_mutuo_granel))
+	tot_utilidad_vta="{:0,.2f}".format(decimal.Decimal(utilidad_vta_piso)+decimal.Decimal(utilidad_vta_granel))
+
+
+	cont_total_vta=cont_venta_granel+cont_venta_piso
+
+	
+	importe_venta_piso="{:0,.2f}".format(importe_venta_piso)
+	importe_avaluo_piso="{:0,.2f}".format(importe_avaluo_piso)
+	importe_mutuo_piso="{:0,.2f}".format(importe_mutuo_piso)
+	utilidad_vta_piso="{:0,.2f}".format(utilidad_vta_piso)
+
+
+
+
+
+
+
+	
+	importe_venta_granel="{:0,.2f}".format(importe_venta_granel)
+	importe_avaluo_granel="{:0,.2f}".format(importe_avaluo_granel)
+	importe_mutuo_granel="{:0,.2f}".format(importe_mutuo_granel)
+	utilidad_vta_granel="{:0,.2f}".format(utilidad_vta_granel)
+
+
+	
 
 	#cuando eres gerente regiona, puedes entrar a todas las sucursales
 	if user_2.perfil.id==3:		
