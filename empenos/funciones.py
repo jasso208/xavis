@@ -346,8 +346,9 @@ def fn_importe_desemp(abono):
 #antes de aceptar un refrendo, en la pantalla existe un boton que simula como quedaria la boeleta del cliente.
 # es este boton el que ejecuta esta funcion.
 #en pagos temp ya tenemos cargados todos los pagos de la boleta.
+#el parametro desc_pg indica si se descontara la comision de pg 1 es para si 0 es para no
 @transaction.atomic
-def fn_simula_refrendo(importe_abono,usuario,boleta,recursivo):	
+def fn_simula_refrendo(importe_abono,usuario,boleta,recursivo,desc_pg):	
 
 	hoy=datetime.now()#fecha actual
 	hoy=datetime.combine(hoy, time.min)
@@ -380,13 +381,17 @@ def fn_simula_refrendo(importe_abono,usuario,boleta,recursivo):
 			if refrendopg.exists():
 				fe_ve=Pagos_Temp.objects.filter(tipo_pago=est_refrendopg,usuario=usuario).aggregate(Max("fecha_vencimiento_real"))
 
+
 				fecha_vencimiento=fe_ve["fecha_vencimiento_real__max"]
 			else:
 				fecha_vencimiento=boleta.fecha_vencimiento_real	
-		except:
+		except Exception as e:
+			print(e)
 			fecha_vencimiento=boleta.fecha_vencimiento_real
 
+
 	mutuo=boleta.mutuo
+
 
 	#boleta Activa / Abierta
 	if boleta.estatus.id==1:
@@ -425,12 +430,15 @@ def fn_simula_refrendo(importe_abono,usuario,boleta,recursivo):
 
 			print("fecha_vencimiento")
 			print(fecha_vencimiento)
+			print(pag_actual)
 			
 			fecha_vencimiento_real=fecha_vencimiento
 			refrendo_pendiente=fn_calcula_saldo_refrendo(boleta,hoy)
 
 			pag_ac=0#cuando es cero es que no se a cubierto el pago actual, cuando cambia a 1 esque ya se cubrio el pago actual.
 			#marcamos los pagos afectados como pagados.
+
+
 			for pt in pagos_t:
 
 				
@@ -445,8 +453,6 @@ def fn_simula_refrendo(importe_abono,usuario,boleta,recursivo):
 					
 					#por cada pago tipo refrendo pagado, generamos uno nuevo.
 					dias = timedelta(days=7)
-					print("entro aqui antes de pagos_temp")		                
-					print(fecha_vencimiento_real)
 					fecha_vencimiento=datetime.combine(fecha_vencimiento_real+dias, time.min)
 					
 					fecha_vencimiento_real=fecha_vencimiento
@@ -465,8 +471,12 @@ def fn_simula_refrendo(importe_abono,usuario,boleta,recursivo):
 					npt.importe=pt.importe
 					npt.vencido="N"
 					npt.pagado="N"
-					npt.fecha_vencimiento_real=fecha_vencimiento_real
+					npt.fecha_vencimiento_real=fecha_vencimiento_real					
 					npt.save()
+
+					print("fecha_vencimiento_real")
+					print(fecha_vencimiento_real)
+
 					importe_abono=int(importe_abono)-int(pt.importe)#disminuimos el saldo del importe abonado
 					if pag_actual==pt:
 						pag_ac=1
@@ -621,12 +631,13 @@ def fn_simula_refrendo(importe_abono,usuario,boleta,recursivo):
 			pcg.pagado="S"
 			pcg.save()
 
-			importe_abono=int(importe_abono)-int(pcg.importe)#disminuimos el saldo del importe abonado
+			if desc_pg==0:
+				importe_abono=int(importe_abono)-int(pcg.importe)#disminuimos el saldo del importe abonado
 
 
 
 
-		#todos los pagos comision Pg deben ser cubiertos 
+		#todos los pagos  Pg deben ser cubiertos 
 		pagos_refrendopg=Pagos_Temp.objects.filter(usuario=usuario,tipo_pago=est_refrendopg,pagado="N")
 
 		#pf_temporal=None
@@ -652,7 +663,7 @@ def fn_simula_refrendo(importe_abono,usuario,boleta,recursivo):
 
 		if importe_abono>0:
 			#recursividad para acceder al algoritmo de una boleta activa.
-			return fn_simula_refrendo(importe_abono,usuario,boleta,1)
+			return fn_simula_refrendo(importe_abono,usuario,boleta,1,0)
 		else:
 			return boleta.mutuo
 
@@ -994,16 +1005,15 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 
 			importe_abono=int(importe_abono)-int(pcg.importe)#disminuimos el saldo del importe abonado
 
-		
+
 		fv_final=boleta.fecha_vencimiento
 
-		#todos los pagos comision Pg deben ser cubiertos 
+		#todos los refrendos pg deben ser cubiertos
 		pagos_refrendopg=Pagos.objects.filter(boleta=boleta,tipo_pago=est_refrendopg,pagado="N")
 		for prg in pagos_refrendopg:
 			prg.pagado="S"
 			prg.fecha_pago=timezone.now()
 			prg.save()
-
 
 			#creamos la relacion entre el abono y los pagos
 			rel=Rel_Abono_Pago()
@@ -1019,7 +1029,10 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 			if prg.fecha_vencimiento>fv_final:
 				fv_final=prg.fecha_vencimiento
 
+		print("la fecha de vencimiento deberia de ser el 18")
+		print(fv_final)
 		boleta.fecha_vencimiento=fv_final
+		boleta.fecha_vencimiento_real=fv_final
 		boleta.save()
 
 		rel_abono=Rel_Abono_Pago.objects.filter(abono=abono).order_by("id")
@@ -1049,11 +1062,15 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 						x.save()
 					c_ont=1
 
+		print("boleta.fecha_vencimiento")
+		print(boleta.fecha_vencimiento)
 		if boleta.fecha_vencimiento>=hoy:
 			abierta=Estatus_Boleta.objects.get(id=1)
 			boleta.estatus=abierta
 			boleta.save()
 
+		print("importe_abono")
+		print(importe_abono)
 		if importe_abono>0:
 			#recursividad para acceder al algoritmo de una boleta activa.
 			fn_aplica_refrendo(usuario,importe_abono,caja,boleta,1,abono)

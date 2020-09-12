@@ -47,6 +47,7 @@ class Cierra_Caja_Form(forms.Form):
 
 class Refrendo_Form(forms.Form):
 	importe_abono=forms.IntegerField()
+	desc_pg=forms.IntegerField()
 	
 class Porcentaje_Sobre_Avaluo_Form(forms.ModelForm):
 	class Meta:

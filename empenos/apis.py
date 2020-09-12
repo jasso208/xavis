@@ -911,6 +911,7 @@ def api_simula_refrendo(request):
 	usuario=User.objects.get(username=request.GET.get("username"))
 	boleta=Boleta_Empeno.objects.get(folio=int(request.GET.get("folio_boleta")),sucursal=sucursal)
 	importe_abono=request.GET.get("importe")
+	desc_pg=request.GET.get("desc_pg")
 
 
 
@@ -936,17 +937,13 @@ def api_simula_refrendo(request):
 		npt.pagado=p.pagado
 		npt.fecha_vencimiento_real=p.fecha_vencimiento_real
 
-		print("p.fecha_vencimiento")
-		print(p.id)
-		print(p.fecha_vencimiento_real)
-		print(p.fecha_vencimiento)
 
 		npt.save()
 
 
 
 	if int(importe_abono)>0:
-		nuevo_mutuo=fn_simula_refrendo(importe_abono,usuario,boleta,0)
+		nuevo_mutuo=fn_simula_refrendo(importe_abono,usuario,boleta,0,desc_pg)
 
 
 
@@ -970,7 +967,7 @@ def api_simula_refrendo(request):
 				x.save()
 			cont=cont-1
 
-			
+	
 	pagos_t=Pagos_Temp.objects.filter(usuario=usuario,pagado="N").order_by("-fecha_vencimiento")
 
 

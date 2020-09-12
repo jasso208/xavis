@@ -275,6 +275,8 @@
 									
 									{% bootstrap_field form.importe_abono show_field=False %}
 									
+									{% bootstrap_field form.desc_pg show_field=False %}
+
 
 
 								</div>								
@@ -443,7 +445,7 @@
 <script type="text/javascript">
 	var total_pagar=0;
 	var importe_comisionpg=0;
-	
+	var desc_pg=0;
 	$(document).ready(
 			function()
 			{
@@ -643,10 +645,14 @@
 			if (minimo_pg!=0)
 			{
 				var importe_comisionpg=0;
+				desc_pg=1;
+				$("#id_desc_pg").val("1");
 				$("#id_descuento").text("${{minimo_pg}}.00");
 			}
 			else
 			{
+				$("#id_desc_pg").val("0");
+				desc_pg=0;
 				var importe_comisionpg="{{importe_comisionpg}}";	
 				$("#id_descuento").text("$0.00");
 			}
@@ -654,6 +660,8 @@
 		}
 		else
 		{
+			$("#id_desc_pg").val("0");
+			desc_pg=0;
 			var importe_comisionpg="{{importe_comisionpg}}";	
 			$("#id_descuento").text("$0.00");
 		}
@@ -828,7 +836,7 @@
 		$.ajax({
 			type: "GET",
 	        url: "{{IP_LOCAL}}/empenos/api_simula_refrendo/",
-	        data: {"username":"{{username}}","folio_boleta":"{{boleta.folio}}","importe":total_pagar.toString(),"id_sucursal":"{{boleta.sucursal.id}}"},
+	        data: {"username":"{{username}}","folio_boleta":"{{boleta.folio}}","importe":total_pagar.toString(),"id_sucursal":"{{boleta.sucursal.id}}","desc_pg":desc_pg},
 	        contentType: "application/json; charset=utf-8",
 	        dataType: "json",
 	        success: function (r) {

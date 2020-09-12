@@ -2559,7 +2559,7 @@ def nvo_empeno(request):
 						pago.iva=ref[0]["iva"]
 
 						pago.fecha_vencimiento_real=boleta.fecha_vencimiento_real
-						
+
 						pago.save()
 						
 						boleta.refrendo=round(ref[0]["refrendo"])
@@ -2694,11 +2694,15 @@ def refrendo(request,id_boleta):
 	if request.method=="POST":
 		try:
 			importe_abono=int(float(request.POST.get("importe_abono")))
+			desc_pg=int(float(request.POST.get("desc_pg")))
+
+			
 
 			#si es apto para el descuento
 			#y ya cubrio todo el saldo vencido
 
-			if minimo_pg!=0 and importe_abono>=importe_saldo_vencido:
+			#if minimo_pg!=0 and importe_abono>=importe_saldo_vencido:
+			if desc_pg==1:
 				#borramos las comisiones pg
 				Pagos.objects.filter(boleta=boleta,pagado="N",tipo_pago=est_comisionpg).delete()
 
