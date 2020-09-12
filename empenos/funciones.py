@@ -465,7 +465,7 @@ def fn_simula_refrendo(importe_abono,usuario,boleta,recursivo):
 					npt.importe=pt.importe
 					npt.vencido="N"
 					npt.pagado="N"
-					ntp.fecha_vencimiento_real=fecha_vencimiento_real
+					npt.fecha_vencimiento_real=fecha_vencimiento_real
 					npt.save()
 					importe_abono=int(importe_abono)-int(pt.importe)#disminuimos el saldo del importe abonado
 					if pag_actual==pt:

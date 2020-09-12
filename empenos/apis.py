@@ -921,7 +921,7 @@ def api_simula_refrendo(request):
 	pagos=Pagos.objects.filter(boleta=boleta,pagado="N")
 
 	for p in pagos:
-		print(str(p.boleta)+str(p.fecha_vencimiento)+str(p.tipo_pago))
+		
 		npt=Pagos_Temp()
 		npt.usuario=usuario
 		npt.tipo_pago=p.tipo_pago

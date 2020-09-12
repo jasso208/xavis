@@ -2192,16 +2192,19 @@ def nvo_empeno(request):
 
 				dias = timedelta(days=28)		                
 				fecha_vencimiento=datetime.combine(hoy+dias, time.min)
+				fecha_vencimiento_real=fecha_vencimiento
 				fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
 
 			elif int(request.POST.get("plazo"))==1:
 				dias = timedelta(days=1)
-				fecha_vencimiento=hoy+dias
+				#fecha_vencimiento=hoy+dias
 				fecha_vencimiento=datetime.combine(hoy+dias, time.min)
+				fecha_vencimiento_real=fecha_vencimiento
 				#validmoas que la fecha de vencimiento no sea de azueto
 				fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
 			elif int(request.POST.get("plazo"))==3:							
 				fecha_vencimiento=datetime.combine(fn_add_months(hoy,1), time.min)	
+				fecha_vencimiento_real=fecha_vencimiento
 				#validmoas que la fecha de vencimiento no sea de azueto
 				fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
 
@@ -2239,6 +2242,7 @@ def nvo_empeno(request):
 				boleta.plazo=plazo
 				boleta.sucursal=caja.sucursal
 				boleta.mutuo_original=mutuo
+				boleta.fecha_vencimiento_real=fecha_vencimiento_real
 				boleta.save()
 
 
@@ -2247,7 +2251,9 @@ def nvo_empeno(request):
 					days = timedelta(days=7)
 					
 					fecha_vencimiento = datetime.combine(hoy+days, time.min) 
+					fecha_vencimiento_real=fecha_vencimiento
 					fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
+
 					almacenaje_semanal=(boleta.mutuo*0.05)/4
 					interes_semanal=(boleta.mutuo*0.063)/4
 					iva_semanal=((almacenaje_semanal+interes_semanal)*0.16)
@@ -2259,21 +2265,27 @@ def nvo_empeno(request):
 						importe_semanal=round(importe_semanal)
 
 
-					Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=importe_semanal,almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
+					Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=importe_semanal,almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal,fecha_vencimiento_real=fecha_vencimiento_real)
 
 					days = timedelta(days=14)					
 					fecha_vencimiento = datetime.combine(hoy+days, time.min) 
+					fecha_vencimiento_real=fecha_vencimiento
 					fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
-					Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=importe_semanal,almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
+					Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=importe_semanal,almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal,fecha_vencimiento_real=fecha_vencimiento_real)
 
 					days = timedelta(days=21)					
+
 					fecha_vencimiento = datetime.combine(hoy+days, time.min) 
+					fecha_vencimiento_real=fecha_vencimiento
+					fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
+
 					Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=importe_semanal,almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
 
 					days = timedelta(days=28)					
 					fecha_vencimiento = datetime.combine(hoy+days, time.min) 
+					fecha_vencimiento_real=fecha_vencimiento
 					fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
-					Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=importe_semanal,almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal)
+					Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=importe_semanal,almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal,fecha_vencimiento_real=fecha_vencimiento_real)
 
 					boleta.refrendo=math.ceil((importe_semanal*4.00))
 					boleta.save()
@@ -2289,6 +2301,7 @@ def nvo_empeno(request):
 					pago.almacenaje=ref[0]["almacenaje"]
 					pago.interes=ref[0]["interes"]
 					pago.iva=ref[0]["iva"]
+					pago.fecha_vencimiento=boleta.fecha_vencimiento
 					pago.save()
 
 
