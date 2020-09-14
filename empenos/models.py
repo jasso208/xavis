@@ -17,6 +17,10 @@ ESTADO_CIVIL_CHOICES = (
     ('2', 'CASADO'),
 )
 
+SI_NO=(
+	('1','SI'),
+	('2','NO'),
+)
 
 
 #al momendo de anunciar un producto para la venta piso, 
@@ -246,6 +250,9 @@ class Plazo(models.Model):
 
 	def __str__(self):
 		return self.plazo
+
+class Retirar_Solo_Utilidad(models.Model):
+	si_no=models.CharField(choices=SI_NO,max_length=2)
 
 class Cliente(models.Model):
 	nombre=models.CharField(max_length=20,null=False)

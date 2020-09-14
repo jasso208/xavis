@@ -26,6 +26,12 @@ class Venta_Piso_Form(forms.Form):
 		# asi vuelves tus campos no requeridos
 		self.fields['id_cliente'].required = False
 
+#SI: para que solo retiro solo utilidad
+#NO: para que puedo retirar todo el disponible.
+class Retirar_Solo_Utilidad_Form(forms.ModelForm):
+	class Meta:
+		model=Retirar_Solo_Utilidad
+		fields=('si_no',)
 
 class Cierra_Caja_Form(forms.Form):
 	centavos_10=forms.IntegerField()

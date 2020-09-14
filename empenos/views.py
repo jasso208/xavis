@@ -112,6 +112,70 @@ def abrir_caja(request):
 
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
+
+def disponible_retiro(request,id):
+	#si no esta logueado mandamos al login
+	if not request.user.is_authenticated:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+	
+	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
+	try:
+		user_2=User_2.objects.get(user=request.user)
+	except Exception as e:		
+		print(e)
+		form=Login_Form(request.POST)
+		estatus=0
+		msj="La cuenta del usuario esta incompleta."			
+		return render(request,'login.html',locals())
+
+	pub_date = date.today()
+	min_pub_date_time = datetime.combine(pub_date, time.min) 
+	max_pub_date_time = datetime.combine(pub_date, time.max)  
+
+	try:		
+		#validamos si el usuario tiene caja abierta en el dia actual.
+		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
+		suc=caja.sucursal
+		c=caja.caja
+
+	except Exception as e:
+		print(e)
+		caja_abierta="0"
+		caja=Cajas
+		
+
+	try:
+		query=Retirar_Solo_Utilidad.objects.get(id=int(id))	
+
+
+				
+	except:
+		
+		query=Retirar_Solo_Utilidad()
+
+	estatus="0"
+
+	if request.method=="POST":
+
+		form=Retirar_Solo_Utilidad_Form(request.POST,instance=query)
+
+		if form.is_valid():
+			form.save()
+			estatus="1"
+		else:
+			estatus="0"
+
+	else:
+		estatus="2"
+		form=Retirar_Solo_Utilidad_Form(instance=query)		
+	
+	return render(request,'empenos/disponible_retiro.html',locals())
+
+
+#*******************************************************************************************************************************************************
+#*¨**************************************************************************************************************************************************************
+
 @transaction.atomic
 def venta_piso(request):
 	#si no esta logueado mandamos al login

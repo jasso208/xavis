@@ -58,7 +58,7 @@
 				</div>
 
 		</div>
-				<div class="row" >
+		<div class="row" >
 				<div class="col-xs-12 cls_encabezado_body_2">
 					<a>
 						Ventas
@@ -80,5 +80,28 @@
 				</div>
 
 		</div>
+		<div class="row" >
+				<div class="col-xs-12 cls_encabezado_body_2">
+					<a>
+						Retiros
+					</a>
+					<br>
+				</div>
+				<div class="row cls_row_body"  >
+					<div class="col-xs-2">
+						<div class="cls_boton_body">
+							<a href="{% url 'empenos:disponible_retiro' id=1 %}">
+								<span class="glyphicon glyphicon-briefcase"></span>
+								<br>
+								<br>
+								Disponible retiro
+							</a>	
+						</div>
+						
+					</div>
+				</div>
+
+		</div>
+
 	</div>
 {% endblock %}

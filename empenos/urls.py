@@ -32,6 +32,7 @@ urlpatterns=[
 	url(r'^venta_piso/$',venta_piso,name="venta_piso"),	
 	url(r'^imprime_venta_piso$',imprime_venta_piso,name="imprime_venta_piso"),
 	url(r'^re_imprimir_venta_piso/(?P<id_venta>\w+)/$',re_imprimir_venta_piso,name="re_imprimir_venta_piso"),
+	url(r'^disponible_retiro/(?P<id>\w+)/$',disponible_retiro,name="disponible_retiro"),
 
 
 	url(r'^consulta_abono$',consulta_abono,name="consulta_abono"),
