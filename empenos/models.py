@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from decimal import Decimal
 from seguridad.models import Session
-from empenos.funciones import *
+
 
 GENERO_CHOICES = (
     ('1','HOMBRE'),
