@@ -3,6 +3,12 @@ from django.forms.models import inlineformset_factory
 from empenos.models import *
 from datetime import date, datetime, time
 from django.utils import timezone
+
+class Min_Apartado_Form(forms.ModelForm):
+	class Meta:
+		model=Min_Apartado
+		fields=('porc_min_1_mes','porc_min_2_mes',)	
+
 class Abre_Caja_Form(forms.ModelForm):
 	class Meta:
 		model=Cajas
@@ -19,6 +25,15 @@ class Retiro_Efectivo_Form(forms.ModelForm):
 		fields=('tipo_movimiento','importe','comentario','token',)
 
 
+class Apartado_Form(forms.Form):
+	id_cliente=forms.IntegerField()
+	pago_cliente=forms.IntegerField()
+	
+	def __init__(self, *args, **kwargs):
+		super(self.__class__, self).__init__(*args, **kwargs)
+		# asi vuelves tus campos no requeridos
+		self.fields['id_cliente'].required = False
+
 class Venta_Piso_Form(forms.Form):
 	id_cliente=forms.IntegerField()
 	def __init__(self, *args, **kwargs):
@@ -32,6 +47,10 @@ class Retirar_Solo_Utilidad_Form(forms.ModelForm):
 	class Meta:
 		model=Retirar_Solo_Utilidad
 		fields=('si_no',)
+
+class Abono_Apartado_Form(forms.Form):
+	abono=forms.IntegerField()
+	
 
 class Cierra_Caja_Form(forms.Form):
 	centavos_10=forms.IntegerField()
@@ -58,7 +77,7 @@ class Refrendo_Form(forms.Form):
 class Porcentaje_Sobre_Avaluo_Form(forms.ModelForm):
 	class Meta:
 		model=Porcentaje_Sobre_Avaluo
-		fields=('porcentaje',)
+		fields=('porcentaje','porcentaje_apartado',)
 
 class Refrendo_Mensual_Form(forms.Form):
 	total_refrendo=forms.IntegerField()
@@ -72,6 +91,12 @@ class Reportes_Caja_Form(forms.Form):
 class Buscar_Ventas_Form(forms.Form):
 	fecha_inicial=forms.DateTimeField(initial=timezone.now())
 	fecha_final=forms.DateTimeField(initial=timezone.now())
+
+
+class Buscar_Apartados_Form(forms.Form):
+	fecha_inicial=forms.DateTimeField(initial=timezone.now())
+	fecha_final=forms.DateTimeField(initial=timezone.now())
+
 
 class Costo_Extra_Form(forms.Form):
 	sucursal=forms.ModelChoiceField(queryset=Sucursal.objects.all())

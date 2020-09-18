@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% load bootstrap3 %}
+{% load static%}
+{% block usuario %}
+
+			<div class="col-xs-6">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{user_2.user.username}} {{user_2.perfil.perfil}}</label> 
+				
+			</div>
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-home"></span> Sucursal: {{user_2.sucursal}}</label> 	
+			</div>
+
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-inbox"></span> Caja: {{c}} </label> 	
+			</div>
+
+
+{% endblock  %}
+{% block content %}
+	<div class="col-xs-12 cls_encabezado_body">
+	
+		<a >
+			Porcentajes minimos para apartado.
+		</a>		
+	
+	</div>
+
+
+	<div class="col-xs-12">
+		<form method="post" action="#" class="cls_form_1">
+			{%csrf_token%}
+			<div class="row cls_form_consulta">
+				<div class="col-xs-6">
+					<div class="panel panel-default">						
+						<div class="panel-body">
+							
+
+							<div class="col-xs-12 col-md-6"  >
+								<label for="">Porcentaje plazo 1 mes</label>
+								{% bootstrap_field form.porc_min_1_mes show_label=False %}
+							</div>
+							<div class="col-xs-12 col-md-6"  >
+								<label for="">Porcentaje plazo 2 mes</label>
+								{% bootstrap_field form.porc_min_2_mes show_label=False %}
+							</div>
+
+							<div class="col-xs-12">								
+								<button class="btn btn-primary btn-sm" style="float: right;"   id="guardar">Guardar</button>								
+							</div>	
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+
+
+
+
+	{% ifequal permiso "0" %}
+		<div class="fondo_mensaje  cls_error_guardar_venta" >
+
+		</div >
+
+		<div class="mensaje  cls_error_guardar_venta" >
+			<div class="cls_encabezado_alert" >
+				Error!!
+			</div>	
+			<div class="panel panel-default">	
+				<label class="page-header" id="msj_notificacion"> No cuentas con permiso para acceder a esta opción</label>
+				<br>				
+				<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_administracion'%}"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+				<br>
+				<br>
+			</div>
+		</div>
+	{% endifequal %}
+
+
+
+	{% ifequal estatus "0" %}
+		<div class="fondo_mensaje  cls_error_guardar_venta" >
+
+		</div >
+
+		<div class="mensaje  cls_error_guardar_venta" >
+			<div class="cls_encabezado_alert" >
+				Error!!
+			</div>	
+			<div class="panel panel-default">	
+				<label class="page-header" id="msj_notificacion">Error al guardar. Intente nuevamente.</label>
+				<br>				
+				<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_administracion'%}"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+				<br>
+				<br>
+			</div>
+		</div>
+	{% endifequal %}
+
+	{% ifequal estatus "1" %}
+		<div class="fondo_mensaje  cls_error_guardar_venta" >
+
+		</div >
+
+		<div class="mensaje  cls_error_guardar_venta" >
+			<div class="cls_encabezado_alert" >
+				Aviso
+			</div>	
+			<div class="panel panel-default">	
+				<label class="page-header" id="msj_notificacion">Se actualizó correctamente.</label>
+				<br>				
+				<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_administracion'%}"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+				<br>
+				<br>
+			</div>
+		</div>
+	{% endifequal %}
+
+
+		<div class="fondo_mensaje  cls_error_form_hover" >
+
+		</div >
+
+		<div class="mensaje  cls_error_form_hover" >
+			<div class="cls_encabezado_alert" >
+				Error!!
+			</div>	
+			<div class="panel panel-default">	
+				<label class="page-header" id="msj_error"></label>
+				<br>				
+				<a class="btn btn-primary btn-sm" id="btn_aceptar_error"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+				<br>
+				<br>
+			</div>
+		</div>
+
+
+	<div id="fondo_preloader">
+		<div class="preloader" id="preloader">
+		
+		</div>
+	</div>
+
+
+<script type="text/javascript">
+	$(document).ready(
+		function()
+		{
+			fn_inicio();
+			$("#btn_aceptar_error").click(
+					function()
+					{
+						$(".cls_error_form_hover").hide()
+					}
+				);
+			$("#guardar").click(
+					function()
+					{
+								return fn_valida_form();		
+					}
+				);
+		}
+	);
+
+	function fn_valida_form()
+	{
+		var val_1=$("#id_porc_min_1_mes").val();
+		var val_2=$("#id_porc_min_2_mes").val();
+
+		//si no ha capturado inforamcion en el formulario
+		if (val_1==""  | val_2=="" | parseInt(val_1)<0  | parseInt(val_2)<0 | parseInt(val_1)>100  | parseInt(val_2)>100)
+		{
+			$(".cls_error_form_hover").show()
+			$("#msj_error").text("Revise la información capturada e intente nuevamente.");
+			return false;
+		}
+
+		$("#fondo_preloader").show();	
+		return true;
+
+	}
+	function fn_inicio()
+	{
+
+		$("#fondo_preloader").hide();
+		$(".cls_error_form_hover").hide()
+	}
+</script>
+	
+	
+{% endblock  %}

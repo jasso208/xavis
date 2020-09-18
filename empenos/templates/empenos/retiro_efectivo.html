@@ -32,8 +32,9 @@
 					<div class="panel panel-default">						
 						<div class="panel-body">
 							<div class="col-xs-6 ">
-								<div class="col-xs-12" style="text-align: center;">
-									<h4 class="page-header">Teorico</h4>
+								
+								<div class="cls_encabezado_alert " >
+									<label>Teórico</label>
 								</div>
 
 								<div class="col-xs-12">
@@ -151,6 +152,19 @@
 										<p>${{importe_ventas}}</p>
 									</div>
 								</div>
+								<div class="col-xs-12">
+
+									<div class="col-xs-6">
+										<p>Ing. Apartado:</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>{{cont_ab_apartado}}</p>
+									</div>
+									<div class="col-xs-3 text-right">
+										<p>${{importe_apartado}}</p>
+									</div>
+									
+								</div>
 
 
 
@@ -181,6 +195,7 @@
 										</p>
 									</div>
 								</div>
+
 								<div class="col-xs-12">
 									<div class="col-xs-6">
 										<p>Retiros de Efectivo:</p>
@@ -192,6 +207,7 @@
 										<p>${{retiros}}</p>
 									</div>
 								</div>
+
 								<div class="col-xs-12">
 									<div class="col-xs-6">
 										<p>Pagos Empeño:</p>
@@ -223,9 +239,9 @@
 							</div>
 
 							<div class="col-xs-6 ">
-								<div class="panel panel-default">						
-									<div class="panel-body">
-										<h4 class="page-header" style="padding-top: 0; margin-top: 20px;text-align: center;">Retiro Efectivo</h4>
+										<div class="cls_encabezado_alert " >
+											<label>Retiro Efectivo</label>
+										</div>
 										<div class="col-xs-4">
 											<label for=""> Importe</label>
 											{% bootstrap_field form.importe  show_label=False%}
@@ -246,6 +262,7 @@
 
 										</div>
 										<div class="col-xs-12">
+
 											<label for=""> Motivo</label>
 											{% bootstrap_field form.comentario  show_label=False%}
 
@@ -253,16 +270,11 @@
 												Debe ingresar el motivo del retiro.
 											</div>
 
-											
 										</div>
 										<div class="col-xs-4">
 											<label for=""> Token Seguridad</label>
 											{% bootstrap_field form.token  show_label=False%}
-											{% if error_token == '1' %}
-												<div class="help-block">
-													El token de seguridad no es valido.
-												</div>								
-											{% endif %}
+											
 										</div>
 										<div class="col-xs-4">								
 											<label for=""> 
@@ -280,10 +292,15 @@
 
 										<div class="col-xs-12" >
 											<br>
-											<button class="btn btn-primary" style="float: right;"   id="retirar">Retirar</button>	
+											<button class="btn btn-primary btn-sm" style="float: right;"   id="retirar">
+											
+												<span class="glyphicon glyphicon-usd">
+													
+												</span>
+													Retirar
+											</button>	
 										</div>
-									</div>
-								</div>
+									
 							</div>
 							
 						</div>
@@ -331,20 +348,44 @@
 				<br>
 			</div>
 	</div>
+
+	<div class="fondo_mensaje cls_error_formulario" >
+		
+	</div >
+	<div class="mensaje cls_error_formulario" >
+			<div class="cls_encabezado_alert" >
+				Error!!
+			</div>	
+			<div class="panel panel-default">	
+				<label class="page-header" id="msj_error_form"></label>
+				<br>				
+				<a class="btn btn-primary btn-sm" id="btn_aceptar_error_form">
+					<span class="glyphicon glyphicon-ok"></span> 
+					Aceptar
+				</a>
+				<br>
+				<br>
+			</div>
+	</div>
+
 	<script type="text/javascript">
 			$(document).ready(
 					function()
 					{
-						$("#fondo_preloader").hide();
-						read_only="{{read_only}}";
-						//esta condicion es cuando se intenta guardar el formulario y falla
-						//para que mantenga bloqueado el formulario
-						//en caso de que se requiera editar el cmotivo o importe debera refrescar la pagina
-						if(read_only=="1")
-						{
-								$("#id_importe").prop("readonly",true);
-								$("#id_comentario").prop("readonly",true);
-						}
+
+						fn_inicio();
+						$("#btn_aceptar_error_form").click(
+								function ()
+								{
+									$(".cls_error_formulario").hide();
+								}
+							);
+						$("#retirar").click(
+								function () 
+								{
+									$("#fondo_preloader").show();
+								}
+							);
 						$("#btn_retirar").hide();
 						$("#error_importe_cero").hide();
 						$("#error_comentario").hide();
@@ -360,6 +401,19 @@
 								}
 						);
 
+						$("#id_importe").focusout(
+								function()
+								{
+
+									if ($("#id_importe").val()=="")
+									{
+										$("#id_importe").val("0");
+									}
+
+									$("#id_importe").val(parseInt($("#id_importe").val()));
+
+								}
+							);
 						$("#generar_codigo").click(
 							function()
 							{	
@@ -371,7 +425,13 @@
 								if( importe==0.00)
 								{
 									
-									$("#error_importe_cero").show();
+									if($("#id_importe").val()=="")
+									{
+										$("#id_importe").val(0);	
+									}
+
+									$(".cls_error_formulario").show();
+									$("#msj_error_form").text("El importe indicado no es valido.");
 									return 0;
 								}
 								if(comentario=="")
@@ -383,8 +443,19 @@
 
 								if(importe>{{total_efectivo}})
 								{
-									$("#error_importe_excedido").show();
+
+									$(".cls_error_formulario").show();
+									$("#msj_error_form").text("No puedes disponer mas del disponible en caja.");
+
 									return 0;
+								}
+								if(importe<=0)
+								{
+
+									$(".cls_error_formulario").show();
+									$("#msj_error_form").text("El importe indicado no es valido.");
+									return 0;
+
 								}
 								$("#fondo_preloader").show();
 							   $.ajax({
@@ -432,5 +503,27 @@
 
 					}
 				);
+
+		function fn_inicio()
+		{
+			$("#fondo_preloader").hide();
+			read_only="{{read_only}}";
+			//esta condicion es cuando se intenta guardar el formulario y falla
+			//para que mantenga bloqueado el formulario
+			//en caso de que se requiera editar el cmotivo o importe debera refrescar la pagina
+			if(read_only=="1")
+			{
+					$("#id_importe").prop("readonly",true);
+					$("#id_comentario").prop("readonly",true);
+			}
+			$(".cls_error_formulario").hide();
+
+			if("{{error_token}}"=="1")
+			{
+					$(".cls_error_formulario").show();
+					$("#msj_error_form").text("El token ingresado es invalido.");
+					return 0;
+			}
+		}
 	</script>
 {% endblock %}

@@ -173,7 +173,7 @@
 									    			</a> 
 
 									    			{% if b.plazo.id != 1  %}
-										    			 {%  if b.estatus.id != 4 and b.estatus.id != 6 %}
+										    			 {%  if b.estatus.id != 4 and b.estatus.id != 6 and b.estatus.id != 7 %}
 										    			 	{% if b.plazo.id == 2 %}
 											    			<a href='/empenos/refrendo/{{b.id}}' class='btn btn-default btn-sm'>
 											    				<span class='glyphicon glyphicon-euro'>
@@ -181,7 +181,7 @@
 											    				</span>    					
 											    			</a>
 											    			{% endif %}
-											    			{% if b.plazo.id == 3 %}
+											    			{% if b.plazo.id == 3  %}
 											    			<a href='/empenos/refrendo_plazo_mensual/{{b.id}}' class='btn btn-default btn-sm'>
 											    				<span class='glyphicon glyphicon-euro'>
 											    					
@@ -692,7 +692,7 @@
 	        		$("#span_cotitular").text(r[2].cotitular);
 	        		$("#span_estatus").text(r[2].estatus);
 
-	        		if (parseInt(r[1].id_plazo)==1 || parseInt(r[1].id_estatus_boleta)==4 || parseInt(r[1].id_estatus_boleta)==2 || parseInt(r[1].id_estatus_boleta)==6)
+	        		if (parseInt(r[1].id_plazo)==1 || parseInt(r[1].id_estatus_boleta)==4 || parseInt(r[1].id_estatus_boleta)==2 || parseInt(r[1].id_estatus_boleta)==6 || parseInt(r[1].id_estatus_boleta)==7)
 	        		{
 
 	        			$("#btn_refrendar").hide();

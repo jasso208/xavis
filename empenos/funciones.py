@@ -12,6 +12,21 @@ import email.message
 from django.conf import settings
 from django.db.models import Sum
 
+
+
+def fn_calcula_precio_apartado(boleta):
+	importe_venta=0.00
+
+	porcentaje=Porcentaje_Sobre_Avaluo.objects.all().aggregate(Sum("porcentaje_apartado"))
+
+	porce=0;
+	if porcentaje["porcentaje_apartado__sum"]!=None:
+		porce=int(porcentaje["porcentaje_apartado__sum"])
+
+	importe_venta=decimal.Decimal(boleta.avaluo)+(decimal.Decimal(boleta.avaluo)*(decimal.Decimal(porce)/decimal.Decimal(100.00)))
+	return importe_venta
+
+
 def fn_calcula_precio_venta_producto(boleta):
 	importe_venta=0.00
 
@@ -22,9 +37,6 @@ def fn_calcula_precio_venta_producto(boleta):
 		porce=int(porcentaje["porcentaje__sum"])
 
 	importe_venta=decimal.Decimal(boleta.avaluo)+(decimal.Decimal(boleta.avaluo)*(decimal.Decimal(porce)/decimal.Decimal(100.00)))
-	print(boleta.avaluo)
-	print(boleta.avaluo)
-	print(importe_venta)
 	return importe_venta
 
 

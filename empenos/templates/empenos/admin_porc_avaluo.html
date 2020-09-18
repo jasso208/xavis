@@ -37,8 +37,12 @@
 							
 
 							<div class="col-xs-12 col-md-6"  >
-								<label for="">Porcentaje</label>
+								<label for="">Porcentaje Venta</label>
 								{% bootstrap_field form.porcentaje show_label=False %}
+							</div>
+							<div class="col-xs-12 col-md-6"  >
+								<label for="">Porcentaje Apartado</label>
+								{% bootstrap_field form.porcentaje_apartado show_label=False %}
 							</div>
 
 							<div class="col-xs-12">								
@@ -90,6 +94,39 @@
 		</div>
 	{% endifequal %}
 
+	{% ifequal error "0" %}
+		<div class="fondo_mensaje  cls_error_porcentaje_invalido" >
+		</div >
+		<div class="mensaje  cls_error_porcentaje_invalido" >
+			<div class="cls_encabezado_alert">
+				Aviso
+			</div>	
+			<div class="panel panel-default">	
+				<label class="page-header" id="msj_notificacion">Se actualizo correctamente.</label>
+				<br>				
+				<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_administracion' %}"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+				<br>
+				<br>
+			</div>
+		</div>
+	{% endifequal %}
+
+
+		<div class="fondo_mensaje cls_error_form_invalido" >
+		</div >
+		<div class="mensaje  cls_error_form_invalido" >
+			<div class="cls_encabezado_alert">
+				Error!!
+			</div>	
+			<div class="panel panel-default">	
+				<label class="page-header" id="msj_error_form"></label>
+				<br>				
+				<a class="btn btn-primary btn-sm" id="btn_aceptar_error_form"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+				<br>
+				<br>
+			</div>
+		</div>
+
 	<div id="fondo_preloader">
 		<div class="preloader" id="preloader">
 		
@@ -104,11 +141,12 @@
 					
 					fn_inicio();
 					$("#id_porcentaje").val("{{porc}}");
+					$("#id_porcentaje_apartado").val("{{porc_apartado}}");
 
 					$("#guardar").click(
 							function()
 							{
-								$("#fondo_preloader").show();
+								return fn_valida_form();
 							}
 						);
 					$("#btn_aceptar").click(
@@ -117,11 +155,36 @@
 								$(".cls_error_porcentaje_invalido").hide();
 							}
 						);
+					$("#btn_aceptar_error_form").click(
+							function()
+							{
+								$(".cls_error_form_invalido").hide();
+							}
+						);
 				}
 			);
+		function fn_valida_form()
+		{
+
+			var porc=$("#id_porcentaje").val();
+			var porc_apartado=$("#id_porcentaje_apartado").val();
+			
+
+			if (porc=="" | porc_apartado=="" | parseInt(porc_apartado)<0 | parseInt(porc)<0 | parseInt(porc_apartado)>100 | parseInt(porc)>100  )
+			{
+				$(".cls_error_form_invalido").show();
+				$("#msj_error_form").text("Revise la información capturada e intente nuevamente.");
+				//si entro aqui es porque el formulario no es valido.	
+				return false;
+			}
+			$("#fondo_preloader").show();
+			return true;
+
+		}
 		function fn_inicio()
 		{
 			$("#fondo_preloader").hide();
+			$(".cls_error_form_invalido").hide();
 		}
 
 	</script>

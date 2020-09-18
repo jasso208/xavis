@@ -67,6 +67,20 @@ def api_limpia_venta_piso(request):
 
 
 @api_view(['GET'])
+def api_elimina_prod_apartado(request):
+	respuesta=[]
+	try:
+		id=int(request.GET.get("id"))
+		Apartado_Temporal.objects.get(id=id).delete()
+		respuesta.append({"estatus":"1"})
+	except Exception as e:
+		respuesta=[]
+		print(e)
+		respuesta.append({"estatus":"0","msj":"Error al eliminar el producto."})
+	return Response(respuesta)
+
+
+@api_view(['GET'])
 def api_elimina_prod_venta_piso(request):
 	respuesta=[]
 	try:
@@ -78,6 +92,108 @@ def api_elimina_prod_venta_piso(request):
 		print(e)
 		respuesta.append({"estatus":"0","msj":"Error al eliminar el producto."})
 	return Response(respuesta)
+
+
+@api_view(['GET'])
+def api_consulta_prod_temporal_apartado(request):
+	respuesta=[]
+
+	try:
+
+		username=request.GET.get("username")
+
+		usuario=User.objects.get(username=username)
+		
+		#buscamos porcentaje sobre apartado
+		cont=Porcentaje_Sobre_Avaluo.objects.all().count()
+
+		#si cont es diferente de 1 es porque el porcentaje que se agregara sobre avaluo para calcular el precio de producto
+		#esta incorrecto
+		if cont!=1:			
+			respuesta.append({"estatus":"0","msj":"Error al consultar los productos."})
+			return Response(respuesta)
+
+
+		porcentaje=Porcentaje_Sobre_Avaluo.objects.all().aggregate(Sum("porcentaje_apartado"))
+
+		porce=0;
+		if porcentaje["porcentaje_apartado__sum"]!=None:
+			porce=int(porcentaje["porcentaje_apartado__sum"])
+
+		
+
+		at=Apartado_Temporal.objects.filter(usuario=usuario).order_by("boleta")
+
+		total_mutuo=0.00
+		total_avaluo=0.00
+		total_pagar=0.00
+
+		lista=[]
+
+		for v in at:
+			db=Det_Boleto_Empeno.objects.filter(boleta_empeno=v.boleta)
+			descripcion=""
+
+			for d in db:
+				if d.observaciones==None:
+					ob=""
+				else:
+					ob=d.observaciones
+
+				descripcion=descripcion+d.descripcion+", "+ob+"; "
+
+			total=math.ceil(fn_calcula_precio_apartado(v.boleta))#decimal.Decimal(d.avaluo)+(decimal.Decimal(d.avaluo)*(decimal.Decimal(porce)/decimal.Decimal(100.00)))
+
+			#trabajamos con el mutuo de la boleta no con el mutuo origina, ya que para fines de utilidad, nos barsaremos en lo que realmene se le dio al cliente.
+			total_mutuo=decimal.Decimal(total_mutuo)+decimal.Decimal(v.boleta.mutuo)
+			total_avaluo=decimal.Decimal(total_avaluo)+decimal.Decimal(v.boleta.avaluo)
+			total_pagar=math.ceil(decimal.Decimal(total_pagar)+decimal.Decimal(fn_calcula_precio_apartado(v.boleta)))
+
+
+
+
+			total="{:0,.2f}".format(total)
+			mutuo="{:0,.2f}".format(v.boleta.mutuo)
+			avaluo="{:0,.2f}".format(v.boleta.avaluo)
+
+			lista.append({"id":v.id,"descripcion":descripcion,"folio":v.boleta.folio,"estatus":v.boleta.estatus.estatus,"tipo_producto":v.boleta.tipo_producto.tipo_producto,"avaluo":avaluo,"mutuo":mutuo,"total":str(total)})
+
+		respuesta.append({"estatus":"1"})
+		respuesta.append({"lista":lista})
+
+
+		try:
+			ma=Min_Apartado.objects.get(id=1)
+		except Exception as e:
+			respuesta.append({"estatus":"0","msj":"No se ha capturado el minimo para apartado."})
+			return Response(respuesta)
+
+		min_apartado_1_mes=math.ceil(decimal.Decimal(total_pagar)*(decimal.Decimal(ma.porc_min_1_mes)/decimal.Decimal(100)))
+		min_apartado_2_mes=math.ceil(decimal.Decimal(total_pagar)*(decimal.Decimal(ma.porc_min_2_mes)/decimal.Decimal(100)))
+
+
+		intmin_apartado_1_mes=int(min_apartado_1_mes)
+		intmin_apartado_2_mes=int(min_apartado_2_mes)
+
+		inttotal_pagar=total_pagar
+
+		total_mutuo="{:0,.2f}".format(total_mutuo)
+		total_avaluo="{:0,.2f}".format(total_avaluo)
+		total_pagar="{:0,.2f}".format(total_pagar)
+
+		min_apartado_1_mes="{:0,.2f}".format(min_apartado_1_mes)		
+		min_apartado_2_mes="{:0,.2f}".format(min_apartado_2_mes)
+
+		respuesta.append({"intmin_apartado_2_mes":intmin_apartado_2_mes,"intmin_apartado_1_mes":intmin_apartado_1_mes,"min_apartado_1_mes":min_apartado_1_mes,"min_apartado_2_mes":min_apartado_2_mes,"total_mutuo":total_mutuo,"total_avaluo":total_avaluo,"total_pagar":total_pagar,"inttotal_pagar":inttotal_pagar})
+
+	except Exception as e:
+		respuesta=[]
+		print(e)
+		respuesta.append({"estatus":"0","msj":"Error al consultar los productos."})
+
+	return Response(respuesta)
+
+
 
 @api_view(['GET'])
 def api_consulta_prod_temporal_piso(request):
@@ -164,6 +280,78 @@ def api_consulta_prod_temporal_piso(request):
 
 	return Response(respuesta)
 
+
+@api_view(['GET'])
+def api_agrega_prod_apartado(request):
+	respuesta=[]
+	try:
+		
+		username=request.GET.get("username")
+		folio=int(request.GET.get("folio"))
+		id_sucursal=int(request.GET.get("id_sucursal"))
+
+		sucursal=Sucursal.objects.get(id=id_sucursal)
+
+		boleta=Boleta_Empeno.objects.get(sucursal=sucursal,folio=folio)
+
+
+		#si la boleta no esta en almoneda o en remate, no permitira agregarla.
+		if boleta.estatus.id==3 or boleta.estatus.id==5:
+			print("boleta valida")
+		else:
+			respuesta.append({"estatus":"0","msj":"La boleta no esta disponible para ser apartada."})
+			return Response(respuesta)
+
+
+		try:	
+			#si la boleta ya existe en una venta, ya no puede ser apartada.
+			dvp=Det_Venta_Piso.objects.get(boleta=boleta)
+
+			respuesta.append({"estatus":"0","msj":"La boleta ya fue vendida."})
+			return Response(respuesta)
+		except:
+			print("Boleta disponible para apartado")
+
+		try:
+			#si la bleta existe en un apartado, ya no puede ser apartada
+			da=Apartado.objects.get(boleta=boleta)			
+			respuesta.append({"estatus":"0","msj":"La boleta ya esta apartada."})
+			return Response(respuesta)
+
+		except:
+			print("Boleta disponible para apartado")
+
+
+
+		usuario=User.objects.get(username=username)
+
+		vtp=Apartado_Temporal.objects.filter(boleta=boleta)
+
+		#si existe es que ya fue agregada la boelta.
+		if vtp.exists():
+			respuesta.append({"estatus":"0","msj":"La boleta ya ha sido agregada."})
+			return Response(respuesta)
+
+		try:
+			at=Apartado_Temporal.objects.get(usuario=usuario)
+			respuesta.append({"estatus":"0","msj":"Solo puedes apartar un producto por ticket."})
+			return Response(respuesta)			
+		except:
+			print("")
+
+
+		Apartado_Temporal.objects.create(usuario=usuario,boleta=boleta)
+		respuesta.append({"estatus":"1"})
+		print(respuesta);
+	except Exception as e:
+		print(e)
+		print("fallo")
+		respuesta=[]
+		respuesta.append({"estatus":"0","msj":"Error al agregar el producto."})
+
+	return Response(respuesta)
+
+
 @api_view(['GET'])
 def api_agrega_prod_venta_piso(request):
 	respuesta=[]
@@ -186,11 +374,23 @@ def api_agrega_prod_venta_piso(request):
 			return Response(respuesta)
 
 		try:	
+			#si la boleta ya esta incluida en una venta, ya no puede ser vendida
 			dvp=Det_Venta_Piso.objects.get(boleta=boleta)
+			
+			return Response(respuesta)
+		except Exception as e:
+			print(e)
+			print("boleta_valida para venta")
+
+
+		try:
+			#si la bleta existe en un apartado, ya no puede ser apartada
+			da=Apartado.objects.get(boleta=boleta)						
 			respuesta.append({"estatus":"0","msj":"La boleta no esta disponible para la venta."})
 			return Response(respuesta)
-		except:
-			print("")
+		except Exception as e:
+			print(e)
+			print("Boleta disponible para Venta")
 
 
 
@@ -393,6 +593,16 @@ def api_job_diario(request):
 		fn_envia_mail("JOB Fechas vencimiento se ejecuto correctamente","Job Vencimientos","jasso.gallegos@gmail.com")
 	except Exception as e:
 		fn_envia_mail(str(e),"Fallo Job Vencimientos","jasso.gallegos@gmail.com")
+		
+	try:
+		estatus=fn_job_libera_apartado()
+		if estatus:
+			fn_envia_mail("JOB libera apartados se ejecuto correctamente","Job libera apartados","jasso.gallegos@gmail.com")
+		else:
+			fn_envia_mail("Error job libera apartados se ejecuto correctamente","Error job libera apartados","jasso.gallegos@gmail.com")
+
+	except:
+		fn_envia_mail("Error job libera apartados se ejecuto correctamente","Error job libera apartados","jasso.gallegos@gmail.com")
 		
 	return Response(respuesta)
 

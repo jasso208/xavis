@@ -33,10 +33,14 @@ urlpatterns=[
 	url(r'^imprime_venta_piso$',imprime_venta_piso,name="imprime_venta_piso"),
 	url(r'^re_imprimir_venta_piso/(?P<id_venta>\w+)/$',re_imprimir_venta_piso,name="re_imprimir_venta_piso"),
 	url(r'^disponible_retiro/(?P<id>\w+)/$',disponible_retiro,name="disponible_retiro"),
+	url(r'^admin_min_apartado/(?P<id>\w+)/$',admin_min_apartado,name="admin_min_apartado"),
+	url(r'^apartado/$',apartado,name="apartado"),
+	url(r'^imprime_apartado$',imprime_apartado,name="imprime_apartado"),
+	url(r'^consulta_apartado$',consulta_apartado,name="consulta_apartado"),
+	url(r'^re_imprimir_apartado/(?P<id_apartado>\w+)/$',re_imprimir_apartado,name="re_imprimir_apartado"),
+	url(r'^abona_apartado/((?P<id_apartado>\w+))/$',abona_apartado,name="abona_apartado"),
 
-
-	url(r'^consulta_abono$',consulta_abono,name="consulta_abono"),
-
+	url(r'^consulta_abono$',consulta_abono,name="consulta_abono"),	
 	url(r'^cierra_caja/$',api_cierra_caja,name="cierra_caja"),
 	url(r'^envia_token/$',api_envia_token),	
 	url(r'^api_consulta_corte_caja/$',api_consulta_corte_caja),	
@@ -70,6 +74,11 @@ urlpatterns=[
 	url(r'^api_elimina_prod_venta_piso/$',api_elimina_prod_venta_piso,name="api_elimina_prod_venta_piso"),
 	url(r'^api_limpia_venta_piso/$',api_limpia_venta_piso,name="api_limpia_venta_piso"),
 	url(r'^api_consulta_cliente_2/$',api_consulta_cliente_2,name="api_consulta_cliente_2"),
+	url(r'^api_agrega_prod_apartado/$',api_agrega_prod_apartado,name="api_agrega_prod_apartado"),
+	url(r'^api_consulta_prod_temporal_apartado/$',api_consulta_prod_temporal_apartado,name="api_consulta_prod_temporal_apartado"),
+	url(r'^api_elimina_prod_apartado/$',api_elimina_prod_apartado,name="api_elimina_prod_apartado"),
+
+
 
 	
 

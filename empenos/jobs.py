@@ -1,9 +1,47 @@
-from empenos.models import Boleta_Empeno,Pagos,Estatus_Boleta,Plazo,Tipo_Pago
+from empenos.models import *
 from empenos.funciones import *
 from django.db.models import Min
 import math
 from datetime import date, datetime, time,timedelta
 from django.db import transaction
+
+
+
+@transaction.atomic
+def fn_job_libera_apartado():
+	hoy = datetime.now()
+	hoy = datetime.combine(hoy,time.min)
+
+	try:
+		estatus_apartado = Estatus_Apartado.objects.get(id = 1)
+		estatus_liberado = Estatus_Apartado.objects.get(id = 2)
+
+
+
+		estatus_remate = Estatus_Boleta.objects.get(id=5)
+
+		#obtenemos los apartados que vencen hoy
+		apartados = Apartado.objects.filter(fecha_vencimiento = hoy,estatus = estatus_apartado)
+
+		
+		for a in apartados:
+			
+			a.estatus = estatus_liberado
+			
+			a.boleta.estatus = estatus_remate
+
+			a.boleta.save()
+
+			a.boleta = None#desvinculamos la boleta, para que pueda ser vendida o apartada nuevamente.
+			
+
+			a.save()
+	except Exception as e:
+		return false
+		
+		
+
+	return True
 
 
 

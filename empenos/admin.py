@@ -4,6 +4,7 @@ from .models import Tipo_Producto,Linea,Sub_Linea,Marca,Costo_Kilataje,Empenos_T
 from .models import Boleta_Empeno,Det_Boleto_Empeno,Estatus_Boleta,Imprimir_Boletas,Tipo_Pago,Pagos,Dia_No_Laboral,Pagos_Temp,Rel_Abono_Capital,Rel_Abono_Pago
 from .models import Abono,Imprime_Abono,Periodo,Tipo_Periodo,Tipo_Kilataje,Venta_Temporal,Venta_Granel,Det_Venta_Granel,Imprime_Venta_Granel
 from .models import Venta_Temporal_Piso,Porcentaje_Sobre_Avaluo,Imprime_Venta_Piso,Venta_Piso,Det_Venta_Piso,Retirar_Solo_Utilidad
+from .models import Estatus_Apartado,Abono_Apartado,Apartado,Imprime_Apartado
 # Register your models here.
 
 admin.site.register(Tipo_Movimiento)
@@ -49,6 +50,11 @@ admin.site.register(Imprime_Venta_Piso)
 admin.site.register(Venta_Piso)
 admin.site.register(Det_Venta_Piso)
 admin.site.register(Retirar_Solo_Utilidad)
+
+admin.site.register(Estatus_Apartado)
+admin.site.register(Abono_Apartado)
+admin.site.register(Apartado)
+admin.site.register(Imprime_Apartado)
 
 
 

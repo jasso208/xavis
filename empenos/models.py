@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from decimal import Decimal
 from seguridad.models import Session
-
+from empenos.funciones import *
 
 GENERO_CHOICES = (
     ('1','HOMBRE'),
@@ -26,7 +26,8 @@ SI_NO=(
 #al momendo de anunciar un producto para la venta piso, 
 #se le aumenta un % sobre el avaluo, ese porcentaje es configurable en esta tabla.
 class Porcentaje_Sobre_Avaluo(models.Model):
-	porcentaje=models.IntegerField()
+	porcentaje=models.IntegerField()#este es el procentaje para venta
+	porcentaje_apartado=models.IntegerField(default=0)#es el porcentaje para apartado
 
 
 class Tipo_Movimiento(models.Model):
@@ -37,6 +38,9 @@ class Tipo_Movimiento(models.Model):
 		return self.tipo_movimiento+' - '+self.naturaleza
 
 
+class Min_Apartado(models.Model):
+	porc_min_1_mes=models.IntegerField()
+	porc_min_2_mes=models.IntegerField()
 
 class Perfil(models.Model):
 	perfil=models.CharField(max_length=30,null=False)
@@ -310,6 +314,17 @@ class Boleta_Empeno(models.Model):
 	mutuo_original=models.IntegerField(default=0)	#este campo no se actualiza, nos sirve para saber cual fue el mutuo original de la boleta.
 	fecha_vencimiento_real=models.DateTimeField(null=True,blank=True)#cuando la fecha de vencimiento cai en dia de asueto, la fecha de vencimienot se recorre un dia, esta fecha nos indica cual es la fecha de vencimiento real para calcular el las futuras fechas de vencimiento.
 
+	@classmethod
+	def nuevo_empeno(self,sucursal,tp,caja,usuario,avaluo,mutuo,fecha_vencimiento,cliente,nombre_cotitular,apellido_paterno,apellido_materno,plazo,fecha_vencimiento_real,estatus,folio,tm):
+
+		
+	
+
+		boleta = self.objects.create(folio = folio,tipo_producto = tp,caja = caja,usuario = usuario,avaluo = avaluo,mutuo = mutuo,fecha = timezone.now(),fecha_vencimiento = fecha_vencimiento,cliente = cliente,nombre_cotitular = nombre_cotitular,apellido_p_cotitular = apellido_paterno,apellido_m_cotitular = apellido_materno,plazo = plazo,sucursal = sucursal,mutuo_original = mutuo,fecha_vencimiento_real = fecha_vencimiento_real,estatus = estatus)
+				
+		return boleta	
+				
+
 
 	class Meta:
 		unique_together=("folio",'sucursal',)
@@ -321,6 +336,48 @@ class Venta_Temporal_Piso(models.Model):
 
 	class Meta:
 		unique_together=("usuario","boleta")
+
+class Apartado_Temporal(models.Model):
+	usuario=models.ForeignKey(User,on_delete=models.PROTECT)
+	boleta=models.ForeignKey(Boleta_Empeno,on_delete=models.PROTECT)
+
+	class Meta:
+		unique_together=("usuario","boleta")
+
+class Estatus_Apartado(models.Model):
+	estatus=models.CharField(max_length=20,null=False)
+
+	def __str__(self):
+		return self.estatus
+
+class Apartado(models.Model):
+	folio=models.CharField(max_length=7,null=True)
+	usuario=models.ForeignKey(User,on_delete=models.PROTECT,null=True,blank=True,related_name="usuario_apartado")#el usuario que realiza la venta en el sistema
+	fecha=models.DateTimeField(default=timezone.now)		
+	importe_venta=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)#es elimporte real de la venta, en cuanto realmente se vendio el producto
+	caja=models.ForeignKey(Cajas,on_delete=models.PROTECT,blank=True,null=True)#es la caja que se tenia aberta cuando se ingreso el dinero.
+	cliente=models.ForeignKey(Cliente,on_delete=models.PROTECT,blank=True,null=True)
+	saldo_restante=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)#es el importe que falta para terminar de pagar la prenda.
+	estatus=models.ForeignKey(Estatus_Apartado,on_delete=models.PROTECT,null=True,blank=True)
+	boleta=models.OneToOneField(Boleta_Empeno,on_delete=models.PROTECT,null=True,blank=True)#como solo una boleta puede estar apartada a la vez, no necesitamos el detalle.
+	fecha_vencimiento=models.DateTimeField(null=True,blank=True)
+	sucursal=models.ForeignKey(Sucursal,on_delete=models.PROTECT,blank=True,null=True)	
+
+
+
+class Abono_Apartado(models.Model):
+	folio=models.CharField(max_length=7,null=True)
+	usuario=models.ForeignKey(User,on_delete=models.PROTECT,null=True,blank=True,related_name="usuario_ab_apartado")
+	fecha=models.DateTimeField(default=timezone.now)		
+	importe=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)
+	caja=models.ForeignKey(Cajas,on_delete=models.PROTECT,blank=True,null=True)#es la caja que se tenia aberta cuando se ingreso el dinero.
+	apartado=models.ForeignKey(Apartado,on_delete=models.PROTECT)
+	
+	
+class Imprime_Apartado(models.Model):
+	usuario=models.OneToOneField(User,on_delete=models.PROTECT,null=True,blank=True)
+	apartado=models.ForeignKey(Apartado,on_delete=models.PROTECT)
+	abono=models.OneToOneField(Abono_Apartado,on_delete=models.PROTECT,null=True,blank=True)
 
 
 class Venta_Piso(models.Model):
