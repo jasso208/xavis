@@ -35,7 +35,7 @@ class Tipo_Movimiento(models.Model):
 	naturaleza=models.CharField(max_length=20,null=False)
 
 	def __str__(self):
-		return self.tipo_movimiento+' - '+self.naturaleza
+		return self.tipo_movimiento
 
 
 class Min_Apartado(models.Model):

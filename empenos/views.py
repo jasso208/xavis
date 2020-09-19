@@ -2478,9 +2478,9 @@ def reportes_caja(request):
 		permiso="1"
 		
 	if request.method=="POST" and permiso=="1":		
-		print("aqui entro 1")
+		
 		id_tipo_movimiento=request.POST.get("id_tipo_mov")
-		print("aqui entro 2")
+		
 		fecha_inicial= datetime.strptime(request.POST.get("fecha_inicial"), "%Y-%m-%d").date()
 		fecha_final= datetime.strptime(request.POST.get("fecha_final"), "%Y-%m-%d").date()
 
@@ -2579,7 +2579,31 @@ def reportes_caja(request):
 				error="1"
 				msj_error="Error al exportar la información, contacte al administrador del sistema."
 				return render(request,'empenos/reportes_caja.html',locals())
-	
+		if id_tipo_movimiento=="4":
+			try:
+				boletas=Boleta_Empeno.objects.filter(fecha__range=(fecha_inicial,fecha_final)).order_by('folio')
+			except:
+				error="1"
+				msj_error="No existen retiros en la fecha indicada."
+				return render(request,'empenos/reportes_caja.html',locals())	
+
+			try:
+				nom_archivo='Rep_Boletas_'+request.POST.get('fecha_inicial')+'-'+request.POST.get('fecha_final')+'.csv'
+				response = HttpResponse(content_type='text/csv')
+				response['Content-Disposition'] = 'attachment; filename="'+nom_archivo+'"'
+
+				writer = csv.writer(response)
+
+				writer.writerow(['Folio','Sucursal','Fecha Emision','Nombre Usuario','Usuario','Cliente','Avaluo','Mutuo','Estatus','Fecha Vencimiento'])
+
+				for b in boletas:
+										
+					writer.writerow([b.folio,b.sucursal.sucursal,b.fecha.strftime('%Y-%m-%d'),b.usuario.username,b.usuario.first_name+' '+b.usuario.last_name,b.cliente.nombre+' '+b.cliente.apellido_p+' '+b.cliente.apellido_m,b.avaluo,b.mutuo,b.estatus.estatus,b.fecha_vencimiento.strftime('%Y-%m-%d')])
+				return response
+			except:
+				error = "1"
+				msj_error = "No existen boletas."
+				return render(request,'empenos/reportes_caja.html',locals())	
 
 		form=Reportes_Caja_Form(request.POST)
 	else:
