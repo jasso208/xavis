@@ -1102,16 +1102,26 @@ def consulta_apartado(request):
 		permiso="1"	
 
 	if request.method=="POST":
-		fecha_inicial=request.POST.get("fecha_inicial")
-		fecha_final=request.POST.get("fecha_final")
 
-		fecha_inicial=datetime.strptime(fecha_inicial,'%Y-%m-%d').date()
-		fecha_final=datetime.strptime(fecha_final,'%Y-%m-%d').date()
+		folio_apartado = request.POST.get("folio_apartado")
 
-		fecha_inicial=datetime.combine(fecha_inicial,time.min)
-		fecha_final=datetime.combine(fecha_final,time.max)
+		if request.POST.get("fecha_inicial") != "" and request.POST.get("fecha_inicial") != None : 
+			fecha_inicial = request.POST.get("fecha_inicial")
+			fecha_final = request.POST.get("fecha_final")
 
-		apartados=Apartado.objects.filter(fecha__range=(fecha_inicial,fecha_final),sucursal=suc).order_by("-folio")
+
+			fecha_inicial = datetime.strptime(fecha_inicial,'%Y-%m-%d').date()
+			fecha_final = datetime.strptime(fecha_final,'%Y-%m-%d').date()
+
+			fecha_inicial = datetime.combine(fecha_inicial,time.min)
+			fecha_final = datetime.combine(fecha_final,time.max)
+
+			apartados = Apartado.objects.filter(fecha__range = (fecha_inicial,fecha_final),sucursal = suc).order_by("-folio")
+		elif request.POST.get("cliente") != "" and request.POST.get("cliente") != None:			
+			
+			apartados = (Apartado.objects.filter(cliente__nombre__icontains = request.POST.get("cliente"),sucursal = suc) | Apartado.objects.filter(cliente__apellido_p__icontains = request.POST.get("cliente"),sucursal = suc) | Apartado.objects.filter(cliente__apellido_m__icontains = request.POST.get("cliente"),sucursal = suc)).order_by("-folio")
+		elif folio_apartado != "" or folio_apartado != None :
+			apartados = Apartado.objects.filter(folio = int(request.POST.get("folio_apartado")),sucursal = suc)
 
 		form=Buscar_Apartados_Form(request.POST)
 	else:

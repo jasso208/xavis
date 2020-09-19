@@ -39,23 +39,41 @@
 									<div class="panel-body">
 
 										<div class="col-xs-3">
-											<label>
+											<div class="col-xs-12">
+												<label>
 												Fecha Inicial
-											</label>
-											<input type="date" name="fecha_inicial" required="" id="id_fecha_inicial" class="form-control">
+												</label>
+												<input type="date" name="fecha_inicial"  id="id_fecha_inicial" class="form-control">
+											</div>
+											
+												
+
+											<div class="col-xs-12">
+												<label>
+												Fecha Final
+												</label>										
+												<input type="date" class="form-control" name="fecha_final"   id="id_fecha_final">
+											</div>
 										</div>
 
 										<div class="col-xs-3">
-											<label>
-												Fecha Final
-											</label>										
-											<input type="date" class="form-control" name="fecha_final"  required="" id="id_fecha_final">
+											<label>Folio Boleta</label>
+											
+											<input type="number" name="folio_apartado"  id="id_folio_apartado" class="form-control">
 										</div>
+										<div class="col-xs-3">
+											<label>Cliente</label>
+											<input type="text" name="cliente"  id="id_cliente" class="form-control">
+										</div>
+
+										
+
 
 
 										<div class="col-xs-3">
 											<br>
-											<button class="btn btn-primary">
+											<button class="btn btn-primary btn-sm" id="btn_consultar">
+												<span class="glyphicon glyphicon-search"></span>
 												Consultar
 											</button>
 										</div>
@@ -171,30 +189,7 @@
 		</div>
 	</div>
 
-	<div class="cls_fondo_form_emergente_2 cls_agregar_importe_venta" id="fondo_emergente">
-		
-	</div>
-	<div class="cls_form_emergente_2 cls_agregar_importe_venta" style="overflow: hidden;" >
 
-				<div class="cls_encabezado_alert" >
-					<label id="encabezado_error">						
-					</label>
-				</div>
-
-				<div class="col-xs-12">	
-					<br>				
-					<input type="number" name="" id="txt_importe" clasS="form-control" placeholder="0.00">
-					<div class="help-block" id="id_error_importe">
-							<span id="error_importe">Error al guardar el importe.</span>
-					</div>
-				</div>
-
-				<div class="col-xs-12 text-center">	
-					<a class="btn btn-primary btn-sm" onclick="fn_agrega_importe_real_venta()" ><span class="glyphicon glyphicon-ok"></span> 		Guardar
-					</a>
-					<br><br>
-				</div>
-	</div>
 
 
 
@@ -214,15 +209,79 @@
 
 					}
 				);
+
+				$("#id_fecha_inicial,#id_fecha_final").focusin(
+						function()
+						{
+							$("#id_folio_apartado").val("");
+							$("#id_cliente").val("");		
+											
+							
+						}
+					);
+				$("#id_cliente").focusin(
+						function()
+						{
+							$("#id_fecha_inicial,#id_fecha_final").val("");
+							$("#id_folio_apartado").val("");
+							$("#id_cliente").val("");
+							
+						}
+					);
+				$("#id_folio_apartado").focusin(
+						function()
+						{
+							$("#id_fecha_inicial,#id_fecha_final").val("");
+							$("#id_cliente").val("");
+							$("#id_folio_apartado").val("");
+							
+						}
+					);
+				$("#id_fecha_inicial,#id_fecha_final,#id_cliente,#id_folio_apartado").focusout(
+					function()
+					{
+						fn_habilita_busqueda();
+					}
+					);
 			}
 		);
 
+		//si el formulario tiene valores validos, se habilita el boton de busqueda.
+		function fn_habilita_busqueda()
+		{
+			fecha_inicial = $("#id_fecha_inicial").val();
+			fecha_final = $("#id_fecha_final").val();
+			cliente = $("#id_cliente").val();
+			folio_apartado = $("#id_folio_apartado").val();
+
+
+			if (fecha_inicial != "" & fecha_final != "")
+			{
+				$("#btn_consultar").prop("disabled",false);
+				return 0;
+			}
+			if( cliente != "")
+			{			
+				$("#btn_consultar").prop("disabled",false);
+				return 0;	
+			}
+			if(folio_apartado != "")
+			{
+				$("#btn_consultar").prop("disabled",false);
+				return 0;	
+			}
+
+			$("#btn_consultar").prop("disabled",true);
+			return 0;	
+
+		}
 		function fn_inicio()
 		{
 
 			$(".cls_agregar_importe_venta").hide();
 			$("#fondo_preloader").hide();
 			$("#id_error_importe").hide();
+			$("#btn_consultar").prop("disabled",true);
 
 		}
 

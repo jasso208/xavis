@@ -96,6 +96,8 @@ class Buscar_Ventas_Form(forms.Form):
 class Buscar_Apartados_Form(forms.Form):
 	fecha_inicial=forms.DateTimeField(initial=timezone.now())
 	fecha_final=forms.DateTimeField(initial=timezone.now())
+	folio_apartado=forms.IntegerField()
+	cliente=forms.CharField()
 
 
 class Costo_Extra_Form(forms.Form):
