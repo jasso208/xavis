@@ -1,6 +1,6 @@
 from django.test import TestCase
 from empenos.jobs import *
-from empenos.funciones import *
+
 from empenos.models import *
 from datetime import date, datetime, time,timedelta
 # Create your tests here.
@@ -8,7 +8,7 @@ from datetime import date, datetime, time,timedelta
 #probamos el job para liberar los apartados que se vencen y no ha sido cubierto su saldo restante
 class TestJobApartado(TestCase):
 	#aqui se inicializan los valores de la prueba, tipo un constructor
-	def setUp(self):
+	def setUpTestData(cls):
 		hoy = date.today()
 
 		Sucursal.objects.create(sucursal="prueba")
@@ -39,6 +39,10 @@ class TestJobApartado(TestCase):
 		
 		un_dia=timedelta(days=1)
 
+		for x in Tipo_Movimiento.objects.all():
+			print(x.id)
+			print(x.tipo_movimiento)
+			print("")
 		tm = Tipo_Movimiento.objects.get(id=4)
 		#creamos una boleta para la prueba		
 		sucursal = Sucursal.objects.get(id = 1)
@@ -103,22 +107,30 @@ class TestJobApartado(TestCase):
 	def test_apartado_vence_hoy(self):
 		estatus_liberado = Estatus_Apartado.objects.get(id=2)
 		estatus_remate = Estatus_Boleta.objects.get(id=5)	
-		estatus_boleta_apartado = Estatus_Boleta.objects.get(id=7)
-		estatus_apartado_apartado = Estatus_Apartado.objects.get(id=1)
+
 
 		fn_job_libera_apartado()
 		
 		apartado = Apartado.objects.get(id = 1)		
 		boleta = Boleta_Empeno.objects.get(id = 1)
-		apartado_2 = Apartado.objects.get(id = 2)
-		boleta_2 = Boleta_Empeno.objects.get(id = 2)
+
 
 		self.assertEqual(apartado.estatus,estatus_liberado)
 		self.assertEqual(apartado.boleta,None)
 		self.assertEqual(boleta.estatus,estatus_remate)
+
+
+	def test_apartado_no_vence_hoy(self):
+		estatus_boleta_apartado = Estatus_Boleta.objects.get(id=7)
+		estatus_apartado_apartado = Estatus_Apartado.objects.get(id=1)
+
+		apartado_2 = Apartado.objects.get(id = 2)
+		boleta_2 = Boleta_Empeno.objects.get(id = 2)
+
 		self.assertEqual(apartado_2.estatus,estatus_apartado_apartado)
 		self.assertEqual(apartado_2.boleta,boleta_2)
 		self.assertEqual(boleta_2.estatus,estatus_boleta_apartado)
+
 
 
 		
