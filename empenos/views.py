@@ -1953,7 +1953,7 @@ def rep_flujo_caja(request):
 
 	
 	
-
+	importe_refrendo=round(importe_refrendo)
 
 	importe_total = decimal.Decimal(importe_ab_apartado) + decimal.Decimal(saldo_inicial) - decimal.Decimal(importe_empenos) + decimal.Decimal(importe_desempenos)+decimal.Decimal(importe_capital)+decimal.Decimal(importe_refrendo)+decimal.Decimal(importe_com_pg)+decimal.Decimal(importe_otros)-decimal.Decimal(importe_retiros)+decimal.Decimal(importe_ventas)
 
@@ -1971,7 +1971,7 @@ def rep_flujo_caja(request):
 	saldo_inicial="{:0,.2f}".format(saldo_inicial)
 	importe_desempenos="{:0,.2f}".format(importe_desempenos)
 	importe_capital="{:0,.2f}".format(importe_capital)
-	importe_refrendo=math.ceil(importe_refrendo)
+	
 	importe_refrendo="{:0,.2f}".format(importe_refrendo)
 	importe_com_pg="{:0,.2f}".format(importe_com_pg)
 	importe_otros="{:0,.2f}".format(importe_otros)
@@ -2195,6 +2195,7 @@ def retiro_efectivo(request):
 				if p.pago.tipo_pago==est_refrendo:#si afecto a refrendo acumulamos el importe.
 					cont_refrendos=cont_refrendos+1
 					importe_refrendo=decimal.Decimal(importe_refrendo)+decimal.Decimal(p.pago.importe)
+					
 
 				print("2 ciclo")
 				if p.pago.tipo_pago==est_com_pg:#si afecto a comision pg acumulamos el importe.
@@ -2213,7 +2214,7 @@ def retiro_efectivo(request):
 				cont_refrendos=cont_refrendos+1
 				importe_refrendo=decimal.Decimal(importe_refrendo)+decimal.Decimal(x.periodo.importe)
 
-			importe_refrendo=decimal.Decimal(math.ceil(importe_refrendo))
+			importe_refrendo=round(importe_refrendo)
 
 			print("seg ciclo")
 			rel_ab_cap=Rel_Abono_Capital.objects.filter(abono=ab).exclude(capital_restante=0).aggregate(Sum("importe"))#buscamos si el abono afecto a capital
@@ -3641,10 +3642,7 @@ def refrendo_plazo_mensual(request,id_boleta):
 				rel.pago=c
 				rel.save()
 
-
 				total_refrendo=total_refrendo-c.importe
-
-
 
 			periodos=Periodo.objects.filter(boleta=boleta,pagado="N").order_by("fecha_vencimiento")		
 			mutuo=boleta.mutuo
@@ -3714,8 +3712,6 @@ def refrendo_plazo_mensual(request,id_boleta):
 					rel_cap.capital_restante=mutuo
 					rel_cap.save()
 
-
-			print("empieza a cambiar estatus")
 			#por los redondeos aplicados en el formulario, puede darse el caso de que el mutuo termine con importe menor a cero.
 			if mutuo<=0:
 				mutuo=0
@@ -4241,12 +4237,30 @@ def imprime_abono(request):
 				linea=502
 			else:
 				linea=102
+			#si existen pagos parciales no vencidos sin pagar, los mostramos como fechas proximo pago,
+			#en caso de no existir solo mostramos un proximo pago como si fuera mensual
+			if pa.exists():
+				for x in pa:		
+					cont=cont+1
+					p.setFont("Helvetica",7)
+					p.drawString(60,linea,str(cont))
+					p.drawString(131,linea,str(x.fecha_vencimiento.strftime('%d/%m/%Y')))
+					almacenaje=""
+					p.drawString(202,linea,"$"+str(almacenaje))
+					interes=""
+					p.drawString(273,linea,"$"+str(interes))
+					iva=""
+					p.drawString(344,linea,"$"+str(iva))
+					#refrendo=iva+interes+almacenaje
+					p.drawString(415,linea,"$"+str(x.importe*cont))
 
-			for x in pa:		
+					p.drawString(486,linea,"$"+str(math.ceil((x.importe*cont)+x.boleta.mutuo)))
+					linea=linea-20
+			else:
 				cont=cont+1
 				p.setFont("Helvetica",7)
 				p.drawString(60,linea,str(cont))
-				p.drawString(131,linea,str(x.fecha_vencimiento.strftime('%d/%m/%Y')))
+				p.drawString(131,linea,str(abono.boleta.fecha_vencimiento.strftime('%d/%m/%Y')))
 				almacenaje=""
 				p.drawString(202,linea,"$"+str(almacenaje))
 				interes=""
@@ -4254,10 +4268,11 @@ def imprime_abono(request):
 				iva=""
 				p.drawString(344,linea,"$"+str(iva))
 				#refrendo=iva+interes+almacenaje
-				p.drawString(415,linea,"$"+str(x.importe*cont))
+				p.drawString(415,linea,"$"+str(abono.boleta.refrendo))
 
-				p.drawString(486,linea,"$"+str(math.ceil((x.importe*cont)+x.boleta.mutuo)))
+				p.drawString(486,linea,"$"+str(math.ceil((abono.boleta.refrendo)+abono.boleta.mutuo)))
 				linea=linea-20
+
 
 		current_row=current_row-heigth_row	
 
@@ -5245,7 +5260,7 @@ def api_consulta_corte_caja(request):
 				cont_refrendos=cont_refrendos+1
 				importe_refrendo=decimal.Decimal(importe_refrendo)+decimal.Decimal(x.periodo.importe)
 
-			importe_refrendo=int(round(importe_refrendo))
+			importe_refrendo=round(importe_refrendo)
 
 			rel_ab_cap=Rel_Abono_Capital.objects.filter(abono=ab).exclude(capital_restante=0).aggregate(Sum("importe"))#buscamos si el abono afecto a capital
 			cont_pc=cont_pc+Rel_Abono_Capital.objects.filter(abono=ab).exclude(capital_restante=0).count()
