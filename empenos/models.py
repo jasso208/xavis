@@ -373,6 +373,7 @@ class Abono_Apartado(models.Model):
 	caja=models.ForeignKey(Cajas,on_delete=models.PROTECT,blank=True,null=True)#es la caja que se tenia aberta cuando se ingreso el dinero.
 	apartado=models.ForeignKey(Apartado,on_delete=models.PROTECT)
 	
+
 	
 class Imprime_Apartado(models.Model):
 	usuario=models.OneToOneField(User,on_delete=models.PROTECT,null=True,blank=True)
@@ -545,6 +546,7 @@ class Abono(models.Model):
 	importe=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)	
 	caja=models.ForeignKey(Cajas,on_delete=models.PROTECT,blank=True,null=True)
 	boleta=models.ForeignKey(Boleta_Empeno,on_delete=models.PROTECT,blank=True,null=True)
+
 
 
 

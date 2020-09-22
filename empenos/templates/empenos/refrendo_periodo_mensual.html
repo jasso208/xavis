@@ -523,12 +523,21 @@
 								fn_total_pagar();
 							}
 						);
+					$("#btn_pagar").click(
+							function()
+							{
+								$("#fondo_preloader").show();			
+							}
+						);
+
+					
 				}
 			);
 
 		function fn_inicio()
 		{	
 
+			$("#id_descuento").hide();
 				var abono_aplicado="{{abono_aplicado}}"
 
 				if (parseInt(abono_aplicado)==0)
