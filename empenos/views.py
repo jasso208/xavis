@@ -2723,7 +2723,7 @@ def consulta_abono(request):
 		fecha_final=datetime.strptime(request.POST.get("fecha_final"), "%Y-%m-%d").date()
 
 		fecha_inicial = datetime.combine(fecha_inicial, time.min) 
-		fecha_final = datetime.combine(pub_date, time.max)  
+		fecha_final = datetime.combine(fecha_final, time.max)  
 
 		abonos=Abono.objects.filter(fecha__range=(fecha_inicial,fecha_final),sucursal=caja.sucursal)	
 
