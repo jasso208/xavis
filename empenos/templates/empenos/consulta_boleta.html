@@ -365,7 +365,7 @@
 		<div class="row">
 			<div class="col-xs-12">
 				<label>
-					Articulos:
+					Artículos:
 				</label>
 			</div>
 		</div>
@@ -378,8 +378,11 @@
 						<table id="tabla_articulos" class="table table-bordered">
 						    <thead>
 						      <tr>
-						        <th style="width: 85%">Descripción</th>						        
-						        <th style="width: 15%">Avaluo</th>						        
+						        <th style="width: 55%">Descripción</th>					        
+						        <th style="width: 10%">Peso</th>
+						        <th style="width: 10%">Kilataje</th>
+						        <th style="width: 15%">Avalúo</th>						        
+						        <th style="width: 10%">Mutuo</th>						        
 						      </tr>
 						    </thead>
 						    <tbody>
@@ -747,9 +750,13 @@
 	        		{
 	        			var htmlTags = '<tr>'+
 
-						        "<td style='width: 85%'>"+r[4].lista_2[x].descripcion+"</td>"+
+						        "<td style='width: 55%'>"+r[4].lista_2[x].descripcion+"</td>"+
+						        "<td style='width: 10%'>"+r[4].lista_2[x].peso+"</td>"+
+						        "<td style='width: 10%'>"+r[4].lista_2[x].kilataje+"</td>"+
+						        
 						        
 						        "<td style='width: 15%'>$"+r[4].lista_2[x].avaluo+".00</td>"+						        
+						        "<td style='width: 10%'>$"+r[4].lista_2[x].mutuo+".00</td>"+						        
 						      '</tr>';
 			      
 			  	 			$('#tabla_articulos tbody').append(htmlTags);			  	 			

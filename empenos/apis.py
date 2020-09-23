@@ -894,7 +894,11 @@ def api_consulta_boleta(request):
 		det_bol=Det_Boleto_Empeno.objects.filter(boleta_empeno=boleta)
 		lista_2=[]
 		for x in det_bol:
-			lista_2.append({"descripcion":x.descripcion,"avaluo":x.avaluo,"mutuo":x.mutuo})
+			if x.costo_kilataje == None:
+				kilataje = ""
+			else:
+				kilataje = x.costo_kilataje.kilataje
+			lista_2.append({"descripcion":x.descripcion,"avaluo":x.avaluo,"mutuo":x.mutuo,"peso":x.peso,"kilataje":kilataje,"mutuo":x.mutuo})
 
 		respuesta.append({"lista_2":lista_2})
 		
