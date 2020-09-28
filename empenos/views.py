@@ -2605,11 +2605,11 @@ def reportes_caja(request):
 
 				writer = csv.writer(response)
 
-				writer.writerow(['Folio','Sucursal','Fecha Emision','Nombre Usuario','Usuario','Cliente','Avaluo','Mutuo','Estatus','Fecha Vencimiento'])
+				writer.writerow(['Folio','Sucursal','Fecha Emision','Nombre Usuario','Usuario','Cliente','Avaluo','Mutuo','Estatus','Fecha Vencimiento','Tipo Producto'])
 
 				for b in boletas:
 										
-					writer.writerow([b.folio,b.sucursal.sucursal,b.fecha.strftime('%Y-%m-%d'),b.usuario.username,b.usuario.first_name+' '+b.usuario.last_name,b.cliente.nombre+' '+b.cliente.apellido_p+' '+b.cliente.apellido_m,b.avaluo,b.mutuo,b.estatus.estatus,b.fecha_vencimiento.strftime('%Y-%m-%d')])
+					writer.writerow([b.folio,b.sucursal.sucursal,b.fecha.strftime('%Y-%m-%d'),b.usuario.username,b.usuario.first_name+' '+b.usuario.last_name,b.cliente.nombre+' '+b.cliente.apellido_p+' '+b.cliente.apellido_m,b.avaluo,b.mutuo,b.estatus.estatus,b.fecha_vencimiento.strftime('%Y-%m-%d'),b.tipo_producto.tipo_producto])
 				return response
 			except:
 				error = "1"
