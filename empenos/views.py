@@ -294,7 +294,7 @@ def admin_min_apartado(request,id):
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
 
-def disponible_retiro(request,id):
+def concepto_retiro(request):
 	#si no esta logueado mandamos al login
 	if not request.user.is_authenticated:
 		return HttpResponseRedirect(reverse('seguridad:login'))
@@ -324,34 +324,12 @@ def disponible_retiro(request,id):
 		print(e)
 		caja_abierta="0"
 		caja=Cajas
-		
-
-	try:
-		query=Retirar_Solo_Utilidad.objects.get(id=int(id))	
 
 
-				
-	except:
-		
-		query=Retirar_Solo_Utilidad()
-
-	estatus="0"
-
-	if request.method=="POST":
-
-		form=Retirar_Solo_Utilidad_Form(request.POST,instance=query)
-
-		if form.is_valid():
-			form.save()
-			estatus="1"
-		else:
-			estatus="0"
-
-	else:
-		estatus="2"
-		form=Retirar_Solo_Utilidad_Form(instance=query)		
+	form = Alta_Concepto_Retiro_Form()	
+	id_usuario = user_2.user.id
 	
-	return render(request,'empenos/disponible_retiro.html',locals())
+	return render(request,'empenos/concepto_retiro.html',locals())
 
 
 #*******************************************************************************************************************************************************
@@ -2283,6 +2261,8 @@ def retiro_efectivo(request):
 	
 	#total_efectivo="{:0,.2f}".format(total_efectivo)
 
+	conceptos = Concepto_Retiro.objects.filter(sucursal = caja.sucursal)
+	
 	if request.method=="POST":
 		read_only="1"
 		form=Retiro_Efectivo_Form(request.POST)				

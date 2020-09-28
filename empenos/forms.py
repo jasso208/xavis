@@ -22,7 +22,10 @@ class Otros_Ingresos_Form(forms.ModelForm):
 class Retiro_Efectivo_Form(forms.ModelForm):
 	class Meta:
 		model=Retiro_Efectivo
-		fields=('tipo_movimiento','importe','comentario','token',)
+		fields=('tipo_movimiento','importe','comentario','token','concepto',)
+
+class Alta_Concepto_Retiro_Form(forms.Form):
+	sucursal=forms.ModelChoiceField(queryset=Sucursal.objects.all())
 
 
 class Apartado_Form(forms.Form):
@@ -41,12 +44,6 @@ class Venta_Piso_Form(forms.Form):
 		# asi vuelves tus campos no requeridos
 		self.fields['id_cliente'].required = False
 
-#SI: para que solo retiro solo utilidad
-#NO: para que puedo retirar todo el disponible.
-class Retirar_Solo_Utilidad_Form(forms.ModelForm):
-	class Meta:
-		model=Retirar_Solo_Utilidad
-		fields=('si_no',)
 
 class Abono_Apartado_Form(forms.Form):
 	abono=forms.IntegerField()

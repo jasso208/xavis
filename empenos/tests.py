@@ -5,9 +5,13 @@ from empenos.models import *
 from datetime import date, datetime, time,timedelta
 # Create your tests here.
 
+
+
+
 #probamos el job para liberar los apartados que se vencen y no ha sido cubierto su saldo restante
 class TestJobApartado(TestCase):
-	#aqui se inicializan los valores de la prueba, tipo un constructor
+	#aqui se inicializan los valores de la prueba, se inicializa para cada prueba
+	@classmethod
 	def setUpTestData(cls):
 		hoy = date.today()
 
@@ -39,16 +43,15 @@ class TestJobApartado(TestCase):
 		
 		un_dia=timedelta(days=1)
 
-		for x in Tipo_Movimiento.objects.all():
-			print(x.id)
-			print(x.tipo_movimiento)
-			print("")
 		tm = Tipo_Movimiento.objects.get(id=4)
+
+		
+
 		#creamos una boleta para la prueba		
-		sucursal = Sucursal.objects.get(id = 1)
+		sucursal = Sucursal.objects.get(sucursal = "prueba")
 		tp = Tipo_Producto.objects.get(id = 1)
 		caja = None
-		usuario = User.objects.get(id=1)
+		usuario = User.objects.get(username="jasso208")
 		avaluo = 0
 		mutuo = 0
 		fecha_vencimiento = datetime.combine(hoy,time.min)#para la prueba  no importa la fecha de vencimiento
@@ -130,6 +133,67 @@ class TestJobApartado(TestCase):
 		self.assertEqual(apartado_2.estatus,estatus_apartado_apartado)
 		self.assertEqual(apartado_2.boleta,boleta_2)
 		self.assertEqual(boleta_2.estatus,estatus_boleta_apartado)
+
+
+class TestConceptosRetiros(TestCase):
+	@classmethod
+	def setUpTestData(cls):
+		Sucursal.objects.create(sucursal = "Sucursal de prueba")
+
+		User.objects.create(username = "jasso208")
+		return True
+
+	def test_nuevo_concepto(self):
+		concepto_correcto = Concepto_Retiro.fn_nuevo_concepto(1,1,100,"concepto de prueba")
+		#falla debido a la longitud del campo
+		concepto_no_correcto = Concepto_Retiro.fn_nuevo_concepto(1,1,100,"concepto de prueba 1212121212121212121212")
+		#no puede contener importe maximo de retiro negativo
+		concepto_no_correcto_por_importe = Concepto_Retiro.fn_nuevo_concepto(1,1,-1,"concepto de prueba")		
+
+		concepto_usr_no_correcto = Concepto_Retiro.fn_nuevo_concepto(1,3,100,"concepto de prueba")		
+		concepto_suc_no_correcta = Concepto_Retiro.fn_nuevo_concepto(3,1,100,"concepto de prueba")		
+		concepto_no_concepto = Concepto_Retiro.fn_nuevo_concepto(3,1,100,"")	
+
+		self.assertEqual(concepto_correcto,True)
+		self.assertEqual(concepto_no_correcto,False)
+		self.assertEqual(concepto_no_correcto_por_importe,False)
+		self.assertEqual(concepto_usr_no_correcto,False)
+		self.assertEqual(concepto_suc_no_correcta,False)
+		self.assertEqual(concepto_no_concepto,False)
+
+	def test_elimina_concepto(self):
+		concepto_correcto = Concepto_Retiro.fn_nuevo_concepto(1,1,100,"prueba_elimina_concepto")
+		
+		concepto = Concepto_Retiro.objects.get(concepto="prueba_elimina_concepto".upper())
+		User.objects.create(username = "jasso20800")
+		usuario = User.objects.get(username = "jasso20800")
+		resp = Concepto_Retiro.fn_delete_concepto(concepto.id,usuario.id)
+
+		self.assertEqual(resp,True)
+
+	def test_update_importe_maximo_retiro(self):
+		concepto_correcto = Concepto_Retiro.fn_nuevo_concepto(1,1,100,"prueba_update_retiro")
+		concepto_correcto = Concepto_Retiro.fn_nuevo_concepto(1,1,100,"prueba_update_retiro_negativo")
+		
+		concepto = Concepto_Retiro.objects.get(concepto = "prueba_update_retiro".upper())
+		concepto_2 = Concepto_Retiro.objects.get(concepto = "prueba_update_retiro_negativo".upper())
+
+		User.objects.create(username = "jasso_update")
+		usuario = User.objects.get(username = "jasso_update")
+		print("aqui llego bien")
+		resp = Concepto_Retiro.fn_update_importe_maximo_retiro(concepto.id,200,usuario.id)
+		print("aqui llego bien1")
+		resp_2 = Concepto_Retiro.fn_update_importe_maximo_retiro(concepto_2.id,-200,usuario.id)
+		print("aqui llego bien2")
+		concepto = Concepto_Retiro.objects.get(concepto = "prueba_update_retiro".upper())
+
+		self.assertEqual(decimal.Decimal(concepto.importe_maximo_retiro),decimal.Decimal(200))
+		self.assertEqual(resp,True)
+		self.assertEqual(resp_2,False)
+
+
+
+
 
 
 

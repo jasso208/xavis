@@ -107,6 +107,8 @@ def fn_boletas_vencidas_semanal(hoy):
 	estatus_almoneda=Estatus_Boleta.objects.get(id=3)
 	estatus_remate=Estatus_Boleta.objects.get(id=5)
 	estatus_desempem=Estatus_Boleta.objects.get(id=4)
+	estatus_vendido=Estatus_Boleta.objects.get(id=6)
+	estatus_apartado=Estatus_Boleta.objects.get(id=7)
 
 
 	refrendo_pg=Tipo_Pago.objects.get(id=3)
@@ -115,7 +117,7 @@ def fn_boletas_vencidas_semanal(hoy):
 	#sacamos las boletas que vencen hoy  y que no han sido desempenadas ni vendidas
 	#abs((hoy-boleta.fecha_vencimiento).days)
 
-	boletas=Boleta_Empeno.objects.filter(fecha_vencimiento=hoy).exclude(estatus=estatus_desempem)
+	boletas=Boleta_Empeno.objects.filter(fecha_vencimiento=hoy).exclude(estatus=estatus_desempem).exclude(estatus=estatus_vendido).exclude(estatus=estatus_apartado)
 
 	for b in boletas:
 

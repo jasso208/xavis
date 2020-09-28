@@ -1,5 +1,8 @@
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+
+from rest_framework.decorators import api_view,permission_classes
+from rest_framework.permissions import IsAuthenticated,AllowAny 
+
 from empenos.models import Tipo_Producto,Linea,Sub_Linea,Marca,Costo_Kilataje,Empenos_Temporal,Joyeria_Empenos_Temporal,Cliente,Boleta_Empeno
 from empenos.models import Pagos,Det_Boleto_Empeno,Periodo_Temp
 from django.contrib.auth.models import User
@@ -11,6 +14,73 @@ from empenos.jobs import *
 from django.conf import settings
 from django.utils import timezone
 from django.db.models import Sum
+
+@api_view(['POST','GET','DELETE','PUT'])
+def api_concepto_retiro(request):
+	
+	respuesta=[]
+	if request.method=="POST":
+		
+		try:
+			concepto = request.data["concepto"]
+			id_usuario = request.data["id_usuario"]
+			importe = request.data["importe"]
+			id_sucursal = request.data["id_sucursal"]
+
+
+			resp = Concepto_Retiro.fn_nuevo_concepto(id_sucursal,id_usuario,importe,concepto)
+			if resp:				
+				respuesta.append({"estatus":"1"})
+			else:
+				respuesta.append({"estatus":"0","msj":"Error al guardar el nuevo concepto"})
+
+		except Exception as e:
+			respuesta.append({"estatus":"0","msj":"Error al guardar el nuevo concepto"})
+	if request.method == "GET":
+		respuesta = []
+		try:
+			lista = []
+			id_sucursal = request.GET.get("id_sucursal")
+			resp = Concepto_Retiro.fn_get_conceptos(id_sucursal)
+			for r in resp:
+				importe_maximo_retiro = "{:0,.2f}".format(r.importe_maximo_retiro)
+				lista.append({"id_concepto" : r.id,"concepto" : r.concepto,"importe_maximo" : importe_maximo_retiro})
+
+			respuesta.append({"estatus" : "1"})
+			respuesta.append({"lista" : lista})
+		except:
+			respuesta.append({"estatus" : "0","msj" : "Error al consultar los conceptos de la sucursal."})
+	if request.method == "DELETE":
+		id_concepto = request.data["id_concepto"]
+		id_usuario = request.data["id_usuario"]
+
+		try:
+
+			resp = Concepto_Retiro.fn_delete_concepto(id_concepto,id_usuario);			
+			if resp:
+				respuesta.append({"estatus" : "1"})
+			else:
+				respuesta.append({"estatus" : "0","msj" : "Error al eliminar el concepto"})
+		except:
+			respuesta.append({"estatus" : "0","msj" : "Error al eliminar el concepto"})
+
+	if request.method == "PUT":
+		id_concepto = request.data["id_concepto"]
+		id_usuario = request.data["id_usuario"]
+		importe_maximo_retiro = request.data["importe_maximo_retiro"]
+
+		try:
+			resp = Concepto_Retiro.fn_update_importe_maximo_retiro(id_concepto,importe_maximo_retiro,id_usuario)
+			if resp:
+
+				respuesta.append({"estatus":"1"})
+			else:
+				respuesta.append({"estatus":"0","msj":"Error al actualizar el importe maximo de retiro del concepto."})
+		except:
+			respuesta.append({"estatus":"0","msj":"Error al actualizar el importe maximo de retiro del concepto."})
+
+	return Response(respuesta)
+
 
 @api_view(['GET'])
 def api_tipo_producto(request):

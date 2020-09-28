@@ -262,8 +262,26 @@
 
 										</div>
 										<div class="col-xs-12">
+											<label>Concepto</label>
 
-											<label for=""> Motivo</label>
+											<select name="concepto" class="form-control" title="" id="id_concepto">
+											  <option value="" selected="">---------</option>
+
+												{% for c in conceptos %}
+
+													<option value="{{c.id}}">{{c.id}} {{c.concepto}} </option>	
+												{% endfor %}
+											 
+
+											</select>
+
+
+											
+											
+										</div>
+										<div class="col-xs-12">
+
+											<label for=""> Comentario</label>
 											{% bootstrap_field form.comentario  show_label=False%}
 
 											<div class="help-block" id="error_comentario">
@@ -457,6 +475,12 @@
 									return 0;
 
 								}
+								if($("#id_concepto").val() == "")
+								{
+									$(".cls_error_formulario").show();
+									$("#msj_error_form").text("Debe indicar el concepto de retiro.");
+									return 0;									
+								}
 								$("#fondo_preloader").show();
 							   $.ajax({
 							        type: "GET",
@@ -471,7 +495,7 @@
 										$("#error_importe_excedido").hide();
 										$("#id_importe").prop("readonly",true);
 										$("#id_comentario").prop("readonly",true);
-
+										$("#id_concepto").prop("disabled",true);
 										$(".cls_notificacion").show();
 										$("#msj_notificacion").text("El código de confirmación se envío al gerente regional.");
 										$("#fondo_preloader").hide();

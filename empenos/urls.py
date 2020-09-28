@@ -32,7 +32,7 @@ urlpatterns=[
 	url(r'^venta_piso/$',venta_piso,name="venta_piso"),	
 	url(r'^imprime_venta_piso$',imprime_venta_piso,name="imprime_venta_piso"),
 	url(r'^re_imprimir_venta_piso/(?P<id_venta>\w+)/$',re_imprimir_venta_piso,name="re_imprimir_venta_piso"),
-	url(r'^disponible_retiro/(?P<id>\w+)/$',disponible_retiro,name="disponible_retiro"),
+	url(r'^concepto_retiro/$',concepto_retiro,name="concepto_retiro"),
 	url(r'^admin_min_apartado/(?P<id>\w+)/$',admin_min_apartado,name="admin_min_apartado"),
 	url(r'^apartado/$',apartado,name="apartado"),
 	url(r'^imprime_apartado$',imprime_apartado,name="imprime_apartado"),
@@ -77,6 +77,7 @@ urlpatterns=[
 	url(r'^api_agrega_prod_apartado/$',api_agrega_prod_apartado,name="api_agrega_prod_apartado"),
 	url(r'^api_consulta_prod_temporal_apartado/$',api_consulta_prod_temporal_apartado,name="api_consulta_prod_temporal_apartado"),
 	url(r'^api_elimina_prod_apartado/$',api_elimina_prod_apartado,name="api_elimina_prod_apartado"),
+	url(r'^api_concepto_retiro/$',api_concepto_retiro,name="api_concepto_retiro"),
 
 
 

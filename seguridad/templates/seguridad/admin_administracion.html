@@ -25,25 +25,15 @@
 		</a>	
 	</div>
 	<div class="col-xs-12">
-		<div class="row" >
+			<div class="row" >
 				<div class="col-xs-12 cls_encabezado_body_2">
 					<a>
-						Baja
+						Edición catalogos
 					</a>
 					<br>
 				</div>
 				<div class="row cls_row_body"  >
-					<div class="col-xs-2">
-						<div class="cls_boton_body">
-							<a href="{% url 'empenos:elimina_costo_extra' %}">
-								<span class="glyphicon glyphicon-trash"></span>
-								<br>
-								<br>
-								Ingresos Extras
-							</a>	
-						</div>
-						
-					</div>
+
 					<div class="col-xs-2">
 						<div class="cls_boton_body">
 							<a href="{% url 'empenos:admin_kilataje' %}">
@@ -61,7 +51,30 @@
 		<div class="row" >
 				<div class="col-xs-12 cls_encabezado_body_2">
 					<a>
-						Ventas y Apartados
+						Cancelación Movimientos Operación
+					</a>
+					<br>
+				</div>
+				<div class="row cls_row_body"  >
+					<div class="col-xs-2">
+						<div class="cls_boton_body">
+							<a href="{% url 'empenos:elimina_costo_extra' %}">
+								<span class="glyphicon glyphicon-trash"></span>
+								<br>
+								<br>
+								Ingresos Extras
+							</a>	
+						</div>
+						
+					</div>
+
+				</div>
+
+		</div>
+		<div class="row" >
+				<div class="col-xs-12 cls_encabezado_body_2">
+					<a>
+						Configuración operación
 					</a>
 					<br>
 				</div>
@@ -88,32 +101,24 @@
 							</a>	
 						</div>
 					</div>
-				</div>
-
-
-		</div>
-		<div class="row" >
-				<div class="col-xs-12 cls_encabezado_body_2">
-					<a>
-						Retiros
-					</a>
-					<br>
-				</div>
-				<div class="row cls_row_body"  >
-					<div class="col-xs-2">
-						<div class="cls_boton_body">
-							<a href="{% url 'empenos:disponible_retiro' id=1 %}">
-								<span class="glyphicon glyphicon-briefcase"></span>
-								<br>
-								<br>
-								Disponible retiro
-							</a>	
+					<div class="row cls_row_body"  >
+						<div class="col-xs-2">
+							<div class="cls_boton_body">
+								<a href="{% url 'empenos:concepto_retiro'  %}">
+									<span class="glyphicon glyphicon-arrow-right"></span>
+									<br>
+									<br>
+									Concep. retiro
+								</a>	
+							</div>
+							
 						</div>
-						
 					</div>
 				</div>
 
+
 		</div>
+
 
 	</div>
 {% endblock %}
