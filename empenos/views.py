@@ -1986,28 +1986,22 @@ def rep_flujo_caja(request):
 	importe_avaluo_piso="{:0,.2f}".format(importe_avaluo_piso)
 	importe_mutuo_piso="{:0,.2f}".format(importe_mutuo_piso)
 	utilidad_vta_piso="{:0,.2f}".format(utilidad_vta_piso)
-
-
-
-
-
-
-
 	
 	importe_venta_granel="{:0,.2f}".format(importe_venta_granel)
 	importe_avaluo_granel="{:0,.2f}".format(importe_avaluo_granel)
 	importe_mutuo_granel="{:0,.2f}".format(importe_mutuo_granel)
 	utilidad_vta_granel="{:0,.2f}".format(utilidad_vta_granel)
 
-
-	
-
 	#cuando eres gerente regiona, puedes entrar a todas las sucursales
 	if user_2.perfil.id==3:		
 		sucursales=Sucursal.objects.all()
 		sucursal_default=""
 	else:#cuando no eres gerente regional, solo puedes acceder a tu sucursal.
-		sucursales=Sucursal.objects.filter(sucursal=user_2.sucursal)
+		print("jasso")
+		print(user_2.sucursal)
+		print(Sucursal.objects.filter(id=user_2.sucursal.id))
+		sucursales=Sucursal.objects.filter(id=user_2.sucursal.id)
+		print(sucursales)
 		sucursal_default=user_2.sucursal.id
 
 	perfil=str(user_2.perfil.id)
