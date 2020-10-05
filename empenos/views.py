@@ -4186,7 +4186,7 @@ def imprime_abono(request):
 
 		#plazo semanal
 		if abono.boleta.plazo.id==2:
-			pa=Pagos.objects.filter(boleta=abono.boleta,pagado='N',vencido="N").exclude(tipo_pago=est_comisionpg).order_by("id")
+			pa=Pagos.objects.filter(boleta=abono.boleta,pagado = 'N').exclude(tipo_pago = est_comisionpg).order_by("id")
 
 			cont=0
 			if cop==0:
