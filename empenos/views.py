@@ -1997,11 +1997,9 @@ def rep_flujo_caja(request):
 		sucursales=Sucursal.objects.all()
 		sucursal_default=""
 	else:#cuando no eres gerente regional, solo puedes acceder a tu sucursal.
-		print("jasso")
-		print(user_2.sucursal)
-		print(Sucursal.objects.filter(id=user_2.sucursal.id))
+
 		sucursales=Sucursal.objects.filter(id=user_2.sucursal.id)
-		print(sucursales)
+
 		sucursal_default=user_2.sucursal.id
 
 	perfil=str(user_2.perfil.id)
