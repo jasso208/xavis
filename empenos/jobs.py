@@ -294,6 +294,7 @@ def fn_pagos_vencidos(hoy):
 			dias = timedelta(days=7)		                
 			fecha_vencimiento=datetime.combine(hoy+dias, time.min)
 			fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
+			fecha_vencimiento_real=fecha_vencimiento
 
 			almacenaje=resp[0]["almacenaje"]/4.00
 			interes=resp[0]["interes"]/4.00
