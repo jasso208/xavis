@@ -324,7 +324,7 @@ def fn_pagos_vencidos(hoy):
 			fecha_vencimiento=datetime.combine(fn_add_months(p.boleta.fecha,meses), time.min)
 
 			fecha_vencimiento_real=fecha_vencimiento
-			print("entro entro entro 1")
+			
 			#fecha_vencimiento=datetime.combine(fn_add_months(hoy,1), time.min)	
 			#validmoas que la fecha de vencimiento no sea de azueto
 			fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
@@ -346,8 +346,7 @@ def fn_pagos_vencidos(hoy):
 		pago.iva=iva
 		pago.importe=refrendo
 		pago.vencido="N"
-		pago.pagado="N"
-		print("entro entro entro 1 2")
+		pago.pagado="N"		
 		pago.fecha_vencimiento_real=fecha_vencimiento_real
 		
 		pago.save()

@@ -141,6 +141,72 @@
 
 		</div>
 	</div>	
+
+		<div class="fondo_mensaje cls_error_cancela_retiro" id="fondo_error_actualiza" >			
+		</div >
+
+		<div class="mensaje cls_error_cancela_retiro" >	
+				<div class="cls_encabezado_alert" >
+					Error!!
+				</div>
+				<div class="panel panel-default">	
+					<label class="page-header" id="mensaje_error_cancela_retiro"></label>
+
+					<br>
+					<a class="btn btn-primary btn-sm" id="btn_aceptar_error_cancela_retiro" ><span class="glyphicon glyphicon-ok"></span> Aceptar
+
+					</a>		
+					<br>
+					<br>		
+
+				</div>
+		</div>
+
+		<div class="fondo_mensaje cls_exito_cancela_retiro"  >			
+		</div >
+
+		<div class="mensaje cls_exito_cancela_retiro" >	
+				<div class="cls_encabezado_alert" >
+					Aviso
+				</div>
+				<div class="panel panel-default">	
+					<label class="page-header" >El retiro se cancelo correctamente.</label>
+
+					<br>
+					<a class="btn btn-primary btn-sm" id="btn_aceptar_exito_cancela_retiro" ><span class="glyphicon glyphicon-ok"></span> Aceptar
+
+					</a>		
+					<br>
+					<br>		
+
+				</div>
+		</div>
+
+
+	{% ifequal permiso '0' %}
+
+		<div class="fondo_mensaje " >
+			
+		</div >
+		<div class="mensaje" >	
+				<div class="cls_encabezado_alert" >
+					Aviso
+				</div>
+
+				<div class="panel panel-default">	
+					<label class="page-header">No cuentas con permiso para acceder a esta opción.</label>
+					<br>
+
+					<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_administracion' %}" ><span class="glyphicon glyphicon-ok"></span> Aceptar</a>		
+					<br>
+					<br>		
+
+				</div>
+		</div>
+
+	{% endifequal  %}
+
+
 	<div id="fondo_preloader">
 		<div class="preloader" id="preloader">
 		
@@ -153,23 +219,43 @@
 				{
 					fn_inicio();
 
-					$("#btn_confirma_cancelacion").click(
+					$("#btn_aceptar_error_cancela_retiro").click(
+						function()
+						{
+							$(".cls_error_cancela_retiro").hide();
+						});
+
+					$("#btn_aceptar_exito_cancela_retiro").click(
 							function()
 							{
-								fn_confirma_cancelacion();
+
+								location.reload();
 							}
 					);
 					$("#fondo_confirma_cancelacion").click(
 							function ()
 							{
-									$(".cls_confirma_cancelacion").hide();
+								$(".cls_confirma_cancelacion").hide();
 							}
 					);
+					$("#btn_confirma_cancelacion").click(
+							function()
+							{
+								fn_continuar_cancelacion();
+							}
+						);
+					$("#btn_aceptar_exito_cancela_retiro").click(
+						function()
+						{
+							location.reload();
+						}
+						);
 				}
 			);
 
-		function fn_confirma_cancelacion()
+		function fn_continuar_cancelacion()
 		{
+			
 
 			$("#fondo_preloader").show();
 			
@@ -179,30 +265,45 @@
 			paramdata["comentario"] = $("#txt_motivo_cancelacion").val();
 			paramdata["id_retiro"] = id_retiro;
 
-
-
+			var datajson=JSON.stringify(paramdata);
 
 			$.ajax(
 					{
 						type : "PUT",
 						url : "{{IP_LOCAL}}/empenos/api_cancela_retiro/",
-						data : paramdata,
+						data : datajson,
 						contentType: "application/json; charset=utf-8",
 						datatype : "json",
 						headers : {
 							'X-CSRFToken': "{{csrf_token}}"
 						},
-						succes : function(data)
+						success : function(data)
 						{
+
+							if(data[0].estatus == "0")
+							{
+								$(".cls_error_cancela_retiro").show();		
+								$("#mensaje_error_cancela_retiro").text(data[0].msj);
+							}
+							else
+							{
+								$(".cls_exito_cancela_retiro").show();		
+							}
+
+							$("#fondo_preloader").hide();
 
 						},
 						error : function(err)
 						{
-
+							$(".cls_error_cancela_retiro").show();
+							$("#mensaje_error_cancela_retiro").text("Error al cancelar el retiro.");
+							$("#fondo_preloader").hide();
 						},
 						failure : function (f)
 						{
-
+							$(".cls_error_cancela_retiro").show();
+							$("#mensaje_error_cancela_retiro").text("Error al cancelar el retiro.");
+							$("#fondo_preloader").hide();
 						}
 
 					}
@@ -218,6 +319,9 @@
 		function fn_inicio()
 		{
 			$(".cls_confirma_cancelacion").hide();
+			$(".cls_error_cancela_retiro").hide();
+			$("#fondo_preloader").hide();
+			$(".cls_exito_cancela_retiro").hide();
 		}
 
 	</script>

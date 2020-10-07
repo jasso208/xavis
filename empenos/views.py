@@ -1079,6 +1079,13 @@ def elimina_retiro (request):
 	permiso="0"
 
 	retiros = None
+	id_usuario=user_2.user.id
+
+
+	permiso="0"
+	if user_2.perfil.id==3:		#solo el gerente regional puede entrar a esta opcion.
+		permiso="1"
+		
 	if request.method == "POST":
 
 		id_sucursal = request.POST.get("sucursal")
@@ -1672,13 +1679,13 @@ def rep_flujo_caja(request):
 			if oi["importe__sum"]!=None:
 				importe_otros=decimal.Decimal(importe_otros)+decimal.Decimal(oi["importe__sum"])
 
-			ret=Retiro_Efectivo.objects.filter(sucursal=sucursal,fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("importe"))
+			ret=Retiro_Efectivo.objects.filter(sucursal=sucursal,fecha__range=(fecha_inicial,fecha_final),activo = 1).aggregate(Sum("importe"))
 
 			importe_retiros=0.00			
 			cont_retiros=0
 			if ret["importe__sum"]!=None:
 				importe_retiros=ret["importe__sum"]
-				cont_retiros=Retiro_Efectivo.objects.filter(sucursal=sucursal,fecha__range=(fecha_inicial,fecha_final)).count()
+				cont_retiros=Retiro_Efectivo.objects.filter(sucursal=sucursal,fecha__range=(fecha_inicial,fecha_final),activo = 1).count()
 
 
 
@@ -1882,13 +1889,13 @@ def rep_flujo_caja(request):
 			if oi["importe__sum"]!=None:
 				importe_otros=decimal.Decimal(importe_otros)+decimal.Decimal(oi["importe__sum"])
 
-			ret=Retiro_Efectivo.objects.filter(fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("importe"))
+			ret=Retiro_Efectivo.objects.filter(fecha__range=(fecha_inicial,fecha_final),activo = 1).aggregate(Sum("importe"))
 
 			importe_retiros=0.00			
 			cont_retiros=0
 			if ret["importe__sum"]!=None:
 				importe_retiros=ret["importe__sum"]
-				cont_retiros=Retiro_Efectivo.objects.filter(fecha__range=(fecha_inicial,fecha_final)).count()
+				cont_retiros=Retiro_Efectivo.objects.filter(fecha__range=(fecha_inicial,fecha_final),activo = 1).count()
 
 
 
@@ -2133,8 +2140,8 @@ def retiro_efectivo(request):
 
 	#buscamos los retiros
 	try:
-		ret=Retiro_Efectivo.objects.filter(sucursal=suc,usuario=request.user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c).aggregate(Sum('importe'))
-		cont_retiros=Retiro_Efectivo.objects.filter(sucursal=suc,usuario=request.user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c).count()
+		ret=Retiro_Efectivo.objects.filter(sucursal=suc,usuario=request.user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c,activo = 1).aggregate(Sum('importe'))
+		cont_retiros=Retiro_Efectivo.objects.filter(sucursal=suc,usuario=request.user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c,activo = 1).count()
 		total_movs=total_movs+cont_retiros #sumamos el total de retiros al total de movimientos
 		if ret["importe__sum"]!=None:
 			retiros=ret["importe__sum"]
@@ -5203,8 +5210,8 @@ def api_consulta_corte_caja(request):
 
 	#buscamos los retiros
 	try:
-		ret=Retiro_Efectivo.objects.filter(sucursal=sucursal,usuario=user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c).aggregate(Sum('importe'))
-		cont_retiros=Retiro_Efectivo.objects.filter(sucursal=sucursal,usuario=user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c).count()
+		ret=Retiro_Efectivo.objects.filter(sucursal=sucursal,usuario=user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c,activo = 1).aggregate(Sum('importe'))
+		cont_retiros=Retiro_Efectivo.objects.filter(sucursal=sucursal,usuario=user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c,activo = 1).count()
 		total_movs=total_movs+cont_retiros #sumamos el total de retiros al total de movimientos
 		if ret["importe__sum"]!=None:
 			retiros=ret["importe__sum"]

@@ -21,16 +21,22 @@ def api_cancela_retiro(request):
 	respuesta = []
 
 	try:
+
 		id_usuario = request.data["id_usuario"]
 		comentario = request.data["comentario"]
 		id_retiro = request.data["id_retiro"]
 
 		retiro = Retiro_Efectivo.objects.get(id = int(id_retiro))
 
-		retiro.fn_cancela_retiro(id_usuario,comentario)
+		resp = retiro.fn_cancela_retiro(id_usuario,comentario)
 
-		respuesta.append({"estatus":"1"})
-	except Exception as e:
+		if resp:
+			respuesta.append({"estatus":"1"})
+		else:
+			respuesta.append({"estatus":"0","msj":"Error al cancelar el retiro."})			
+
+	except Exception as e:		
+
 		respuesta.append({"estatus":"0","msj":"Error al cancelar el retiro."})
 
 	return Response(respuesta)
