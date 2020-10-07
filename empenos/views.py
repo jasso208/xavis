@@ -1045,6 +1045,59 @@ def elimina_costo_extra(request):
 
 	return render(request,'empenos/elimina_costo_extra.html',locals())
 
+
+def elimina_retiro (request):
+	#si no esta logueado mandamos al login
+	if not request.user.is_authenticated:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+	
+	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
+	try:
+		user_2=User_2.objects.get(user=request.user)
+	except Exception as e:		
+		print(e)
+		form=Login_Form(request.POST)
+		estatus=0
+		msj="La cuenta del usuario esta incompleta."			
+		return render(request,'login.html',locals())
+
+	pub_date = date.today()
+	min_pub_date_time = datetime.combine(pub_date, time.min) 
+	max_pub_date_time = datetime.combine(pub_date, time.max)  
+
+	try:
+		#validamos si el usuario tiene caja abierta en el dia actual.
+		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
+		suc=caja.sucursal
+		c=caja.caja
+	except Exception as e:
+		print(e)
+		caja_abierta="0"
+		caja=Cajas
+
+	permiso="0"
+
+	retiros = None
+	id_usuario=user_2.user.id
+
+
+	permiso="0"
+	if user_2.perfil.id==3:		#solo el gerente regional puede entrar a esta opcion.
+		permiso="1"
+		
+	if request.method == "POST":
+
+		id_sucursal = request.POST.get("sucursal")
+		
+		hoy = date.today()
+		fecha_inicial = datetime.combine(hoy,time.min)
+		fecha_final = datetime.combine(hoy,time.max)
+
+		retiros = Retiro_Efectivo.objects.filter(sucursal__id = int(id_sucursal), fecha__range = (fecha_inicial,fecha_final), activo = 1)
+
+	form = Elimina_Retiro_Form()
+	return render(request,'empenos/elimina_retiro.html',locals())
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
 def consulta_apartado(request):
@@ -1626,13 +1679,13 @@ def rep_flujo_caja(request):
 			if oi["importe__sum"]!=None:
 				importe_otros=decimal.Decimal(importe_otros)+decimal.Decimal(oi["importe__sum"])
 
-			ret=Retiro_Efectivo.objects.filter(sucursal=sucursal,fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("importe"))
+			ret=Retiro_Efectivo.objects.filter(sucursal=sucursal,fecha__range=(fecha_inicial,fecha_final),activo = 1).aggregate(Sum("importe"))
 
 			importe_retiros=0.00			
 			cont_retiros=0
 			if ret["importe__sum"]!=None:
 				importe_retiros=ret["importe__sum"]
-				cont_retiros=Retiro_Efectivo.objects.filter(sucursal=sucursal,fecha__range=(fecha_inicial,fecha_final)).count()
+				cont_retiros=Retiro_Efectivo.objects.filter(sucursal=sucursal,fecha__range=(fecha_inicial,fecha_final),activo = 1).count()
 
 
 
@@ -1836,13 +1889,13 @@ def rep_flujo_caja(request):
 			if oi["importe__sum"]!=None:
 				importe_otros=decimal.Decimal(importe_otros)+decimal.Decimal(oi["importe__sum"])
 
-			ret=Retiro_Efectivo.objects.filter(fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("importe"))
+			ret=Retiro_Efectivo.objects.filter(fecha__range=(fecha_inicial,fecha_final),activo = 1).aggregate(Sum("importe"))
 
 			importe_retiros=0.00			
 			cont_retiros=0
 			if ret["importe__sum"]!=None:
 				importe_retiros=ret["importe__sum"]
-				cont_retiros=Retiro_Efectivo.objects.filter(fecha__range=(fecha_inicial,fecha_final)).count()
+				cont_retiros=Retiro_Efectivo.objects.filter(fecha__range=(fecha_inicial,fecha_final),activo = 1).count()
 
 
 
@@ -2079,8 +2132,8 @@ def retiro_efectivo(request):
 
 	#buscamos los retiros
 	try:
-		ret=Retiro_Efectivo.objects.filter(sucursal=suc,usuario=request.user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c).aggregate(Sum('importe'))
-		cont_retiros=Retiro_Efectivo.objects.filter(sucursal=suc,usuario=request.user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c).count()
+		ret=Retiro_Efectivo.objects.filter(sucursal=suc,usuario=request.user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c,activo = 1).aggregate(Sum('importe'))
+		cont_retiros=Retiro_Efectivo.objects.filter(sucursal=suc,usuario=request.user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c,activo = 1).count()
 		total_movs=total_movs+cont_retiros #sumamos el total de retiros al total de movimientos
 		if ret["importe__sum"]!=None:
 			retiros=ret["importe__sum"]
@@ -2550,14 +2603,25 @@ def reportes_caja(request):
 
 				writer = csv.writer(response)
 
-				writer.writerow(['Folio','Sucursal','Fecha','Nombre Usuario','Usuario', 'Importe','Comentario','Caja','Concepto','Activo'])
+				writer.writerow(['Folio','Sucursal','Fecha','Nombre Usuario','Usuario', 'Importe','Comentario','Caja','Concepto','Activo','Usuario Cancela'])
 
 				for r in retiros:
 					if r.concepto == None:
 						concepto = ""
 					else:
 						concepto = r.concepto				
-					writer.writerow([r.folio,r.sucursal.sucursal,str(r.fecha),r.usuario.username,r.usuario.first_name+' '+r.usuario.last_name, r.importe,r.comentario,r.caja,concepto,r.activo])					
+
+					if r.activo == '1':
+						activo = "SI"
+					else:
+						activo = "NO"
+
+					if r.usuario_cancela == None:
+						username = ''
+					else:
+						username =r.usuario_cancela.username
+
+					writer.writerow([r.folio,r.sucursal.sucursal,r.fecha.strftime('%Y-%m-%d'),r.usuario.username,r.usuario.first_name+' '+r.usuario.last_name, r.importe,r.comentario,r.caja,concepto,activo,username])					
 
 				return response
 			except:
@@ -5138,8 +5202,8 @@ def api_consulta_corte_caja(request):
 
 	#buscamos los retiros
 	try:
-		ret=Retiro_Efectivo.objects.filter(sucursal=sucursal,usuario=user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c).aggregate(Sum('importe'))
-		cont_retiros=Retiro_Efectivo.objects.filter(sucursal=sucursal,usuario=user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c).count()
+		ret=Retiro_Efectivo.objects.filter(sucursal=sucursal,usuario=user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c,activo = 1).aggregate(Sum('importe'))
+		cont_retiros=Retiro_Efectivo.objects.filter(sucursal=sucursal,usuario=user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c,activo = 1).count()
 		total_movs=total_movs+cont_retiros #sumamos el total de retiros al total de movimientos
 		if ret["importe__sum"]!=None:
 			retiros=ret["importe__sum"]
