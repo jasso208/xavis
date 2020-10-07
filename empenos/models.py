@@ -261,13 +261,32 @@ class Retiro_Efectivo(models.Model):
 	fecha=models.DateTimeField(default = timezone.now)
 	usuario=models.ForeignKey(User,on_delete = models.PROTECT,related_name = "usuario_alta")
 	importe=models.IntegerField(default = 0, validators = [MinValueValidator(Decimal('1'))])
-	comentario=models.TextField(null = True, blank = True)
+	comentario=models.TextField(default = '')
 	caja=models.CharField(max_length = 1,null = True)
 	token=models.IntegerField()
 	concepto = models.ForeignKey(Concepto_Retiro,on_delete = models.PROTECT,blank = True,null = True)
 	#no requerimos fecha de cancelacion ya que solo se puede cancelar el dia en que se genera.
 	usuario_cancela = models.ForeignKey(User,on_delete = models.PROTECT,null = True, blank = True,related_name = 'usuario_cancela')
 	activo = models.CharField(choices = SI_NO,default = 1, max_length=2)
+
+
+	def fn_cancela_retiro(self,id_usuario_cancela,comentario_cancelacion):
+		try:
+			self.importe = 0
+			self.comentario = comentario_cancelacion
+			self.usuario_cancela = User.objects.get(id = int(id_usuario_cancela))
+			self.activo = 2# no activo
+			self.save()
+			return True
+		except:
+			return False
+
+	
+		
+
+
+
+
 
 class Token(models.Model):
 	tipo_movimiento=models.ForeignKey(Tipo_Movimiento,on_delete=models.PROTECT)

@@ -238,8 +238,54 @@ class TestConceptosRetiros(TestCase):
 		self.assertEqual(saldo_tercer_concepto,0)
 
 
+class TestRetiros(TestCase):
 
+	@classmethod
+	def setUpTestData(cls):
+		Sucursal.objects.create(sucursal = "Sucursal de prueba")
+
+		User.objects.create(username = "jasso208")
+
+		Tipo_Movimiento.objects.create(tipo_movimiento="AP Caja",naturaleza='')
+		Tipo_Movimiento.objects.create(tipo_movimiento="O I",naturaleza='')
+		Tipo_Movimiento.objects.create(tipo_movimiento="Retiro Efectivo",naturaleza='')
+
+		return True
+
+	def test_cancela_retiro(self):
+
+		sucursal = Sucursal.objects.get(sucursal = "Sucursal de prueba")
+		usuario = User.objects.get(username = "jasso208")
+		nuevo_concepto = Concepto_Retiro.fn_nuevo_concepto(sucursal.id,usuario.id,100,"nvo_concepto")
+		segundo_concepto = Concepto_Retiro.fn_nuevo_concepto(sucursal.id,usuario.id,100,"segundo_concepto")
+		tercer_concepto = Concepto_Retiro.fn_nuevo_concepto(sucursal.id,usuario.id,150,"tercer_concepto")
+		tm_retiro_efectivo = Tipo_Movimiento.objects.get(tipo_movimiento="Retiro Efectivo")	
+		concepto_segundo_concepto = Concepto_Retiro.objects.get(concepto="segundo_concepto".upper())
+
+
+
+		#creamos un retiro
+		Retiro_Efectivo.objects.create(folio = 1,tipo_movimiento = tm_retiro_efectivo,sucursal = sucursal, usuario = usuario, importe = 50,concepto = concepto_segundo_concepto, token = 10)
 		
+		retiro_1 = Retiro_Efectivo.objects.get(folio = 1, sucursal = sucursal)		
+
+		#obtenemos el saldo del concepto despues de haber realizado el retiro
+		saldo_antes_cancelar = concepto_segundo_concepto.fn_saldo_concepto()
+
+		#cancelamos el retiro
+		retiro_1.fn_cancela_retiro(usuario.id,"cancelacion_retiro")
+
+		#obtenemos el saldo despues de haber cancelado el retiro
+		saldo_despues_cancela = concepto_segundo_concepto.fn_saldo_concepto()
+
+		self.assertEqual(saldo_antes_cancelar,50)#cuando se hiso el retiro, se quedo con saldo de 50 pesos
+		self.assertEqual(retiro_1.comentario,'cancelacion_retiro')#cuando se cancelo el retiro se le paso el comentario "cancelacion_retiro"
+		self.assertEqual(retiro_1.importe,0)#cuando se cancelo el retiro, se queda con importe 0
+		self.assertEqual(saldo_despues_cancela,100)#el saldo del concepto despues de haber cancelado  el retiro vuelve a ser 100
+		self.assertEqual(retiro_1.usuario_cancela,usuario)#almacenamos tambien el usuario que cancela.
+		self.assertEqual(retiro_1.activo,2)## el status del retiro es cancelado
+
+
 
 
 

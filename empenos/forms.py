@@ -25,8 +25,10 @@ class Retiro_Efectivo_Form(forms.ModelForm):
 		fields=('tipo_movimiento','importe','comentario','token','concepto',)
 
 class Alta_Concepto_Retiro_Form(forms.Form):
-	sucursal=forms.ModelChoiceField(queryset=Sucursal.objects.all())
+	sucursal = forms.ModelChoiceField(queryset = Sucursal.objects.all())
 
+class Elimina_Retiro_Form(forms.Form):
+	sucursal = forms.ModelChoiceField(queryset = Sucursal.objects.all())
 
 class Apartado_Form(forms.Form):
 	id_cliente=forms.IntegerField()

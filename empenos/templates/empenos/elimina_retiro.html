@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% load bootstrap3 %}
+{% load static%}
+{% block usuario %}
+
+			<div class="col-xs-6">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{user_2.user.username}} {{user_2.perfil.perfil}}</label> 
+				
+			</div>
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-home"></span> Sucursal: {{user_2.sucursal}}</label> 	
+			</div>
+
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-inbox"></span> Caja: {{c}} </label> 	
+			</div>
+
+
+{% endblock  %}
+{% block content %}
+	<div class="col-xs-12 cls_encabezado_body">
+		<a>
+			Cancela retiro.
+		</a>	
+	</div>
+
+	<div class="col-xs-12">
+		<form method="post" action="#" class="cls_form_1" id="form_principal">
+			{%csrf_token%}  
+			<div class="row cls_form_consulta">
+
+				<div class="col-xs-12">
+					<div class="panel panel-default" id="panel_principal" >						 
+						<div class="panel-body">
+
+							<div class="col-xs-12">
+								<div class="panel panel-default">						
+									<div class="panel-body">
+
+										<div class="col-xs-3"  >
+											<label for="">Sucursal</label>
+											{% bootstrap_field form.sucursal show_label=False %}
+										</div>	
+										<div class="col-xs-3">
+											<button class="btn btn-primary btn-sm" style = "margin-top: 25px" ><span  class="glyphicon glyphicon-search"></span> Consultar</button>
+
+										</div>
+									</div>
+								</div>
+							</div>
+
+
+							<div class="col-xs-12">
+								<div class="cls_encabezado_alert " >
+									<label>Conceptos Retiro</label>
+								</div>
+
+									<table id="tabla_conceptos_retiro" class="table table-bordered">
+									    <thead>
+										      <tr>
+											      	<th ></th>
+											        <th >Folio</th>	
+											        <th >Usuario Retira</th>								        
+											        <th >Importe</th>	
+											        
+											        <th >Comentario</th>	
+											        <th >Concepto</th>	
+											        <th>Activo</th>
+										      </tr>
+									    </thead>
+
+									    <tbody>
+									    	{% for r in retiros%}
+									    	<tr>
+									    		<td>
+									    			<a class="btn btn-default btn-sm" onclick='fn_confirma_cancelacion("{{r.id}}")';>
+									    				<span class="glyphicon glyphicon-remove">
+									    					
+									    				</span>
+									    			</a>
+									    		</td>
+									    		<td>{{r.folio}}</td>
+									    		<td>{{r.usuario.username}}</td>
+									    		<td>${{r.importe | floatformat:2}}</td>
+									    		<td>{{r.comentario}}</td>
+									    		<td>{{r.concepto}}</td>
+									    		<td>
+									    			{% ifequal r.activo '1' %}
+									    				SI
+									    			{% endifequal %}
+									    			{% ifequal r.activo '2' %}
+									    				NO
+									    			{% endifequal %}
+									    		</td>
+									    	</tr>
+									    	{% endfor %}
+
+									    </tbody>
+									</table>
+								</div>
+
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</form>
+	</div>
+
+	<div class="fondo_mensaje cls_confirma_cancelacion" id="fondo_confirma_cancelacion">
+		
+	</div>
+
+
+	<div class="cls_form_busca_cliente cls_confirma_cancelacion" style="width: 40%;left: 30%; overflow-x: hidden;">		
+		<div class="cls_encabezado_alert" >
+			<label>
+			Motivo de cancelación
+			</label>
+
+		</div>
+
+		<div class="row">
+		<br>
+		<div class="col-xs-12">
+			<label>Motivo</label>
+			<input type="text" name="" id="txt_motivo_cancelacion" maxlength="40" class="form-control">
+		</div>
+		
+		<div clasS="col-xs-6">
+			
+		</div>
+		<div class="col-xs-12 text-right">
+			<a class="btn btn-primary btn-sm" id="btn_confirma_cancelacion"> 
+				<span class="glyphicon glyphicon-ok">
+					
+				</span>
+			Confirmar</a>
+		</div>
+
+
+		</div>
+	</div>	
+	<div id="fondo_preloader">
+		<div class="preloader" id="preloader">
+		
+		</div>
+	</div>
+	<script type="text/javascript">
+		var id_retiro = 0;
+		$(document).ready(
+				function()
+				{
+					fn_inicio();
+
+					$("#btn_confirma_cancelacion").click(
+							function()
+							{
+								fn_confirma_cancelacion();
+							}
+					);
+					$("#fondo_confirma_cancelacion").click(
+							function ()
+							{
+									$(".cls_confirma_cancelacion").hide();
+							}
+					);
+				}
+			);
+
+		function fn_confirma_cancelacion()
+		{
+
+			$("#fondo_preloader").show();
+			
+			$(".cls_confirma_cancelacion").hide();
+			var paramdata = {};
+			paramdata["id_usuario"] = "{{id_usuario}}";
+			paramdata["comentario"] = $("#txt_motivo_cancelacion").val();
+			paramdata["id_retiro"] = id_retiro;
+
+
+
+
+			$.ajax(
+					{
+						type : "PUT",
+						url : "{{IP_LOCAL}}/empenos/api_cancela_retiro/",
+						data : paramdata,
+						contentType: "application/json; charset=utf-8",
+						datatype : "json",
+						headers : {
+							'X-CSRFToken': "{{csrf_token}}"
+						},
+						succes : function(data)
+						{
+
+						},
+						error : function(err)
+						{
+
+						},
+						failure : function (f)
+						{
+
+						}
+
+					}
+				);
+			
+		}
+		function fn_confirma_cancelacion(id)
+		{
+			$(".cls_confirma_cancelacion").show();
+			id_retiro=id;
+
+		}
+		function fn_inicio()
+		{
+			$(".cls_confirma_cancelacion").hide();
+		}
+
+	</script>
+{% endblock %}
+

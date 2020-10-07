@@ -16,6 +16,26 @@ from django.utils import timezone
 from django.db.models import Sum
 
 
+@api_view(["PUT"])
+def api_cancela_retiro(request):
+	respuesta = []
+
+	try:
+		id_usuario = request.data["id_usuario"]
+		comentario = request.data["comentario"]
+		id_retiro = request.data["id_retiro"]
+
+		retiro = Retiro_Efectivo.objects.get(id = int(id_retiro))
+
+		retiro.fn_cancela_retiro(id_usuario,comentario)
+
+		respuesta.append({"estatus":"1"})
+	except Exception as e:
+		respuesta.append({"estatus":"0","msj":"Error al cancelar el retiro."})
+
+	return Response(respuesta)
+
+
 #validamos si el concepto que se selecciono para el retiro puede cubrir el importe
 #que se desea retirar.
 @api_view(['GET'])
@@ -33,8 +53,7 @@ def api_valida_importe_retiro(request):
 		else:
 			respuesta.append({"estatus" : "0","msj" : "El concepto seleccionado no cuenta con saldo suficiente para hacer el retiro. Saldo concepto: " + str(saldo_concepto)})
 
-	except Exception as e:
-		print(e)
+	except Exception as e:		
 		respuesta = []
 		respuesta.append({"estatus" : "0","msj" : "Error al validar el saldo del concepto de retiro."})
 
