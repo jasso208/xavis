@@ -2642,7 +2642,7 @@ def reportes_caja(request):
 				response['Content-Disposition'] = 'attachment; filename="'+nom_archivo+'"'
 
 				writer = csv.writer(response)
-				writer.writerow(['Folio','Sucursal','Fecha Emision','Nombre Usuario','Usuario','Cliente','Avaluo','Mutuo','Estatus','Fecha Vencimiento','Descripción Producto (s)'])
+				writer.writerow(['Folio','Sucursal','Fecha Emision','Nombre Usuario','Usuario','Cliente','Avaluo','Mutuo','Estatus','Fecha Vencimiento','Tipo Producto','Descripción Producto (s)'])
 
 				for b in boletas:
 					d_boleta = Det_Boleto_Empeno.objects.filter(boleta_empeno = b)					
@@ -2656,7 +2656,7 @@ def reportes_caja(request):
 						
 						descripcion = descripcion + '; '
 
-					writer.writerow([b.folio,b.sucursal.sucursal,b.fecha.strftime('%Y-%m-%d'),b.usuario.username,b.usuario.first_name+' '+b.usuario.last_name,b.cliente.nombre+' '+b.cliente.apellido_p+' '+b.cliente.apellido_m,b.avaluo,b.mutuo,b.estatus.estatus,b.fecha_vencimiento.strftime('%Y-%m-%d'),descripcion])
+					writer.writerow([b.folio,b.sucursal.sucursal,b.fecha.strftime('%Y-%m-%d'),b.usuario.username,b.usuario.first_name+' '+b.usuario.last_name,b.cliente.nombre+' '+b.cliente.apellido_p+' '+b.cliente.apellido_m,b.avaluo,b.mutuo,b.estatus.estatus,b.fecha_vencimiento.strftime('%Y-%m-%d'),b.tipo_producto.tipo_producto,descripcion])
 				return response
 			except:
 				error = "1"
@@ -2677,7 +2677,7 @@ def reportes_caja(request):
 
 				writer = csv.writer(response)
 
-				writer.writerow(['Folio','Sucursal','Fecha Emision','Nombre Usuario','Usuario','Cliente','Avaluo','Mutuo','Estatus','Fecha Vencimiento','Descripción','Kilataje','Peso'])
+				writer.writerow(['Folio','Sucursal','Fecha Emision','Nombre Usuario','Usuario','Cliente','Avaluo','Mutuo','Estatus','Fecha Vencimiento','Tipo Producto','Descripción','Kilataje','Peso'])
 
 				
 				for b in boletas:
@@ -2697,7 +2697,7 @@ def reportes_caja(request):
 						
 						descripcion = descripcion + '; '
 						
-						writer.writerow([b.folio,b.sucursal.sucursal,b.fecha.strftime('%Y-%m-%d'),b.usuario.username,b.usuario.first_name+' '+b.usuario.last_name,b.cliente.nombre+' '+b.cliente.apellido_p+' '+b.cliente.apellido_m,b.avaluo,b.mutuo,b.estatus.estatus,b.fecha_vencimiento.strftime('%Y-%m-%d'),descripcion,kilataje,peso])
+						writer.writerow([b.folio,b.sucursal.sucursal,b.fecha.strftime('%Y-%m-%d'),b.usuario.username,b.usuario.first_name+' '+b.usuario.last_name,b.cliente.nombre+' '+b.cliente.apellido_p+' '+b.cliente.apellido_m,b.avaluo,b.mutuo,b.estatus.estatus,b.fecha_vencimiento.strftime('%Y-%m-%d'),b.tipo_producto.tipo_producto,descripcion,kilataje,peso])
 
 				return response
 
