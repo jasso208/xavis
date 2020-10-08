@@ -36,7 +36,22 @@
 							
 							<div class="col-xs-3 ">											
 								<label>Tipo de movimiento</label>								
-								{% bootstrap_field form.id_tipo_mov show_label=False %}								
+								
+
+								<select name="id_tipo_mov" class="form-control" title="" required="" id="id_id_tipo_mov">
+								  <option value="" selected="">---------</option>
+
+								  <option value="1">APERTURA DE CAJA</option>
+
+								  <option value="2">OTROS INGRESOS</option>
+
+								  <option value="3">RETIRO EFECTIVO</option>
+
+								  <option value="4">BOLETA EMPEÑO</option>
+
+								  <option value="1000">DETALLE BOLETA EMPEÑO</option>
+
+								</select>						
 							</div>
 
 							<div class="col-xs-3  ">											

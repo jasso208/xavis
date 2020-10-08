@@ -2651,12 +2651,64 @@ def reportes_caja(request):
 
 				writer = csv.writer(response)
 
-				writer.writerow(['Folio','Sucursal','Fecha Emision','Nombre Usuario','Usuario','Cliente','Avaluo','Mutuo','Estatus','Fecha Vencimiento'])
+				writer.writerow(['Folio','Sucursal','Fecha Emision','Nombre Usuario','Usuario','Cliente','Avaluo','Mutuo','Estatus','Fecha Vencimiento','Descripción Producto (s)'])
 
 				for b in boletas:
-										
-					writer.writerow([b.folio,b.sucursal.sucursal,b.fecha.strftime('%Y-%m-%d'),b.usuario.username,b.usuario.first_name+' '+b.usuario.last_name,b.cliente.nombre+' '+b.cliente.apellido_p+' '+b.cliente.apellido_m,b.avaluo,b.mutuo,b.estatus.estatus,b.fecha_vencimiento.strftime('%Y-%m-%d')])
+					d_boleta = Det_Boleto_Empeno.objects.filter(boleta_empeno = b)					
+					descripcion = ""
+					for db in d_boleta:
+						descripcion = descripcion + 'Descripción ' +  db.descripcion 
+						
+						if db.costo_kilataje != None:
+							descripcion = descripcion  + ', Kilataje: ' + db.costo_kilataje.kilataje
+							descripcion = descripcion  + ', Peso: ' + str(db.peso)
+						
+						descripcion = descripcion + '; '
+
+					writer.writerow([b.folio,b.sucursal.sucursal,b.fecha.strftime('%Y-%m-%d'),b.usuario.username,b.usuario.first_name+' '+b.usuario.last_name,b.cliente.nombre+' '+b.cliente.apellido_p+' '+b.cliente.apellido_m,b.avaluo,b.mutuo,b.estatus.estatus,b.fecha_vencimiento.strftime('%Y-%m-%d'),descripcion])
 				return response
+			except:
+				error = "1"
+				msj_error = "No existen boletas."
+				return render(request,'empenos/reportes_caja.html',locals())	
+		if id_tipo_movimiento == "1000":
+			try:
+				boletas=Boleta_Empeno.objects.filter(fecha__range=(fecha_inicial,fecha_final)).order_by('folio')
+			except:
+				error="1"
+				msj_error="No existen retiros en la fecha indicada."
+				return render(request,'empenos/reportes_caja.html',locals())				
+
+			try:
+				nom_archivo='Rep_Det_Boletas_'+request.POST.get('fecha_inicial')+'-'+request.POST.get('fecha_final')+'.csv'
+				response = HttpResponse(content_type='text/csv')
+				response['Content-Disposition'] = 'attachment; filename="'+nom_archivo+'"'
+
+				writer = csv.writer(response)
+
+				writer.writerow(['Folio','Sucursal','Fecha Emision','Nombre Usuario','Usuario','Cliente','Avaluo','Mutuo','Estatus','Fecha Vencimiento','Descripción','Kilataje','Peso'])
+
+				
+				for b in boletas:
+					
+					d_boleta = Det_Boleto_Empeno.objects.filter(boleta_empeno = b)					
+					descripcion = ""
+					for db in d_boleta:
+						
+						descripcion =   db.descripcion 
+						
+						kilataje = ""
+						peso = ""
+						
+						if db.costo_kilataje != None:
+							kilataje = db.costo_kilataje.kilataje
+							peso = str(db.peso)
+						
+						descripcion = descripcion + '; '
+						
+						writer.writerow([b.folio,b.sucursal.sucursal,b.fecha.strftime('%Y-%m-%d'),b.usuario.username,b.usuario.first_name+' '+b.usuario.last_name,b.cliente.nombre+' '+b.cliente.apellido_p+' '+b.cliente.apellido_m,b.avaluo,b.mutuo,b.estatus.estatus,b.fecha_vencimiento.strftime('%Y-%m-%d'),descripcion,kilataje,peso])
+				return response
+
 			except:
 				error = "1"
 				msj_error = "No existen boletas."
