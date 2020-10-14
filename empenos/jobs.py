@@ -303,7 +303,7 @@ def fn_pagos_vencidos(hoy):
 			almacenaje=resp[0]["almacenaje"]/4.00
 			interes=resp[0]["interes"]/4.00
 			iva=resp[0]["iva"]/4.00
-			refrendo=math.ceil(resp[0]["refrendo"]/4.00)
+			refrendo=round(resp[0]["refrendo"]/4.00)
 
 		elif b.plazo.id==3:#si es plazo de 1 mes
 			#fecha_vencimiento=datetime.combine(fn_add_months(hoy,1), time.min)	
@@ -332,7 +332,7 @@ def fn_pagos_vencidos(hoy):
 			almacenaje=resp[0]["almacenaje"]
 			interes=resp[0]["interes"]
 			iva=resp[0]["iva"]
-			refrendo=math.ceil(resp[0]["refrendo"])		
+			refrendo=round(resp[0]["refrendo"])		
 
 		#elif b.plazo.id=1:
 		#	print("el plazo de 1  dia no debera entrar aqui ya que no genera REEFRENDO PG")
