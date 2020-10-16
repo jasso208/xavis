@@ -1634,10 +1634,6 @@ def rep_flujo_caja(request):
 				importe_mutuo_granel=decimal.Decimal(imp_mut_vg["importe_mutuo__sum"])
 
 
-
-
-
-
 			try:
 
 				cajas_dia_inicial=Cajas.objects.filter(fecha__range=(fec_inicial_caja,fec_final_caja),sucursal=sucursal).aggregate(Sum("importe"))
@@ -1731,6 +1727,7 @@ def rep_flujo_caja(request):
 			abonos=Abono.objects.filter(fecha__range=(fecha_inicial,fecha_final),sucursal=sucursal)
 
 			est_com_pg=Tipo_Pago.objects.get(id=2)
+			est_refrendo=Tipo_Pago.objects.get(id=1)
 
 			for a in abonos:
 				try:
@@ -1750,14 +1747,30 @@ def rep_flujo_caja(request):
 				try:	
 
 					ra=Rel_Abono_Pago.objects.filter(abono=a)
+
+					#busamos si el abono afecto a refrendos.
+					rel_ab_pagos_ref=Rel_Abono_Pago.objects.filter(abono=a,pago__tipo_pago=est_refrendo)
+					
+					#si el abono afecto a pagos tipo refrendo, contamos en 1 el abono a refrendos
+					if rel_ab_pagos_ref.exists():
+						cont_refrendos=cont_refrendos+1
+
+					#buscamos si el abono afecto a comision PG
+					rel_ab_pagos_pg=Rel_Abono_Pago.objects.filter(abono=a,pago__tipo_pago=est_com_pg)
+
+					if rel_ab_pagos_pg.exists():
+						cont_com_pg=cont_com_pg+1
+
+
 					for x in ra:
 						if x.pago.tipo_pago!=est_com_pg:
 							importe_refrendo=decimal.Decimal(importe_refrendo)+x.pago.importe
-							cont_refrendos=cont_refrendos+1		
+							#cont_refrendos=cont_refrendos+1		
 
 						if x.pago.tipo_pago==est_com_pg:
 							importe_com_pg=decimal.Decimal(importe_com_pg)+x.pago.importe
-							cont_com_pg=cont_com_pg+1		
+							#cont_com_pg=cont_com_pg+1	
+
 				except Exception as e:
 					print(e)
 					importe_refrendo=importe_refrendo
@@ -1765,10 +1778,13 @@ def rep_flujo_caja(request):
 				#pago refrendo mensual
 				try:
 					rp=Rel_Abono_Periodo.objects.filter(abono=a)
-
+					#las boletas de plazo mensual se pagan en periodos			
+					rap=Rel_Abono_Periodo.objects.filter(abono=a)
+					if rap.exists():
+						cont_refrendos=cont_refrendos+1
 					for x in rp:												
 						importe_refrendo=decimal.Decimal(x.periodo.importe)+decimal.Decimal(importe_refrendo)						
-						cont_refrendos=cont_refrendos+1
+						#cont_refrendos=cont_refrendos+1
 				except:
 					importe_refrendo=importe_refrendo
 
@@ -1941,6 +1957,7 @@ def rep_flujo_caja(request):
 			abonos=Abono.objects.filter(fecha__range=(fecha_inicial,fecha_final))
 
 			est_com_pg=Tipo_Pago.objects.get(id=2)
+			est_refrendo=Tipo_Pago.objects.get(id=1)
 
 			for a in abonos:
 				try:
@@ -1960,14 +1977,31 @@ def rep_flujo_caja(request):
 				try:	
 
 					ra=Rel_Abono_Pago.objects.filter(abono=a)
+
+
+					#busamos si el abono afecto a refrendos.
+					rel_ab_pagos_ref=Rel_Abono_Pago.objects.filter(abono=a,pago__tipo_pago=est_refrendo)
+					
+					#si el abono afecto a pagos tipo refrendo, contamos en 1 el abono a refrendos
+					if rel_ab_pagos_ref.exists():
+						cont_refrendos=cont_refrendos+1
+
+					#buscamos si el abono afecto a comision PG
+					rel_ab_pagos_pg=Rel_Abono_Pago.objects.filter(abono=a,pago__tipo_pago=est_com_pg)
+
+					if rel_ab_pagos_pg.exists():
+						cont_com_pg=cont_com_pg+1
+
+
 					for x in ra:
 						if x.pago.tipo_pago!=est_com_pg:
 							importe_refrendo=decimal.Decimal(importe_refrendo)+x.pago.importe
-							cont_refrendos=cont_refrendos+1		
+							#cont_refrendos=cont_refrendos+1		
 
 						if x.pago.tipo_pago==est_com_pg:
 							importe_com_pg=decimal.Decimal(importe_com_pg)+x.pago.importe
-							cont_com_pg=cont_com_pg+1		
+							#cont_com_pg=cont_com_pg+1		
+
 				except Exception as e:
 					print(e)
 					importe_refrendo=importe_refrendo
@@ -1976,9 +2010,14 @@ def rep_flujo_caja(request):
 				try:
 					rp=Rel_Abono_Periodo.objects.filter(abono=a)
 
+					#las boletas de plazo mensual se pagan en periodos			
+					rap=Rel_Abono_Periodo.objects.filter(abono=a)
+					if rap.exists():
+						cont_refrendos=cont_refrendos+1
+
 					for x in rp:												
 						importe_refrendo=decimal.Decimal(x.periodo.importe)+decimal.Decimal(importe_refrendo)						
-						cont_refrendos=cont_refrendos+1
+						#cont_refrendos=cont_refrendos+1
 				except:
 					importe_refrendo=importe_refrendo
 
@@ -2211,29 +2250,46 @@ def retiro_efectivo(request):
 		
 		for ab in abonos:
 			rel_ab_pagos=Rel_Abono_Pago.objects.filter(abono=ab)#buscamos a que pago le pego cada refrendo
+
+			#busamos si el abono afecto a refrendos.
+			rel_ab_pagos_ref=Rel_Abono_Pago.objects.filter(abono=ab,pago__tipo_pago=est_refrendo)
 			
+			#si el abono afecto a pagos tipo refrendo, contamos en 1 el abono a refrendos
+			if rel_ab_pagos_ref.exists():
+				cont_refrendos=cont_refrendos+1
+
+			#buscamos si el abono afecto a comision PG
+			rel_ab_pagos_pg=Rel_Abono_Pago.objects.filter(abono=ab,pago__tipo_pago=est_com_pg)
+
+			if rel_ab_pagos_pg.exists():
+				cont_com_pg=cont_com_pg+1
+
+			
+
 			for p in rel_ab_pagos:
 				
 				if p.pago.tipo_pago==est_refrendo:#si afecto a refrendo acumulamos el importe.
-					cont_refrendos=cont_refrendos+1
+					
 					importe_refrendo=decimal.Decimal(importe_refrendo)+decimal.Decimal(p.pago.importe)
 					
 
 				
 				if p.pago.tipo_pago==est_com_pg:#si afecto a comision pg acumulamos el importe.
-					cont_com_pg=cont_com_pg+1
+					
 					comisiones_pg=decimal.Decimal(comisiones_pg)+decimal.Decimal(p.pago.importe)
 
 				
 				if p.pago.tipo_pago==est_ref_pg:#si afecto a refrebdis pg acumulamos el importe.
-					cont_refrendos=cont_refrendos+1
+					
 					importe_refrendo=decimal.Decimal(importe_refrendo)+decimal.Decimal(p.pago.importe)
 
-			
+
 			#las boletas de plazo mensual se pagan en periodos			
 			rap=Rel_Abono_Periodo.objects.filter(abono=ab)
-			for x in rap:
+			if rap.exists():
 				cont_refrendos=cont_refrendos+1
+			for x in rap:
+				#cont_refrendos=cont_refrendos+1
 				importe_refrendo=decimal.Decimal(importe_refrendo)+decimal.Decimal(x.periodo.importe)
 
 			importe_refrendo=round(importe_refrendo)
@@ -5339,23 +5395,41 @@ def api_consulta_corte_caja(request):
 		
 		for ab in abonos:
 			rel_ab_pagos=Rel_Abono_Pago.objects.filter(abono=ab)#buscamos a que pago le pego cada refrendo
+
+
+			#busamos si el abono afecto a refrendos.
+			rel_ab_pagos_ref=Rel_Abono_Pago.objects.filter(abono=ab,pago__tipo_pago=est_refrendo)
+			
+			#si el abono afecto a pagos tipo refrendo, contamos en 1 el abono a refrendos
+			if rel_ab_pagos_ref.exists():
+				cont_refrendos=cont_refrendos+1
+
+			#buscamos si el abono afecto a comision PG
+			rel_ab_pagos_pg=Rel_Abono_Pago.objects.filter(abono=ab,pago__tipo_pago=est_com_pg)
+
+			if rel_ab_pagos_pg.exists():
+				cont_com_pg=cont_com_pg+1
+
+
 			for p in rel_ab_pagos:
 				if p.pago.tipo_pago==est_refrendo:#si afecto a refrendo acumulamos el importe.
-					cont_refrendos=cont_refrendos+1
+					#cont_refrendos=cont_refrendos+1
 					importe_refrendo=decimal.Decimal(importe_refrendo)+decimal.Decimal(p.pago.importe)
 
 				if p.pago.tipo_pago==est_com_pg:#si afecto a comision pg acumulamos el importe.
-					cont_com_pg=cont_com_pg+1
+					#cont_com_pg=cont_com_pg+1
 					comisiones_pg=decimal.Decimal(comisiones_pg)+decimal.Decimal(p.pago.importe)
 
 				if p.pago.tipo_pago==est_ref_pg:#si afecto a refrebdis pg acumulamos el importe.
-					cont_refrendos=cont_refrendos+1
+					#cont_refrendos=cont_refrendos+1
 					importe_refrendo=decimal.Decimal(importe_refrendo)+decimal.Decimal(p.pago.importe)
 
 			#las boletas de plazo mensual se pagan en periodos			
 			rap=Rel_Abono_Periodo.objects.filter(abono=ab)
-			for x in rap:
+			if rap.exists():
 				cont_refrendos=cont_refrendos+1
+			for x in rap:
+				#cont_refrendos=cont_refrendos+1
 				importe_refrendo=decimal.Decimal(importe_refrendo)+decimal.Decimal(x.periodo.importe)
 
 			importe_refrendo=round(importe_refrendo)
