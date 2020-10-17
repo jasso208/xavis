@@ -2034,7 +2034,7 @@ def rep_flujo_caja(request):
 
 	importe_total=math.ceil(importe_total)
 
-	cont_total=1+cont_otros+cont_com_pg+cont_refrendos+cont_capital+cont_desempenos+cont_empenos+cont_ventas+cont_ab_apartado
+	cont_total=1+cont_otros+cont_com_pg+cont_refrendos+cont_capital+cont_desempenos+cont_empenos+cont_ventas+cont_ab_apartado+cont_retiros
 
 	cont_total_2=cont_almoneda+cont_activas+cont_remate
 
@@ -2313,12 +2313,14 @@ def retiro_efectivo(request):
 					cont_desemp=int(cont_desemp)+1
 
 			
-		total_movs=total_movs+int(cont_com_pg)+int(cont_ref_pg)+int(cont_pc)+int(cont_refrendos)+int(cont_rebol)+int(cont_desemp)+int(cont_ventas)
+		#total_movs=total_movs+int(cont_com_pg)+int(cont_ref_pg)+int(cont_pc)+int(cont_refrendos)+int(cont_rebol)+int(cont_desemp)+int(cont_ventas)
 	
 	except Exception as e:
 
 		print(e)
 		print("No se han registrado abonos.")
+
+
 
 	total_movs=total_movs+int(cont_com_pg)+int(cont_ref_pg)+int(cont_pc)+int(cont_refrendos)+int(cont_rebol)+int(cont_desemp)+int(cont_ventas)+int(cont_ab_apartado)
 	
