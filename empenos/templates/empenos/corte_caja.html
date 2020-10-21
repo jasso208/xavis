@@ -52,11 +52,11 @@
 										</div>
 										<div class="col-xs-3 ">
 											<label>Nombre Usuario</label>
-											<input type="text" name="" id="id_nom_user" class="form-control" placeholder="ej. jasso208">
+											<input type="text" name="" id="id_nom_user" class="form-control" placeholder="ej. jasso208" value="{{user_2.user.username}}">
 										</div>
 										<div class="col-xs-1 ">
 											<label>Caja</label>
-											<input type="text" name="" id="id_caja_2" class="form-control" placeholder="ej. A" >
+											<input type="text" name="" id="id_caja_2" class="form-control" placeholder="ej. A" value="{{c}}" >
 										</div>
 										<div class="col-xs-2  text-right">
 											<label>&nbsp</label>
@@ -566,6 +566,8 @@
 			{
 				
 				var username="{{user_2.user.username}}";
+				fn_establece_fecha_hoy();
+
 				$("#id_sucursal").val("{{user_2.sucursal.id}}");
 
 				$("#cls_error_guardar").hide();
@@ -1160,6 +1162,18 @@
 			$("#id_diferencia").val(parseInt(total_pesos-total_efectivo_global).toString());
 
 			$("#id_real_efectivo").val(parseInt(total_pesos).toString());
+		}
+
+		function fn_establece_fecha_hoy()
+		{
+			var now = new Date();
+
+		    var day = ("0" + now.getDate()).slice(-2);
+		    var month = ("0" + (now.getMonth() + 1)).slice(-2);
+
+		    var today = now.getFullYear()+"-"+(month)+"-"+(day) ;
+		    $("#id_fecha").val(today);
+		    
 		}
 //*******************************************************************************************************************************************************
 //**************************************************************************************************************************************************************s

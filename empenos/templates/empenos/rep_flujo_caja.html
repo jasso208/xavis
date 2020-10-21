@@ -571,8 +571,20 @@
 
 				}
 			);
+		function fn_establece_fecha_hoy()
+		{
+			var now = new Date();
+
+		    var day = ("0" + now.getDate()).slice(-2);
+		    var month = ("0" + (now.getMonth() + 1)).slice(-2);
+
+		    var today = now.getFullYear()+"-"+(month)+"-"+(day) ;
+		    $("#id_fecha_inicial").val(today);
+		    $("#id_fecha_final").val(today);
+		}
 		function fn_inicio()
 		{
+			fn_establece_fecha_hoy();
 			post="{{post}}";
 
 			$("#id_sucursal").prop("required",false);

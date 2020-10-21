@@ -628,28 +628,36 @@ def imprime_apartado(request):
 	p.drawImage(settings.IP_LOCAL+'/static/img/logo.jpg',340,750,100, 30)
 
 	p.drawString(400,790,"Copia cliente")
-
-	p.drawString(200,760,"Folio: "+str(im.apartado.folio))
-	p.drawString(500,760,"Folio: "+str(im.apartado.folio))
+	p.setFont("Helvetica-Bold",10)
+	p.drawString(170,760,"Folio apartado: "+str(im.apartado.folio))
+	p.drawString(470,760,"Folio apartado: "+str(im.apartado.folio))
 
 	p.setFont("Helvetica-Bold",12)
 	p.drawString(100,current_row,"Apartado Producto")
 	p.drawString(400,current_row,"Apartado Producto")
 
 	current_row=current_row-20
-	current_row=current_row-20
 	p.setFont("Helvetica",10)
 
-	p.drawString(35,current_row,"Fecha: ")
-	p.drawString(100,current_row,str(im.apartado.fecha.strftime("%Y-%m-%d %H:%M:%S")))
-	p.drawString(335,current_row,"Fecha: ")
-	p.drawString(400,current_row,str(im.apartado.fecha.strftime("%Y-%m-%d %H:%M:%S")))
+	current_row=current_row-20
+	p.drawString(35,current_row,"Folio boleta:")
+	p.drawString(100,current_row,str(im.apartado.boleta.folio))
+
+	p.drawString(335,current_row,"Folio boleta:")
+	p.drawString(400,current_row,str(im.apartado.boleta.folio))
 
 	current_row=current_row-20
-	p.drawString(35,current_row,"Vence: ")
-	p.drawString(100,current_row,str(im.apartado.fecha_vencimiento.strftime("%Y-%m-%d %H:%M:%S")))
-	p.drawString(335,current_row,"Fecha: ")
-	p.drawString(400,current_row,str(im.apartado.fecha_vencimiento.strftime("%Y-%m-%d %H:%M:%S")))
+
+	p.drawString(35,current_row,"Fecha emisión: ")
+	p.drawString(150,current_row,str(im.apartado.fecha.strftime("%Y-%m-%d")))
+	p.drawString(335,current_row,"Fecha emisión: ")
+	p.drawString(450,current_row,str(im.apartado.fecha.strftime("%Y-%m-%d")))
+
+	current_row=current_row-20
+	p.drawString(35,current_row,"Fecha vencimiento: ")
+	p.drawString(150,current_row,str(im.apartado.fecha_vencimiento.strftime("%Y-%m-%d")))
+	p.drawString(335,current_row,"Fecha vencimiento: ")
+	p.drawString(450,current_row,str(im.apartado.fecha_vencimiento.strftime("%Y-%m-%d")))
 
 	current_row=current_row-20
 	p.drawString(35,current_row,"Sucursal:")
@@ -696,7 +704,14 @@ def imprime_apartado(request):
 	for db in dbe:
 		p.drawString(35,current_row,db.descripcion)
 		p.drawString(335,current_row,db.descripcion)
-		current_row=current_row-20
+		current_row=current_row-20		
+		
+		if db.observaciones is not None:				
+			p.drawString(35,current_row,db.observaciones)
+			p.drawString(335,current_row,db.observaciones)
+			current_row=current_row-20		
+
+		
 
 
 
@@ -746,21 +761,21 @@ def imprime_apartado(request):
 
 	current_row=current_row-20
 
-	p.setFont("Helvetica-Bold",10)
+	p.setFont("Helvetica-Bold",7)
 	p.drawString(40,current_row,"Nota: ")	
 	p.drawString(340,current_row,"Nota: ")	
-	p.setFont("Helvetica",10)
-	p.drawString(70,current_row,"El artículo fue probado en sucursal junto con ")	
-	p.drawString(370,current_row,"El artículo fue probado en sucursal junto con ")	
+	p.setFont("Helvetica",7)
+	p.drawString(70,current_row,"El artículo fue probado en sucursal junto con el cliente y se aparta  ")	
+	p.drawString(370,current_row,"El artículo fue probado en sucursal junto con el cliente y se aparta  ")	
 	current_row=current_row-10
-	p.drawString(70,current_row,"el cliente y se entrega funcionando.")	
-	p.drawString(370,current_row,"el cliente y se entrega funcionando.")	
+	p.drawString(70,current_row,"funcionando.")	
+	p.drawString(370,current_row,"funcionando.")	
 	current_row=current_row-10
-	p.drawString(70,current_row,"Por ser un artículo usado no se da ningun ")	
-	p.drawString(370,current_row,"Por ser un artículo usado no se da ningun ")	
+	p.drawString(70,current_row,"Por ser un artículo usado no se da ningun tipo de garantia. ")	
+	p.drawString(370,current_row,"Por ser un artículo usado no se da ningun tipo de garantia. ")	
 	current_row=current_row-10
-	p.drawString(70,current_row,"tipo de garantia.")
-	p.drawString(370,current_row,"tipo de garantia.")		
+	p.drawString(70,current_row,"")
+	p.drawString(370,current_row,"")		
 	
 
 	current_row=current_row-20	
@@ -2177,15 +2192,15 @@ def rep_flujo_caja(request):
 	importe_mutuo_granel="{:0,.2f}".format(importe_mutuo_granel)
 	utilidad_vta_granel="{:0,.2f}".format(utilidad_vta_granel)
 
+	sucursal_default=user_2.sucursal.id
 	#cuando eres gerente regiona, puedes entrar a todas las sucursales
 	if user_2.perfil.id==3:		
-		sucursales=Sucursal.objects.all()
-		sucursal_default=""
+		sucursales=Sucursal.objects.all()		
 	else:#cuando no eres gerente regional, solo puedes acceder a tu sucursal.
 
 		sucursales=Sucursal.objects.filter(id=user_2.sucursal.id)
 
-		sucursal_default=user_2.sucursal.id
+		
 
 	perfil=str(user_2.perfil.id)
 
