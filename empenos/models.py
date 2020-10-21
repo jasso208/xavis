@@ -695,6 +695,28 @@ class Rel_Abono_Capital(models.Model):
 	importe=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)
 	capital_restante=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)#cuando se afecte el capital, aqui almacenamos el historial de como quedo al aplicar el abono.
 
+class Configuracion_Interes_Empeno(models.Model):
+	sucursal = models.OneToOneField(Sucursal,on_delete = models.PROTECT)
+	almacenaje_oro = models.DecimalField(max_digits = 20,decimal_places = 2,default = 0.00)
+	interes_oro = models.DecimalField(max_digits = 20,decimal_places = 2,default = 0.00)
+	iva_oro = models.DecimalField(max_digits = 20,decimal_places = 2,default = 0.00)
+	almacenaje_plata = models.DecimalField(max_digits = 20,decimal_places = 2,default = 0.00)
+	interes_plata = models.DecimalField(max_digits = 20,decimal_places = 2,default = 0.00)
+	iva_plata = models.DecimalField(max_digits = 20,decimal_places = 2,default = 0.00)
+	almacenaje_prod_varios = models.DecimalField(max_digits = 20,decimal_places = 2,default = 0.00)
+	interes_prod_varios = models.DecimalField(max_digits = 20,decimal_places = 2,default = 0.00)
+	iva_prod_varios = models.DecimalField(max_digits = 20,decimal_places = 2,default = 0.00)
+	usuario_modifica = models.ForeignKey(User,on_delete=models.PROTECT)
+	fecha_modificacion = models.DateTimeField(default = timezone.now)
+
+	#si no encuentra la condiguracion, regresa false para indicar que no la tiene capturada.
+	def fn_get_configuracion_interes_empeno(sucursal):
+		try:
+			return Configuracion_Interes_Empeno.objects.get(sucursal = sucursal)
+		except:
+			return False
+
+
 
 
 

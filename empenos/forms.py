@@ -41,16 +41,15 @@ class Apartado_Form(forms.Form):
 
 class Venta_Piso_Form(forms.Form):
 	id_cliente=forms.IntegerField()
+
 	def __init__(self, *args, **kwargs):
 		super(self.__class__, self).__init__(*args, **kwargs)
 		# asi vuelves tus campos no requeridos
 		self.fields['id_cliente'].required = False
 
-
 class Abono_Apartado_Form(forms.Form):
 	abono=forms.IntegerField()
 	
-
 class Cierra_Caja_Form(forms.Form):
 	centavos_10=forms.IntegerField()
 	centavos_50=forms.IntegerField()
@@ -91,17 +90,28 @@ class Buscar_Ventas_Form(forms.Form):
 	fecha_inicial=forms.DateTimeField(initial=timezone.now())
 	fecha_final=forms.DateTimeField(initial=timezone.now())
 
-
 class Buscar_Apartados_Form(forms.Form):
 	fecha_inicial=forms.DateTimeField(initial=timezone.now())
 	fecha_final=forms.DateTimeField(initial=timezone.now())
 	folio_apartado=forms.IntegerField()
 	cliente=forms.CharField()
 
-
 class Costo_Extra_Form(forms.Form):
 	sucursal=forms.ModelChoiceField(queryset=Sucursal.objects.all())
 
+class Interes_Empeno_Form(forms.Form):
+	sucursal = forms.ModelChoiceField(queryset = Sucursal.objects.all())
+	almacenaje_oro = forms.DecimalField(max_digits=20,decimal_places=2)
+	almacenaje_plata = forms.DecimalField(max_digits=20,decimal_places=2)
+	almacenaje_art_varios = forms.DecimalField(max_digits=20,decimal_places=2)
+
+	interes_oro = forms.DecimalField(max_digits=20,decimal_places=2)
+	interes_plata = forms.DecimalField(max_digits=20,decimal_places=2)
+	interes_art_varios = forms.DecimalField(max_digits=20,decimal_places=2)
+
+	iva_oro = forms.DecimalField(max_digits=20,decimal_places=2)
+	iva_plata = forms.DecimalField(max_digits=20,decimal_places=2)
+	iva_art_varios = forms.DecimalField(max_digits=20,decimal_places=2)
 
 class Consulta_Abono_Form(forms.Form):
 	sucursal=forms.ModelChoiceField(queryset=Sucursal.objects.all())

@@ -211,8 +211,6 @@ def abona_apartado(request,id_apartado):
 			Imprime_Apartado.objects.filter(usuario = usuario).delete()
 			Imprime_Apartado.objects.create(usuario = usuario,apartado = apartado,abono = ab_ap)
 
-			print("entro")
-
 			return HttpResponseRedirect(reverse('empenos:imprime_apartado'))
 
 		except Exception as e:
@@ -225,6 +223,101 @@ def abona_apartado(request,id_apartado):
 		error = "2"				
 		form = Abono_Apartado_Form()
 	return render(request,'empenos/abona_apartado.html',locals())
+#*******************************************************************************************************************************************************
+#*¨**************************************************************************************************************************************************************
+
+def administracion_interes_empeno(request):
+	#si no esta logueado mandamos al login
+	if not request.user.is_authenticated:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+	
+	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
+	try:
+		user_2 = User_2.objects.get(user = request.user)
+	except Exception as e:		
+		print(e)
+		form = Login_Form(request.POST)
+		estatus = 0
+		msj = "La cuenta del usuario esta incompleta."			
+		return render(request,'login.html',locals())
+
+	hoy = date.today()
+	hoy_inicial = datetime.combine(hoy, time.min) 
+	hoy_final = datetime.combine(hoy, time.max)  
+
+	try:		
+		#validamos si el usuario tiene caja abierta en el dia actual.
+		caja = Cajas.objects.get(fecha__range = (hoy_inicial,hoy_final),fecha_cierre__isnull = True,usuario=request.user)
+		caja_abierta = "1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
+		suc = caja.sucursal
+		c = caja.caja
+
+	except Exception as e:
+		print(e)
+		caja_abierta = "0"
+		caja = Cajas
+
+	permiso="0"
+
+	#Si el perfil es gerente regional, permite entrar.
+	if user_2.perfil.id == 3:
+		permiso="1"
+
+	estatus = "0"#no hace nada
+
+	if request.method == "POST":
+		id_sucursal = request.POST.get("sucursal")
+		sucursal = Sucursal.objects.get(id = int(id_sucursal))
+
+		#si existe un registro, solo lo actualizamos, de lo contrario, creamos el registro.
+		try:
+
+			cie = Configuracion_Interes_Empeno.objects.get(sucursal = sucursal)
+
+			cie.almacenaje_oro = request.POST.get("almacenaje_oro") 
+			cie.interes_oro = request.POST.get("interes_oro") 
+			cie.iva_oro = request.POST.get("iva_oro") 
+			cie.almacenaje_plata = request.POST.get("almacenaje_plata") 
+			cie.interes_plata = request.POST.get("interes_plata") 
+			cie.iva_plata = request.POST.get("iva_plata") 
+			cie.almacenaje_prod_varios = request.POST.get("almacenaje_art_varios") 
+			cie.interes_prod_varios = request.POST.get("interes_art_varios") 
+			cie.iva_prod_varios = request.POST.get("iva_art_varios") 
+			cie.usuario_modifica = request.user
+			cie.fecha_modificacion = date.today()
+			cie.save()			
+
+		except:
+			cie = Configuracion_Interes_Empeno()
+			cie.sucursal = sucursal
+
+			cie.almacenaje_oro = request.POST.get("almacenaje_oro") 
+			cie.interes_oro = request.POST.get("interes_oro") 
+			cie.iva_oro = request.POST.get("iva_oro") 
+			cie.almacenaje_plata = request.POST.get("almacenaje_plata") 
+			cie.interes_plata = request.POST.get("interes_plata") 
+			cie.iva_plata = request.POST.get("iva_plata") 
+			cie.almacenaje_pro_varios = request.POST.get("almacenaje_art_varios") 
+			cie.interes_prod_varios = request.POST.get("interes_art_varios") 
+			cie.iva_prod_varios = request.POST.get("iva_art_varios") 
+			cie.usuario_modifica = request.user
+			cie.fecha_modificacion = date.today()
+			cie.save()	
+		estatus = "1"#muestra mensaje de que se guardo con exito
+
+	else:
+		estatus = "0"
+
+		
+
+	
+
+		
+
+	
+
+	form = Interes_Empeno_Form()
+	return render(request,'empenos/administracion_interes_empeno.html',locals())
 
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************

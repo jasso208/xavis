@@ -16,6 +16,29 @@ from django.utils import timezone
 from django.db.models import Sum
 
 
+@api_view(["GET"])
+def api_consulta_configuracion_empeno(request):
+	respuesta = []
+	try:
+		id_sucursal = request.GET.get("id_sucursal")
+		sucursal = Sucursal.objects.get(id=int(id_sucursal))
+
+		resp_interes = Configuracion_Interes_Empeno.fn_get_configuracion_interes_empeno(sucursal)
+
+		print(resp_interes)
+		#si el tipo de dato es boletano y como solo podemos regresar false o un queryset,
+		#asumimos que fallo.
+		if type(resp_interes) == type(False):
+			respuesta.append({"almacenaje_oro":"0.00","interes_oro":"0.00","iva_oro":"0.00","almacenaje_plata":"0.00","interes_plata":"0.00","iva_plata":"0.00","almacenaje_prod_varios":"0.00","interes_prod_varios":"0.00","iva_prod_varios":"0.00"})
+		else:
+			respuesta.append({"almacenaje_oro":resp_interes.almacenaje_oro,"interes_oro":resp_interes.interes_oro,"iva_oro":resp_interes.iva_oro,"almacenaje_plata":resp_interes.almacenaje_plata,"interes_plata":resp_interes.interes_plata,"iva_plata":resp_interes.iva_plata,"almacenaje_prod_varios":resp_interes.almacenaje_prod_varios,"interes_prod_varios":resp_interes.interes_prod_varios,"iva_prod_varios":resp_interes.iva_prod_varios})
+
+	except Exception as e:
+		print(e)
+		respuesta.append({"almacenaje_oro":"0.00","interes_oro":"0.00","iva_oro":"0.00","almacenaje_plata":"0.00","interes_plata":"0.00","iva_plata":"0.00","almacenaje_prod_varios":"0.00","interes_prod_varios":"0.00","iva_prod_varios":"0.00"})
+	return Response(respuesta)
+
+
 @api_view(["PUT"])
 def api_cancela_retiro(request):
 	respuesta = []
