@@ -786,7 +786,7 @@ def imprime_apartado(request):
 
 	current_row=current_row-20	
 	p.drawString(120,current_row,"Firma Cliente.")		
-	p.drawString(420,current_row,"Firma Cliente.")		
+	p.drawString(420,current_row,"Firma Valuador.")		
 
 	
 
@@ -799,7 +799,7 @@ def imprime_apartado(request):
 			p.line(300,linea_corte,300,linea_corte-20)		
 			pinta=1
 		else:
-			print("no pinta")
+			
 			pinta=0
 
 		linea_corte=linea_corte-20
@@ -969,8 +969,10 @@ def imprime_venta_piso(request):
 
 	p.drawString(400,790,"Copia cliente")
 
-	p.drawString(200,760,"Folio: "+str(im.venta_piso.folio))
-	p.drawString(500,760,"Folio: "+str(im.venta_piso.folio))
+	p.setFont("Helvetica-Bold",10)
+
+	p.drawString(170,760,"Folio venta: "+str(im.venta_piso.folio))
+	p.drawString(470,760,"Folio venta: "+str(im.venta_piso.folio))
 
 	p.setFont("Helvetica-Bold",12)
 	p.drawString(100,current_row,"TICKET VENTA")
@@ -980,10 +982,14 @@ def imprime_venta_piso(request):
 	current_row=current_row-20
 	p.setFont("Helvetica",10)
 
-	p.drawString(35,current_row,"Fecha: ")
-	p.drawString(100,current_row,str(im.venta_piso.fecha.strftime("%Y-%m-%d %H:%M:%S")))
-	p.drawString(335,current_row,"Fecha: ")
-	p.drawString(400,current_row,str(im.venta_piso.fecha.strftime("%Y-%m-%d %H:%M:%S")))
+
+
+	
+
+	p.drawString(35,current_row,"Fecha emisión: ")
+	p.drawString(130,current_row,str(im.venta_piso.fecha.strftime("%Y-%m-%d")))
+	p.drawString(335,current_row,"Fecha emisión: ")
+	p.drawString(430,current_row,str(im.venta_piso.fecha.strftime("%Y-%m-%d")))
 
 	current_row=current_row-20
 	p.drawString(35,current_row,"Sucursal:")
@@ -1028,8 +1034,8 @@ def imprime_venta_piso(request):
 		p.drawString(530,current_row,importe)
 
 		for db in dbe:
-			p.drawString(35,current_row,db.descripcion)
-			p.drawString(335,current_row,db.descripcion)
+			p.drawString(35,current_row,"fb:"+str(db.boleta_empeno.folio)+"; "+db.descripcion)
+			p.drawString(335,current_row,"fb:"+str(db.boleta_empeno.folio)+"; "+db.descripcion)
 			current_row=current_row-20
 
 	
@@ -1043,21 +1049,21 @@ def imprime_venta_piso(request):
 
 	current_row=current_row-20
 
-	p.setFont("Helvetica-Bold",10)
+	p.setFont("Helvetica-Bold",7)
 	p.drawString(40,current_row,"Nota: ")	
 	p.drawString(340,current_row,"Nota: ")	
-	p.setFont("Helvetica",10)
-	p.drawString(70,current_row,"El artículo fue probado en sucursal junto con ")	
-	p.drawString(370,current_row,"El artículo fue probado en sucursal junto con ")	
+	p.setFont("Helvetica",7)
+	p.drawString(70,current_row,"El artículo fue probado en sucursal junto con el cliente y se entrega ")	
+	p.drawString(370,current_row,"El artículo fue probado en sucursal junto con el cliente y se entrega ")	
 	current_row=current_row-10
-	p.drawString(70,current_row,"el cliente y se entrega funcionando.")	
-	p.drawString(370,current_row,"el cliente y se entrega funcionando.")	
+	p.drawString(70,current_row,"funcionando.")	
+	p.drawString(370,current_row,"funcionando.")	
 	current_row=current_row-10
-	p.drawString(70,current_row,"Por ser un artículo usado no se da ningun ")	
-	p.drawString(370,current_row,"Por ser un artículo usado no se da ningun ")	
+	p.drawString(70,current_row,"Por ser un artículo usado no se da ningun tipo de garantia.")	
+	p.drawString(370,current_row,"Por ser un artículo usado no se da ningun tipo de garantia.")	
 	current_row=current_row-10
-	p.drawString(70,current_row,"tipo de garantia.")
-	p.drawString(370,current_row,"tipo de garantia.")		
+	p.drawString(70,current_row,"")
+	p.drawString(370,current_row,"")		
 	
 
 	current_row=current_row-20	
@@ -1081,7 +1087,7 @@ def imprime_venta_piso(request):
 			p.line(300,linea_corte,300,linea_corte-20)		
 			pinta=1
 		else:
-			print("no pinta")
+			
 			pinta=0
 
 		linea_corte=linea_corte-20
