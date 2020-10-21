@@ -16,8 +16,6 @@ def fn_job_libera_apartado():
 		estatus_apartado = Estatus_Apartado.objects.get(id = 1)
 		estatus_liberado = Estatus_Apartado.objects.get(id = 2)
 
-
-
 		estatus_remate = Estatus_Boleta.objects.get(id=5)
 
 		#obtenemos los apartados que vencen hoy
@@ -33,7 +31,6 @@ def fn_job_libera_apartado():
 			a.boleta.save()
 
 			a.boleta = None#desvinculamos la boleta, para que pueda ser vendida o apartada nuevamente.
-			
 
 			a.save()
 	except Exception as e:
@@ -110,7 +107,6 @@ def fn_boletas_vencidas_semanal(hoy):
 	estatus_vendido=Estatus_Boleta.objects.get(id=6)
 	estatus_apartado=Estatus_Boleta.objects.get(id=7)
 
-
 	refrendo_pg=Tipo_Pago.objects.get(id=3)
 	vendida=Estatus_Boleta.objects.get(id=6)
 
@@ -182,12 +178,25 @@ def fn_boletas_vencidas_semanal(hoy):
 @transaction.atomic
 def fn_pagos_vencidos(hoy):
 
+
+	#obtenemos el estasus almoneda
+	estatus_almoneda=Estatus_Boleta.objects.get(id=3)
+	estatus_remate=Estatus_Boleta.objects.get(id=5)
+	estatus_desempem=Estatus_Boleta.objects.get(id=4)
+	estatus_vendido=Estatus_Boleta.objects.get(id=6)
+	estatus_apartado=Estatus_Boleta.objects.get(id=7)
+
+
+	
+
+
 	#*******************************************************************************************
 	#pagos de tipo refrendo que se venncen hoy
 	refrendo=Tipo_Pago.objects.get(id=1)
-	pagos=Pagos.objects.filter(fecha_vencimiento=hoy,tipo_pago=refrendo)
+	pagos=Pagos.objects.filter(fecha_vencimiento = hoy,tipo_pago = refrendo).exclude(boleta__estatus = estatus_desempem).exclude(boleta__estatus = estatus_vendido).exclude(boleta__estatus = estatus_apartado)
 	estatus_almoneda=Estatus_Boleta.objects.get(id=3)
 	refrendo_pg=Tipo_Pago.objects.get(id=3)
+
 	#lo marcamos como vencidos.
 	for p in pagos:
 		p.vencido="S"
@@ -274,7 +283,8 @@ def fn_pagos_vencidos(hoy):
 	#*******************************************************************************************
 	#pagos de tipo refrendo PG que se vencen hoy
 	refrendo_pg=Tipo_Pago.objects.get(id=3)
-	pagos=Pagos.objects.filter(fecha_vencimiento=hoy,pagado='N',tipo_pago=refrendo_pg)
+
+	pagos=Pagos.objects.filter(fecha_vencimiento=hoy,pagado='N',tipo_pago=refrendo_pg).exclude(boleta__estatus = estatus_desempem).exclude(boleta__estatus = estatus_vendido).exclude(boleta__estatus = estatus_apartado)
 
 	for p in pagos:
 		#marcamos cadapago como vencido.
