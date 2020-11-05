@@ -14,6 +14,7 @@ from django.db.models import Sum
 
 
 
+
 def fn_calcula_precio_apartado(boleta):
 	importe_venta=0.00
 
