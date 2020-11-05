@@ -141,6 +141,10 @@ class TestConceptosRetiros(TestCase):
 		Sucursal.objects.create(sucursal = "Sucursal de prueba")
 
 		User.objects.create(username = "jasso208")
+
+		Tipo_Movimiento.objects.create(tipo_movimiento="AP Caja",naturaleza='')
+		Tipo_Movimiento.objects.create(tipo_movimiento="O I",naturaleza='')
+		Tipo_Movimiento.objects.create(tipo_movimiento="Retiro Efectivo",naturaleza='')
 		return True
 
 	def test_nuevo_concepto(self):
@@ -149,6 +153,9 @@ class TestConceptosRetiros(TestCase):
 		concepto_no_correcto = Concepto_Retiro.fn_nuevo_concepto(1,1,100,"concepto de prueba 1212121212121212121212")
 		#no puede contener importe maximo de retiro negativo
 		concepto_no_correcto_por_importe = Concepto_Retiro.fn_nuevo_concepto(1,1,-1,"concepto de prueba")		
+
+		#no puede contener importe maximo igual a cero
+		concepto_no_correcto_por_importe_cero = Concepto_Retiro.fn_nuevo_concepto(1,1,0,"concepto de prueba maximo cero")		
 
 		concepto_usr_no_correcto = Concepto_Retiro.fn_nuevo_concepto(1,3,100,"concepto de prueba")		
 		concepto_suc_no_correcta = Concepto_Retiro.fn_nuevo_concepto(3,1,100,"concepto de prueba")		
@@ -160,6 +167,8 @@ class TestConceptosRetiros(TestCase):
 		self.assertEqual(concepto_usr_no_correcto,False)
 		self.assertEqual(concepto_suc_no_correcta,False)
 		self.assertEqual(concepto_no_concepto,False)
+		self.assertEqual(concepto_no_correcto_por_importe_cero,False)
+
 
 	def test_elimina_concepto(self):
 		concepto_correcto = Concepto_Retiro.fn_nuevo_concepto(1,1,100,"prueba_elimina_concepto")
@@ -173,23 +182,65 @@ class TestConceptosRetiros(TestCase):
 
 	def test_update_importe_maximo_retiro(self):
 		concepto_correcto = Concepto_Retiro.fn_nuevo_concepto(1,1,100,"prueba_update_retiro")
-		concepto_correcto = Concepto_Retiro.fn_nuevo_concepto(1,1,100,"prueba_update_retiro_negativo")
+		concepto_correcto_2 = Concepto_Retiro.fn_nuevo_concepto(1,1,100,"prueba_update_retiro_negativo")
+		concepto_correcto_3 = Concepto_Retiro.fn_nuevo_concepto(1,1,100,"prueba_update_retiro_cero")
 		
+
 		concepto = Concepto_Retiro.objects.get(concepto = "prueba_update_retiro".upper())
 		concepto_2 = Concepto_Retiro.objects.get(concepto = "prueba_update_retiro_negativo".upper())
+		concepto_3 = Concepto_Retiro.objects.get(concepto = "prueba_update_retiro_cero".upper())
 
 		User.objects.create(username = "jasso_update")
 		usuario = User.objects.get(username = "jasso_update")
-		print("aqui llego bien")
+	
 		resp = Concepto_Retiro.fn_update_importe_maximo_retiro(concepto.id,200,usuario.id)
-		print("aqui llego bien1")
+		
 		resp_2 = Concepto_Retiro.fn_update_importe_maximo_retiro(concepto_2.id,-200,usuario.id)
-		print("aqui llego bien2")
+
+		resp_3 = Concepto_Retiro.fn_update_importe_maximo_retiro(concepto_2.id,0,usuario.id)
+		
 		concepto = Concepto_Retiro.objects.get(concepto = "prueba_update_retiro".upper())
 
 		self.assertEqual(decimal.Decimal(concepto.importe_maximo_retiro),decimal.Decimal(200))
-		self.assertEqual(resp,True)
+		self.assertEqual(resp,True)		
 		self.assertEqual(resp_2,False)
+		self.assertEqual(resp_3,False)
+
+	#prueba para consultar el saldo de un concepto de retiro.
+	def test_saldo_concepto(self):
+		nuevo_concepto = Concepto_Retiro.fn_nuevo_concepto(1,1,100,"nvo_concepto")
+		segundo_concepto = Concepto_Retiro.fn_nuevo_concepto(1,1,100,"segundo_concepto")
+		tercer_concepto = Concepto_Retiro.fn_nuevo_concepto(1,1,150,"tercer_concepto")
+
+		#probamos el saldo de un concepto cuando aun no se hacen retiros.		
+		concepto_nvo_concepto = Concepto_Retiro.objects.get(concepto="nvo_concepto".upper())
+		saldo = concepto_nvo_concepto.fn_saldo_concepto()
+
+		#probams el saldo haciendo un retiro
+		tm_retiro_efectivo = Tipo_Movimiento.objects.get(id=3)
+		sucursal = Sucursal.objects.get(sucursal = "Sucursal de prueba")
+		usuario = User.objects.get(username = "jasso208")
+		concepto_segundo_concepto = Concepto_Retiro.objects.get(concepto="segundo_concepto".upper())
+		Retiro_Efectivo.objects.create(folio = 1,tipo_movimiento = tm_retiro_efectivo,sucursal = sucursal, usuario = usuario, importe = 50,concepto = concepto_segundo_concepto, token = 10)
+		saldo_segundo_concepto = concepto_segundo_concepto.fn_saldo_concepto()
+
+		#probamos el saldo retirando al 100% el concepto
+		tm_retiro_efectivo = Tipo_Movimiento.objects.get(id=3)
+		sucursal = Sucursal.objects.get(sucursal = "Sucursal de prueba")
+		usuario = User.objects.get(username = "jasso208")
+		concepto_tercer_concepto = Concepto_Retiro.objects.get(concepto="tercer_concepto".upper())
+		Retiro_Efectivo.objects.create(folio = 1,tipo_movimiento = tm_retiro_efectivo,sucursal = sucursal, usuario = usuario, importe = 150,concepto = concepto_tercer_concepto, token = 10)
+		saldo_tercer_concepto = concepto_tercer_concepto.fn_saldo_concepto()
+
+
+		self.assertEqual(saldo,100)
+		self.assertEqual(saldo_segundo_concepto,50)
+		self.assertEqual(saldo_tercer_concepto,0)
+
+
+
+		
+
 
 
 

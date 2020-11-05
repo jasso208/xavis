@@ -15,6 +15,32 @@ from django.conf import settings
 from django.utils import timezone
 from django.db.models import Sum
 
+
+#validamos si el concepto que se selecciono para el retiro puede cubrir el importe
+#que se desea retirar.
+@api_view(['GET'])
+def api_valida_importe_retiro(request):
+	respuesta = []
+	try:	
+		importe_a_retirar = request.GET.get("importe_a_retirar")
+		id_concepto_retiro = request.GET.get("id_concepto_retiro")
+
+		saldo_concepto = Concepto_Retiro.objects.get(id = int(id_concepto_retiro)).fn_saldo_concepto()
+
+
+		if int(saldo_concepto) >= int(importe_a_retirar):	
+			respuesta.append({"estatus" : "1"})
+		else:
+			respuesta.append({"estatus" : "0","msj" : "El concepto seleccionado no cuenta con saldo suficiente para hacer el retiro. Saldo concepto: " + str(saldo_concepto)})
+
+	except Exception as e:
+		print(e)
+		respuesta = []
+		respuesta.append({"estatus" : "0","msj" : "Error al validar el saldo del concepto de retiro."})
+
+	return Response(respuesta)
+
+
 @api_view(['POST','GET','DELETE','PUT'])
 def api_concepto_retiro(request):
 	
@@ -42,6 +68,7 @@ def api_concepto_retiro(request):
 			lista = []
 			id_sucursal = request.GET.get("id_sucursal")
 			resp = Concepto_Retiro.fn_get_conceptos(id_sucursal)
+			print(resp)
 			for r in resp:
 				importe_maximo_retiro = "{:0,.2f}".format(r.importe_maximo_retiro)
 				lista.append({"id_concepto" : r.id,"concepto" : r.concepto,"importe_maximo" : importe_maximo_retiro})

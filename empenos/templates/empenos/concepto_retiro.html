@@ -177,6 +177,30 @@
 	{% endifequal  %}
 
 
+	{% ifequal permiso '0' %}
+
+		<div class="fondo_mensaje " >
+			
+		</div >
+		<div class="mensaje" >	
+				<div class="cls_encabezado_alert" >
+					Aviso
+				</div>
+
+				<div class="panel panel-default">	
+					<label class="page-header">No cuentas con permiso para acceder a esta opción.</label>
+					<br>
+
+					<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_administracion' %}" ><span class="glyphicon glyphicon-ok"></span> Aceptar</a>		
+					<br>
+					<br>		
+
+				</div>
+		</div>
+
+	{% endifequal  %}
+
+
 
 		<div class="fondo_mensaje cls_confirma_eliminar_concepto" >
 			
@@ -455,6 +479,7 @@
 			);
 
 		}
+		
 		function fn_eliminar_concepto()
 		{
 			$("#fondo_preloader").show();

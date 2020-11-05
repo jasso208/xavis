@@ -78,6 +78,7 @@ urlpatterns=[
 	url(r'^api_consulta_prod_temporal_apartado/$',api_consulta_prod_temporal_apartado,name="api_consulta_prod_temporal_apartado"),
 	url(r'^api_elimina_prod_apartado/$',api_elimina_prod_apartado,name="api_elimina_prod_apartado"),
 	url(r'^api_concepto_retiro/$',api_concepto_retiro,name="api_concepto_retiro"),
+	url(r'^api_valida_importe_retiro/$',api_valida_importe_retiro,name="api_valida_importe_retiro"),
 
 
 

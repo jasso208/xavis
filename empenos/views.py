@@ -326,6 +326,11 @@ def concepto_retiro(request):
 		caja=Cajas
 
 
+	#solo el gerente regional tiene permiso para acceder a esta opción
+	permiso = "0"
+	if user_2.perfil.id == 3:
+		permiso = "1"
+
 	form = Alta_Concepto_Retiro_Form()	
 	id_usuario = user_2.user.id
 	
@@ -2026,8 +2031,6 @@ def retiro_efectivo(request):
 		msj="La cuenta del usuario esta incompleta."			
 		return render(request,'login.html',locals())
 
-
-
 	pub_date = date.today()
 	min_pub_date_time = datetime.combine(pub_date, time.min) 
 	max_pub_date_time = datetime.combine(pub_date, time.max)  
@@ -2039,6 +2042,7 @@ def retiro_efectivo(request):
 	total_efectivo=0.00
 	
 	try:
+
 		#validamos si el usuario tiene caja abierta en el dia actual.,si no tiene fecha de cierre es prque aun no ha sido cerrada.
 		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
 		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
@@ -2048,7 +2052,6 @@ def retiro_efectivo(request):
 
 	except Exception as e:
 		print(e)
-		print("si entro aqui no deberia fallar")
 		#si mandamos este estatus es que hay que bloquear el acceos ya que no tiene caja abierta
 		caja_abierta="0"
 		caja=Cajas
@@ -2150,9 +2153,6 @@ def retiro_efectivo(request):
 	if ia["importe__sum"] != None:
 		importe_apartado = ia["importe__sum"]
 
-	
-
-
 	try:
 		
 		#buscamos el pago a comisiones PG
@@ -2163,29 +2163,28 @@ def retiro_efectivo(request):
 		est_com_pg=Tipo_Pago.objects.get(id=2)
 
 		est_ref_pg=Tipo_Pago.objects.get(id=3)
-
-		print("cer ciclo")
+		
 		for ab in abonos:
 			rel_ab_pagos=Rel_Abono_Pago.objects.filter(abono=ab)#buscamos a que pago le pego cada refrendo
 			
 			for p in rel_ab_pagos:
-				print("1 ciclo")
+				
 				if p.pago.tipo_pago==est_refrendo:#si afecto a refrendo acumulamos el importe.
 					cont_refrendos=cont_refrendos+1
 					importe_refrendo=decimal.Decimal(importe_refrendo)+decimal.Decimal(p.pago.importe)
 					
 
-				print("2 ciclo")
+				
 				if p.pago.tipo_pago==est_com_pg:#si afecto a comision pg acumulamos el importe.
 					cont_com_pg=cont_com_pg+1
 					comisiones_pg=decimal.Decimal(comisiones_pg)+decimal.Decimal(p.pago.importe)
 
-				print("3 ciclo")
+				
 				if p.pago.tipo_pago==est_ref_pg:#si afecto a refrebdis pg acumulamos el importe.
 					cont_refrendos=cont_refrendos+1
 					importe_refrendo=decimal.Decimal(importe_refrendo)+decimal.Decimal(p.pago.importe)
 
-			print("primer ciclo")
+			
 			#las boletas de plazo mensual se pagan en periodos			
 			rap=Rel_Abono_Periodo.objects.filter(abono=ab)
 			for x in rap:
@@ -2194,7 +2193,7 @@ def retiro_efectivo(request):
 
 			importe_refrendo=round(importe_refrendo)
 
-			print("seg ciclo")
+			
 			rel_ab_cap=Rel_Abono_Capital.objects.filter(abono=ab).exclude(capital_restante=0).aggregate(Sum("importe"))#buscamos si el abono afecto a capital
 			cont_pc=cont_pc+Rel_Abono_Capital.objects.filter(abono=ab).exclude(capital_restante=0).count()
 
@@ -2212,14 +2211,6 @@ def retiro_efectivo(request):
 					importe_desemp=decimal.Decimal(importe_desemp)+decimal.Decimal(x.importe)
 					cont_desemp=int(cont_desemp)+1
 
-
-
-			
-			#if rel_desem["importe__sum"]==None:
-			#	importe_desemp=importe_desemp+0
-			#else:
-			#	importe_desemp=importe_desemp+int(rel_desem["importe__sum"])
-			
 			
 		total_movs=total_movs+int(cont_com_pg)+int(cont_ref_pg)+int(cont_pc)+int(cont_refrendos)+int(cont_rebol)+int(cont_desemp)+int(cont_ventas)
 	
@@ -2261,21 +2252,27 @@ def retiro_efectivo(request):
 	
 	#total_efectivo="{:0,.2f}".format(total_efectivo)
 
-	conceptos = Concepto_Retiro.objects.filter(sucursal = caja.sucursal)
+	conceptos = Concepto_Retiro.objects.filter(sucursal = caja.sucursal, activo = 1)
 	
 	if request.method=="POST":
+
+
+
 		read_only="1"
 		form=Retiro_Efectivo_Form(request.POST)				
+		
 		folio=fn_folios(tm,suc)
 		str_folio=fn_str_clave(folio)
 
 		token=None
 		#el usuario debe tener token
 		try:
-			q_token=Token.objects.get(tipo_movimiento=tm,sucursal=suc,caja=c,usuario=request.user)
-			token=q_token.token
+			q_token = Token.objects.get(tipo_movimiento=tm,sucursal=suc,caja=c,usuario=request.user)
+			token = q_token.token
+			concepto =Concepto_Retiro.objects.get(id = q_token.aux_1) 
 		except:
 			print("no hay token")
+
 		if form.is_valid():
 			f=form.save(commit=False)
 			error_token='0'
@@ -2299,6 +2296,7 @@ def retiro_efectivo(request):
 			f.sucursal=suc
 			f.caja=c
 			f.usuario=request.user
+			f.concepto = concepto
 			f.save()
 			return HttpResponseRedirect(reverse('seguridad:admin_cajas'))
 	else:
@@ -2560,10 +2558,14 @@ def reportes_caja(request):
 
 				writer = csv.writer(response)
 
-				writer.writerow(['Folio','Sucursal','Fecha','Nombre Usuario','Usuario', 'Importe','Comentario','Caja'])
+				writer.writerow(['Folio','Sucursal','Fecha','Nombre Usuario','Usuario', 'Importe','Comentario','Caja','Concepto','Activo'])
 
-				for r in retiros:				
-					writer.writerow([r.folio,r.sucursal.sucursal,str(r.fecha),r.usuario.username,r.usuario.first_name+' '+r.usuario.last_name, r.importe,r.comentario,r.caja])					
+				for r in retiros:
+					if r.concepto == None:
+						concepto = ""
+					else:
+						concepto = r.concepto				
+					writer.writerow([r.folio,r.sucursal.sucursal,str(r.fecha),r.usuario.username,r.usuario.first_name+' '+r.usuario.last_name, r.importe,r.comentario,r.caja,concepto,r.activo])					
 
 				return response
 			except:
@@ -4964,18 +4966,26 @@ def api_envia_token(request):
 	
 
 	#el token se genero al entrar a la pantalla d retiro de efectivo, aqui solamente lo enviamos.c
-	asunto	=request.GET.get("asunto")
-	usuario =request.GET.get("usuario")
-	sucursal=request.GET.get("sucursal")
-	caja=request.GET.get("caja")
-	importe=request.GET.get("importe")
-	comentarios=request.GET.get("comentarios")
-	token=request.GET.get("token")
+	asunto	= request.GET.get("asunto")
+	usuario = request.GET.get("usuario")
+	sucursal = request.GET.get("sucursal")
+	caja = request.GET.get("caja")
+	importe = request.GET.get("importe")
+	comentarios = request.GET.get("comentarios")
+	token = request.GET.get("token")
+	id_concepto = request.GET.get("id_concepto")
+
+	
+	obj_token = Token.objects.get(token = int(token))
+	obj_token.aux_1 = id_concepto
+	obj_token.save()
+
+	concepto = Concepto_Retiro.objects.get(id = int(id_concepto))
 	
 	respuesta=[]
 	if request.method=="GET":
 		html="<html><head></head><body>"
-		html=html+"El usuario "+ usuario+ " de la sucursal <strong>"+sucursal+ "</strong> en la <strong> caja "+caja +" </strong>, solicita tu autorizacion para realizar un retiro de <strong> $"+str(importe)+ " </strong> por concepto de:<strong> "+comentarios+"</strong>.<br><br><br>Folio de Autorizacion: "+token
+		html=html+"El usuario "+ usuario+ " de la sucursal <strong>"+sucursal+ "</strong> en la <strong> caja "+caja +" </strong>, solicita tu autorizacion para realizar un retiro de efectivo. <br><br>Importe: <strong> $"+str(importe)+ ".00</strong> <br><br>Concepto: <strong>"+concepto.concepto+"</strong><br><br>Comentario: <strong> "+comentarios+"</strong>.<br><br><br>Folio de Autorizacion: "+token
 		html=html+"</body></html>"
 
 
