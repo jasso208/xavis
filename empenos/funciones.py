@@ -727,13 +727,12 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 	#tipo de pago refrendo
 	est_refrendo=Tipo_Pago.objects.get(id=1)
 
-		#si recursivo es 0 es que es un abono de boleta activa
+	#si recursivo es 0 es que es un abono de boleta activa
 	if int(recursivo)==0:
 		fecha_vencimiento=boleta.fecha_vencimiento_real
 	else:# si recursivo es 1, es que viene de una boleta vencida.
 		#Cambiamos temporalemente el estatus de la boleta a activa para acceder al algoritmo de boletas activas.
-		estatus_activo=Estatus_Boleta.objects.get(id=1)
-		
+		estatus_activo=Estatus_Boleta.objects.get(id=1)		
 
 		estatus_respaldo=boleta.estatus#guardamos el estatus en que se encuentra la boleta para poder regresarla a su estatus.
 
@@ -844,8 +843,11 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 			if int(importe_abono)>0 and (int(num_pagos_no_vencidos))==4 :
 		
 				mutuo=boleta.mutuo
-
 				mutuo=int(mutuo)-int(importe_abono)
+
+				#actualizamos el mutuo del la boleta.
+				boleta.mutuo=mutuo
+				boleta.save()
 
 				rel_cap=Rel_Abono_Capital()
 				rel_cap.boleta=boleta
@@ -885,7 +887,6 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 			#actualizamos la fecha de vencimiento de la boleta.
 			boleta.fecha_vencimiento=fecha_vencimiento
 			boleta.fecha_vencimiento_real=fecha_vencimiento_real
-			boleta.mutuo=mutuo
 			boleta.save()
 		else:#mensual
 			#la boleta esta activa y es plazo mensual.						
@@ -961,7 +962,8 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 				mutuo=int(mutuo)-int(importe_abono)
 				
 				
-				
+				boleta.mutuo=mutuo
+				boleta.save()
 
 				rel_cap=Rel_Abono_Capital()
 				rel_cap.boleta=boleta
@@ -1046,8 +1048,7 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 			if prg.fecha_vencimiento>fv_final:
 				fv_final=prg.fecha_vencimiento
 
-		print("la fecha de vencimiento deberia de ser el 18")
-		print(fv_final)
+
 		boleta.fecha_vencimiento=fv_final
 		boleta.fecha_vencimiento_real=fv_final
 		boleta.save()
@@ -1079,15 +1080,13 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 						x.save()
 					c_ont=1
 
-		print("boleta.fecha_vencimiento")
-		print(boleta.fecha_vencimiento)
+
 		if boleta.fecha_vencimiento>=hoy:
 			abierta=Estatus_Boleta.objects.get(id=1)
 			boleta.estatus=abierta
 			boleta.save()
 
-		print("importe_abono")
-		print(importe_abono)
+
 		if importe_abono>0:
 			#recursividad para acceder al algoritmo de una boleta activa.
 			fn_aplica_refrendo(usuario,importe_abono,caja,boleta,1,abono)

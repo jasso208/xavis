@@ -865,17 +865,14 @@ class Configuracion_Interes_Empeno(models.Model):
 	def fn_set_configuracion_interes_empeno(sucursal,almacenaje_oro,interes_oro,iva_oro,almacenaje_plata,interes_plata,iva_plata,almacenaje_prod_varios,interes_prod_varios,iva_prod_varios,usuario_modifica):
 		try:
 			cie = Configuracion_Interes_Empeno.objects.get(sucursal = sucursal)
-			print("jass")
-			print(cie.almacenaje_oro)			
+			
 			cie.almacenaje_oro=almacenaje_oro
 			cie.save()
-			print(cie.almacenaje_oro)			
-			print("jass")
 		except Exception as e:
 			print(e)
 			cie = fn_actualiza_porcentaje_mutuo()
 
-		print(interes_oro)
+		
 		try:
 			cie.almacenaje_oro = almacenaje_oro
 			cie.interes_oro = interes_oro
