@@ -41,6 +41,7 @@ urlpatterns=[
 	url(r'^abona_apartado/((?P<id_apartado>\w+))/$',abona_apartado,name="abona_apartado"),
 	url(r'^elimina_retiro/$',elimina_retiro,name="elimina_retiro"),
 	url(r'^administracion_interes_empeno/$',administracion_interes_empeno,name="administracion_interes_empeno"),
+	url(r'^administracion_porcentaje_mutuo/$',administracion_porcentaje_mutuo,name="administracion_porcentaje_mutuo"),
 
 
 	url(r'^consulta_abono$',consulta_abono,name="consulta_abono"),	
@@ -84,6 +85,8 @@ urlpatterns=[
 	url(r'^api_valida_importe_retiro/$',api_valida_importe_retiro,name="api_valida_importe_retiro"),
 	url(r'^api_cancela_retiro/$',api_cancela_retiro,name="api_cancela_retiro"),
 	url(r'^api_consulta_configuracion_empeno/$',api_consulta_configuracion_empeno,name="api_consulta_configuracion_empeno"),
+	url(r'^api_porcentaje_mutuo/$',api_porcentaje_mutuo,name="api_porcentaje_mutuo"),
+	url(r'^api_cliente/$',api_cliente,name="api_cliente"),
 
 
 ]

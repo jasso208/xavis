@@ -226,6 +226,69 @@ def abona_apartado(request,id_apartado):
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
 
+def administracion_porcentaje_mutuo(request):
+	#si no esta logueado mandamos al login
+	if not request.user.is_authenticated:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+	
+	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
+	try:
+		user_2 = User_2.objects.get(user = request.user)
+	except Exception as e:		
+		print(e)
+		form = Login_Form(request.POST)
+		estatus = 0
+		msj = "La cuenta del usuario esta incompleta."			
+		return render(request,'login.html',locals())
+
+	hoy = date.today()
+	hoy_inicial = datetime.combine(hoy, time.min) 
+	hoy_final = datetime.combine(hoy, time.max)  
+
+	try:		
+		#validamos si el usuario tiene caja abierta en el dia actual.
+		caja = Cajas.objects.get(fecha__range = (hoy_inicial,hoy_final),fecha_cierre__isnull = True,usuario=request.user)
+		caja_abierta = "1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
+		suc = caja.sucursal
+		c = caja.caja
+
+	except Exception as e:
+		print(e)
+		caja_abierta = "0"
+		caja = Cajas
+
+	permiso="0"
+
+	#Si el perfil es gerente regional, permite entrar.
+	if user_2.perfil.id == 3:
+		permiso="1"
+
+	estatus = "2"	
+
+	if request.method == "POST" and permiso == "1":
+		id_sucursal = request.POST.get("sucursal")
+		sucursal = Sucursal.objects.get(id = id_sucursal)
+
+		porcentaje_oro = request.POST.get("porcentaje_oro")
+		porcentaje_plata = request.POST.get("porcentaje_plata")
+		porcentaje_articulos_varios = request.POST.get("porcentaje_articulos_varios")
+
+		sucursal = Sucursal.objects.get(id = int(id_sucursal))
+
+		print(type(porcentaje_oro))
+		print(porcentaje_plata)
+		print(porcentaje_articulos_varios)
+		resp = sucursal.fn_actualiza_porcentaje_mutuo(int(porcentaje_oro),int(porcentaje_plata),int(porcentaje_articulos_varios))
+
+		if resp:
+			estatus = "1"
+		else:
+			estatus = "0"
+
+
+	form = Porcentaje_Mutuo_Form()
+	return render(request,'empenos/administracion_porcentaje_mutuo.html',locals())
+
 def administracion_interes_empeno(request):
 	#si no esta logueado mandamos al login
 	if not request.user.is_authenticated:
@@ -3202,11 +3265,46 @@ def nvo_empeno(request):
 	try:
 		#validamos si el usuaario tiene caja abierta para mostrarla en el encabezado.
 		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
-		print(caja.sucursal)
+		
 		c=caja.caja
 	except Exception as e:
 		msj_error="No cuentas con caja abierta."
 		print(e)
+		form=Nuevo_Empeno_Form()
+		empeno_exitoso="2"
+		return render(request,'empenos/nvo_empeno.html',locals())
+
+	id_sucursal = caja.sucursal.id
+
+	sucursal = caja.sucursal
+
+	#un 1 indica que no tenemos registrado el porcentaje de mutuo.
+	error_porcentaje_mutuo = "0"	
+	try:
+		porcentaje_mutuo_oro = decimal.Decimal(sucursal.fn_consulta_porcentaje_mutuo().porcentaje_oro)/decimal.Decimal(100.00)
+		porcentaje_mutuo_plata = decimal.Decimal(sucursal.fn_consulta_porcentaje_mutuo().porcentaje_plata)/decimal.Decimal(100.00)
+		porcentaje_articulos_varios = decimal.Decimal(sucursal.fn_consulta_porcentaje_mutuo().porcentaje_articulos_varios)/decimal.Decimal(100.00)
+		print(porcentaje_articulos_varios)
+	except Exception as e:
+		print(e)
+		error_porcentaje_mutuo = "1"
+		form=Nuevo_Empeno_Form()
+		empeno_exitoso="2"
+		return render(request,'empenos/nvo_empeno.html',locals())	
+
+	#un 1 indica que no tenemos registrado el porcentaje de interes del mutuo
+	error_porcentaje_interes = "0"
+
+	#validamos que tenga configurado el porcentaje para interes del refrendo.
+	try:
+		Configuracion_Interes_Empeno.objects.get(sucursal = sucursal)
+	except Exception as e:
+		print(e)
+		error_porcentaje_interes = "1"
+		form=Nuevo_Empeno_Form()
+		empeno_exitoso="2"
+		return render(request,'empenos/nvo_empeno.html',locals())
+
 
 	#buscamos el tipo de movimiento para boleta.
 	tm=Tipo_Movimiento.objects.get(id=4)
@@ -3217,11 +3315,9 @@ def nvo_empeno(request):
 		try:
 			hoy = datetime.now()#fecha actual
 
-			print("temporal")
-			print(request.POST.get("plazo"))
+
 			#calculamos la fecha de vemcimiento para 4 semanas
 			if int(request.POST.get("plazo"))==2:
-
 				dias = timedelta(days=28)		                
 				fecha_vencimiento=datetime.combine(hoy+dias, time.min)
 				fecha_vencimiento_real=fecha_vencimiento
@@ -3245,7 +3341,7 @@ def nvo_empeno(request):
 			oro=Tipo_Producto.objects.get(id=1)			
 			plazo=Plazo.objects.get(id=int(request.POST.get("plazo")))
 
-			#buscamos los productos de oro del actual afiliado.
+			#buscamos los productos de oro que estan en la cotizacion y que corresponden al usuario.
 			poro=Empenos_Temporal.objects.filter(tipo_producto=oro,usuario=request.user)
 			
 			if poro.exists():
@@ -3255,26 +3351,36 @@ def nvo_empeno(request):
 
 				avaluo=0
 				mutuo=0
+
+				#acumulamos el avaluo y el oro
 				for x in poro:
-					avaluo=avaluo+x.avaluo
-					mutuo=mutuo+x.mutuo
-				boleta=Boleta_Empeno()
-				boleta.folio=str_folio
-				boleta.tipo_producto=oro
-				boleta.caja=caja
-				boleta.usuario=request.user
-				boleta.avaluo=avaluo
-				boleta.mutuo=mutuo
-				boleta.fecha=timezone.now()
-				boleta.fecha_vencimiento=fecha_vencimiento
-				boleta.cliente=cliente
-				boleta.nombre_cotitular=request.POST.get("nombre_cotitular")
-				boleta.apellido_p_cotitular=request.POST.get("apellido_paterno")
-				boleta.apellido_m_cotitular=request.POST.get("apellido_materno")
-				boleta.plazo=plazo
-				boleta.sucursal=caja.sucursal
-				boleta.mutuo_original=mutuo
-				boleta.fecha_vencimiento_real=fecha_vencimiento_real
+					avaluo = avaluo + x.avaluo
+					mutuo = mutuo + x.mutuo
+
+				boleta = Boleta_Empeno()
+				boleta.folio = str_folio
+				boleta.tipo_producto = oro
+				boleta.caja = caja
+				boleta.usuario = request.user
+				boleta.avaluo = avaluo
+				boleta.mutuo = mutuo
+				boleta.fecha = timezone.now()
+				boleta.fecha_vencimiento = fecha_vencimiento
+				boleta.cliente = cliente
+				boleta.nombre_cotitular = request.POST.get("nombre_cotitular")
+				boleta.apellido_p_cotitular = request.POST.get("apellido_paterno")
+				boleta.apellido_m_cotitular = request.POST.get("apellido_materno")
+				boleta.plazo = plazo
+				boleta.sucursal = caja.sucursal
+				boleta.mutuo_original = mutuo
+				boleta.fecha_vencimiento_real = fecha_vencimiento_real
+
+				#almacenamos los porcentajes para el interes por si con el tiempo cambian
+				#calcular los nuevos refrendos a como esaban al generar la boleta.
+				boleta.interes = sucursal.fn_get_interes(1)#
+				boleta.almacenaje = sucursal.fn_get_almacenaje(1)
+				boleta.iva = sucursal.fn_get_iva(1)
+
 				boleta.save()
 
 
@@ -3286,9 +3392,11 @@ def nvo_empeno(request):
 					fecha_vencimiento_real=fecha_vencimiento
 					fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
 
-					almacenaje_semanal=(boleta.mutuo*0.05)/4
-					interes_semanal=(boleta.mutuo*0.063)/4
-					iva_semanal=((almacenaje_semanal+interes_semanal)*0.16)
+					ref = sucursal.fn_calcula_refrendo(boleta.mutuo,1)
+
+					almacenaje_semanal=ref[0]["almacenaje"]/4
+					interes_semanal=(ref[0]["interes"])/4
+					iva_semanal=ref[0]["iva"]/4
 					importe_semanal=(almacenaje_semanal+interes_semanal+iva_semanal)
 
 					if round(importe_semanal)==0:
@@ -3324,7 +3432,9 @@ def nvo_empeno(request):
 				elif int(request.POST.get("plazo"))==1:#diario
 					print("En diarios no se calcula el pago ya que se asume que es para venta.")
 				elif int(request.POST.get("plazo"))==3:#mensual
-					ref=fn_calcula_refrendo(boleta.mutuo,boleta.tipo_producto.id)
+					ref = sucursal.fn_calcula_refrendo(boleta.mutuo,1)
+					#ref=fn_calcula_refrendo(boleta.mutuo,boleta.tipo_producto.id)
+
 					pago=Pagos()
 					pago.tipo_pago=refrendo
 					pago.boleta=boleta
@@ -3340,7 +3450,7 @@ def nvo_empeno(request):
 					boleta.refrendo=round(ref[0]["refrendo"])
 					boleta.save()
 
-					fn_pago_parcial(boleta,hoy,ref[0]["refrendo"],pago)
+					fn_pago_parcial(boleta,hoy,round(ref[0]["refrendo"]),pago)
 
 
 
@@ -3406,13 +3516,18 @@ def nvo_empeno(request):
 				boleta.sucursal=caja.sucursal
 				boleta.mutuo_original=mutuo
 				boleta.fecha_vencimiento_real=fecha_vencimiento_real
-				boleta.save()
 
-				
+				#almacenamos los porcentajes para el interes por si con el tiempo cambian
+				#calcular los nuevos refrendos a como esaban al generar la boleta.
+				boleta.interes = sucursal.fn_get_interes(2)#
+				boleta.almacenaje = sucursal.fn_get_almacenaje(2)
+				boleta.iva = sucursal.fn_get_iva(2)
+
+
+				boleta.save()
 
 				#almcenamos la boleta para imprimirla posteriormente
 				Imprimir_Boletas.objects.create(usuario=request.user,boleta=boleta)
-
 
 				#llenamos la tabla de pagos.				
 				if int(request.POST.get("plazo"))==2:#semanal
@@ -3421,16 +3536,19 @@ def nvo_empeno(request):
 					fecha_vencimiento = datetime.combine(hoy+days, time.min) 
 					fecha_vencimiento_real=fecha_vencimiento
 					fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
-					almacenaje_semanal=(boleta.mutuo*0.05)/4
-					interes_semanal=(boleta.mutuo*0.063)/4
-					iva_semanal=((almacenaje_semanal+interes_semanal)*0.16)
+
+					ref = sucursal.fn_calcula_refrendo(boleta.mutuo,2)
+
+					almacenaje_semanal=ref[0]["almacenaje"]/4
+					interes_semanal=(ref[0]["interes"])/4
+					iva_semanal=ref[0]["iva"]/4
 					importe_semanal=(almacenaje_semanal+interes_semanal+iva_semanal)
+
 
 					if round(importe_semanal)==0:
 						importe_semanal=1
 					else:
 						importe_semanal=round(importe_semanal)
-
 
 					Pagos.objects.create(tipo_pago=refrendo,boleta=boleta,fecha_vencimiento=fecha_vencimiento,importe=importe_semanal,almacenaje=almacenaje_semanal,interes=interes_semanal,iva=iva_semanal,fecha_vencimiento_real=fecha_vencimiento_real)
 
@@ -3457,7 +3575,8 @@ def nvo_empeno(request):
 				elif int(request.POST.get("plazo"))==1:#diario
 					print("aun esta listo")
 				elif int(request.POST.get("plazo"))==3:#mensual
-					ref=fn_calcula_refrendo(boleta.mutuo,boleta.tipo_producto.id)				
+					#ref=fn_calcula_refrendo(boleta.mutuo,boleta.tipo_producto.id)				
+					ref = sucursal.fn_calcula_refrendo(boleta.mutuo,2)
 
 					pago=Pagos()
 					pago.tipo_pago=refrendo
@@ -3470,14 +3589,10 @@ def nvo_empeno(request):
 					pago.fecha_vencimiento_real=boleta.fecha_vencimiento_real
 					pago.save()
 
-
-
-
 					boleta.refrendo=round(ref[0]["refrendo"])
 					boleta.save()
 
-					fn_pago_parcial(boleta,hoy,ref[0]["refrendo"],pago)
-
+					fn_pago_parcial(boleta,hoy,round(ref[0]["refrendo"]),pago)
 
 				#recorremos cada producto de plata para agregar al detalle de la boleta.		
 				for x in tplata:
@@ -3533,6 +3648,14 @@ def nvo_empeno(request):
 					boleta.sucursal=caja.sucursal		
 					boleta.mutuo_original=x.mutuo
 					boleta.fecha_vencimiento_real=fecha_vencimiento_real
+
+
+					#almacenamos los porcentajes para el interes por si con el tiempo cambian
+					#calcular los nuevos refrendos a como esaban al generar la boleta.
+					boleta.interes = sucursal.fn_get_interes(3)#
+					boleta.almacenaje = sucursal.fn_get_almacenaje(3)
+					boleta.iva = sucursal.fn_get_iva(3)
+
 					boleta.save()
 
 					#llenamos la tabla de pagos.				
@@ -3542,9 +3665,12 @@ def nvo_empeno(request):
 						fecha_vencimiento = datetime.combine(hoy+days, time.min) 
 						fecha_vencimiento_real=fecha_vencimiento
 						fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
-						almacenaje_semanal=(boleta.mutuo*0.072)/4
-						interes_semanal=(boleta.mutuo*0.1263)/4
-						iva_semanal=((almacenaje_semanal+interes_semanal)*0.16)
+
+						ref = sucursal.fn_calcula_refrendo(boleta.mutuo,3)
+
+						almacenaje_semanal=ref[0]["almacenaje"]/4
+						interes_semanal=(ref[0]["interes"])/4
+						iva_semanal=ref[0]["iva"]/4
 						importe_semanal=(almacenaje_semanal+interes_semanal+iva_semanal)
 
 						if round(importe_semanal)==0:
@@ -3580,7 +3706,8 @@ def nvo_empeno(request):
 						print("aun esta listo")
 					elif int(request.POST.get("plazo"))==3:#mensual
 
-						ref=fn_calcula_refrendo(boleta.mutuo,boleta.tipo_producto.id)
+						ref = sucursal.fn_calcula_refrendo(boleta.mutuo,3)
+
 						pago=Pagos()
 						pago.tipo_pago=refrendo
 						pago.boleta=boleta
@@ -3597,7 +3724,7 @@ def nvo_empeno(request):
 						boleta.refrendo=round(ref[0]["refrendo"])
 						boleta.save()
 
-						fn_pago_parcial(boleta,hoy,ref[0]["refrendo"],pago)
+						fn_pago_parcial(boleta,hoy,round(ref[0]["refrendo"]),pago)
 
 					#almcenamos la boleta para imprimirla posteriormente
 					Imprimir_Boletas.objects.create(usuario=request.user,boleta=boleta)
@@ -3978,7 +4105,6 @@ def refrendo_plazo_mensual(request,id_boleta):
 			if mutuo<=0:
 				mutuo=0
 
-				print("1")
 				desempenada=Estatus_Boleta.objects.get(id=4)
 				boleta.estatus=desempenada
 				boleta.mutuo=0
@@ -3995,10 +4121,10 @@ def refrendo_plazo_mensual(request,id_boleta):
 
 			if mutuo>0:
 				if fecha_vencimiento<hoy:
-					print("2")
+					
 					estatus=Estatus_Boleta.objects.get(id=3)	
 				else:
-					print("3")
+				
 					estatus=Estatus_Boleta.objects.get(id=1)	
 				boleta.estatus=estatus
 

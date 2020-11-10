@@ -58,9 +58,9 @@
 											
 								</div>
 										
-											<div class="row">
+										<div class="row">
 											<div class="col-xs-12">
-												<div class="cls_encabezado_alert text-center" >
+												<div class="cls_encabezado_alert" >
 														<label>Productos en cotización</label>
 												</div>
 												<div class="panel panel-default">
@@ -85,8 +85,8 @@
 												    </tbody>
 												  </table>
 												</div>
-												</div>
 											</div>
+										</div>
 											<div class="row">
 												<div class="col-xs-12 text-right">
 													<label>No. Movs: <span id="num_movs"></span> </label>
@@ -95,15 +95,39 @@
 											<form method="post" action="#" class="cls_form_1">
 												{%csrf_token%}
 												<div class="row">
-													<div class="col-xs-12">
-														<hr>
+													
+													<div class="col-xs-3">
+																	
+															
+																<label>Plazo</label>
+															
+
+															
+
+														
 													</div>
+
+													<div class="col-xs-9">
+														
+														<div class="col-xs-12">
+																	
+															
+																<label>Cliente</label>
+															
+															
+																						
+														</div>
+													</div>
+
 												</div>
+
+
+
 												<div class="row">
 													
 													<div class="col-xs-3">
-																
-															<label >Plazo</label>									
+																	
+																							
 
 															{%bootstrap_field form.plazo show_label=False%}
 
@@ -112,14 +136,22 @@
 
 													<div class="col-xs-9">
 														
-														<div class="col-xs-8">
-															<label>Cliente</label>
-															{%bootstrap_field form.cliente show_label=False%}														</div>
-														<div class="col-xs-4">
+														<div class="col-xs-12">
+																	
+																
+															
+															<a class="btn btn-default btn-sm" id="btn_buscar_cliente" >
+																<span class="glyphicon glyphicon-search">
+																	
+																</span>
+																Buscar Cliente
+															</a>	    
 
-															<br>
-															<a class="btn btn-default" id="btn_buscar_cliente" style="margin-top:5px;">Buscar Cliente</a>	
+															<label id="lbl_cliente"></label>
+
+															{%bootstrap_field form.cliente show_label=False%}								
 														</div>
+													
 														
 														
 
@@ -127,11 +159,7 @@
 
 
 												</div>
-												<div class="row">
-													<div class="col-xs-12">
-														<hr>
-													</div>
-												</div>
+
 												<div class="row">
 													<div class="col-xs-12">
 														<label >Cotitular</label>
@@ -166,11 +194,12 @@
 													</div>
 												</div>
 
-												<div class="row">
-													<div class="col-xs-12">
-														<label>Resumen de Cotización</label>
+											<div class="row">
+												<div class="col-xs-12">
+													<div class="cls_encabezado_alert" >
+															<label>Resumen cotización</label>
 													</div>
-													<div class="col-xs-6">
+													<div class="panel panel-default">
 														<table class="table table-bordered">
 														<thead>
 														<tr>
@@ -202,13 +231,12 @@
 														</tbody>
 														</table>
 													</div>
-
-													<div class="col-xs-6">
-													</div>
 												</div>
+											</div>
+												
 												<div class="row">
 														<div class="col-xs-12 text-right">
-															<button class="btn btn-primary">
+															<button class="btn btn-primary" id="btn_terminar_empeno">
 																Terminar Empeño
 															</button>
 														</div>
@@ -249,6 +277,47 @@
 				</div>
 		</div>
 	{% endif %}
+
+		<div class="fondo_mensaje cls_error_cliente" >
+			
+		</div >
+		<div class="mensaje cls_error_cliente" >
+				<div class="cls_encabezado_alert" >
+					Error !!			
+				</div>
+				
+				<div class="panel panel-default">	
+					<label class="page-header">Debe seleccionar el cliente.</label>
+					<br>
+					<a class="btn btn-primary btn-sm" id="btn_error_cliente">
+						<span class='glyphicon glyphicon-ok'>
+						</span>
+					Aceptar</a>
+					<br>
+					<br>
+				</div>
+		</div>
+
+
+		<div class="fondo_mensaje cls_error_plazo" >
+			
+		</div >
+		<div class="mensaje cls_error_plazo" >
+				<div class="cls_encabezado_alert" >
+					Error !!			
+				</div>
+				
+				<div class="panel panel-default">	
+					<label class="page-header">Debe seleccionar el plazo.</label>
+					<br>
+					<a class="btn btn-primary btn-sm" id="btn_error_plazo">
+						<span class='glyphicon glyphicon-ok'>
+						</span>
+					Aceptar</a>
+					<br>
+					<br>
+				</div>
+		</div>
 
 
 	<div class="cls_form_busca_cliente" style="width: 60%;left: 20%; overflow-x: hidden;">		
@@ -483,6 +552,52 @@
 	</div>
 
 
+		{% ifequal error_porcentaje_mutuo "1" %}
+				<div class="fondo_mensaje_2 " >
+			
+				</div >
+				<div class="mensaje_2 " >
+						<div class="cls_encabezado_alert" >
+							Error !!		
+						</div>
+						<div class="panel panel-default">	
+							<label class="page-header" >Debe tener configurado el porcentaje de mutuo para continuar.</label>
+							<br>
+							<a class="btn btn-primary btn-sm" id="btn_aceptar" href="{% url 'seguridad:admin_administracion' %}"> 
+								<span class="glyphicon glyphicon-ok"></span> 
+								Aceptar
+							</a>
+							<br>
+							<br>
+
+						</div>
+				</div>
+
+		{% endifequal%}
+
+		{% ifequal error_porcentaje_interes "1" %}
+				<div class="fondo_mensaje_2 " >
+			
+				</div >
+				<div class="mensaje_2 " >
+						<div class="cls_encabezado_alert" >
+							Error !!		
+						</div>
+						<div class="panel panel-default">	
+							<label class="page-header" >Debe tener configurado el porcentaje para interes del refrendo.</label>
+							<br>
+							<a class="btn btn-primary btn-sm" id="btn_aceptar" href="{% url 'seguridad:admin_administracion' %}"> 
+								<span class="glyphicon glyphicon-ok"></span> 
+								Aceptar
+							</a>
+							<br>
+							<br>
+
+						</div>
+				</div>
+
+		{% endifequal%}
+
 		<div class="fondo_mensaje_2 cls_msj_error" >
 			
 		</div >
@@ -582,6 +697,45 @@
 //eventos Click
 //**********************************************************************************************
 //**********************************************************************************************
+$("#btn_error_cliente").click(
+		function ()
+		{
+			$(".cls_error_cliente").hide();
+		}
+	);
+$("#btn_error_plazo").click(
+		function()
+		{
+			$(".cls_error_plazo").hide();	
+		}
+	);
+	$("#btn_terminar_empeno").click(
+			function()
+			{
+				
+
+				if($("#id_cliente").val() == "" || $("#id_cliente").val() == "0")
+				{
+					$(".cls_error_cliente").show();
+					
+					return false
+				}
+
+
+				
+
+
+				if($("#id_plazo").val() == "")
+				{
+					$(".cls_error_plazo").show();
+					
+					return false	
+				}
+				$("#fondo_preloader").show();
+				return true;
+			}
+		);
+
 		$("#btn_nuevo_cliente").click(
 					function()
 					{
@@ -813,8 +967,11 @@
 //**********************************************************************************************
 			function fn_inicio()
 			{
+				$("#id_plazo").removeAttr("required");
+				$(".cls_error_cliente").hide();
+				$(".cls_error_plazo").hide();	
 				$("#btn_guardar_marca").prop("disabled",true);
-
+				$("#id_cliente").hide();
 				$("#fondo_form_emergente").hide();
 				$(".cls_form_emergente").hide();
 				$(".cls_msj_error").hide();
@@ -968,6 +1125,7 @@
 			}
 			function fn_carga_tipo_producto()
 			{
+				fn_reinicia_form_cotizacion();
 				$("#fondo_preloader").show();
 				$('#id_linea').empty();
 				$('#id_sublinea').empty();
@@ -1023,6 +1181,21 @@
 							$("#fondo_preloader").hide();
 			        }
 				});
+			}
+			function fn_reinicia_form_cotizacion()
+			{
+				$("#id_tipo_producto").val("");
+				$("#id_linea").val("");
+				$("#id_sublinea").val("");
+				$("#id_marca").val("");
+				$("#id_descripcion").val("");
+				$("#txt_observaciones").val("");
+				$("#id_kilataje").val("");
+				$("#id_peso").val("");
+				$("#id_avaluo").val("");
+				$("#id_mutuo_sugerido").val("");
+				$("#id_mutuo").val("");
+
 			}
 			function fn_carga_linea(id_tipo_producto)
 			{
@@ -1298,12 +1471,9 @@
 			        		var total_avaluo=avaluo*peso;
 
 			        		$("#id_avaluo").val(parseFloat(total_avaluo).toFixed(0));
-			        		$("#id_mutuo_sugerido").val(parseFloat(total_avaluo*0.81).toFixed(0));
-			        		$("#id_mutuo").val(parseFloat(total_avaluo*0.81).toFixed(0));
-			        		if (mutuo_aux>0)
-			        		{
-			        			$("#id_mutuo").val(mutuo_aux);
-			        		}
+			        		fn_calcula_mutuo();
+
+			        		
 
 			        	}
 			        	$("#fondo_preloader").hide();
@@ -1324,6 +1494,7 @@
 
 			function  fn_calcula_totales()
 			{
+
 				var id_tipo_producto=$("#id_tipo_producto").val();
 				//si es oro o plata
 				if(id_tipo_producto==1 || id_tipo_producto==2)
@@ -1332,6 +1503,10 @@
 					if (id_kilataje!="")
 					{
 						fn_consulta_costo_kilataje($("#id_kilataje").val());
+
+
+
+
 						//cuando sea articulos varios el avaluo es editable						
 						$("#id_peso").prop("disabled",false);
 					}
@@ -1349,24 +1524,61 @@
 				else//si es articulos varios
 				{	
 					var avaluo=$("#id_avaluo").val();
-
-					$("#id_mutuo_sugerido").val(parseFloat(avaluo*0.65).toFixed(0));
-					$("#id_mutuo").val(parseFloat(avaluo*0.65).toFixed(0));
+					fn_calcula_mutuo();
 					if (mutuo_aux>0)
 	        		{
 	        			$("#id_mutuo").val(mutuo_aux);
 	        		}
 					
 				}
+
+				
+
+			}
+			function fn_calcula_mutuo()
+			{
+				var id_tipo_producto=$("#id_tipo_producto").val();
+
+				console.log(id_tipo_producto);
+				//si es oro
+				if (id_tipo_producto == 1)
+				{
+					porcentaje_mutuo_sugerido = parseFloat("{{porcentaje_mutuo_oro}}");
+				}
+				//si es plata
+				else if (id_tipo_producto == 2)
+				{	
+					porcentaje_mutuo_sugerido = parseFloat("{{porcentaje_mutuo_plata}}");
+				}
+				//si son articulos varios
+				else
+				{
+					porcentaje_mutuo_sugerido = parseFloat("{{porcentaje_articulos_varios}}");
+				}
+
+				var avaluo=$("#id_avaluo").val();
+
+				
+				console.log("porcentaje_mutuo: "+porcentaje_mutuo_sugerido);
+				
+				$("#id_mutuo_sugerido").val(parseFloat(avaluo*porcentaje_mutuo_sugerido).toFixed(0));
+				$("#id_mutuo").val(parseFloat(avaluo*porcentaje_mutuo_sugerido).toFixed(0));
+
+				if (mutuo_aux>0)
+        		{
+        			$("#id_mutuo").val(mutuo_aux);
+        		}
 			}
 
 			function fn_guarda_cotizacion()
 			{
+
 				$("#fondo_preloader").show();
 				$.ajax({
 					type: "GET",
 			        url: "{{IP_LOCAL}}/empenos/api_guarda_producto_temporal/",
-			        data: {
+			        data: 
+			        {
 
 						"id_usuario":"{{id_usuario}}",
 						"id_tipo_producto":$("#id_tipo_producto").val(),
@@ -1389,8 +1601,8 @@
 			        	//fallo
 			        	if (r[0].estatus=="0")
 			        	{
-			        		$("#msj_error").text(r[0].msj);
 
+			        		$("#msj_error").text(r[0].msj);
 							$(".cls_msj_error").show();
 
 			        	}
@@ -1429,7 +1641,8 @@
 			        url: "{{IP_LOCAL}}/empenos/api_consulta_cotizacion/",
 			        data: {
 
-						"id_usuario":"{{id_usuario}}"
+						"id_usuario" : "{{id_usuario}}",
+						"id_sucursal" : "{{id_sucursal}}"
 
 			        },
 			        contentType: "application/json; charset=utf-8",
@@ -1452,8 +1665,7 @@
 			        		$("#num_movs").text(r[3].cont_movs);
 
 			        	}
-						
-						
+
 			        	$("#fondo_preloader").hide();
 
 			        	if($("#id_plazo").val()!="")
@@ -1493,18 +1705,60 @@
 			        	}
 			        },
 			        error: function (r) {
-			        		$("#msj_error").text("Error al consultar la cotizacion");
+			        		$("#msj_error").text("Error al consultar la cotización");
 							$(".cls_msj_error").show();
 							$("#fondo_preloader").hide();
 			        },
 			        failure: function (r) {
-			        		$("#msj_error").text("Error al consultarconsultar la cotizacion");
+			        		$("#msj_error").text("Error al consultarconsultar la cotización");
 							$(".cls_msj_error").show();
 							$("#fondo_preloader").hide();
 			        }
 				});
 
 			}
+
+			function fn_consulta_cliente(id_cliente)
+			{
+				$("#tabla_cliente tbody tr").remove();
+				$("#fondo_preloader").show();
+				$.ajax({
+					type: "GET",
+			        url: "{{IP_LOCAL}}/empenos/api_cliente/",
+			        data: {
+
+						"id_cliente":id_cliente
+
+			        },
+			        contentType: "application/json; charset=utf-8",
+			        dataType: "json",
+			        success: function (r) 
+			        {
+
+			        	$("#lbl_cliente").text(r[0].nombre+' '+r[0].apellido_p+' '+r[0].apellido_m);
+			        	$("#fondo_preloader").hide();
+
+			        },
+			        error: function (r) 
+			        {
+
+			        		$("#msj_error").text("Error al consultar el cliente");
+							$(".cls_msj_error").show();
+							$("#fondo_preloader").hide();
+
+			        },
+			        failure: function (r) 
+			        {
+
+			        		$("#msj_error").text("Error al consultar el cliente");
+							$(".cls_msj_error").show();
+							$("#fondo_preloader").hide();
+
+			        }
+				});
+
+			}
+
 
 			function fn_busca_cliente()
 			{
@@ -1552,6 +1806,8 @@
 				});
 
 			}
+
+
 			function fn_agregarFila_cliente(obj)
 			{
    				var cont=obj.length;
@@ -1576,7 +1832,7 @@
 			{
 
 
-
+				fn_consulta_cliente(id);
 				$("#id_cliente").val(id.toString());
 				$(".cls_form_busca_cliente").hide();		
 				$("#fondo_form_emergente").hide();
@@ -1595,9 +1851,9 @@
 			        '<td>' + obj[x].descripcion + '</td>'+
 			        '<td>' + obj[x].Kilataje + '</td>'+
 			        '<td>' + obj[x].peso + '</td>'+
-			        '<td>' + obj[x].avaluo + '</td>'+
-			        '<td>' + obj[x].mutuo_sugerido + '</td>'+
-			        '<td>' + obj[x].mutuo + '</td>'+
+			        '<td>$' + parseFloat(obj[x].avaluo).toFixed(2) + '</td>'+
+			        '<td>$' + parseFloat(obj[x].mutuo_sugerido).toFixed(2) + '</td>'+
+			        '<td>$' + parseFloat(obj[x].mutuo).toFixed(2) + '</td>'+
 			        
 			
 			      '</tr>';

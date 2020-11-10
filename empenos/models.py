@@ -7,7 +7,7 @@ from seguridad.models import Session
 from datetime import date, datetime, time,timedelta
 import calendar
 from django.db.models import Sum
-
+import decimal
 
 GENERO_CHOICES = (
     ('1','HOMBRE'),
@@ -67,7 +67,136 @@ class Sucursal(models.Model):
 	def __str__(self):
 		return str(self.id)+' '+self.sucursal
 
+	def fn_actualiza_porcentaje_mutuo(self,porcentaje_oro,porcentaje_plata,porcentaje_articulos_varios):
 
+		#validamos que los valores sean enteros
+		if type(porcentaje_oro) != type(0):
+			return False
+
+		if type(porcentaje_plata) != type(0):
+			return False
+
+		if type(porcentaje_articulos_varios) != type(0):
+			return False
+
+		if porcentaje_oro <= 0:
+			return False
+
+		if porcentaje_plata <= 0:
+			return False
+
+		if porcentaje_articulos_varios <= 0:
+			return False			
+
+		try:
+			cpm = Configuracion_Porcentaje_Mutuo.objects.get(sucursal = self)
+		except Exception as e:#si falla es porque aun no tiene configurada el porcentaje mutuo
+			
+			cpm = Configuracion_Porcentaje_Mutuo()
+			cpm.sucursal = self
+
+
+		cpm.porcentaje_oro = porcentaje_oro
+		cpm.porcentaje_plata = porcentaje_plata
+		cpm.porcentaje_articulos_varios = porcentaje_articulos_varios
+		cpm.save()
+
+		return True
+
+	def fn_consulta_porcentaje_mutuo(self):
+		try:
+			return Configuracion_Porcentaje_Mutuo.objects.get(sucursal = self)
+		except Exception as e:			
+			return False
+
+	#recibe el tipo de producto y regresa el interes que le corresponde a ese tipo de producto
+	def fn_get_interes(self,tipo_producto):
+
+		cpm = Configuracion_Interes_Empeno.objects.get(sucursal = self)
+
+		#si es oro
+		if tipo_producto == 1:
+			return cpm.interes_oro
+		elif tipo_producto == 2:
+			return cpm.interes_plata
+		elif tipo_producto == 3:
+			return cpm.interes_prod_varios
+		else:
+			return 0
+
+
+	#recibe como parametro el tipo de producto y regresa el porcentaje de almacenje que le corresponde a ese tipo de producto
+	def fn_get_almacenaje(self,tipo_producto):
+		cpm = Configuracion_Interes_Empeno.objects.get(sucursal = self)
+
+		#si es oro
+		if tipo_producto == 1:
+			return cpm.almacenaje_oro
+		elif tipo_producto == 2:
+			return cpm.almacenaje_plata
+		elif tipo_producto == 3:
+			return cpm.almacenaje_prod_varios
+		else:
+			return 0
+
+	#recibe como parametro el tipo de producto y regresa el porcentaje de IVA que le corresponde a ese tipo de producto
+	def fn_get_iva(self,tipo_producto):
+		cpm = Configuracion_Interes_Empeno.objects.get(sucursal = self)
+
+		#si es oro
+		if tipo_producto == 1:
+			return cpm.iva_oro
+		elif tipo_producto == 2:
+			return cpm.iva_plata
+		elif tipo_producto == 3:
+			return cpm.iva_prod_varios
+		else:
+			return 0
+
+	#funcion que recibe el mutuo y el tipo de producto para calcular el refrendo que le corresponde
+	# considerando la sucursal en la que se encuentra. y la configuracion de la tabla Configuracion_Interes_Empeno
+	# este se usa solo para la cotizacion, ya que para guardar el refrendo en la boleta se usa la funcion de el modelo Boleta Empeno
+	def fn_calcula_refrendo(self,mutuo,tipo_producto):
+		
+		almacenaje = 0.00
+		interes = 0.00
+		iva=0.00
+		refrendo = 0.00
+		respuesta = []
+
+		try:
+			cie = Configuracion_Interes_Empeno.objects.get(sucursal = self)
+		except:
+			#el estatus cero es error al encontrar la configuracion de interes empeno
+			respuesta.append({"estatus":"0","almacenaje":0,"interes":0,"iva":0,"refrendo":0})
+			return respuesta
+
+		if tipo_producto == 1 :#Oro
+
+			p_almacenaje = cie.almacenaje_oro/100
+			p_interes = cie.interes_oro/100
+			p_iva  = cie.iva_oro/100
+
+		elif tipo_producto == 2:#plata
+
+
+			p_almacenaje = cie.almacenaje_plata/100
+			p_interes = cie.interes_plata/100
+			p_iva  = cie.iva_plata/100
+
+		else:		
+
+			p_almacenaje = cie.almacenaje_prod_varios /100
+			p_interes = cie.interes_prod_varios /100
+			p_iva  = cie.iva_prod_varios /100
+
+		almacenaje = (mutuo * p_almacenaje)
+		interes = (mutuo * p_interes)
+		iva = ((almacenaje+interes) * p_iva)
+		refrendo = (almacenaje+interes+iva)
+		respuesta.append({"estatus":"1","almacenaje":almacenaje,"interes":interes,"iva":iva,"refrendo":refrendo})
+		
+		return respuesta
 
 class Concepto_Retiro(models.Model):
 	concepto = models.CharField(max_length = 40,null = False)
@@ -281,13 +410,6 @@ class Retiro_Efectivo(models.Model):
 		except:
 			return False
 
-	
-		
-
-
-
-
-
 class Token(models.Model):
 	tipo_movimiento=models.ForeignKey(Tipo_Movimiento,on_delete=models.PROTECT)
 	sucursal=models.ForeignKey(Sucursal,on_delete=models.PROTECT)
@@ -436,18 +558,42 @@ class Boleta_Empeno(models.Model):
 	sucursal=models.ForeignKey(Sucursal,on_delete=models.PROTECT,blank=True,null=True)
 	mutuo_original=models.IntegerField(default=0)	#este campo no se actualiza, nos sirve para saber cual fue el mutuo original de la boleta.
 	fecha_vencimiento_real=models.DateTimeField(null=True,blank=True)#cuando la fecha de vencimiento cai en dia de asueto, la fecha de vencimienot se recorre un dia, esta fecha nos indica cual es la fecha de vencimiento real para calcular el las futuras fechas de vencimiento.
+	
+	almacenaje = models.DecimalField(max_digits = 20,decimal_places = 2,default = 0)
+	interes = models.DecimalField(max_digits = 20,decimal_places = 2,default = 0)
+	iva = models.DecimalField(max_digits = 20,decimal_places = 2,default = 0)
+
+
 
 	@classmethod
 	def nuevo_empeno(self,sucursal,tp,caja,usuario,avaluo,mutuo,fecha_vencimiento,cliente,nombre_cotitular,apellido_paterno,apellido_materno,plazo,fecha_vencimiento_real,estatus,folio,tm):
 
-		
-	
-
-		boleta = self.objects.create(folio = folio,tipo_producto = tp,caja = caja,usuario = usuario,avaluo = avaluo,mutuo = mutuo,fecha = timezone.now(),fecha_vencimiento = fecha_vencimiento,cliente = cliente,nombre_cotitular = nombre_cotitular,apellido_p_cotitular = apellido_paterno,apellido_m_cotitular = apellido_materno,plazo = plazo,sucursal = sucursal,mutuo_original = mutuo,fecha_vencimiento_real = fecha_vencimiento_real,estatus = estatus)
+		boleta = self.objects.create(folio = folio,tipo_producto = tp,caja = caja,usuario = usuario,avaluo = avaluo,mutuo = mutuo,fecha = timezone.now(),fecha_vencimiento = fecha_vencimiento,cliente = cliente,nombre_cotitular = nombre_cotitular,apellido_p_cotitular = apellido_paterno,apellido_m_cotitular = apellido_materno,plazo = plazo,sucursal = sucursal,mutuo_original = mutuo,fecha_vencimiento_real = fecha_vencimiento_real,estatus = estatus,almacenaje =  sucursal.fn_get_almacenaje(tp.id), interes = sucursal.fn_get_interes(tp.id),iva = sucursal.fn_get_iva(tp.id))
 				
 		return boleta	
-				
+			
+	#funcion que calcula el refrendo de los proximos pagos de una boleta consderando el mutuo actual y los porcentajes de interes
+	#que se tenian al momento de hacer el empeño.
+	def fn_calcula_refrendo(self):
+		
+		p_almacenaje = decimal.Decimal(self.almacenaje)/decimal.Decimal(100)
+		p_interes = decimal.Decimal(self.interes)/decimal.Decimal(100)
+		p_iva = decimal.Decimal(self.iva)/decimal.Decimal(100)
 
+		almacenaje = 0.00
+		interes = 0.00
+		iva=0.00
+		refrendo = 0.00
+
+		respuesta = []
+
+		almacenaje = (decimal.Decimal(self.mutuo) * p_almacenaje)
+		interes = (decimal.Decimal(self.mutuo) * p_interes)
+		iva = ((almacenaje+interes) * p_iva)
+		refrendo = round(almacenaje + interes + iva)
+		respuesta.append({"estatus":"1","almacenaje":almacenaje,"interes":interes,"iva":iva,"refrendo":refrendo})
+		
+		return respuesta
 
 	class Meta:
 		unique_together=("folio",'sucursal',)
@@ -715,6 +861,45 @@ class Configuracion_Interes_Empeno(models.Model):
 			return Configuracion_Interes_Empeno.objects.get(sucursal = sucursal)
 		except:
 			return False
+
+	def fn_set_configuracion_interes_empeno(sucursal,almacenaje_oro,interes_oro,iva_oro,almacenaje_plata,interes_plata,iva_plata,almacenaje_prod_varios,interes_prod_varios,iva_prod_varios,usuario_modifica):
+		try:
+			cie = Configuracion_Interes_Empeno.objects.get(sucursal = sucursal)
+			print("jass")
+			print(cie.almacenaje_oro)			
+			cie.almacenaje_oro=almacenaje_oro
+			cie.save()
+			print(cie.almacenaje_oro)			
+			print("jass")
+		except Exception as e:
+			print(e)
+			cie = fn_actualiza_porcentaje_mutuo()
+
+		print(interes_oro)
+		try:
+			cie.almacenaje_oro = almacenaje_oro
+			cie.interes_oro = interes_oro
+			cie.iva_oro = iva_oro
+			cie.almacenaje_plata = almacenaje_plata
+			cie.interes_plata = interes_plata
+			cie.iva_plata = iva_plata
+			cie.almacenaje_prod_varios = almacenaje_prod_varios
+			cie.interes_prod_varios = interes_prod_varios
+			cie.iva_prod_varios = iva_prod_varios
+			cie.usuario_modifica = usuario_modifica
+			cie.fecha_modificacion = date.today()
+			cie.save()
+			return True
+		except:
+			return False
+
+
+
+class Configuracion_Porcentaje_Mutuo(models.Model):
+	sucursal = models.OneToOneField(Sucursal,on_delete=models.PROTECT)
+	porcentaje_oro = models.IntegerField()
+	porcentaje_plata = models.IntegerField()
+	porcentaje_articulos_varios = models.IntegerField()
 
 
 

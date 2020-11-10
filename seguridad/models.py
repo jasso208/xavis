@@ -29,6 +29,8 @@ class Direccion_Envio_Cliente(models.Model):
 	pais=models.CharField(max_length=50,null=False,default="")	
 	referencia=models.CharField(max_length=200,null=False)
 
+
+
 #cuando un cliente de autentica correctamente guardaremos en estado
 #tabla el token (session) generdo en el front end y el usuario que se autentico con ese token.
 #para que en posteriores movimientos de ese token, identificar a que cliente le pertenece.

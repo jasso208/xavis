@@ -45,13 +45,31 @@ class TestJobApartado(TestCase):
 
 		tm = Tipo_Movimiento.objects.get(id=4)
 
-		
+		usuario = User.objects.get(username="jasso208")
 
 		#creamos una boleta para la prueba		
 		sucursal = Sucursal.objects.get(sucursal = "prueba")
+
+		cie = Configuracion_Interes_Empeno()
+
+		cie.sucursal = sucursal		
+		cie.almacenaje_oro = 10
+		cie.interes_oro = 20
+		cie.iva_oro = 30
+		cie.almacenaje_plata = 15
+		cie.interes_plata = 25
+		cie.iva_plata = 35
+		cie.almacenaje_prod_varios = 5
+		cie.interes_prod_varios = 6
+		cie.iva_prod_varios = 7
+		cie.usuario_modifica = usuario
+		cie.save()
+
+
+
 		tp = Tipo_Producto.objects.get(id = 1)
 		caja = None
-		usuario = User.objects.get(username="jasso208")
+		
 		avaluo = 0
 		mutuo = 0
 		fecha_vencimiento = datetime.combine(hoy,time.min)#para la prueba  no importa la fecha de vencimiento
@@ -67,6 +85,7 @@ class TestJobApartado(TestCase):
 		estatus_apartado = Estatus_Apartado.objects.get(id=1)
 
 
+		
 
 		#la boleta con folio 1 vence hoy mismo
 		boleta = Boleta_Empeno.nuevo_empeno(sucursal,tp,caja,usuario,avaluo,mutuo,fecha_vencimiento,cliente,nombre_cotitular,apellido_paterno,apellido_materno,plazo,fecha_vencimiento_real,estatus_boleta,1,tm)
@@ -286,8 +305,302 @@ class TestRetiros(TestCase):
 		self.assertEqual(retiro_1.activo,2)## el status del retiro es cancelado
 
 
+class TestSucursales(TestCase):
+
+	#aqui inicializamos valores para la prueba
+	@classmethod
+	def setUpTestData(cls):
+		Sucursal.objects.create(sucursal = "Sucursal de prueba")
+		Sucursal.objects.create(sucursal = "Sucursal de prueba 2")
+
+		Sucursal.objects.create(sucursal = "Sucursal de prueba 3")
+
+		User.objects.create(username = "jasso208")
+
+	def test_fn_consulta_porcentaje_mutuo(self):
+		sucursal = Sucursal.objects.get(sucursal = "Sucursal de prueba" )
+		sucursal2 = Sucursal.objects.get(sucursal = "Sucursal de prueba 2" )
+
+		resp_1 = sucursal.fn_consulta_porcentaje_mutuo()		
+		resp_2 = sucursal.fn_actualiza_porcentaje_mutuo(1,2,3)
+		resp_3 = sucursal.fn_consulta_porcentaje_mutuo()
+		resp_4 = sucursal2.fn_consulta_porcentaje_mutuo()		
+		sucursal.fn_actualiza_porcentaje_mutuo(4,5,6)
+		resp_5 = sucursal.fn_consulta_porcentaje_mutuo()
+		
+		
+
+		#esta debe fallar ya que se consulto antes de que se generara la configuracion de porcentajes mutuos.
+		self.assertEqual(type(resp_1),type(False))
+		#se debe actualizar correctamente los parametros de configuracion
+		self.assertEqual(resp_2,True)
+		#como se consulto despues de haber creado la configuracion de porcentaje de mutuo, no debe ser false
+		self.assertNotEqual(type(resp_3),type(False))
+		#validamos que nos regrese los valores correctos
+		self.assertEqual(resp_3.porcentaje_oro,1)
+		self.assertEqual(resp_3.porcentaje_plata,2)
+		self.assertEqual(resp_3.porcentaje_articulos_varios,3)
+
+		#para la sucursal 2 no hemos creado los parametros de consulta, por lo tanto debe fallar
+		self.assertEqual(type(resp_4),type(False))
+
+		#actualizamos los valores de la primera sucursal
+		self.assertEqual(resp_5.porcentaje_oro,4)
+		self.assertEqual(resp_5.porcentaje_plata,5)
+		self.assertEqual(resp_5.porcentaje_articulos_varios,6)
 
 
+	def test_fn_actualiza_porcentaje_mutuo(self):
+		sucursal = Sucursal.objects.get(sucursal = "Sucursal de prueba" )
+		sucursal2 = Sucursal.objects.get(sucursal = "Sucursal de prueba 2" )
+
+		resp = sucursal.fn_actualiza_porcentaje_mutuo(1,2,3)
+		resp_2 = sucursal.fn_actualiza_porcentaje_mutuo(4,5,6)
+
+		resp_3 = sucursal.fn_actualiza_porcentaje_mutuo(4.3,5,6)
+		resp_4 = sucursal.fn_actualiza_porcentaje_mutuo(4,5.5,6)
+		resp_5 = sucursal.fn_actualiza_porcentaje_mutuo(4,5,6.6)
+		resp_6 = sucursal.fn_actualiza_porcentaje_mutuo(1,2,3)
+
+		resp_7 = sucursal.fn_actualiza_porcentaje_mutuo(0,5,6)
+		resp_8 = sucursal.fn_actualiza_porcentaje_mutuo(1,0,6)
+		resp_9 = sucursal.fn_actualiza_porcentaje_mutuo(1,2,0)
+
+		resp_10 = sucursal.fn_consulta_porcentaje_mutuo()
+		resp_11 = sucursal2.fn_consulta_porcentaje_mutuo()
+
+		self.assertEqual(resp,True)
+		self.assertEqual(resp_2,True)
+		self.assertEqual(resp_3,False)
+		self.assertEqual(resp_4,False)
+		self.assertEqual(resp_5,False)
+		self.assertEqual(resp_6,True)
+		self.assertEqual(resp_7,False)
+		self.assertEqual(resp_8,False)
+		self.assertEqual(resp_9,False)
+
+
+		self.assertEqual(resp_10.porcentaje_oro,1)
+		self.assertEqual(resp_10.porcentaje_plata,2)
+		self.assertEqual(resp_10.porcentaje_articulos_varios,3)
+		
+		self.assertEqual(resp_11,False)
+
+	def test_fn_calcula_refrendo(self):
+
+		sucursal = Sucursal.objects.get(sucursal = "Sucursal de prueba" )
+		sucursal2 = Sucursal.objects.get(sucursal = "Sucursal de prueba 2" )
+		sucursal3 = Sucursal.objects.get(sucursal = "Sucursal de prueba 3" )
+
+		usuario = User.objects.get(username = "jasso208")
+
+		cie = Configuracion_Interes_Empeno()
+
+		cie.sucursal = sucursal		
+		cie.almacenaje_oro = 10
+		cie.interes_oro = 20
+		cie.iva_oro = 30
+		cie.almacenaje_plata = 15
+		cie.interes_plata = 25
+		cie.iva_plata = 35
+		cie.almacenaje_prod_varios = 5
+		cie.interes_prod_varios = 6
+		cie.iva_prod_varios = 7
+		cie.usuario_modifica = usuario
+		cie.save()
+
+
+		cie2 = Configuracion_Interes_Empeno()
+
+		cie2.sucursal = sucursal2		
+		cie2.almacenaje_oro = 5
+		cie2.interes_oro = 6.3
+		cie2.iva_oro = 16
+		cie2.almacenaje_plata = 5
+		cie2.interes_plata = 6.3
+		cie2.iva_plata = 16
+		cie2.almacenaje_prod_varios = 7.2
+		cie2.interes_prod_varios = 12.63
+		cie2.iva_prod_varios = 16
+		cie2.usuario_modifica = usuario
+		cie2.save()
+
+		#tipo oro, mil pesos de mutuo
+		resp_1 = sucursal.fn_calcula_refrendo(1000,1)
+		#tipo plata, mil pesos de mutuo
+		resp_2 = sucursal.fn_calcula_refrendo(1000,2)
+		#articulos varios, mil pesos de mutuo
+		resp_3 = sucursal.fn_calcula_refrendo(1000,3)
+
+
+		#articulos varios, mil pesos de mutuo
+		resp_4 = sucursal2.fn_calcula_refrendo(1633,3)
+
+		#esta sucursal no tiene configurado el interes, deberia devolver esatus cero
+		resp_5 = sucursal3.fn_calcula_refrendo(1633,3)
+
+
+		self.assertEqual(resp_1[0]["estatus"],'1')
+		self.assertEqual(resp_5[0]["estatus"],'0')
+		self.assertEqual(resp_1[0]["refrendo"],390)
+		self.assertEqual(resp_2[0]["refrendo"],540)
+		self.assertEqual(round(resp_3[0]["refrendo"],2),round(decimal.Decimal(117.70),2))
+
+		self.assertEqual(round(resp_4[0]["refrendo"],2),round(decimal.Decimal(375.64),2))
+
+
+
+		
+
+
+class Test_Boleta_Empeno(TestCase):
+
+	@classmethod
+	def setUpTestData(cls):
+
+
+		cl = Cliente()
+		cl.id = 1
+		cl.nombre = "prueba"
+		cl.apellido_p = "prueba"
+		cl.estado_civil  =1
+		cl.save()
+
+		Sucursal.objects.create(sucursal = "Sucursal de prueba")
+		Sucursal.objects.create(sucursal = "Sucursal de prueba 2")
+		Sucursal.objects.create(sucursal = "Sucursal de prueba 3")
+
+		sucursal = Sucursal.objects.get(sucursal = "Sucursal de prueba" )
+		sucursal2 = Sucursal.objects.get(sucursal = "Sucursal de prueba 2" )
+		sucursal3 = Sucursal.objects.get(sucursal = "Sucursal de prueba 3" )
+
+		User.objects.create(username = "jasso208")
+		usuario = User.objects.get(username = "jasso208")
+
+		cie = Configuracion_Interes_Empeno()
+
+		cie.sucursal = sucursal		
+		cie.almacenaje_oro = 10
+		cie.interes_oro = 20
+		cie.iva_oro = 30
+		cie.almacenaje_plata = 15
+		cie.interes_plata = 25
+		cie.iva_plata = 35
+		cie.almacenaje_prod_varios = 5
+		cie.interes_prod_varios = 6
+		cie.iva_prod_varios = 7
+		cie.usuario_modifica = usuario
+		cie.save()
+
+		cie2 = Configuracion_Interes_Empeno()
+
+		cie2.sucursal = sucursal2		
+		cie2.almacenaje_oro = 5
+		cie2.interes_oro = 6.3
+		cie2.iva_oro = 16
+		cie2.almacenaje_plata = 5
+		cie2.interes_plata = 6.3
+		cie2.iva_plata = 16
+		cie2.almacenaje_prod_varios = 7.2
+		cie2.interes_prod_varios = 12.63
+		cie2.iva_prod_varios = 16
+		cie2.usuario_modifica = usuario
+		cie2.save()
+
+		tp = Tipo_Producto()
+		tp.id = 1
+		tp.tipo_producto = "oro"
+		tp.save()
+
+		
+		pl = Plazo()
+		pl.plazo = "4 semanas"
+		pl.id = 1
+		pl.save()
+
+		eb = Estatus_Boleta()
+		eb.id = 1
+		eb.estatus = "ABIERTA"
+		eb.save()
+
+
+	def test_fn_calcula_refrendo_mismo_mutuo(self):
+		sucursal = Sucursal.objects.get(sucursal = "Sucursal de prueba" )
+		sucursal2 = Sucursal.objects.get(sucursal = "Sucursal de prueba 2" )
+
+		usuario = User.objects.get(username = "jasso208")
+
+		tp = Tipo_Producto.objects.get(tipo_producto = "oro")		
+		caja = None
+		avaluo = 2000
+		mutuo = 1000
+
+		hoy = date.today()
+		fecha_vencimiento = datetime.combine(hoy,time.min)#para la prueba  no importa la fecha de vencimiento
+
+		cliente = Cliente.objects.get(id = 1)
+
+		nombre_cotitular = "test_1"
+		apellido_paterno = ""
+		apellido_materno = ""
+
+		plazo=Plazo.objects.get(id=1)
+		
+		fecha_vencimiento_real = fecha_vencimiento
+
+		estatus_boleta = Estatus_Boleta.objects.get(id=1)#boleta abierta
+		
+		tm = None
+
+		
+		boleta = Boleta_Empeno.nuevo_empeno(sucursal,tp,caja,usuario,avaluo,mutuo,fecha_vencimiento,cliente,nombre_cotitular,apellido_paterno,apellido_materno,plazo,fecha_vencimiento_real,estatus_boleta,1,tm)
+
+
+		#almacenaje_oro = 10
+		#interes_oro = 20
+		#iva_oro = 30
+		resp = boleta.fn_calcula_refrendo()
+		self.assertEqual(resp[0]["estatus"],"1")
+		self.assertEqual(decimal.Decimal(resp[0]["almacenaje"]),decimal.Decimal("100.00"))
+		self.assertEqual(decimal.Decimal(resp[0]["interes"]),decimal.Decimal("200.00"))
+		self.assertEqual(decimal.Decimal(resp[0]["iva"]),decimal.Decimal("90.00"))
+
+		#cambiamos el porcentaje de refrendo
+		r = Configuracion_Interes_Empeno.fn_set_configuracion_interes_empeno(sucursal,15,25,35,45,55,65,75,85,95,usuario)
+
+		
+		#almacenaje_oro = 15
+		#interes_oro = 25
+		#iva_oro = 35
+		resp = boleta.fn_calcula_refrendo()
+		
+		#cambiamos los porcentajes de refrendo en la sucursal, pero la boleta que ya existe respeta el valor que tenia
+		self.assertEqual(r,True)
+		self.assertEqual(resp[0]["estatus"],"1")
+		self.assertEqual(decimal.Decimal(resp[0]["almacenaje"]),decimal.Decimal("100.00"))
+		self.assertEqual(decimal.Decimal(resp[0]["interes"]),decimal.Decimal("200.00"))
+		self.assertEqual(decimal.Decimal(resp[0]["iva"]),decimal.Decimal("90.00"))
+
+
+		#al generar una nueva boleta, se genera con los nuevos porcentajes de refrendo.				
+		boleta = Boleta_Empeno.nuevo_empeno(sucursal,tp,caja,usuario,avaluo,mutuo,fecha_vencimiento,cliente,nombre_cotitular,apellido_paterno,apellido_materno,plazo,fecha_vencimiento_real,estatus_boleta,2,tm)
+
+				#almacenaje_oro = 15
+		#interes_oro = 25
+		#iva_oro = 35
+		resp = boleta.fn_calcula_refrendo()
+		
+		#cambiamos los porcentajes de refrendo en la sucursal, pero la boleta que ya existe respeta el valor que tenia
+		self.assertEqual(r,True)
+		self.assertEqual(resp[0]["estatus"],"1")
+		self.assertEqual(decimal.Decimal(resp[0]["almacenaje"]),decimal.Decimal("150.00"))
+		self.assertEqual(decimal.Decimal(resp[0]["interes"]),decimal.Decimal("250.00"))
+		self.assertEqual(decimal.Decimal(resp[0]["iva"]),decimal.Decimal("140.00"))
+
+
+
+
+		
 
 
 

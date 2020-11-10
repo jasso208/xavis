@@ -41,24 +41,37 @@ def fn_calcula_precio_venta_producto(boleta):
 	return importe_venta
 
 
-def fn_calcula_refrendo(mutuo,tipo_producto):
-	almacenaje=0.00
-	interes=0.00
-	iva=0.00
-	refrendo=0.00
-	respuesta=[]
-	if tipo_producto==1 or tipo_producto==2:#oro o plata
-		almacenaje=(mutuo*0.05)
-		interes=(mutuo*0.063)
-		iva=((almacenaje+interes)*0.16)
-		refrendo=(almacenaje+interes+iva)
-	else:
-		almacenaje=(mutuo*0.072)
-		interes=(mutuo*0.1263)
-		iva=((almacenaje+interes)*0.16)
-		refrendo=(almacenaje+interes+iva)
-	respuesta.append({"almacenaje":almacenaje,"interes":interes,"iva":iva,"refrendo":refrendo})
-	return respuesta
+#def fn_calcula_refrendo(mutuo,tipo_producto):
+#	
+#	almacenaje = 0.00
+#	interes = 0.00
+#	iva=0.00
+#	refrendo = 0.00
+#	respuesta = []
+#
+#	if tipo_producto == 1 :#Oro
+#
+#		almacenaje = (mutuo*0.05)
+#		interes = (mutuo*0.063)
+#		iva = ((almacenaje+interes)*0.16)
+#		refrendo = (almacenaje+interes+iva)
+##
+#	elif tipo_producto == 2:#plata
+#
+#		almacenaje = (mutuo*0.05)
+#		interes = (mutuo*0.063)
+#		iva = ((almacenaje+interes)*0.16)
+#		refrendo = (almacenaje+interes+iva)
+#
+#	else:#articulos varios
+#
+#		almacenaje = (mutuo*0.072)
+#		interes = (mutuo*0.1263)
+#		iva = ((almacenaje+interes)*0.16)
+#		refrendo = (almacenaje+interes+iva)
+#		
+#	respuesta.append({"almacenaje":almacenaje,"interes":interes,"iva":iva,"refrendo":refrendo})
+#	return respuesta
 
 #funcion para determinar el modulo
 def fn_modulo(a, b):
@@ -72,18 +85,13 @@ def fn_modulo(a, b):
 #solo para periodos mensuales
 def fn_pago_parcial(boleta,hoy,refrendo,pago):
 
-	#primer periodo
-	print("periodo 1")
 	#dias fijos
 	periodo_7=Tipo_Periodo.objects.get(id=1)
 	days = timedelta(days=7)
 	
-	fecha_vencimiento = datetime.combine(hoy+days, time.min) 
-	print("fecha_vencimiento")
-	print(fecha_vencimiento)
-	fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
-	print("fecha_vencimiento")
-	print(fecha_vencimiento)
+	fecha_vencimiento = datetime.combine(hoy+days, time.min) 	
+	fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)	
+	
 
 	consecutivo=Periodo.objects.filter(boleta=boleta).aggregate(Max("consecutivo"))
 
@@ -441,9 +449,7 @@ def fn_simula_refrendo(importe_abono,usuario,boleta,recursivo,desc_pg):
 					#este es el pago que esta corriendo actualmente.
 					pag_actual=p
 
-			print("fecha_vencimiento")
-			print(fecha_vencimiento)
-			print(pag_actual)
+
 			
 			fecha_vencimiento_real=fecha_vencimiento
 			refrendo_pendiente=fn_calcula_saldo_refrendo(boleta,hoy)
@@ -487,8 +493,6 @@ def fn_simula_refrendo(importe_abono,usuario,boleta,recursivo,desc_pg):
 					npt.fecha_vencimiento_real=fecha_vencimiento_real					
 					npt.save()
 
-					print("fecha_vencimiento_real")
-					print(fecha_vencimiento_real)
 
 					importe_abono=int(importe_abono)-int(pt.importe)#disminuimos el saldo del importe abonado
 					if pag_actual==pt:
@@ -508,7 +512,7 @@ def fn_simula_refrendo(importe_abono,usuario,boleta,recursivo,desc_pg):
 				mutuo=int(mutuo)-int(importe_abono)
 
 				#actualizamos el refrendo en base al nuevo mutuo
-				ref=fn_calcula_refrendo(mutuo,boleta.tipo_producto.id)
+				ref=boleta.fn_calcula_refrendo()
 
 				refrendo=math.ceil((ref[0]["refrendo"])/4)
 				almacenaje=ref[0]["almacenaje"]/4
@@ -609,7 +613,7 @@ def fn_simula_refrendo(importe_abono,usuario,boleta,recursivo,desc_pg):
 				mutuo=int(mutuo)-int(importe_abono)
 
 				#actualizamos el refrendo en base al nuevo mutuo
-				ref=fn_calcula_refrendo(mutuo,boleta.tipo_producto.id)
+				ref=boleta.fn_calcula_refrendo()
 
 				refrendo=math.ceil((ref[0]["refrendo"]))
 				almacenaje=ref[0]["almacenaje"]
@@ -851,7 +855,7 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 				rel_cap.save()
 
 				#actualizamos el refrendo en base al nuevo mutuo
-				ref=fn_calcula_refrendo(mutuo,boleta.tipo_producto.id)
+				ref=boleta.fn_calcula_refrendo()
 
 				refrendo=math.ceil((ref[0]["refrendo"])/4)
 				almacenaje=ref[0]["almacenaje"]/4
@@ -968,7 +972,7 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 
 
 				#actualizamos el refrendo en base al nuevo mutuo
-				ref=fn_calcula_refrendo(mutuo,boleta.tipo_producto.id)
+				ref=boleta.fn_calcula_refrendo()
 
 				refrendo=math.ceil((ref[0]["refrendo"]))
 				almacenaje=ref[0]["almacenaje"]

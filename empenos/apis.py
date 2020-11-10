@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated,AllowAny
 from empenos.models import Tipo_Producto,Linea,Sub_Linea,Marca,Costo_Kilataje,Empenos_Temporal,Joyeria_Empenos_Temporal,Cliente,Boleta_Empeno
 from empenos.models import Pagos,Det_Boleto_Empeno,Periodo_Temp
 from django.contrib.auth.models import User
-from empenos.funciones import fn_calcula_refrendo
+
 import math
 from empenos.funciones import *
 from django.core import serializers
@@ -15,6 +15,42 @@ from django.conf import settings
 from django.utils import timezone
 from django.db.models import Sum
 
+
+@api_view(["GET"])
+def api_cliente(request):
+
+	id_cliente = request.GET.get("id_cliente")
+
+	
+	cliente = Cliente.objects.filter(id=id_cliente).values("nombre","apellido_p","apellido_m")
+	
+	return Response(cliente)
+
+
+
+
+	pass
+@api_view(["GET"])
+def api_porcentaje_mutuo(request):
+	respuesta=[]
+	id_sucursal = request.GET.get("id_sucursal")
+	sucursal = Sucursal.objects.get(id = int(id_sucursal))
+
+	resp = sucursal.fn_consulta_porcentaje_mutuo()
+
+	#si el valor que nos regreso es boleano, es porque no se encontro la configuracion del mutuo.
+	if type(resp) == type(False):
+		porcentaje_oro = 0.00
+		porcentaje_plata = 0.00
+		porcentaje_articulos_varios = 0.00
+	else:
+		porcentaje_oro = resp.porcentaje_oro
+		porcentaje_plata = resp.porcentaje_plata
+		porcentaje_articulos_varios = resp.porcentaje_articulos_varios
+
+	respuesta.append({"porcentaje_oro":porcentaje_oro,"porcentaje_plata":porcentaje_plata,"porcentaje_articulos_varios":porcentaje_articulos_varios})
+
+	return Response(respuesta)
 
 @api_view(["GET"])
 def api_consulta_configuracion_empeno(request):
@@ -446,7 +482,6 @@ def api_agrega_prod_apartado(request):
 		else:
 			respuesta.append({"estatus":"0","msj":"La boleta no esta disponible para ser apartada."})
 			return Response(respuesta)
-
 
 		try:	
 			#si la boleta ya existe en una venta, ya no puede ser apartada.
@@ -891,48 +926,58 @@ def api_guarda_producto_temporal(request):
 
 @api_view(['GET'])
 def api_consulta_cotizacion(request):
-	respuesta=[]
-	id_usuario=request.GET.get("id_usuario")
+
+	respuesta = []
+	id_usuario = request.GET.get("id_usuario")
+	id_sucursal = request.GET.get("id_sucursal")
+
+	sucursal = Sucursal.objects.get(id = id_sucursal)
 
 	try:
-		avaluo_oro=0
-		avaluo_plata=0
-		avaluo_varios=0
-		mutuo_oro=0
-		mutuo_plata=0
-		mutuo_varios=0
+		avaluo_oro = 0
+		avaluo_plata = 0
+		avaluo_varios = 0
+		mutuo_oro = 0
+		mutuo_plata = 0
+		mutuo_varios = 0
+
 		respuesta.append({"estatus":"1"})
-		usuario=User.objects.get(id=id_usuario)
-		cotizacion=Empenos_Temporal.objects.filter(usuario=usuario)
-		lista=[]
-		cont_movs=0
+		usuario = User.objects.get(id = id_usuario)
+
+
+		cotizacion = Empenos_Temporal.objects.filter(usuario = usuario)
+		lista = []
+		cont_movs = 0
+
+		#de los productos en la cotizacion, sumamos cuanto mutuo hay de cada tipo de producto
+		#para poder calcular el refrendo total de la cotizacion.
 		for c in cotizacion:
-			cont_movs=cont_movs+1
-			if c.tipo_producto.id==1:
-				avaluo_oro=avaluo_oro+c.avaluo
-				mutuo_oro=mutuo_oro+c.mutuo
-			elif c.tipo_producto.id==2:
-				avaluo_plata=avaluo_plata+c.avaluo
-				mutuo_plata=mutuo_plata+c.mutuo
-			elif c.tipo_producto.id==3:
-				avaluo_varios=avaluo_varios+c.avaluo
-				mutuo_varios=mutuo_varios+c.mutuo
-			kilataje=""
-			peso=""
-			if c.tipo_producto.id==1 or c.tipo_producto.id==2:
-				j=Joyeria_Empenos_Temporal.objects.get(empeno_temporal=c)
-				print(j)
-				kilataje=j.costo_kilataje.kilataje
-				peso=j.peso
+			cont_movs = cont_movs+1
+			if c.tipo_producto.id == 1:
+				avaluo_oro = avaluo_oro + c.avaluo
+				mutuo_oro = mutuo_oro + c.mutuo
+			elif c.tipo_producto.id == 2:
+				avaluo_plata = avaluo_plata + c.avaluo
+				mutuo_plata = mutuo_plata + c.mutuo
+			elif c.tipo_producto.id == 3:
+				avaluo_varios = avaluo_varios + c.avaluo
+				mutuo_varios = mutuo_varios + c.mutuo
+			kilataje = ""
+			peso = ""
+
+			#en caso de ser joyeria obtenemos el peso
+			if c.tipo_producto.id == 1 or c.tipo_producto.id == 2:
+				j = Joyeria_Empenos_Temporal.objects.get(empeno_temporal = c)
+				
+				kilataje = j.costo_kilataje.kilataje
+				peso = j.peso
 
 			lista.append({"id":c.id,"tipo_producto":c.tipo_producto.tipo_producto,"linea":c.linea.linea, "sub_linea":c.sub_linea.sub_linea, "marca":c.marca.marca, "descripcion":c.descripcion, "Kilataje":kilataje, "peso":peso, "avaluo":c.avaluo, "mutuo_sugerido":c.mutuo_sugerido, "mutuo":c.mutuo})
 		respuesta.append({"lista":lista})
 		
-		ref_aux_oro=fn_calcula_refrendo(mutuo_oro,1)
-		ref_aux_plata=fn_calcula_refrendo(mutuo_plata,2)
-		ref_aux_varios=fn_calcula_refrendo(mutuo_varios,3)
-
-		print(cont_movs)
+		ref_aux_oro = sucursal.fn_calcula_refrendo(mutuo_oro,1)
+		ref_aux_plata = sucursal.fn_calcula_refrendo(mutuo_plata,2)
+		ref_aux_varios = sucursal.fn_calcula_refrendo(mutuo_varios,3)
 
 		respuesta.append({"avaluo_oro":avaluo_oro,"avaluo_plata":avaluo_plata,"avaluo_varios":avaluo_varios,"mutuo_oro":mutuo_oro,"mutuo_plata":mutuo_plata,"mutuo_varios":mutuo_varios,"refrendo_oro":math.ceil(ref_aux_oro[0]["refrendo"]),"refrendo_plata":math.ceil(ref_aux_plata[0]["refrendo"]),"refrendo_varios":math.ceil(ref_aux_varios[0]["refrendo"])})
 		respuesta.append({"cont_movs":str(cont_movs)})
@@ -942,6 +987,8 @@ def api_consulta_cotizacion(request):
 		respuesta.append({"estatus":"0","msj":"Error al guardar la cotizacion."})
 
 	return Response(respuesta)
+
+
 
 @api_view(['GET'])
 def api_limpia_cotizacion(request):

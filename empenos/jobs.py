@@ -48,27 +48,27 @@ def fn_job_diario():
 	hoy=datetime.now()#fecha actual
 	hoy=datetime.combine(hoy, time.min)
 
-	#hoy=datetime(2020,9,29,0,0)	
-	#fecha_fin=datetime(2020,9,30,0,0)
+	hoy=datetime(2020,11,5,0,0)	
+	fecha_fin=datetime(2020,12,10,0,0)
 	#cont=30
 
-	#while hoy<=fecha_fin:
-	#	print("fecha ejecucion")
-	#	print(hoy)
-	#	fn_boletas_vencidas_semanal(hoy)
-	#	fn_pagos_vencidos(hoy)
-	#	fn_comision_pg(hoy)
-	#	fn_boletas_10d_alomneda(hoy)
-	#
-	#	dias = timedelta(days=1)	
-	#	hoy=datetime.combine(hoy+dias, time.min)                
+	while hoy<=fecha_fin:
+		print("fecha ejecucion")
+		print(hoy)
+		fn_boletas_vencidas_semanal(hoy)
+		fn_pagos_vencidos(hoy)
+		fn_comision_pg(hoy)
+		fn_boletas_10d_alomneda(hoy)
+	
+		dias = timedelta(days=1)	
+		hoy=datetime.combine(hoy+dias, time.min)                
 		
 
 	#estas tres lineas son las que se pondran en prodcutivo
-	fn_boletas_vencidas_semanal(hoy)
-	fn_pagos_vencidos(hoy)
-	fn_comision_pg(hoy)
-	fn_boletas_10d_alomneda(hoy)
+	#fn_boletas_vencidas_semanal(hoy)
+	#fn_pagos_vencidos(hoy)
+	#fn_comision_pg(hoy)
+	#fn_boletas_10d_alomneda(hoy)
 
 	return True
 
@@ -133,20 +133,20 @@ def fn_boletas_vencidas_semanal(hoy):
 			iva=0.00
 
 			#se calcula el refrendo para que en caso de que se haya abonado a capital, se calcule el refrendo en base al nuevo mutuo
-			resp=fn_calcula_refrendo(b.mutuo,b.tipo_producto.id)
+			resp=b.fn_calcula_refrendo()
 			
 			if b.plazo.id==2:#si es plazo 4 semanas
 				#calculamos la fecha de vencimiento
 				dias = timedelta(days=7)		                
 				fecha_vencimiento=datetime.combine(hoy+dias, time.min)
 				fecha_vencimiento_real=fecha_vencimiento
-				print("entro 1")
+				
 				fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
 
-				almacenaje=resp[0]["almacenaje"]/4.00
-				interes=resp[0]["interes"]/4.00
-				iva=resp[0]["iva"]/4.00
-				refrendo=round(resp[0]["refrendo"]/4.00)
+				almacenaje=decimal.Decimal(resp[0]["almacenaje"])/decimal.Decimal(4.00)
+				interes=decimal.Decimal(resp[0]["interes"])/decimal.Decimal(4.00)
+				iva=decimal.Decimal(resp[0]["iva"])/decimal.Decimal(4.00)
+				refrendo=round(decimal.Decimal(resp[0]["refrendo"])/decimal.Decimal(4.00))
 
 				#generamos el nuevo pago
 				p=Pagos()
@@ -159,8 +159,7 @@ def fn_boletas_vencidas_semanal(hoy):
 				p.importe=refrendo
 				p.vencido="N"
 				p.pagado="N"
-				p.fecha_vencimiento_real=fecha_vencimiento_real
-				print("entro 1 2")
+				p.fecha_vencimiento_real=fecha_vencimiento_real				
 				p.save()
 
 			elif b.plazo.id==3:#si es plazo de 1 mes
@@ -215,8 +214,8 @@ def fn_pagos_vencidos(hoy):
 			interes=0.00
 			iva=0.00
 
-			#se calcula el refrendo para que en caso de que se haya abonado a capital, se calcule el refrendo en base al nuevo mutuo
-			resp=fn_calcula_refrendo(p.boleta.mutuo,p.boleta.tipo_producto.id)
+			#se calcula el refrendo para que en caso de que se haya abonado a capital, se calcule el refrendo en base al nuevo mutuo			
+			resp=p.boleta.fn_calcula_refrendo()
 
 			almacenaje=resp[0]["almacenaje"]
 			interes=resp[0]["interes"]
@@ -236,7 +235,7 @@ def fn_pagos_vencidos(hoy):
 			fecha_vencimiento=datetime.combine(fn_add_months(p.boleta.fecha,meses), time.min)
 
 			fecha_vencimiento_real=fecha_vencimiento
-			print("entro entro 1")
+			
 			#fecha_vencimiento=datetime.combine(fn_add_months(hoy,1), time.min)	
 			#validmoas que la fecha de vencimiento no sea de azueto
 			fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
@@ -301,7 +300,7 @@ def fn_pagos_vencidos(hoy):
 		b=p.boleta
 
 		#se calcula el refrendo para que en caso de que se haya abonado a capital, se calcule el refrendo en base al nuevo mutuo
-		resp=fn_calcula_refrendo(b.mutuo,b.tipo_producto.id)
+		resp=b.fn_calcula_refrendo()
 
 		#calculamos la fecha de vencimiento
 		if b.plazo.id==2:#si es plazo 4 semanas
@@ -310,10 +309,10 @@ def fn_pagos_vencidos(hoy):
 			fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
 			fecha_vencimiento_real=fecha_vencimiento
 
-			almacenaje=resp[0]["almacenaje"]/4.00
-			interes=resp[0]["interes"]/4.00
-			iva=resp[0]["iva"]/4.00
-			refrendo=round(resp[0]["refrendo"]/4.00)
+			almacenaje=decimal.Decimal(resp[0]["almacenaje"])/decimal.Decimal(4.00)
+			interes=decimal.Decimal(resp[0]["interes"])/decimal.Decimal(4.00)
+			iva=decimal.Decimal(resp[0]["iva"])/decimal.Decimal(4.00)
+			refrendo=round(decimal.Decimal(resp[0]["refrendo"])/decimal.Decimal(4.00))
 
 		elif b.plazo.id==3:#si es plazo de 1 mes
 			#fecha_vencimiento=datetime.combine(fn_add_months(hoy,1), time.min)	

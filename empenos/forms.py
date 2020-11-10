@@ -99,6 +99,12 @@ class Buscar_Apartados_Form(forms.Form):
 class Costo_Extra_Form(forms.Form):
 	sucursal=forms.ModelChoiceField(queryset=Sucursal.objects.all())
 
+class Porcentaje_Mutuo_Form(forms.Form):
+	sucursal = forms.ModelChoiceField(queryset = Sucursal.objects.all())
+	porcentaje_oro = forms.IntegerField()
+	porcentaje_plata = forms.IntegerField()
+	porcentaje_articulos_varios = forms.IntegerField()
+
 class Interes_Empeno_Form(forms.Form):
 	sucursal = forms.ModelChoiceField(queryset = Sucursal.objects.all())
 	almacenaje_oro = forms.DecimalField(max_digits=20,decimal_places=2)
@@ -157,7 +163,7 @@ class Nuevo_Empeno_Form(forms.Form):
 	nombre_cotitular=forms.CharField(max_length=30)
 	apellido_paterno=forms.CharField(max_length=30)
 	apellido_materno=forms.CharField(max_length=30)
-	cliente=forms.ModelChoiceField(queryset=Cliente.objects.all().order_by('apellido_p'))
+	cliente=forms.IntegerField()
 
 	def __init__(self, *args, **kwargs):
 		super(self.__class__, self).__init__(*args, **kwargs)
