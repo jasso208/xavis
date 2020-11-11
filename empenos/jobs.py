@@ -49,7 +49,7 @@ def fn_job_diario():
 	hoy=datetime.combine(hoy, time.min)
 
 	hoy=datetime(2020,11,10,0,0)	
-	fecha_fin=datetime(2020,10,10,0,0)
+	fecha_fin=datetime(2020,11,10,0,0)
 	#cont=30
 
 	while hoy<=fecha_fin:
