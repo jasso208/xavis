@@ -45,30 +45,30 @@ def fn_job_libera_apartado():
 @transaction.atomic
 def fn_job_diario():
 
-	hoy=datetime.now()#fecha actual
-	hoy=datetime.combine(hoy, time.min)
+	#hoy=datetime.now()#fecha actual
+	#hoy=datetime.combine(hoy, time.min)
 
-	hoy=datetime(2020,11,10,0,0)	
-	fecha_fin=datetime(2020,11,10,0,0)
+	#hoy=datetime(2020,11,10,0,0)	
+	#fecha_fin=datetime(2020,11,10,0,0)
 	#cont=30
 
-	while hoy<=fecha_fin:
-		print("fecha ejecucion")
-		print(hoy)
-		fn_boletas_vencidas_semanal(hoy)
-		fn_pagos_vencidos(hoy)
-		fn_comision_pg(hoy)
-		fn_boletas_10d_alomneda(hoy)
-	
-		dias = timedelta(days=1)	
-		hoy=datetime.combine(hoy+dias, time.min)                
+	#while hoy<=fecha_fin:
+	#	print("fecha ejecucion")
+	#	print(hoy)
+	#	fn_boletas_vencidas_semanal(hoy)
+	#	fn_pagos_vencidos(hoy)
+	#	fn_comision_pg(hoy)
+	#	fn_boletas_10d_alomneda(hoy)
+	#
+	#	dias = timedelta(days=1)	
+	#	hoy=datetime.combine(hoy+dias, time.min)                
 		
 
 	#estas tres lineas son las que se pondran en prodcutivo
-	#fn_boletas_vencidas_semanal(hoy)
-	#fn_pagos_vencidos(hoy)
-	#fn_comision_pg(hoy)
-	#fn_boletas_10d_alomneda(hoy)
+	fn_boletas_vencidas_semanal(hoy)
+	fn_pagos_vencidos(hoy)
+	fn_comision_pg(hoy)
+	fn_boletas_10d_alomneda(hoy)
 
 	return True
 
