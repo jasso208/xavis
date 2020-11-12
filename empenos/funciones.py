@@ -247,7 +247,7 @@ def fn_calcula_saldo_refrendo(boleta,hoy):
 			pagos_2=Pagos.objects.filter(vencido="S",pagado="N",boleta=boleta)			
 
 			for p in pagos_2:
-				importe_refrendo=importe_refrendo+p.importe
+				importe_refrendo=decimal.Decimal(importe_refrendo)+decimal.Decimal(p.importe)
 
 		elif boleta.plazo.id==3:#1 mes			
 			pago_actual=Pagos.objects.get(vencido="N",pagado="N",boleta=boleta)
