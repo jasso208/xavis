@@ -45,10 +45,10 @@ def fn_job_libera_apartado():
 @transaction.atomic
 def fn_job_diario():
 
-	#hoy=datetime.now()#fecha actual
-	#hoy=datetime.combine(hoy, time.min)
+	hoy=datetime.now()#fecha actual
+	hoy=datetime.combine(hoy, time.min)
 
-	hoy=datetime(2020,11,11,0,0)	
+	#hoy=datetime(2020,11,11,0,0)	
 	#fecha_fin=datetime(2020,11,10,0,0)
 	#cont=30
 
