@@ -19,6 +19,7 @@
 {% endblock  %}
 {% block content %}
 
+
 	<div class="col-xs-12 cls_encabezado_body">
 	
 		<a >
@@ -33,491 +34,613 @@
 	
 			<div class="row cls_form_consulta">
 				<div class="col-xs-12">
-					<div class="panel panel-default" id="panel_principal" >						 
+							<div class="panel panel-default" id="panel_principal" >						 
+								<div class="panel-body">
+
+									<div class="col-xs-12">
+										<div class="panel panel-default">						
 											<div class="panel-body">
+												<div class="col-xs-3">
+													<label>Sucursal</label>										
+													<select name="sucursal" class="form-control" title="" id="id_sucursal">
+													  <option value="" selected="">---------</option>
+
+													  {% for s in sucursales %}
+													  <option value="{{s.id}}">{{s.sucursal}}</option>			
+													  {% endfor %}											  
+
+													</select>
+
+												</div>
+												<div class="col-xs-3">
+													<label>Fecha Inicial</label>
+													<input type="date" name="fecha_inicial" class="form-control" placeholder="Fecha inicial" title="" required="" id="id_fecha_inicial">
+												</div>
+												<div class="col-xs-3">
+													<label>Fecha Final</label>
+													<input type="date" name="fecha_final" class="form-control" placeholder="Fecha final" title="" required="" id="id_fecha_final">
+												</div>
+												<div class="col-xs-3">
+													<br>
+													<button id="btn_consultar" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-ok"></span> Consultar</button>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-xs-12">
+									<hr>
+								</div>
+									<!--
+										abre
+										Formulario de busqueda
+									-->
+								<div class="col-xs-12">								
+									<div class="col-xs-4">
+										<label>Sucursal: <span id="span_sucursal">{{txt_sucursal}}</span></label>
+									</div>
+									<div class="col-xs-4">
+										<label>Fecha Inicial: <span id="span_fecha_inicial">{{fecha_inicial | date:'Y-m-d' }}</span></label>
+									</div>
+									<div class="col-xs-4">
+										<label>Fecha Final: <span id="span_fecha_final">{{fecha_final | date:'Y-m-d'}}</span></label>
+									</div>
+								</div>
+								<!--
+										Cierra
+										Formulario de busqueda
+								-->
+
+								<div class="col-xs-12">
+									<br>
+									<br>
+									
+									<div class="col-xs-4">
+									<!--
+										abre
+										resumen de periodo
+									-->
+										<div class = "col-xs-12" style="padding: 0">																	
+											<div class="cls_encabezado_alert" >
+												<label>Resumen de período seleccionado</label>
+											</div>
+											<div class="panel panel-default">
 
 												<div class="col-xs-12">
-													<div class="panel panel-default">						
-														<div class="panel-body">
-															<div class="col-xs-3">
-																<label>Sucursal</label>										
-																<select name="sucursal" class="form-control" title="" id="id_sucursal">
-																  <option value="" selected="">---------</option>
+													<div class="col-xs-5">
+														<label>Entradas</label>
+													</div>
+													<div class="col-xs-2">
+														<label>Cant.</label>
+														
+													</div>
+													<div class="col-xs-5 text-right">
+														<label>Importe</label>
+													</div>	
+												</div>
+												<div class="col-xs-12">
+													<div class="col-xs-5">
+														Saldo Inicial
+													</div>
+													<div class="col-xs-2">
 
-																  {% for s in sucursales %}
-																  <option value="{{s.id}}">{{s.sucursal}}</option>			
-																  {% endfor %}											  
+														
+													</div>
+													<div class="col-xs-5 text-right">
+														${{saldo_inicial}}
+													</div>	
+												</div>
 
-																</select>
 
-															</div>
-															<div class="col-xs-3">
-																<label>Fecha Inicial</label>
-																<input type="date" name="fecha_inicial" class="form-control" placeholder="Fecha inicial" title="" required="" id="id_fecha_inicial">
-															</div>
-															<div class="col-xs-3">
-																<label>Fecha Final</label>
-																<input type="date" name="fecha_final" class="form-control" placeholder="Fecha final" title="" required="" id="id_fecha_final">
-															</div>
-															<div class="col-xs-3">
-																<br>
-																<button class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-ok"></span> Consultar</button>
-															</div>
-														</div>
+
+												<div class="col-xs-12">
+													<div class="col-xs-5">
+														Desempeño
+													</div>
+													<div class="col-xs-2">											
+														{{cont_desempenos}}
+													</div>
+													<div class="col-xs-5 text-right">
+														${{importe_desempenos}}
+													</div>	
+												</div>
+												<div class="col-xs-12">
+													<div class="col-xs-5">
+														Abono Capital
+													</div>
+													<div class="col-xs-2">											
+														{{cont_capital}}
+													</div>
+													<div class="col-xs-5 text-right">
+														${{importe_capital}}
+													</div>	
+												</div>
+												<div class="col-xs-12">
+													<div class="col-xs-5">
+														Refrendos
+													</div>
+													<div class="col-xs-2">											
+														{{cont_refrendos}}
+													</div>
+													<div class="col-xs-5 text-right">
+														${{importe_refrendo}}
+													</div>	
+												</div>
+												<div class="col-xs-12">
+													<div class="col-xs-5">
+														Comision PG
+													</div>
+													<div class="col-xs-2">											
+														{{cont_com_pg}}
+													</div>
+													<div class="col-xs-5 text-right">
+														${{importe_com_pg}}
+													</div>	
+												</div>
+
+												<div class="col-xs-12">
+													<div class="col-xs-5">
+														Otros Ingresos
+													</div>
+													<div class="col-xs-2">											
+														{{cont_otros}}
+													</div>
+													<div class="col-xs-5 text-right">
+														${{importe_otros}}
+													</div>	
+												</div>
+
+
+												<div class="col-xs-12">
+													<div class="col-xs-5">
+														<p>Ventas:</p>
+													</div>
+													<div class="col-xs-2">	
+														<p id="cont_ventas">{{cont_ventas}}</p>
+													</div>
+													<div class="col-xs-5 text-right">
+														<p id="importe_ventas">${{importe_ventas}}</p>
 													</div>
 												</div>
-											</div>
 
-											<div class="col-xs-12">
-												<hr>
-											</div>
-
-											<div class="col-xs-12">								
-												<div class="col-xs-4">
-													<label>Sucursal: <span id="span_sucursal">{{txt_sucursal}}</span></label>
-												</div>
-												<div class="col-xs-4">
-													<label>Fecha Inicial: <span id="span_fecha_inicial">{{fecha_inicial | date:'Y-m-d' }}</span></label>
-												</div>
-												<div class="col-xs-4">
-													<label>Fecha Final: <span id="span_fecha_final">{{fecha_inicial | date:'Y-m-d'}}</span></label>
-												</div>
-											</div>
-															<div class="col-xs-12">
-																<br>
-																<br>
-																<div class="col-xs-4">
-																	<div class="cls_encabezado_alert" >
-																		<label>Reporte de Período</label>
-																	</div>
-																	<div class="panel panel-default">
-
-																		<div class="col-xs-12">
-																			<div class="col-xs-5">
-																				<label>Entradas</label>
-																			</div>
-																			<div class="col-xs-2">
-																				<label>Cant.</label>
-																				
-																			</div>
-																			<div class="col-xs-5 text-right">
-																				<label>Importe</label>
-																			</div>	
-																		</div>
-																		<div class="col-xs-12">
-																			<div class="col-xs-5">
-																				Saldo Inicial
-																			</div>
-																			<div class="col-xs-2">
-
-																				
-																			</div>
-																			<div class="col-xs-5 text-right">
-																				${{saldo_inicial}}
-																			</div>	
-																		</div>
-
-
-
-																		<div class="col-xs-12">
-																			<div class="col-xs-5">
-																				Desempeño
-																			</div>
-																			<div class="col-xs-2">											
-																				{{cont_desempenos}}
-																			</div>
-																			<div class="col-xs-5 text-right">
-																				${{importe_desempenos}}
-																			</div>	
-																		</div>
-																		<div class="col-xs-12">
-																			<div class="col-xs-5">
-																				Abono Capital
-																			</div>
-																			<div class="col-xs-2">											
-																				{{cont_capital}}
-																			</div>
-																			<div class="col-xs-5 text-right">
-																				${{importe_capital}}
-																			</div>	
-																		</div>
-																		<div class="col-xs-12">
-																			<div class="col-xs-5">
-																				Refrendos
-																			</div>
-																			<div class="col-xs-2">											
-																				{{cont_refrendos}}
-																			</div>
-																			<div class="col-xs-5 text-right">
-																				${{importe_refrendo}}
-																			</div>	
-																		</div>
-																		<div class="col-xs-12">
-																			<div class="col-xs-5">
-																				Comision PG
-																			</div>
-																			<div class="col-xs-2">											
-																				{{cont_com_pg}}
-																			</div>
-																			<div class="col-xs-5 text-right">
-																				${{importe_com_pg}}
-																			</div>	
-																		</div>
-
-																		<div class="col-xs-12">
-																			<div class="col-xs-5">
-																				Otros Ingresos
-																			</div>
-																			<div class="col-xs-2">											
-																				{{cont_otros}}
-																			</div>
-																			<div class="col-xs-5 text-right">
-																				${{importe_otros}}
-																			</div>	
-																		</div>
-
-
-																		<div class="col-xs-12">
-																			<div class="col-xs-5">
-																				<p>Ventas:</p>
-																			</div>
-																			<div class="col-xs-2">	
-																				<p id="cont_ventas">{{cont_ventas}}</p>
-																			</div>
-																			<div class="col-xs-5 text-right">
-																				<p id="importe_ventas">${{importe_ventas}}</p>
-																			</div>
-																		</div>
-
-																		<div class="col-xs-12">
-																			<div class="col-xs-5">
-																				<p>Ing Apartado:</p>
-																			</div>
-																			<div class="col-xs-2">	
-																				<p id="cont_ventas">{{cont_ab_apartado}}</p>
-																			</div>
-																			<div class="col-xs-5 text-right">
-																				<p id="importe_ventas">${{importe_ab_apartado}}</p>
-																			</div>
-																		</div>
-
-
-
-																		<div class="col-xs-12">
-																			<div class="col-xs-5">
-																				<label>Salidas</label>
-																			</div>
-																			<div class="col-xs-2">
-																				<label>Cant.</label>
-																				
-																			</div>
-																			<div class="col-xs-5 text-right">
-																				<label>Importe</label>
-																			</div>	
-																		</div>
-
-
-
-																		<div class="col-xs-12">
-																			<div class="col-xs-5">
-																				Empeños
-																			</div>
-																			<div class="col-xs-2">											
-																				{{cont_empenos}}
-																			</div>
-																			<div class="col-xs-5 text-right">
-																				${{importe_empenos}}
-																			</div>	
-																		</div>
-
-
-
-																		<div class="col-xs-12">
-																			<div class="col-xs-5">
-																				Retiros
-																			</div>
-																			<div class="col-xs-2">							
-																				{{cont_retiros}}
-																			</div>
-																			<div class="col-xs-5 text-right">
-																				${{importe_retiros}}
-																			</div>	
-																		</div>
-
-
-
-
-
-																		<div class="col-xs-12">
-																			<hr>
-																		</div>
-
-																		<div class="col-xs-12">
-																			<div class="col-xs-5">
-																				Total
-																			</div>
-																			<div class="col-xs-2">											
-																				{{cont_total}}
-																			</div>
-																			<div class="col-xs-5 text-right">
-																				${{importe_total}}
-																			</div>	
-																		</div>
-
-																		&nbsp;
-																	</div>
-																</div>	
-																			
-														<div class="col-xs-8">
-															<div class="col-xs-12">
-																
-															
-
-																<div class="cls_encabezado_alert" >
-																	<label>Resumen de venta de período</label>
-																</div>
-																<div class="panel panel-default">
-																	<div class="col-xs-12">
-																		<div class="col-xs-3">
-																			
-																		</div>
-																		<div class="col-xs-1">											
-																			<label>Cant.</label>
-																		</div>
-																		<div class="col-xs-2 text-right">
-																			
-																			<label>Mutuo</label>
-																		</div>	
-
-																		<div class="col-xs-2 text-right">
-																			<label>Avaluo</label>
-																			
-																		</div>	
-
-																		<div class="col-xs-2 text-right">
-																			
-																			<label>Venta</label>
-																		</div>	
-
-
-																		<div class="col-xs-2 text-right">
-																			
-																			<label>Utilidad</label>
-																		</div>	
-
-																	</div>
-																	<div class="col-xs-12">
-																		<div class="col-xs-3">
-																			Venta Piso
-																		</div>
-																		<div class="col-xs-1">											
-																			{{cont_venta_piso}}
-																		</div>
-																		<div class="col-xs-2 text-right">
-																			
-																			${{importe_mutuo_piso}}
-																		</div>	
-
-																		<div class="col-xs-2 text-right">
-																			${{importe_avaluo_piso}}
-																			
-																		</div>	
-
-																		<div class="col-xs-2 text-right">
-																			
-																			${{importe_venta_piso}}
-																		</div>	
-
-
-																		<div class="col-xs-2 text-right">
-																			
-																			${{utilidad_vta_piso}}
-																		</div>	
-
-																	</div>
-																	<div class="col-xs-12">
-																		<div class="col-xs-3">
-																			Venta Granel
-																		</div>
-																		<div class="col-xs-1">											
-																			{{cont_venta_granel}}
-																		</div>
-																		<div class="col-xs-2 text-right">
-																			${{importe_mutuo_granel}}
-																			
-																		</div>	
-
-																		<div class="col-xs-2 text-right">
-																			
-																			${{importe_avaluo_granel}}
-																		</div>	
-
-																		<div class="col-xs-2 text-right">
-																			
-																			${{importe_venta_granel}}
-																		</div>	
-
-
-																		<div class="col-xs-2 text-right">
-																			
-																			${{utilidad_vta_granel}}
-																		</div>	
-
-																	</div>
-																	<div class="col-xs-12">
-																		<hr>
-																	</div>
-																			<div class="col-xs-12">
-																		<div class="col-xs-3">
-																			Total
-																		</div>
-																		<div class="col-xs-1">											
-																			{{cont_total_vta}}
-																		</div>
-																		<div class="col-xs-2 text-right">
-																			${{tot_mutuo}}
-																			
-																		</div>	
-
-																		<div class="col-xs-2 text-right">
-																			
-																			${{tot_avaluo}}
-																		</div>	
-
-																		<div class="col-xs-2 text-right">
-																			
-																			${{tot_venta}}
-																		</div>	
-
-
-																		<div class="col-xs-2 text-right">
-																			
-																			${{tot_utilidad_vta}}
-																		</div>	
-
-																	</div>
-
-																	&nbsp;
-																</div>
-															</div>
-															<div class="col-xs-12">
-																<br>
-															</div>
-															<div class="col-xs-12">
-																
-												
-
-															<div class="cls_encabezado_alert" >
-																<label>Estatus de cartera</label>
-															</div>
-															<div class="panel panel-default">
-																<div class="col-xs-12">
-																	<div class="col-xs-4">
-																		
-																	</div>
-																	<div class="col-xs-2">											
-																		<label>Cantidad</label>
-																	</div>
-																	<div class="col-xs-3 text-right">
-																		
-																		<label>Mutuo</label>
-																	</div>	
-
-																	<div class="col-xs-3 text-right">
-																		<label>Avaluo</label>
-																		
-																	</div>	
-
-																</div>
-
-																<div class="col-xs-12">
-																	<div class="col-xs-4">
-																		Boleta Activa
-																	</div>
-																	<div class="col-xs-2">											
-																		{{cont_activas}}
-																	</div>
-																	<div class="col-xs-3 text-right">
-																		${{mutuo_activo}}
-																	</div>	
-
-																	<div class="col-xs-3 text-right">
-																		${{avaluo_activo}}
-																	</div>	
-								
-
-																</div>
-
-
-																<div class="col-xs-12">
-																	<div class="col-xs-4">
-																		Boleta Almoneda
-																	</div>
-																	<div class="col-xs-2">											
-																		{{cont_almoneda}}
-																	</div>
-																	<div class="col-xs-3 text-right">
-																		${{mutuo_almoneda}}
-																	</div>	
-
-																	<div class="col-xs-3 text-right">
-																		${{avaluo_almoneda}}
-																	</div>	
-																</div>
-
-
-
-											<div class="col-xs-12">
-												<div class="col-xs-4">
-													Boleta Remate
-												</div>
-												<div class="col-xs-2">					
-													{{cont_remate}}
-												</div>
-												<div class="col-xs-3 text-right">
-													${{mutuo_remate}}
-												</div>	
-
-												<div class="col-xs-3 text-right">
-													${{avaluo_remate}}
-												</div>	
-											</div>
-
-
-																<div class="col-xs-12">
-																	<hr>
-																</div>
-
-
-																<div class="col-xs-12">
-																	<div class="col-xs-4">
-																		Total
-																	</div>
-																	<div class="col-xs-2">											
-																		{{cont_total_2}}
-																	</div>
-																	<div class="col-xs-3 text-right">
-																		${{total_mutuo}}
-																	</div>	
-
-																	<div class="col-xs-3 text-right">
-																		${{total_almoneda}}
-																	</div>	
-																</div>
-
-
-																&nbsp;
-															</div>
-														</div>
+												<div class="col-xs-12">
+													<div class="col-xs-5">
+														<p>Ing Apartado:</p>
 													</div>
+													<div class="col-xs-2">	
+														<p id="cont_ventas">{{cont_ab_apartado}}</p>
+													</div>
+													<div class="col-xs-5 text-right">
+														<p id="importe_ventas">${{importe_ab_apartado}}</p>
+													</div>
+												</div>
+
+
+
+												<div class="col-xs-12">
+													<div class="col-xs-5">
+														<label>Salidas</label>
+													</div>
+													<div class="col-xs-2">
+														<label>Cant.</label>
+														
+													</div>
+													<div class="col-xs-5 text-right">
+														<label>Importe</label>
+													</div>	
+												</div>
+
+
+
+												<div class="col-xs-12">
+													<div class="col-xs-5">
+														Empeños
+													</div>
+													<div class="col-xs-2">											
+														{{cont_empenos}}
+													</div>
+													<div class="col-xs-5 text-right">
+														${{importe_empenos}}
+													</div>	
+												</div>
+
+
+
+												<div class="col-xs-12">
+													<div class="col-xs-5">
+														Retiros
+													</div>
+													<div class="col-xs-2">							
+														{{cont_retiros}}
+													</div>
+													<div class="col-xs-5 text-right">
+														${{importe_retiros}}
+													</div>	
+												</div>
+
+
+
+
+
+												<div class="col-xs-12">
+													<hr>
+												</div>
+
+												<div class="col-xs-12">
+													<div class="col-xs-5">
+														Total
+													</div>
+													<div class="col-xs-2">											
+														{{cont_total}}
+													</div>
+													<div class="col-xs-5 text-right">
+														${{importe_total}}
+													</div>	
+												</div>
+
+												&nbsp;
+											</div>
+										</div>
+										<!--
+										cierra
+										resumen de periodo
+									-->
+										<div class = "col-xs-12" style="padding: 0">		
+											<div class="cls_encabezado_alert" >
+												<label>Utilidad mes en curso</label>
+											</div>		
+											<div class="panel panel-default">
+
+												<div class="col-xs-12">
+													<div class="col-xs-12">
+														<label>Ganancias</label>
+													</div>
+												</div>
+
+												<div class="col-xs-12">
+													<div class="col-xs-7">
+														Refrendo
+													</div>
+													<div class="col-xs-5 text-right">
+														${{refrendo_aux}}
+													</div>	
+												</div>
+												<div class="col-xs-12">
+													<div class="col-xs-7">
+														Comisión PG
+													</div>
+													<div class="col-xs-5 text-right">
+														${{cpg_aux}}
 													</div>	
 
-								&nbsp;
-					
-						</div>
-					</div>
-				</div>
+												</div>
+												<div class="col-xs-12">
+													<div class="col-xs-7">
+														Otros ingresos
+													</div>
+													<div class="col-xs-5 text-right">
+														${{ce_aux}}
+													</div>	
+													
+												</div>
+												<div class="col-xs-12">
+													<div class="col-xs-7">
+														Ganancia ventas
+													</div>
+													<div class="col-xs-5 text-right">
+														${{ganancia_ventas_aux}}
+													</div>	
+													
+												</div>	
+												<div class="col-xs-12">
+													<div class="col-xs-12">
+														<label>Retiros</label>
+													</div>
+												</div>	
+
+												<div class="col-xs-12">
+													<div class="col-xs-7">
+														Retiros
+													</div>
+													<div class="col-xs-5 text-right">
+														${{importe_retiros}}		
+													</div>	
+													
+												</div>	
+												<div class="col-xs-12">
+													<hr>
+												</div>
+												<div class="col-xs-12">
+													<div class="col-xs-7">
+														Total
+													</div>
+													<div class="col-xs-5 text-right">
+														${{total_utilidad}}		
+													</div>	
+													
+												</div>	
+
+
+												
+												&nbsp;
+											</div>
+										</div>
+									</div>	
+									
+																				
+									<div class="col-xs-8">
+										<!--
+											abre
+											Resumen de ventas del periodo seleccionado
+										-->
+										<div class="col-xs-12">
+											<div class="cls_encabezado_alert" >
+												<label>Resumen de venta de período Seleccionado</label>
+											</div>
+											<div class="panel panel-default">
+												<div class="col-xs-12">
+													<div class="col-xs-3">
+														
+													</div>
+													<div class="col-xs-1">											
+														<label>Cant.</label>
+													</div>
+													<div class="col-xs-2 text-right">
+														
+														<label>Mutuo</label>
+													</div>	
+
+													<div class="col-xs-2 text-right">
+														<label>Avaluo</label>
+														
+													</div>	
+
+													<div class="col-xs-2 text-right">
+														
+														<label>Venta</label>
+													</div>	
+
+
+													<div class="col-xs-2 text-right">
+														
+														<label>Utilidad</label>
+													</div>	
+
+												</div>
+												<div class="col-xs-12">
+													<div class="col-xs-3">
+														Venta Piso
+													</div>
+													<div class="col-xs-1">											
+														{{cont_venta_piso}}
+													</div>
+													<div class="col-xs-2 text-right">
+														
+														${{importe_mutuo_piso}}
+													</div>	
+
+													<div class="col-xs-2 text-right">
+														${{importe_avaluo_piso}}
+														
+													</div>	
+
+													<div class="col-xs-2 text-right">
+														
+														${{importe_venta_piso}}
+													</div>	
+
+
+													<div class="col-xs-2 text-right">
+														
+														${{utilidad_vta_piso}}
+													</div>	
+
+												</div>
+												<div class="col-xs-12">
+													<div class="col-xs-3">
+														Venta Granel
+													</div>
+													<div class="col-xs-1">											
+														{{cont_venta_granel}}
+													</div>
+													<div class="col-xs-2 text-right">
+														${{importe_mutuo_granel}}
+														
+													</div>	
+
+													<div class="col-xs-2 text-right">
+														
+														${{importe_avaluo_granel}}
+													</div>	
+
+													<div class="col-xs-2 text-right">
+														
+														${{importe_venta_granel}}
+													</div>	
+
+
+													<div class="col-xs-2 text-right">
+														
+														${{utilidad_vta_granel}}
+													</div>	
+
+												</div>
+												<div class="col-xs-12">
+													<hr>
+												</div>
+														<div class="col-xs-12">
+													<div class="col-xs-3">
+														Total
+													</div>
+													<div class="col-xs-1">											
+														{{cont_total_vta}}
+													</div>
+													<div class="col-xs-2 text-right">
+														${{tot_mutuo}}
+														
+													</div>	
+
+													<div class="col-xs-2 text-right">
+														
+														${{tot_avaluo}}
+													</div>	
+
+													<div class="col-xs-2 text-right">
+														
+														${{tot_venta}}
+													</div>	
+
+
+													<div class="col-xs-2 text-right">
+														
+														${{tot_utilidad_vta}}
+													</div>	
+
+												</div>
+
+												&nbsp;
+											</div>
+										</div>
+
+										<!--
+											cierra
+											Resumen de ventas del periodo seleccionado
+										-->
+
+										<div class="col-xs-12">
+											<br>
+										</div>
+										<!--
+											abre
+											estatus de cartera
+										-->
+
+										<div class="col-xs-12">
+																	
+													
+
+											<div class="cls_encabezado_alert" >
+												<label>Estatus de cartera</label>
+											</div>
+											<div class="panel panel-default">
+												<div class="col-xs-12">
+													<div class="col-xs-4">
+														
+													</div>
+													<div class="col-xs-2">											
+														<label>Cantidad</label>
+													</div>
+													<div class="col-xs-3 text-right">
+														
+														<label>Mutuo</label>
+													</div>	
+
+													<div class="col-xs-3 text-right">
+														<label>Avaluo</label>
+														
+													</div>	
+
+												</div>
+
+												<div class="col-xs-12">
+													<div class="col-xs-4">
+														Boleta Activa
+													</div>
+													<div class="col-xs-2">											
+														{{cont_activas}}
+													</div>
+													<div class="col-xs-3 text-right">
+														${{mutuo_activo}}
+													</div>	
+
+													<div class="col-xs-3 text-right">
+														${{avaluo_activo}}
+													</div>	
+												</div>
+
+
+												<div class="col-xs-12">
+													<div class="col-xs-4">
+														Boleta Almoneda
+													</div>
+													<div class="col-xs-2">											
+														{{cont_almoneda}}
+													</div>
+													<div class="col-xs-3 text-right">
+														${{mutuo_almoneda}}
+													</div>	
+
+													<div class="col-xs-3 text-right">
+														${{avaluo_almoneda}}
+													</div>	
+												</div>
+
+
+
+												<div class="col-xs-12">
+													<div class="col-xs-4">
+														Boleta Remate
+													</div>
+													<div class="col-xs-2">					
+														{{cont_remate}}
+													</div>
+													<div class="col-xs-3 text-right">
+														${{mutuo_remate}}
+													</div>	
+
+													<div class="col-xs-3 text-right">
+														${{avaluo_remate}}
+													</div>	
+												</div>
+
+
+												<div class="col-xs-12">
+													<hr>
+												</div>
+
+
+												<div class="col-xs-12">
+													<div class="col-xs-4">
+														Total
+													</div>
+													<div class="col-xs-2">											
+														{{cont_total_2}}
+													</div>
+													<div class="col-xs-3 text-right">
+														${{total_mutuo}}
+													</div>	
+
+													<div class="col-xs-3 text-right">
+														${{total_almoneda}}
+													</div>	
+												</div>
+												&nbsp;
+											</div>
+										</div>
+										<!--
+											cierra
+											estatus de cartera
+										-->
+									</div>
+								</div>
+								&nbsp;	
+							</div>	
+							<div class="col-xs-12">
+
+								
+							</div>
+
+									
+					</div>				
+			</div>
+
 		</form>
+	</div>
+	<div id="fondo_preloader">
+		<div class="preloader" id="preloader">
+		
+		</div>
 	</div>
 
 	{% ifequal est_error '1' %}
@@ -563,6 +686,12 @@
 				{
 					fn_inicio();
 
+					$("#btn_consultar").click(
+							function()
+							{
+								$("#fondo_preloader").show();
+							}
+						);
 					$("#btn-continuar").click(
 								function()
 								{
@@ -585,6 +714,7 @@
 		}
 		function fn_inicio()
 		{
+			$("#fondo_preloader").hide();
 			fn_establece_fecha_hoy();
 			post="{{post}}";
 

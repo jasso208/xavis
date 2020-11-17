@@ -12,15 +12,28 @@ import email.message
 from django.conf import settings
 from django.db.models import Sum
 
+#funcion que regresa el dia primero y dia ultimo del mes de la fecha dada
+#1: para inicio de mes
+#2: para fin de mes
+def fn_last_day_of_month(today,opc): 
+	
+
+	dateMonthStart="%s-%s-01" % (today.year, today.month)
+	dateMonthEnd="%s-%s-%s" % (today.year, today.month, calendar.monthrange(today.year, today.month)[1])
+
+	if opc == 1:
+		return dateMonthStart
+	else:
+		return dateMonthEnd
+	 
 
 
 
-def fn_calcula_precio_apartado(boleta):
+def fn_calcula_precio_apartado(boleta):	
 	importe_venta=0.00
-
 	porcentaje=Porcentaje_Sobre_Avaluo.objects.all().aggregate(Sum("porcentaje_apartado"))
-
 	porce=0;
+
 	if porcentaje["porcentaje_apartado__sum"]!=None:
 		porce=int(porcentaje["porcentaje_apartado__sum"])
 

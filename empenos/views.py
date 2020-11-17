@@ -1655,6 +1655,12 @@ def rep_flujo_caja(request):
 	error=""#en caso de error en esta variable se manda el mensaje de error.
 	est_error="0"#si es cero es que todo esta correcto.
 
+	#obtenemos los el dia incial y final del mes actual
+	today= datetime.now()
+	dia_ultimo_mes = datetime.strptime(fn_last_day_of_month(today,2),'%Y-%m-%d')
+	dia_primero_mes = datetime.strptime(fn_last_day_of_month(today,1),'%Y-%m-%d')
+
+	
 
 
 	post="0"
@@ -1712,6 +1718,12 @@ def rep_flujo_caja(request):
 	cont_ab_apartado=0
 	importe_ab_apartado=0.00
 
+	refrendo_aux = 0.00
+	cpg_aux = 0.00
+	ce_aux = 0.00
+	ganancia_ventas_aux = 0.00
+
+
 
 	if request.method=="POST":
 
@@ -1740,10 +1752,10 @@ def rep_flujo_caja(request):
 			sucursal=Sucursal.objects.get(id=sucursal)
 			txt_sucursal=sucursal.sucursal
 
-			refrendo_aux = sucursal.fn_get_total_refrendos(fecha_inicial,fecha_final)
-			cpg_aux = sucursal.fn_get_total_comision_pg(fecha_inicial,fecha_final)
-
-			ce_aux = sucursal.fn_get_total_costos_extras(fecha_inicial,fecha_final)
+			refrendo_aux = sucursal.fn_get_total_refrendos(dia_primero_mes,dia_ultimo_mes)
+			cpg_aux = sucursal.fn_get_total_comision_pg(dia_primero_mes,dia_ultimo_mes)
+			ce_aux = sucursal.fn_get_total_costos_extras(dia_primero_mes,dia_ultimo_mes)			
+			ganancia_ventas_aux = sucursal.fn_get_ganancia_ventas(dia_primero_mes,dia_ultimo_mes)
 
 
 			cont_ab_apartado = Abono_Apartado.objects.filter(fecha__range = (fecha_inicial,fecha_final),caja__sucursal = sucursal).count()
@@ -1989,6 +2001,18 @@ def rep_flujo_caja(request):
 			fecha_inicial=datetime.combine(fecha_inicial,time.min)
 			fecha_final=datetime.combine(fecha_final,time.max)
 
+
+			sucursales_aux = Sucursal.objects.all()
+
+
+
+			for s in sucursales_aux:				
+				refrendo_aux = decimal.Decimal(refrendo_aux) + decimal.Decimal(s.fn_get_total_refrendos(dia_primero_mes,dia_ultimo_mes))
+				cpg_aux = decimal.Decimal(cpg_aux) + decimal.Decimal(s.fn_get_total_comision_pg(dia_primero_mes,dia_ultimo_mes))
+				ce_aux = decimal.Decimal(ce_aux) + decimal.Decimal(s.fn_get_total_costos_extras(dia_primero_mes,dia_ultimo_mes))			
+				ganancia_ventas_aux = decimal.Decimal(ganancia_ventas_aux) + decimal.Decimal(s.fn_get_ganancia_ventas(dia_primero_mes,dia_ultimo_mes))
+			
+
 			cont_ab_apartado=Abono_Apartado.objects.filter(fecha__range=(fecha_inicial,fecha_final)).count()
 
 			iaa=Abono_Apartado.objects.filter(fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("importe"))
@@ -2208,6 +2232,7 @@ def rep_flujo_caja(request):
 	else:	
 		post="0"
 
+
 	form=Flujo_Caja_Form()
 
 	
@@ -2221,6 +2246,18 @@ def rep_flujo_caja(request):
 	cont_total=1+cont_otros+cont_com_pg+cont_refrendos+cont_capital+cont_desempenos+cont_empenos+cont_ventas+cont_ab_apartado+cont_retiros
 
 	cont_total_2=cont_almoneda+cont_activas+cont_remate
+
+			
+	total_utilidad = decimal.Decimal(refrendo_aux) + decimal.Decimal(cpg_aux) + decimal.Decimal(ce_aux) + decimal.Decimal(ganancia_ventas_aux) - decimal.Decimal(importe_retiros)
+
+
+	
+	refrendo_aux = "{:0,.2f}".format(refrendo_aux)
+	cpg_aux = "{:0,.2f}".format(cpg_aux)
+	ce_aux = "{:0,.2f}".format(ce_aux)
+	ganancia_ventas_aux = "{:0,.2f}".format(ganancia_ventas_aux)
+
+	total_utilidad = "{:0,.2f}".format(total_utilidad)
 
 
 	total_mutuo=mutuo_almoneda+mutuo_activo+mutuo_remate
@@ -2520,7 +2557,12 @@ def retiro_efectivo(request):
 	error_no_fondos='0'
 	read_only="0"
 
-	
+
+
+
+
+
+
 	fondo_inicial="{:0,.2f}".format(fondo_inicial)
 	otros_ingresos="{:0,.2f}".format(otros_ingresos)
 	importe_refrendo="{:0,.2f}".format(importe_refrendo)

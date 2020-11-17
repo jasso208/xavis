@@ -245,6 +245,37 @@ class Sucursal(models.Model):
 
 		return decimal.Decimal(total_costo_extra)
 
+	#funcin que recibe un rango de fechas y regresa la ganancia de las ventas.
+	#importe_venta - mutuo_real = ganancia el ventas.
+	def fn_get_ganancia_ventas(self,fecha_i,fecha_f):
+		importe_mutuo = 0
+		importe_venta = 0
+
+		im = Venta_Piso.objects.filter(sucursal = self, fecha__range = (fecha_i,fecha_f)).aggregate(Sum("importe_mutuo"))
+		if im["importe_mutuo__sum"]!= None:
+			importe_mutuo = im["importe_mutuo__sum"]
+
+		img = Venta_Granel.objects.filter(sucursal = self, fecha__range = (fecha_i,fecha_f)).aggregate(Sum("importe_mutuo"))
+		if img["importe_mutuo__sum"]!= None:
+			importe_mutuo = decimal.Decimal(importe_mutuo)+ decimal.Decimal(img["importe_mutuo__sum"])
+
+
+
+		iv = Venta_Piso.objects.filter(sucursal = self, fecha__range = (fecha_i,fecha_f)).aggregate(Sum("importe_venta"))
+		if iv["importe_venta__sum"]!= None:
+			importe_venta = iv["importe_venta__sum"]	
+
+
+		ivg = Venta_Granel.objects.filter(sucursal = self, fecha__range = (fecha_i,fecha_f)).aggregate(Sum("importe_venta"))
+		if ivg["importe_venta__sum"]!= None:
+			importe_venta = decimal.Decimal(importe_venta) + decimal.Decimal(ivg["importe_venta__sum"])
+
+		return decimal.Decimal(importe_venta) - decimal.Decimal(importe_mutuo)
+
+
+
+
+
 
 class Concepto_Retiro(models.Model):
 	concepto = models.CharField(max_length = 40,null = False)
@@ -681,7 +712,6 @@ class Apartado(models.Model):
 	sucursal=models.ForeignKey(Sucursal,on_delete=models.PROTECT,blank=True,null=True)	
 
 
-
 class Abono_Apartado(models.Model):
 	folio=models.CharField(max_length=7,null=True)
 	usuario=models.ForeignKey(User,on_delete=models.PROTECT,null=True,blank=True,related_name="usuario_ab_apartado")
@@ -689,9 +719,8 @@ class Abono_Apartado(models.Model):
 	importe=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)
 	caja=models.ForeignKey(Cajas,on_delete=models.PROTECT,blank=True,null=True)#es la caja que se tenia aberta cuando se ingreso el dinero.
 	apartado=models.ForeignKey(Apartado,on_delete=models.PROTECT)
-	
 
-	
+
 class Imprime_Apartado(models.Model):
 	usuario=models.OneToOneField(User,on_delete=models.PROTECT,null=True,blank=True)
 	apartado=models.ForeignKey(Apartado,on_delete=models.PROTECT)
