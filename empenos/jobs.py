@@ -42,8 +42,8 @@ def fn_job_libera_apartado():
 #para evitar que cuando se pase a produccion, se pase codigo de prueba
 @transaction.atomic
 def fn_job_diario_prueba():
-	hoy=datetime(2020,11,23,0,0)	
-	fecha_fin=datetime(2020,11,23,0,0)
+	hoy=datetime(2020,11,11,0,0)	
+	fecha_fin=datetime(2020,11,18,0,0)
 
 	while hoy<=fecha_fin:
 		print("fecha ejecucion")

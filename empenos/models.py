@@ -272,6 +272,17 @@ class Sucursal(models.Model):
 
 		return decimal.Decimal(importe_venta) - decimal.Decimal(importe_mutuo)
 
+	def fn_get_retiros(self,fecha_i,fecha_f):
+
+		ret=Retiro_Efectivo.objects.filter(sucursal=self,fecha__range=(fecha_i,fecha_f),activo = 1).aggregate(Sum("importe"))
+
+		importe_retiros=0.00					
+		if ret["importe__sum"]!=None:
+			importe_retiros=ret["importe__sum"]
+
+		return importe_retiros
+			
+
 
 
 

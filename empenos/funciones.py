@@ -680,6 +680,7 @@ def fn_simula_refrendo(importe_abono,usuario,boleta,recursivo,desc_pg):
 			
 			importe_abono=int(importe_abono)-int(prg.importe)#disminuimos el saldo del importe abonado
 
+			print(prg)
 			#calculamos la nueva fecha de vencimiento
 			#se toma la mas alta fecha devencimiento de Refrendo Pg
 			#if prg.fecha_vencimiento>fv_final:

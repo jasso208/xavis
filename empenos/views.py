@@ -1722,7 +1722,7 @@ def rep_flujo_caja(request):
 	cpg_aux = 0.00
 	ce_aux = 0.00
 	ganancia_ventas_aux = 0.00
-
+	im_retiros_aux = 0.00
 
 
 	if request.method=="POST":
@@ -1756,6 +1756,7 @@ def rep_flujo_caja(request):
 			cpg_aux = sucursal.fn_get_total_comision_pg(dia_primero_mes,dia_ultimo_mes)
 			ce_aux = sucursal.fn_get_total_costos_extras(dia_primero_mes,dia_ultimo_mes)			
 			ganancia_ventas_aux = sucursal.fn_get_ganancia_ventas(dia_primero_mes,dia_ultimo_mes)
+			im_retiros_aux = sucursal.fn_get_retiros(dia_primero_mes,dia_ultimo_mes)
 
 
 			cont_ab_apartado = Abono_Apartado.objects.filter(fecha__range = (fecha_inicial,fecha_final),caja__sucursal = sucursal).count()
@@ -1881,6 +1882,7 @@ def rep_flujo_caja(request):
 
 
 
+
 			#obtenemos el importe de boletas activas
 			bea=Boleta_Empeno.objects.filter(estatus=est_activa,sucursal=sucursal).aggregate(Sum("avaluo"))
 			be=Boleta_Empeno.objects.filter(estatus=est_activa,sucursal=sucursal).aggregate(Sum("mutuo"))
@@ -2001,26 +2003,21 @@ def rep_flujo_caja(request):
 			fecha_inicial=datetime.combine(fecha_inicial,time.min)
 			fecha_final=datetime.combine(fecha_final,time.max)
 
-
 			sucursales_aux = Sucursal.objects.all()
-
-
 
 			for s in sucursales_aux:				
 				refrendo_aux = decimal.Decimal(refrendo_aux) + decimal.Decimal(s.fn_get_total_refrendos(dia_primero_mes,dia_ultimo_mes))
 				cpg_aux = decimal.Decimal(cpg_aux) + decimal.Decimal(s.fn_get_total_comision_pg(dia_primero_mes,dia_ultimo_mes))
 				ce_aux = decimal.Decimal(ce_aux) + decimal.Decimal(s.fn_get_total_costos_extras(dia_primero_mes,dia_ultimo_mes))			
 				ganancia_ventas_aux = decimal.Decimal(ganancia_ventas_aux) + decimal.Decimal(s.fn_get_ganancia_ventas(dia_primero_mes,dia_ultimo_mes))
+				im_retiros_aux = decimal.Decimal(im_retiros_aux) + decimal.Decimal(s.fn_get_retiros(dia_primero_mes,dia_ultimo_mes))
 			
-
 			cont_ab_apartado=Abono_Apartado.objects.filter(fecha__range=(fecha_inicial,fecha_final)).count()
 
 			iaa=Abono_Apartado.objects.filter(fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("importe"))
 
 			if iaa["importe__sum"] != None:
 				importe_ab_apartado = iaa["importe__sum"]
-
-
 
 			#buscamos ingresos por ventas
 			cont_ventas=Venta_Granel.objects.filter(fecha_importe_venta__range=(fecha_inicial,fecha_final)).count()
@@ -2248,7 +2245,7 @@ def rep_flujo_caja(request):
 	cont_total_2=cont_almoneda+cont_activas+cont_remate
 
 			
-	total_utilidad = decimal.Decimal(refrendo_aux) + decimal.Decimal(cpg_aux) + decimal.Decimal(ce_aux) + decimal.Decimal(ganancia_ventas_aux) - decimal.Decimal(importe_retiros)
+	total_utilidad = decimal.Decimal(refrendo_aux) + decimal.Decimal(cpg_aux) + decimal.Decimal(ce_aux) + decimal.Decimal(ganancia_ventas_aux) - decimal.Decimal(im_retiros_aux)
 
 
 	
