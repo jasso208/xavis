@@ -35,11 +35,26 @@ def fn_job_libera_apartado():
 			a.save()
 	except Exception as e:
 		return false
-		
-		
 
 	return True
 
+#esta funcion se define para hacer pruebas.
+#para evitar que cuando se pase a produccion, se pase codigo de prueba
+@transaction.atomic
+def fn_job_diario_prueba():
+	hoy=datetime(2020,11,23,0,0)	
+	fecha_fin=datetime(2020,11,23,0,0)
+
+	while hoy<=fecha_fin:
+		print("fecha ejecucion")
+		print(hoy)
+		fn_boletas_vencidas_semanal(hoy)
+		fn_pagos_vencidos(hoy)
+		fn_comision_pg(hoy)
+		fn_boletas_10d_alomneda(hoy)
+
+		dias = timedelta(days=1)	
+		hoy=datetime.combine(hoy+dias, time.min)  
 
 
 @transaction.atomic
@@ -186,9 +201,6 @@ def fn_pagos_vencidos(hoy):
 	estatus_apartado=Estatus_Boleta.objects.get(id=7)
 
 
-	
-
-
 	#*******************************************************************************************
 	#pagos de tipo refrendo que se venncen hoy
 	refrendo=Tipo_Pago.objects.get(id=1)
@@ -206,56 +218,55 @@ def fn_pagos_vencidos(hoy):
 		#generamos el Refrendo Pg.
 		#el refrendo pg para plazo semanal se genera en la funcion de boletas vencidas.
 		#Asumimos que la boleta  que es considerada aqui, esa activa de lo contrario no deberia haber llegado aqui.
-		if p.boleta.plazo.id==3:
-			if p.boleta.fecha_vencimiento==hoy:
-				p.boleta.estatus=estatus_almoneda
-			refrendo=0.00
-			almacenaje=0.00
-			interes=0.00
-			iva=0.00
+		if p.boleta.plazo.id == 3:
+			if p.boleta.fecha_vencimiento == hoy:
+				p.boleta.estatus = estatus_almoneda
+			refrendo = 0.00
+			almacenaje = 0.00
+			interes = 0.00
+			iva = 0.00
 
 			#se calcula el refrendo para que en caso de que se haya abonado a capital, se calcule el refrendo en base al nuevo mutuo			
-			resp=p.boleta.fn_calcula_refrendo()
+			resp = p.boleta.fn_calcula_refrendo()
 
-			almacenaje=resp[0]["almacenaje"]
-			interes=resp[0]["interes"]
-			iva=resp[0]["iva"]
-			refrendo=resp[0]["refrendo"]
+			almacenaje = resp[0]["almacenaje"]
+			interes = resp[0]["interes"]
+			iva = resp[0]["iva"]
+			refrendo = resp[0]["refrendo"]
 			
-			est_refrendo=Tipo_Pago.objects.get(id=1)
-			est_comisionpg=Tipo_Pago.objects.get(id=2)
-			est_refrendopg=Tipo_Pago.objects.get(id=3)
+			est_refrendo = Tipo_Pago.objects.get(id=1)
+			est_comisionpg = Tipo_Pago.objects.get(id=2)
+			est_refrendopg = Tipo_Pago.objects.get(id=3)
 
-			cont_ref=Pagos.objects.filter(boleta=p.boleta,tipo_pago=est_refrendo).count()
-			cont_refpg=Pagos.objects.filter(boleta=p.boleta,tipo_pago=est_refrendopg).count()
+			cont_ref = Pagos.objects.filter(boleta=p.boleta,tipo_pago=est_refrendo).count()
+			cont_refpg = Pagos.objects.filter(boleta=p.boleta,tipo_pago=est_refrendopg).count()
 
-			meses=int(cont_ref)+int(cont_refpg)+1
+			meses = int(cont_ref)+int(cont_refpg)+1
 
 			#como ya se pago el refrendo actual, se genera un nuevo pago tipo refrendo.
-			fecha_vencimiento=datetime.combine(fn_add_months(p.boleta.fecha,meses), time.min)
+			fecha_vencimiento = datetime.combine(fn_add_months(p.boleta.fecha,meses), time.min)
 
-			fecha_vencimiento_real=fecha_vencimiento
+			fecha_vencimiento_real = fecha_vencimiento
 			
 			#fecha_vencimiento=datetime.combine(fn_add_months(hoy,1), time.min)	
 			#validmoas que la fecha de vencimiento no sea de azueto
-			fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
+			fecha_vencimiento = fn_fecha_vencimiento_valida(fecha_vencimiento)
 
 			#generamos el nuevo pago
-			pago=Pagos()
-			pago.tipo_pago=refrendo_pg
-			pago.boleta=p.boleta
-			pago.fecha_vencimiento=fecha_vencimiento
-			pago.almacenaje=almacenaje
-			pago.interes=interes
-			pago.iva=iva
-			pago.importe=round(refrendo)
-			pago.vencido="N"
-			pago.pagado="N"
-			pago.fecha_vencimiento_real=fecha_vencimiento_real
-			print("entro entro 1 2")
+			pago = Pagos()
+			pago.tipo_pago = refrendo_pg
+			pago.boleta = p.boleta
+			pago.fecha_vencimiento = fecha_vencimiento
+			pago.almacenaje = almacenaje
+			pago.interes = interes
+			pago.iva = iva
+			pago.importe = round(refrendo)
+			pago.vencido = "N"
+			pago.pagado = "N"
+			pago.fecha_vencimiento_real = fecha_vencimiento_real			
 			pago.save()	
 
-			p.boleta.refrendo=round(refrendo)
+			p.boleta.refrendo = round(refrendo)
 			p.boleta.save()
 
 			#generamos los pagos parciales.
@@ -263,7 +274,7 @@ def fn_pagos_vencidos(hoy):
 
 	#marcamos los periodos como vencidos,
 	#aplica solo para boletas de periodo mensual.
-	per=Periodo.objects.filter(pagado="N",fecha_vencimiento=hoy)
+	per=Periodo.objects.filter(pagado = "N",fecha_vencimiento = hoy)
 	for x in per:
 		x.vencido="S"
 		x.save()
@@ -283,7 +294,7 @@ def fn_pagos_vencidos(hoy):
 	#pagos de tipo refrendo PG que se vencen hoy
 	refrendo_pg=Tipo_Pago.objects.get(id=3)
 
-	pagos=Pagos.objects.filter(fecha_vencimiento=hoy,pagado='N',tipo_pago=refrendo_pg).exclude(boleta__estatus = estatus_desempem).exclude(boleta__estatus = estatus_vendido).exclude(boleta__estatus = estatus_apartado)
+	pagos=Pagos.objects.filter(fecha_vencimiento=hoy,tipo_pago=refrendo_pg).exclude(boleta__estatus = estatus_desempem).exclude(boleta__estatus = estatus_vendido).exclude(boleta__estatus = estatus_apartado)
 
 	for p in pagos:
 		#marcamos cadapago como vencido.
@@ -315,6 +326,7 @@ def fn_pagos_vencidos(hoy):
 			refrendo=round(decimal.Decimal(resp[0]["refrendo"])/decimal.Decimal(4.00))
 
 		elif b.plazo.id==3:#si es plazo de 1 mes
+			print("es plazo mensual")
 			#fecha_vencimiento=datetime.combine(fn_add_months(hoy,1), time.min)	
 			#validmoas que la fecha de vencimiento no sea de azueto
 			#fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
@@ -346,6 +358,8 @@ def fn_pagos_vencidos(hoy):
 		#elif b.plazo.id=1:
 		#	print("el plazo de 1  dia no debera entrar aqui ya que no genera REEFRENDO PG")
 		#generamos el nuevo pago
+
+
 		pago=Pagos()
 		pago.tipo_pago=refrendo_pg
 		pago.boleta=b
@@ -360,6 +374,8 @@ def fn_pagos_vencidos(hoy):
 		
 		pago.save()
 
+		print("pago id")
+		print(pago.id)
 		#si el pago que esta venciendo es de periodo mensual.
 		#generamos los periodos
 		#el refrendo pg para plazo semanal se genera en la funcion de boletas vencidas.

@@ -198,6 +198,54 @@ class Sucursal(models.Model):
 		
 		return respuesta
 
+
+	#funcion que recibe un rango de fechas y regresa el importe total de refrendos recibidos	
+	def fn_get_total_refrendos(self,fecha_i,fecha_f):
+		abonos = Abono.objects.filter(fecha__range = (fecha_i,fecha_f),sucursal = self)
+		refrendo  = 0.00
+		for a in abonos:
+			#Buscamos los refrendos  de las boletas de plazo semanal.
+			rap = Rel_Abono_Pago.objects.filter(abono = a)
+			for r in rap:
+				
+				#si afecto a un refrendo o refrendo pg, lo contamos como refrendo				
+				if r.pago.tipo_pago.id == 1 or r.pago.tipo_pago.id == 3:
+
+					refrendo = decimal.Decimal(refrendo) + decimal.Decimal(r.pago.importe)
+
+			#buscamos las boletas de plazo mensual
+			rap = Rel_Abono_Periodo.objects.filter(abono = a)
+			for r in rap:
+				refrendo = decimal.Decimal(refrendo) + decimal.Decimal(r.periodo.importe)				
+
+		return refrendo
+
+	#funcion que recibe un rango de fecas y regresa el importe total de pagos a comision pg
+	def fn_get_total_comision_pg(self,fecha_i,fecha_f):
+		abonos = Abono.objects.filter(fecha__range = (fecha_i,fecha_f),sucursal = self)
+		comision_pg  = 0.00
+		for a in abonos:			
+			rap = Rel_Abono_Pago.objects.filter(abono = a)
+			for r in rap:				
+				#Solo contamos los tipos de pagos comision pg
+				if r.pago.tipo_pago.id == 2:
+					comision_pg = decimal.Decimal(comision_pg) + decimal.Decimal(r.pago.importe)
+
+		return comision_pg
+
+	#funcion que recibe un rango de fechas y regresa el importe de costos extras.
+	#al momento de crear esta rutina, solo existe el cobro reimpresion de boleta.
+	def fn_get_total_costos_extras(self,fecha_i,fecha_f):
+		rce = Reg_Costos_Extra.objects.filter(fecha__range = (fecha_i,fecha_f),caja__sucursal = self).aggregate(Sum("importe"))
+
+		total_costo_extra = 0
+
+		if rce["importe__sum"] != None:
+			total_costo_extra = rce["importe__sum"]
+
+		return decimal.Decimal(total_costo_extra)
+
+
 class Concepto_Retiro(models.Model):
 	concepto = models.CharField(max_length = 40,null = False)
 	sucursal = models.ForeignKey(Sucursal,on_delete = models.PROTECT,blank=True,null=True)

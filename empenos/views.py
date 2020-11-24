@@ -1733,10 +1733,17 @@ def rep_flujo_caja(request):
 		fecha_inicial=datetime.combine(fecha_inicial,time.min)
 		fecha_final=datetime.combine(fecha_final,time.max)
 
+
+
 		#si indicamos la sucursal
 		if request.POST.get("sucursal")!="":
 			sucursal=Sucursal.objects.get(id=sucursal)
 			txt_sucursal=sucursal.sucursal
+
+			refrendo_aux = sucursal.fn_get_total_refrendos(fecha_inicial,fecha_final)
+			cpg_aux = sucursal.fn_get_total_comision_pg(fecha_inicial,fecha_final)
+
+			ce_aux = sucursal.fn_get_total_costos_extras(fecha_inicial,fecha_final)
 
 
 			cont_ab_apartado = Abono_Apartado.objects.filter(fecha__range = (fecha_inicial,fecha_final),caja__sucursal = sucursal).count()
