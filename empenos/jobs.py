@@ -4,6 +4,7 @@ from django.db.models import Min
 import math
 from datetime import date, datetime, time,timedelta
 from django.db import transaction
+import os
 
 @transaction.atomic
 def fn_job_backup_basededatos():
