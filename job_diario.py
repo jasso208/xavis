@@ -1,5 +1,8 @@
 import requests
 
+print("iniciamos proceso de respaldo de base de datos")
+r = requests.get("https://empeno.jassdel.com/empenos/api_backup")
+
 print("Iniciamos proceso boletas vencidas")
 #ejecutamos el proceso para detectar boletas o periodos vencidos.
 #https://empeno.jassdel.com/

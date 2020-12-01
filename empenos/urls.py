@@ -87,6 +87,7 @@ urlpatterns=[
 	url(r'^api_consulta_configuracion_empeno/$',api_consulta_configuracion_empeno,name="api_consulta_configuracion_empeno"),
 	url(r'^api_porcentaje_mutuo/$',api_porcentaje_mutuo,name="api_porcentaje_mutuo"),
 	url(r'^api_cliente/$',api_cliente,name="api_cliente"),
+	url(r'^api_backup/$',api_backup,name="api_backup"),
 
 
 ]

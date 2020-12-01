@@ -764,6 +764,15 @@ def api_notificacion_cajas_abiertas(request):
 
 
 
+@api_view(['GET'])
+def api_backup(request):
+	respuesta = []
+	estatus = fn_job_backup_basededatos()
+	if estatus:
+		fn_envia_mail("Job respaldo base de datos exitoso","SE ejecuto correctamente","jasso.gallegos@gmail.com")
+	else:
+		fn_envia_mail("Job respaldo base de datos incorrecto","ERror al generar el respaldo de base de datos","jasso.gallegos@gmail.com")
+	return Response(respuesta)
 
 @api_view(['GET'])
 def api_job_diario(request):
