@@ -35,7 +35,7 @@ def fn_calcula_precio_apartado(boleta):
 	porce=0;
 
 	if porcentaje["porcentaje_apartado__sum"]!=None:
-		porce=int(porcentaje["porcentaje_apartado__sum"])
+		porce=decimal.Decimal(porcentaje["porcentaje_apartado__sum"])
 
 	importe_venta=decimal.Decimal(boleta.avaluo)+(decimal.Decimal(boleta.avaluo)*(decimal.Decimal(porce)/decimal.Decimal(100.00)))
 	return importe_venta
@@ -48,7 +48,7 @@ def fn_calcula_precio_venta_producto(boleta):
 
 	porce=0;
 	if porcentaje["porcentaje__sum"]!=None:
-		porce=int(porcentaje["porcentaje__sum"])
+		porce=decimal.Decimal(porcentaje["porcentaje__sum"])
 
 	importe_venta=decimal.Decimal(boleta.avaluo)+(decimal.Decimal(boleta.avaluo)*(decimal.Decimal(porce)/decimal.Decimal(100.00)))
 	return importe_venta

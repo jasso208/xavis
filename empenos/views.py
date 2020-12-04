@@ -3239,7 +3239,7 @@ def admin_porc_avaluo(request):
 	if request.method=="POST":
 		if permiso=="1":
 			form=Porcentaje_Sobre_Avaluo_Form(request.POST)
-			if int(request.POST.get("porcentaje"))>100 or int(request.POST.get("porcentaje"))<0:
+			if decimal.Decimal(request.POST.get("porcentaje"))>decimal.Decimal(100) or decimal.Decimal(request.POST.get("porcentaje"))<decimal.Decimal(0):
 				error="1"
 				porcentaje=Porcentaje_Sobre_Avaluo.objects.all()
 				porc=0

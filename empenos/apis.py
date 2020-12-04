@@ -390,11 +390,10 @@ def api_consulta_prod_temporal_piso(request):
 		
 		cont=Porcentaje_Sobre_Avaluo.objects.all().count()
 
-		print(cont)
+
 		#si cont es diferente de 1 es porque el porcentaje que se agregara sobre avaluo para calcular el precio de producto
 		#esta incorrecto
-		if cont!=1:
-			print("gallegos")
+		if cont!=1:			
 			respuesta.append({"estatus":"0","msj":"Error al consultar los productos."})
 			return Response(respuesta)
 
@@ -403,7 +402,7 @@ def api_consulta_prod_temporal_piso(request):
 
 		porce=0;
 		if porcentaje["porcentaje__sum"]!=None:
-			porce=int(porcentaje["porcentaje__sum"])
+			porce=decimal.Decimal(porcentaje["porcentaje__sum"])
 
 		
 
