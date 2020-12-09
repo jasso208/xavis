@@ -48,7 +48,7 @@
 								{% bootstrap_field form.tipo_movimiento  show_label=False%}
 							</div>
 							<div class="col-xs-12">								
-								<button class="btn btn-primary btn-sm" style="float: right;"   id="abrir_caja"><span class="glyphicon glyphicon-ok"></span> Aceptar</button>								
+								<button class="btn btn-primary btn-sm" style="float: right;"   id="btn_ingresar_capital"><span class="glyphicon glyphicon-ok"></span> Aceptar</button>
 							</div>	
 
 						</div>
@@ -57,15 +57,75 @@
 			</div>
 		</form>
 	</div>
+<div id="fondo_preloader">
+	<div class="preloader" id="preloader">
+
+	</div>
+</div>
+<div class="fondo_mensaje_2 cls_msj_error" >
+
+		</div >
+		<div class="mensaje_2 cls_msj_error" >
+				<div class="cls_encabezado_alert" >
+					Error!!
+				</div>
+				<div class="panel panel-default">
+					<label class="page-header" id="msj_error"></label>
+					<br>
+					<a class="btn btn-primary btn-sm" id="btn_aceptar_error">
+						<span class="glyphicon glyphicon-ok"></span>
+						Aceptar
+					</a>
+					<br>
+					<br>
+
+				</div>
+		</div>
 	<script type="text/javascript">
 		$(document).ready(
 				function()
 				{
+					fn_inicio();
 						$("#tipo_movimiento").hide();
-					$("#id_tipo_movimiento").val("2");
+						$("#id_tipo_movimiento").val("2");
+						$("#btn_ingresar_capital").click(
+							function()
+							{
+								var importe = $("#id_importe").val();
+
+								var comentario = $("#id_comentario").val();
+								if (importe == "" | importe == "0")
+								{
+
+									$(".cls_msj_error").show();
+									$("#msj_error").text("Debe ingresar un importe valido.");
+									return false;
+								}
+								if(comentario == "")
+								{
+									$(".cls_msj_error").show();
+									$("#msj_error").text("Debe ingresar un comentario.");
+									return false;
+								}
+
+								$("#fondo_preloader").show();
+							}
+						);
+						$("#btn_aceptar_error").click(
+							function()
+							{
+								$(".cls_msj_error").hide();
+							}
+						);
+
 					
 				}
 			);
+			function fn_inicio()
+			{
+				$("#fondo_preloader").hide();
+				$(".cls_msj_error").hide();
+			}
 	</script>
 	{% if caja_abierta == '0' %}
 		<div class="fondo_mensaje" >
