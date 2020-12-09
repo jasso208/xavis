@@ -687,17 +687,17 @@ def imprime_apartado(request):
 
 	current_row=730
 
-	p.drawImage(settings.IP_LOCAL+'/static/img/logo.jpg',40,750,100, 30)
-	p.drawImage(settings.IP_LOCAL+'/static/img/logo.jpg',340,750,100, 30)
-
-	p.drawString(400,790,"Copia cliente")
-	p.setFont("Helvetica-Bold",10)
-	p.drawString(170,760,"Folio apartado: "+str(im.apartado.folio))
+	p.drawImage(settings.IP_LOCAL+'/static/img/logo.jpg' , 40, 720, 200, 60)
+	p.drawImage(settings.IP_LOCAL+'/static/img/logo.jpg', 40, 720-380, 200, 60)
+	p.setFont("Helvetica-Bold",12)
+	p.drawString(250,770-380,"Copia cliente")
+	p.setFont("Helvetica-Bold",12)
 	p.drawString(470,760,"Folio apartado: "+str(im.apartado.folio))
+	p.drawString(470,360,"Folio apartado: "+str(im.apartado.folio))
 
 	p.setFont("Helvetica-Bold",12)
-	p.drawString(100,current_row,"Apartado Producto")
-	p.drawString(400,current_row,"Apartado Producto")
+	p.drawString(250,730,"Apartado Producto")
+	p.drawString(250,340,"Apartado Producto")
 
 	current_row=current_row-20
 	p.setFont("Helvetica",10)
@@ -706,50 +706,53 @@ def imprime_apartado(request):
 	p.drawString(35,current_row,"Folio boleta:")
 	p.drawString(100,current_row,str(im.apartado.boleta.folio))
 
-	p.drawString(335,current_row,"Folio boleta:")
-	p.drawString(400,current_row,str(im.apartado.boleta.folio))
+	p.drawString(35,current_row-380,"Folio boleta:")
+	p.drawString(100,current_row-380,str(im.apartado.boleta.folio))
 
 	current_row=current_row-20
 
 	p.drawString(35,current_row,"Fecha emisión: ")
 	p.drawString(150,current_row,str(im.apartado.fecha.strftime("%Y-%m-%d")))
-	p.drawString(335,current_row,"Fecha emisión: ")
-	p.drawString(450,current_row,str(im.apartado.fecha.strftime("%Y-%m-%d")))
+
+	p.drawString(35,current_row-380,"Fecha emisión: ")
+	p.drawString(150,current_row-380,str(im.apartado.fecha.strftime("%Y-%m-%d")))
 
 	current_row=current_row-20
 	p.drawString(35,current_row,"Fecha vencimiento: ")
 	p.drawString(150,current_row,str(im.apartado.fecha_vencimiento.strftime("%Y-%m-%d")))
-	p.drawString(335,current_row,"Fecha vencimiento: ")
-	p.drawString(450,current_row,str(im.apartado.fecha_vencimiento.strftime("%Y-%m-%d")))
+
+	p.drawString(35,current_row-380,"Fecha vencimiento: ")
+	p.drawString(150,current_row-380,str(im.apartado.fecha_vencimiento.strftime("%Y-%m-%d")))
 
 	current_row=current_row-20
 	p.drawString(35,current_row,"Sucursal:")
 	p.drawString(100,current_row,im.apartado.caja.sucursal.sucursal)
 
-	p.drawString(335,current_row,"Sucursal:")
-	p.drawString(400,current_row,im.apartado.caja.sucursal.sucursal)
+	p.drawString(35,current_row-380,"Sucursal:")
+	p.drawString(100,current_row-380,im.apartado.caja.sucursal.sucursal)
 
 	current_row=current_row-20
 	p.setFont("Helvetica",10)
 	p.drawString(35,current_row,"Cliente: ")
-	p.setFont("Helvetica",7)
+	p.setFont("Helvetica",10)
 	p.drawString(100,current_row,im.apartado.cliente.nombre+' '+im.apartado.cliente.apellido_p+' '+im.apartado.cliente.apellido_m)
 	p.setFont("Helvetica",10)
-	p.drawString(335,current_row,"Cliente: ")
-	p.setFont("Helvetica",7)
-	p.drawString(400,current_row,im.apartado.cliente.nombre+' '+im.apartado.cliente.apellido_p+' '+im.apartado.cliente.apellido_m)
+
+	p.drawString(35,current_row-380,"Cliente: ")
+	p.setFont("Helvetica",10)
+	p.drawString(100,current_row-380,im.apartado.cliente.nombre+' '+im.apartado.cliente.apellido_p+' '+im.apartado.cliente.apellido_m)
 	p.setFont("Helvetica",10)
 	current_row=current_row-20
 	current_row=current_row-20
 
 	p.setFont("Helvetica-Bold",10)
 	p.drawString(35,current_row,"Artículo")
-	p.drawString(230,current_row,"Precio")
+	p.drawString(480,current_row,"Precio")
 
-	p.drawString(335,current_row,"Artículo")
-	p.drawString(530,current_row,"Precio")
+	p.drawString(35,current_row-380,"Artículo")
+	p.drawString(480,current_row-380,"Precio")
 
-	p.setFont("Helvetica",7)
+	p.setFont("Helvetica",8)
 	current_row=current_row-20
 
 	
@@ -759,19 +762,19 @@ def imprime_apartado(request):
 	importe="$"+"{:0,.2f}".format(math.ceil(im.apartado.importe_venta))
 
 	p.drawString(30,current_row,">")
-	p.drawString(330,current_row,">")
+	p.drawString(30,current_row-380,">")
 
-	p.drawString(230,current_row,importe)
-	p.drawString(530,current_row,importe)
+	p.drawString(480,current_row,importe)
+	p.drawString(480,current_row-380,importe)
 
 	for db in dbe:
 		p.drawString(35,current_row,db.descripcion)
-		p.drawString(335,current_row,db.descripcion)
+		p.drawString(35,current_row-380,db.descripcion)
 		current_row=current_row-20		
 		
 		if db.observaciones is not None:				
 			p.drawString(35,current_row,db.observaciones)
-			p.drawString(335,current_row,db.observaciones)
+			p.drawString(35,current_row-380,db.observaciones)
 			current_row=current_row-20		
 
 		
@@ -779,23 +782,23 @@ def imprime_apartado(request):
 
 
 	p.setFont("Helvetica-Bold",10)	
-	p.drawString(130,current_row,"Costo Total: ")		
-	p.drawString(430,current_row,"Costo Total: ")		
+	p.drawString(380,current_row,"Costo Total: ")
+	p.drawString(380,current_row-380,"Costo Total: ")
 	importe_venta="$"+"{:0,.2f}".format(math.ceil(im.apartado.importe_venta))	
-	p.drawString(220,current_row,importe_venta)	
-	p.drawString(520,current_row,importe_venta)	
+	p.drawString(480,current_row,importe_venta)
+	p.drawString(480,current_row-380,importe_venta)
 
 	#cuando no contiene abono, es porque es una reimpresion y no hay abono actual.
 	if im.abono!=None:
 		current_row=current_row-20
 
 		p.setFont("Helvetica-Bold",10)	
-		p.drawString(130,current_row,"Abono: ")		
-		p.drawString(430,current_row,"Abono: ")		
+		p.drawString(380,current_row,"Abono: ")
+		p.drawString(380,current_row-380,"Abono: ")
 
 		importe="$"+"{:0,.2f}".format(int(im.abono.importe))	
-		p.drawString(220,current_row,importe)	
-		p.drawString(520,current_row,importe)	
+		p.drawString(480,current_row,importe)
+		p.drawString(480,current_row-380,importe)
 
 
 	aa=Abono_Apartado.objects.filter(apartado=im.apartado).aggregate(Sum("importe"))
@@ -807,66 +810,65 @@ def imprime_apartado(request):
 	current_row=current_row-20
 
 	p.setFont("Helvetica-Bold",10)	
-	p.drawString(130,current_row,"Total Abonado: ")		
-	p.drawString(430,current_row,"Total Abonado: ")		
+	p.drawString(380,current_row,"Total Abonado: ")
+	p.drawString(380,current_row-380,"Total Abonado: ")
 	total_abonado="$"+"{:0,.2f}".format(int(total_abonado))	
-	p.drawString(220,current_row,total_abonado)	
-	p.drawString(520,current_row,total_abonado)		
+	p.drawString(480,current_row,total_abonado)
+	p.drawString(480,current_row-380,total_abonado)
 
 	current_row=current_row-20
 
 	p.setFont("Helvetica-Bold",10)	
-	p.drawString(130,current_row,"Restan: ")		
-	p.drawString(430,current_row,"Restan: ")		
+	p.drawString(380,current_row,"Restan: ")
+	p.drawString(380,current_row-380,"Restan: ")
 	saldo_restante="$"+"{:0,.2f}".format(math.ceil(im.apartado.saldo_restante))	
-	p.drawString(220,current_row,saldo_restante)	
-	p.drawString(520,current_row,saldo_restante)		
+	p.drawString(480,current_row,saldo_restante)
+	p.drawString(480,current_row-380,saldo_restante)
 
 	current_row=current_row-20
-
+	current_row = 700
 	p.setFont("Helvetica-Bold",7)
-	p.drawString(40,current_row,"Nota: ")	
-	p.drawString(340,current_row,"Nota: ")	
+	p.drawString(30,440,"Nota: ")
+	p.drawString(30,440-380,"Nota: ")
 	p.setFont("Helvetica",7)
-	p.drawString(70,current_row,"El artículo fue probado en sucursal junto con el cliente y se aparta  ")	
-	p.drawString(370,current_row,"El artículo fue probado en sucursal junto con el cliente y se aparta  ")	
+	p.drawString(60,440,"El artículo fue probado en sucursal junto con el cliente  y se aparta funcionando. Por ser un artículo usado no se da ningun tipo de garantia.  ")
+	p.drawString(60,440-380,"El artículo fue probado en sucursal junto con el cliente y se aparta funcionando. Por ser un artículo usado no se da ningun tipo de garantia.  ")
 	current_row=current_row-10
-	p.drawString(70,current_row,"funcionando.")	
-	p.drawString(370,current_row,"funcionando.")	
+	#p.drawString(330,current_row,"y se aparta funcionando.")
+	#p.drawString(330,current_row,"y se aparta funcionando.")
 	current_row=current_row-10
-	p.drawString(70,current_row,"Por ser un artículo usado no se da ningun tipo de garantia. ")	
-	p.drawString(370,current_row,"Por ser un artículo usado no se da ningun tipo de garantia. ")	
+	#p.drawString(330,current_row,"Por ser un artículo usado no se da ningun tipo de garantia. ")
+	#p.drawString(330,current_row,"Por ser un artículo usado no se da ningun tipo de garantia. ")
 	current_row=current_row-10
-	p.drawString(70,current_row,"")
-	p.drawString(370,current_row,"")		
+	p.drawString(330,current_row,"")
+	p.drawString(330,current_row,"")
 	
 
-	current_row=current_row-20	
-	current_row=current_row-20	
+	current_row=530-20
+	current_row=current_row-20
 	
+	p.line(50,current_row-380,250,current_row-380)
 	p.line(50,current_row,250,current_row)
-	p.line(350,current_row,550,current_row)
 
-	current_row=current_row-20	
-	p.drawString(120,current_row,"Firma Cliente.")		
-	p.drawString(420,current_row,"Firma Valuador.")		
+	current_row=current_row-20
+	p.drawString(120,current_row-380,"Firma Cliente.")
+	p.drawString(120,current_row,"Firma Valuador.")
 
-	
 
-	linea_corte=800
+	linea_corte=50
 
 	pinta=0
 
-	while linea_corte>0:
+	while linea_corte<600:
 		if pinta==0:
-			p.line(300,linea_corte,300,linea_corte-20)		
+			p.line(linea_corte,420,linea_corte-20,420)
 			pinta=1
 		else:
 			
 			pinta=0
 
-		linea_corte=linea_corte-20
-	
+		linea_corte=linea_corte+20
+
 
 	p.showPage()#terminar pagina actual
 
