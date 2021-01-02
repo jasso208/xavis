@@ -664,14 +664,15 @@ class Boleta_Empeno(models.Model):
 	apellido_m_cotitular=models.CharField(max_length=20,default='NA')
 	plazo=models.ForeignKey(Plazo,on_delete=models.PROTECT)
 	refrendo=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)
-	estatus=models.ForeignKey(Estatus_Boleta,on_delete=models.PROTECT,default=1)
+	estatus=models.ForeignKey(Estatus_Boleta,on_delete=models.PROTECT,default=1,related_name = "estatus_b")
 	sucursal=models.ForeignKey(Sucursal,on_delete=models.PROTECT,blank=True,null=True)
 	mutuo_original=models.IntegerField(default=0)	#este campo no se actualiza, nos sirve para saber cual fue el mutuo original de la boleta.
 	fecha_vencimiento_real=models.DateTimeField(null=True,blank=True)#cuando la fecha de vencimiento cai en dia de asueto, la fecha de vencimienot se recorre un dia, esta fecha nos indica cual es la fecha de vencimiento real para calcular el las futuras fechas de vencimiento.
-	
 	almacenaje = models.DecimalField(max_digits = 20,decimal_places = 2,default = 0)
 	interes = models.DecimalField(max_digits = 20,decimal_places = 2,default = 0)
 	iva = models.DecimalField(max_digits = 20,decimal_places = 2,default = 0)
+	fecha_vencimiento_anterior = models.DateTimeField(null = True, blank = True)
+	estatus_anterior = models.ForeignKey(Estatus_Boleta,on_delete = models.PROTECT, related_name = "estatus_anterior",null = True,blank = True)
 
 	@classmethod
 	def nuevo_empeno(self,sucursal,tp,caja,usuario,avaluo,mutuo,fecha_vencimiento,cliente,nombre_cotitular,apellido_paterno,apellido_materno,plazo,fecha_vencimiento_real,estatus,folio,tm):
@@ -897,8 +898,7 @@ class Boleta_Empeno(models.Model):
 
 		if comision_pg.exists():			
 
-			print("descuento")
-			print(descuento)
+			
 			if descuento == 0:					
 				try:
 					for cpg in comision_pg:
@@ -1020,6 +1020,9 @@ class Boleta_Empeno(models.Model):
 					pgo.vencido="N"
 					pgo.pagado="N"
 					pgo.fecha_vencimiento_real=fecha_vencimiento_real
+					#en caso de cancelar el refrendo, necesitamos saber que semanas genero el refrendo.
+					#para poder eliminarlas.
+					pgo.abono = abono
 					pgo.save()
 				else:
 					for p in pago:
@@ -1028,7 +1031,12 @@ class Boleta_Empeno(models.Model):
 
 				self.fecha_vencimiento = datetime.strptime(np,'%Y-%m-%d')
 				self.fecha_vencimiento_real = fecha_vencimiento_real
+
 			estatus_abierta = Estatus_Boleta.objects.get(id = 1)
+
+			#esta informacion es necesaria para en caso de cancelar el refrendo.
+			self.estatus_anterior = self.estatus
+			self.fecha_vencimiento_anterior = self.fecha_vencimiento
 
 			self.estatus = estatus_abierta
 			self.save()
@@ -1244,6 +1252,21 @@ class Reg_Costos_Extra(models.Model):
 	boleta=models.ForeignKey(Boleta_Empeno,on_delete=models.PROTECT)
 	importe=models.IntegerField()
 
+class Abono(models.Model):
+	folio=models.CharField(max_length=7,null=True)
+	tipo_movimiento=models.ForeignKey(Tipo_Movimiento,on_delete=models.PROTECT,null=True,blank=True)
+	sucursal=models.ForeignKey(Sucursal,on_delete=models.PROTECT,null=True,blank=True)	
+	fecha=models.DateTimeField(default=timezone.now)
+	usuario=models.ForeignKey(User,on_delete=models.PROTECT)
+	importe=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)	
+	caja=models.ForeignKey(Cajas,on_delete=models.PROTECT,blank=True,null=True)
+	boleta=models.ForeignKey(Boleta_Empeno,on_delete=models.PROTECT,blank=True,null=True)
+
+	#funcion para cancelar abono
+	def fn_cancela_Abono(self):
+		resp = ['','']
+		return resp
+
 class Pagos(models.Model):
 	tipo_pago=models.ForeignKey(Tipo_Pago,on_delete=models.PROTECT,null=False,blank=True)
 	boleta=models.ForeignKey(Boleta_Empeno,on_delete=models.PROTECT,null=False,blank=True)
@@ -1256,7 +1279,7 @@ class Pagos(models.Model):
 	pagado=models.CharField(max_length=1,default='N',null=False)
 	fecha_pago=models.DateTimeField(null=True,blank=True)
 	fecha_vencimiento_real=models.DateTimeField(null=True,blank=True)#cuando la fecha de vencimiento cai en dia de asueto, la fecha de vencimienot se recorre un dia, esta fecha nos indica cual es la fecha de vencimiento real para calcular el las futuras fechas de vencimiento.
-
+	abono = models.ForeignKey(Abono,on_delete = models.PROTECT,null = True,blank = True)
 
 
 
@@ -1312,15 +1335,6 @@ class Dia_No_Laboral(models.Model):
     class Meta:
         unique_together=("fecha",)
 
-class Abono(models.Model):
-	folio=models.CharField(max_length=7,null=True)
-	tipo_movimiento=models.ForeignKey(Tipo_Movimiento,on_delete=models.PROTECT,null=True,blank=True)
-	sucursal=models.ForeignKey(Sucursal,on_delete=models.PROTECT,null=True,blank=True)	
-	fecha=models.DateTimeField(default=timezone.now)
-	usuario=models.ForeignKey(User,on_delete=models.PROTECT)
-	importe=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)	
-	caja=models.ForeignKey(Cajas,on_delete=models.PROTECT,blank=True,null=True)
-	boleta=models.ForeignKey(Boleta_Empeno,on_delete=models.PROTECT,blank=True,null=True)
 
 
 #cuando se aplica un refrendo y se le descuento los periodos PG
