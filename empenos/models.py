@@ -1264,7 +1264,34 @@ class Abono(models.Model):
 
 	#funcion para cancelar abono
 	def fn_cancela_Abono(self):
-		resp = ['','']
+		hoy = datetime.combine(date.today(),time.min)
+		fecha_abono = datetime.combine(self.fecha,time.min)
+
+		resp = []
+
+		if hoy != fecha_abono:
+			resp.append(False)
+			resp.append("El abono no puede ser cancelado ya que no es del dia de hoy.")
+			return resp
+
+		abonos_posteriores = Abono.objects.filter(boleta = self.boleta, id__gt = self.id)
+
+		if abonos_posteriores.exists():
+			resp.append(False)
+			resp.append("El abono no puede ser cancelado ya que existe un abono posterior al que intenta cancelar.")
+			return resp
+
+		if self.boleta.estatus_anterior == None:
+			resp.append(False)
+			resp.append("El abono no puede ser cancelado ya que no es posible calcular el estatus de boleta anterior.")
+			return resp
+
+		if self.boleta.fecha_vencimiento_anterior == None:
+			resp.append(False)
+			resp.append("El abono no puede ser cancelado ya que no es posible calcular la fecha de vencimiento anterior.")
+
+
+
 		return resp
 
 class Pagos(models.Model):

@@ -166,16 +166,13 @@ class Refrendo_Semanal_TestCase(TestCase):
 		abono.boleta = boleta
 		abono.save()
 
-		
-
-
 		#1.- el refrendo no puede ser cancelada si no es del dia de hoy
 		resp = abono.fn_cancela_Abono()
 
 		self.assertEqual(resp[0],False)
 		self.assertEqual(resp[1],"El abono no puede ser cancelado ya que no es del dia de hoy.")
 		
-		#2.- el refrendo no puede ser cancelada si ya presenta un refrendo
+		#2.- el refrendo no puede ser cancelada si la boleta ya presenta un refrendo posterior al que se desea cancelar.
 		abono.fecha = hoy
 		abono.save()
 
@@ -197,7 +194,7 @@ class Refrendo_Semanal_TestCase(TestCase):
 		
 
 		abono2.delete()
-		#3.- La boleta a la que afecto el refrendo debe contar con el estatus anteriorpara poder regresar el estatus.
+		#3.- La boleta a la que afecto el refrendo debe contar con el estatus anterior para poder regresar el estatus.
 		resp = abono.fn_cancela_Abono()
 		self.assertEqual(resp[0],False)
 		self.assertEqual(resp[1],"El abono no puede ser cancelado ya que no es posible calcular el estatus de boleta anterior.")
@@ -205,9 +202,12 @@ class Refrendo_Semanal_TestCase(TestCase):
 		boleta.estatus_anterior = Estatus_Boleta.objects.get(id = 1)
 		#4.- La boleta a la que afecto el refrendo debe contar con la fecha de vencimiento anterior.
 		resp = abono.fn_cancela_Abono()
+
 		self.assertEqual(resp[0],False)
 		self.assertEqual(resp[1],"El abono no puede ser cancelado ya que no es posible calcular la fecha de vencimiento anterior.")
 		boleta.fecha_vencimiento_anterior = hoy
+
+		
 		#5.- Si al refrendo se le aplicaron descuentos, se restauran los descuentos		
 		#.- Si el refrendo saldo comision de periodo de gracia, las marca como no pagadas.
 		#.- Si el refrendo aplico abono a capital, agreamos el abono a capital al mutuo 
