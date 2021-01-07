@@ -27,6 +27,10 @@ SI_NO=(
 	('2','NO'),
 )
 
+ESTATUS_ABONO = (
+	('1','ACTIVO'),
+	('2','CANCELADO'),
+)
 
 #al momendo de anunciar un producto para la venta piso, 
 #se le aumenta un % sobre el avaluo, ese porcentaje es configurable en esta tabla.
@@ -673,6 +677,7 @@ class Boleta_Empeno(models.Model):
 	iva = models.DecimalField(max_digits = 20,decimal_places = 2,default = 0)
 	fecha_vencimiento_anterior = models.DateTimeField(null = True, blank = True)
 	estatus_anterior = models.ForeignKey(Estatus_Boleta,on_delete = models.PROTECT, related_name = "estatus_anterior",null = True,blank = True)
+	fecha_vencimiento_real_anterior = models.DateTimeField(null = True, blank = True)
 
 	@classmethod
 	def nuevo_empeno(self,sucursal,tp,caja,usuario,avaluo,mutuo,fecha_vencimiento,cliente,nombre_cotitular,apellido_paterno,apellido_materno,plazo,fecha_vencimiento_real,estatus,folio,tm):
@@ -873,7 +878,6 @@ class Boleta_Empeno(models.Model):
 			else:
 				return True
 
-		print("si es almoneda")
 		#SI ESTAMOS EN ESTE PUNTO ES QUE LA BOLETA SI ESTA EN ALMONEDA O REMATE.
 		#obtenemos todos las comisiones de Pg que no han sido pagadoas.
 		comision_pg = Pagos.objects.filter(boleta = self,tipo_pago__id = 2,pagado = "N")
@@ -959,19 +963,29 @@ class Boleta_Empeno(models.Model):
 
 		#si no encuentra el importe semanal es porque algo fallo.
 		if importe_semanal == None:			
+			
 			return False
+			
 
 		importe_pagos = int(importe_semanal) * numero_semanas_a_pagar
 
 		#validamos que el importe a pagos (ya descontamos el importe de comision pg)
 		#cubra al 100% el importe a pagos.
 		#de lo contrario regresa false.
+		print("prueba")
+		print(importe_a_pagos)
+		print(importe_pagos)
 		if importe_a_pagos < importe_pagos:		
+			
 			return False
+
 
 
 		#si paso las validaciones anteriores, aplicamos el abono.
 
+
+		fecha_vencimiento_aux = self.fecha_vencimiento 
+		fecha_vencimiento_real_aux = self.fecha_vencimiento_real 
 
 		#obtenemos los proximos pagos.
 		nuevos_pagos = self.fn_simula_proximos_pagos(numero_semanas_a_pagar)
@@ -994,7 +1008,7 @@ class Boleta_Empeno(models.Model):
 
 			tp_refrendo = Tipo_Pago.objects.get(id = 1)
 
-			resp=self.fn_calcula_refrendo()
+			resp = self.fn_calcula_refrendo()
 			
 			almacenaje=decimal.Decimal(resp[0]["almacenaje"])/decimal.Decimal(4.00)
 			interes=decimal.Decimal(resp[0]["interes"])/decimal.Decimal(4.00)
@@ -1033,11 +1047,7 @@ class Boleta_Empeno(models.Model):
 				self.fecha_vencimiento_real = fecha_vencimiento_real
 
 			estatus_abierta = Estatus_Boleta.objects.get(id = 1)
-
-			#esta informacion es necesaria para en caso de cancelar el refrendo.
-			self.estatus_anterior = self.estatus
-			self.fecha_vencimiento_anterior = self.fecha_vencimiento
-
+			
 			self.estatus = estatus_abierta
 			self.save()
 		except Exception as e:
@@ -1087,6 +1097,7 @@ class Boleta_Empeno(models.Model):
 			pagos_t=Pagos.objects.filter(pagado="N",tipo_pago=est_refrendo,boleta=self,vencido="N").order_by("id")
 
 
+
 			#actualizamos el importe de los pagos con el nuevo refrendo.
 			for pt in pagos_t:
 				if mutuo!=0:
@@ -1095,7 +1106,24 @@ class Boleta_Empeno(models.Model):
 					pt.interes=interes
 					pt.iva=iva
 					pt.save()
-				else:
+				else:					
+					#respaldamos los pagos no usados (por el desempeño) para en caso de cancelar el abono podramos restaurarlo.
+					resp_pagos = Pagos_No_Usados()
+					resp_pagos.tipo_pago = pt.tipo_pago
+					resp_pagos.boleta = pt.boleta
+					resp_pagos.fecha_vencimiento = pt.fecha_vencimiento
+					resp_pagos.almacenaje = pt.almacenaje
+					resp_pagos.interes = pt.interes
+					resp_pagos.iva = pt.iva
+					resp_pagos.importe = pt.importe
+					resp_pagos.vencido = pt.vencido
+					resp_pagos.pagado = pt.pagado
+					resp_pagos.fecha_pago = pt.fecha_pago
+					resp_pagos.fecha_vencimiento_real = pt.fecha_vencimiento_real
+					resp_pagos.abono = pt.abono#el abono que genero el refrendo
+					resp_pagos.abono_respaldo = abono
+					resp_pagos.save()
+
 					pt.delete()
 					#marcamos la boleeta como desempeñada.
 					desempenada=Estatus_Boleta.objects.get(id=4)
@@ -1253,17 +1281,19 @@ class Reg_Costos_Extra(models.Model):
 	importe=models.IntegerField()
 
 class Abono(models.Model):
-	folio=models.CharField(max_length=7,null=True)
-	tipo_movimiento=models.ForeignKey(Tipo_Movimiento,on_delete=models.PROTECT,null=True,blank=True)
-	sucursal=models.ForeignKey(Sucursal,on_delete=models.PROTECT,null=True,blank=True)	
-	fecha=models.DateTimeField(default=timezone.now)
-	usuario=models.ForeignKey(User,on_delete=models.PROTECT)
-	importe=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)	
-	caja=models.ForeignKey(Cajas,on_delete=models.PROTECT,blank=True,null=True)
-	boleta=models.ForeignKey(Boleta_Empeno,on_delete=models.PROTECT,blank=True,null=True)
+	folio = models.CharField(max_length=7,null=True)
+	tipo_movimiento = models.ForeignKey(Tipo_Movimiento,on_delete=models.PROTECT,null=True,blank=True)
+	sucursal = models.ForeignKey(Sucursal,on_delete=models.PROTECT,null=True,blank=True)	
+	fecha = models.DateTimeField(default=timezone.now)
+	usuario = models.ForeignKey(User,on_delete=models.PROTECT)
+	importe = models.DecimalField(max_digits=20,decimal_places=2,default=0.00)	
+	caja = models.ForeignKey(Cajas,on_delete=models.PROTECT,blank=True,null=True)
+	boleta = models.ForeignKey(Boleta_Empeno,on_delete=models.PROTECT,blank=True,null=True)
+	estatus = models.CharField(choices = ESTATUS_ABONO,max_length = 10,default = "ACTIVO")
 
 	#funcion para cancelar abono
-	def fn_cancela_Abono(self):
+	@transaction.atomic
+	def fn_cancela_abono(self):
 		hoy = datetime.combine(date.today(),time.min)
 		fecha_abono = datetime.combine(self.fecha,time.min)
 
@@ -1286,11 +1316,116 @@ class Abono(models.Model):
 			resp.append("El abono no puede ser cancelado ya que no es posible calcular el estatus de boleta anterior.")
 			return resp
 
-		if self.boleta.fecha_vencimiento_anterior == None:
+		if self.boleta.fecha_vencimiento_anterior == None or self.boleta.fecha_vencimiento_real_anterior == None:
 			resp.append(False)
 			resp.append("El abono no puede ser cancelado ya que no es posible calcular la fecha de vencimiento anterior.")
+			return resp
 
 
+		#si llegamos a este punto es que el abono si se puede cancelar.
+
+		#eliminamos los pagos que se generaron al aplicar el refrendo
+		Pagos.objects.filter(abono = self).delete()
+		#regresamos el estatus de la boleta.
+		self.boleta.fecha_vencimiento = self.boleta.fecha_vencimiento_anterior
+		self.boleta.fecha_vencimiento_real = self.boleta.fecha_vencimiento_real_anterior
+		self.boleta.estatus = self.boleta.estatus_anterior
+		self.boleta.save()
+
+		#obtenemos las comisiones pg a las que se le aplico descuento con el abono.
+		pagos_pg = Pagos_Com_Pg_No_Usados.objects.filter(abono = self)
+
+		if pagos_pg.exists():
+			for p in pagos_pg:			
+				pago = Pagos()
+				pago.tipo_pago = p.tipo_pago
+				pago.boleta = p.boleta
+				pago.fecha_vencimiento = p.fecha_vencimiento
+				pago.almacenaje = p.almacenaje
+				pago.interes = p.interes
+				pago.iva = p.iva
+				pago.importe = p.importe
+				pago.vencido = p.vencido
+				pago.pagado = "N"
+				pago.fecha_pago = None
+				pago.fecha_vencimiento_real = p.fecha_vencimiento_real
+				pago.save()
+
+			Pagos_Com_Pg_No_Usados.objects.filter(abono = self).delete()
+
+		#obtenemos los pagos no usados en caso de desempeño y los restauramos
+		pagos_resp = Pagos_No_Usados.objects.filter(abono_respaldo = self)
+		if pagos_resp.exists():
+			for p in pagos_resp:			
+				pago = Pagos()
+				pago.tipo_pago = p.tipo_pago
+				pago.boleta = p.boleta
+				pago.fecha_vencimiento = p.fecha_vencimiento
+				pago.almacenaje = p.almacenaje
+				pago.interes = p.interes
+				pago.iva = p.iva
+				pago.importe = p.importe
+				pago.vencido = p.vencido
+				pago.pagado = "N"
+				pago.fecha_pago = None
+				pago.fecha_vencimiento_real = p.fecha_vencimiento_real
+				pago.abono = p.abono
+				pago.save()
+
+			Pagos_No_Usados.objects.filter(abono = self).delete()
+
+		#eliminamos los pagos que fueron generados por el abono que se esta cancelando.
+		Pagos.objects.filter(abono = self).delete()
+
+
+		#validamos si afecto abono a capital, y lo regresamos.
+		if Rel_Abono_Capital.objects.filter(abono = self).exists():			
+			self.boleta.mutuo = self.boleta.mutuo + Rel_Abono_Capital.objects.get(abono = self).importe			
+			self.boleta.save()
+			Rel_Abono_Capital.objects.filter(abono = self).delete()
+
+		#calculamos el refrendo en base al nuevo mutuo
+		r = self.boleta.fn_calcula_refrendo()
+
+		self.boleta.refrendo = decimal.Decimal(r[0]["refrendo"])
+		self.boleta.save()
+		almacenaje = decimal.Decimal(r[0]["almacenaje"])/decimal.Decimal(4.00)
+		interes = decimal.Decimal(r[0]["interes"])/decimal.Decimal(4.00)
+		iva = decimal.Decimal(r[0]["iva"])/decimal.Decimal(4.00)
+		refrendo = round(decimal.Decimal(r[0]["refrendo"])/decimal.Decimal(4.00))
+
+		#en cso d que se haya abonado a capital, aplicamos rollback a el importe de refrendo semanal.
+		for pago in Pagos.objects.filter(boleta = self.boleta,pagado = "N").exclude(tipo_pago__id = 2):
+			pago.almacenaje  = almacenaje
+			pago.interes = interes
+			pago.iva = iva
+			pago.importe = refrendo
+			pago.save()
+
+		#obtenemos los pagos (afecta a comisionpg, refrendo y refrendo pg) que afecto el abono y los regresamos a no pagados
+		rap = Rel_Abono_Pago.objects.filter(abono = self)		
+
+		
+		for p in rap:
+			pago = p.pago
+			pago.pagado = "N"
+			pago.fecha_pago = None		
+			pago.save()
+
+		Rel_Abono_Pago.objects.filter(abono = self).delete()
+
+		#los pagos que tengan fecha de vencimiento mayor a la fech de vencimiento de la boleta
+		#son considerados Refrendo pg
+		for p in Pagos.objects.filter(boleta = self.boleta,pagado = "N").exclude(tipo_pago__id = 2):
+			if p.fecha_vencimiento > self.boleta.fecha_vencimiento:
+				
+				p.tipo_pago = Tipo_Pago.objects.get(id=3)
+				p.save()
+
+		self.estatus = "CANCELADO"
+		self.importe = 0
+
+		self.save()
 
 		return resp
 
@@ -1306,7 +1441,9 @@ class Pagos(models.Model):
 	pagado=models.CharField(max_length=1,default='N',null=False)
 	fecha_pago=models.DateTimeField(null=True,blank=True)
 	fecha_vencimiento_real=models.DateTimeField(null=True,blank=True)#cuando la fecha de vencimiento cai en dia de asueto, la fecha de vencimienot se recorre un dia, esta fecha nos indica cual es la fecha de vencimiento real para calcular el las futuras fechas de vencimiento.
-	abono = models.ForeignKey(Abono,on_delete = models.PROTECT,null = True,blank = True)
+	abono = models.ForeignKey(Abono,on_delete = models.PROTECT,null = True,blank = True)#Nos indica cual abono lo genero, para en caso de cancelar el abono, debemos eliminar el pago.
+
+
 
 
 
@@ -1381,6 +1518,25 @@ class Pagos_Com_Pg_No_Usados(models.Model):
 	fecha_pago=models.DateTimeField(null=True,blank=True)
 	fecha_vencimiento_real=models.DateTimeField(null=True,blank=True)#cuando la fecha de vencimiento cai en dia de asueto, la fecha de vencimienot se recorre un dia, esta fecha nos indica cual es la fecha de vencimiento real para calcular el las futuras fechas de vencimiento.
 	abono = models.ForeignKey(Abono,on_delete = models.PROTECT)
+
+#cuando se aplica un refrendo, y este genera un desemepeño, los pagos que no se usaron se eliminan,
+#pero en caso  de querer cancelar el abono, vamos a necesitar recuperarlos
+#en esta tabla se almacenan para poder restaurarlos.
+class Pagos_No_Usados(models.Model):
+	tipo_pago=models.ForeignKey(Tipo_Pago,on_delete=models.PROTECT,null=False,blank=True)
+	boleta=models.ForeignKey(Boleta_Empeno,on_delete=models.PROTECT,null=False,blank=True)
+	fecha_vencimiento=models.DateTimeField(null=False)
+	almacenaje=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)
+	interes=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)
+	iva=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)
+	importe=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)
+	vencido=models.CharField(max_length=1,default='N')
+	pagado=models.CharField(max_length=1,default='N',null=False)
+	fecha_pago=models.DateTimeField(null=True,blank=True)
+	fecha_vencimiento_real=models.DateTimeField(null=True,blank=True)#cuando la fecha de vencimiento cai en dia de asueto, la fecha de vencimienot se recorre un dia, esta fecha nos indica cual es la fecha de vencimiento real para calcular el las futuras fechas de vencimiento.
+	abono = models.ForeignKey(Abono,on_delete = models.PROTECT,related_name = "abono_genero" )#nos indica el abono que lo genero
+	abono_respaldo = models.ForeignKey(Abono,on_delete = models.PROTECT,related_name = "abono_respaldo",null = True,blank = True)#el abono que genero el respaldo
+
 
 
 class Imprime_Abono(models.Model):

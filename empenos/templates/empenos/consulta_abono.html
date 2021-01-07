@@ -89,6 +89,7 @@
 									        <th>Fecha</th>
 									        <th>importe</th>									        
 									        <th>Cliente</th>
+									        <th>Estatus</th>
 									      </tr>
 									    </thead>
 									    <tbody>
@@ -111,6 +112,11 @@
 									    		<td><a>{{b.fecha | date:"d/m/Y" }}</a></td>
 									    		<td><a>{{b.importe}}</a></td>									    		
 									    		<td><a>{{b.boleta.cliente.nombre}} {{b.boleta.cliente.apellido_p}} {{b.boleta.cliente.apellido_m}}</a></td>
+									    		<td>
+									    			<a>
+									    				{{b.estatus}}
+									    			</a>
+									    		</td>
 
 									    	</tr>
 									     	{% endfor %}

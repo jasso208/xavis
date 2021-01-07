@@ -130,7 +130,10 @@ class Consulta_Abono_Form(forms.Form):
 		self.fields['sucursal'].required = False		
 		self.fields['fecha_inicial'].required = False
 		self.fields['fecha_final'].required = False
-		
+
+class Cancela_Abono_Form(forms.Form):
+	sucursal=forms.ModelChoiceField(queryset=Sucursal.objects.all())	
+
 class Consulta_Boleta_Form(forms.Form):
 	sucursal=forms.ModelChoiceField(queryset=Sucursal.objects.all())
 	cliente=forms.CharField(max_length=30)

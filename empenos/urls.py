@@ -42,6 +42,7 @@ urlpatterns=[
 	url(r'^elimina_retiro/$',elimina_retiro,name="elimina_retiro"),
 	url(r'^administracion_interes_empeno/$',administracion_interes_empeno,name="administracion_interes_empeno"),
 	url(r'^administracion_porcentaje_mutuo/$',administracion_porcentaje_mutuo,name="administracion_porcentaje_mutuo"),
+	url(r'^cancela_abono/$',cancela_abono,name="cancela_abono"),
 
 
 	url(r'^consulta_abono$',consulta_abono,name="consulta_abono"),	
@@ -90,6 +91,7 @@ urlpatterns=[
 	url(r'^api_backup/$',api_backup,name="api_backup"),
 	url(r'^api_simula_proximos_pagos_semanal/$',api_simula_proximos_pagos_semanal,name="api_simula_proximos_pagos_semanal"),
 	url(r'^api_aplica_refrendo_semanal/$',api_aplica_refrendo_semanal,name="api_aplica_refrendo_semanal"),
+	url(r'^api_cancela_abono/$',api_cancela_abono,name="api_cancela_abono"),
 
 
 

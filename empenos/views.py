@@ -3101,16 +3101,55 @@ def consulta_abono(request):
 		fecha_final = datetime.combine(fecha_final, time.max)  
 
 		abonos=Abono.objects.filter(fecha__range=(fecha_inicial,fecha_final),sucursal=caja.sucursal)	
-
 	else:
-		print("na")
-
-	sucursales=Sucursal.objects.filter(id=user_2.sucursal.id)
+		pass
+	sucursales = Sucursal.objects.filter(id=user_2.sucursal.id)
 	form=Consulta_Abono_Form()
 
 	return render(request,'empenos/consulta_abono.html',locals())
 
 
+def cancela_abono(request):
+	#si regresa nonem, es porque el usuario no esta logueado.
+	user_2 = User_2.fn_is_logueado(request.user)
+
+	if user_2 == None:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+
+	#validamos si el usuario tiene caja abierta
+	caja = user_2.fn_tiene_caja_abierta()
+
+	if caja != None:
+		c=caja.caja
+	
+	msj_error = ""
+
+	#el estatus 1 indica que todo esta ok, 
+	#el estatus 0 indica que se presento un error. el error debe venir acompalñado de una leyenda en la variable msj_error
+	estatus = "1" 
+
+	if user_2.perfil.id != 3:
+		estatus = "0"
+		msj_error = "No cuentas con permiso para acceder a esta opción."
+		return render(request,'empenos/cancela_abono.html',locals())
+		
+	if request.method  == "POST":
+		id_sucursal = request.POST.get("sucursal")
+		sucursal = Sucursal.objects.get(id = int(id_sucursal))
+		hoy = date.today()
+
+		fecha_inicial = datetime.combine(hoy,time.min)
+		fecha_final = datetime.combine(hoy,time.max)
+		print(fecha_inicial)
+		print(fecha_final)
+		abonos=Abono.objects.filter(fecha__range=(fecha_inicial,fecha_final),sucursal=sucursal)	
+	else:
+		pass
+
+	sucursales = Sucursal.objects.all()
+	form=Cancela_Abono_Form()
+
+	return render(request,'empenos/cancela_abono.html',locals())
 
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************

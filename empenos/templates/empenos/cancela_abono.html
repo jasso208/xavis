@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% block archivos_staticos%}
+<script type="text/javascript" src="{% static 'js/cancela_abono.js' %}"></script>
+{% endblock %}
+
+{% block usuario %}
+
+			<div class="col-xs-6">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{user_2.user.username}} {{user_2.perfil.perfil}}</label> 
+				
+			</div>
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-home"></span> Sucursal: {{user_2.sucursal}}</label> 	
+			</div>
+
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-inbox"></span> Caja: {{c}} </label> 	
+			</div>
+
+
+{% endblock  %}
+{% block content %}
+	<div class="col-xs-12 cls_encabezado_body">
+	
+		<a >
+			Cancelación de abonos
+		</a>		
+	
+	</div>
+	<div class="col-xs-12">
+		<form method="post" action="#" class="cls_form_1">
+			{%csrf_token%}
+	
+			<div class="row cls_form_consulta">
+				<div class="col-xs-12">
+					<div class="panel panel-default" id="panel_principal" >						 
+						<div class="panel-body">
+
+							<div class="col-xs-12">
+								<div class="panel panel-default">						
+									<div class="panel-body">
+
+										<div class="col-xs-3">
+											<label for="">Sucursal</label>					
+											<select name="sucursal" class="form-control" title="" id="id_sucursal" required="">
+											
+											{% for x in sucursales %}										
+											<option value="{{x.id}}">{{ x.sucursal }}</option>
+											{% endfor %}
+											</select>	
+											<br>
+										</div>
+
+										<div class="col-xs-3">
+											<br>
+											<button class="btn btn-primary btn-sm">
+												<span class="glyphicon glyphicon-search"></span>
+												Consultar
+											</button>
+										</div>
+
+										<div class="col-xs-3">
+										
+											
+										</div>
+										<div class="col-xs-3">
+
+										</div>
+
+									</div>
+								</div>
+							</div>
+
+
+							<div class="col-xs-12">
+								<div class="cls_encabezado_alert " >
+									<label>Abonos del dia.</label>
+								</div>
+
+									<table id="tabla_cotizacion" class="table table-bordered">
+									    <thead>
+									      <tr>
+									      	<th style="width: 10%"></th>
+									        <th style="width: 10%">Folio Abono</th>
+									        <th style="width: 10%">Sucursal</th>
+									        <th style="width: 10%">Fecha</th>
+									        <th style="width: 10%">importe</th>									        
+									        <th style="width: 40%">Cliente</th>
+									        <th style="width: 10%">Estatus</th>
+									      </tr>
+									    </thead>
+									    <tbody>
+									    	{% for b in abonos %}
+									    	<tr>
+									    		<td style="width: 10%">
+									    			
+									    			<a href="/empenos/re_imprimir_abono/{{b.id}}" class='btn btn-default btn-sm'>
+									    				<span class='glyphicon glyphicon-print'>
+									    					
+									    				</span>    					
+									    			</a> 
+									    			{% ifequal b.estatus "ACTIVO" %}	
+									    			<a style="cursor: pointer;" onclick ="fn_cancela_abono('{{b.id}}')" class='btn btn-default btn-sm'>
+									    				<span class='glyphicon glyphicon-remove'>
+									    					
+									    				</span>    					
+									    			</a> 
+									    			{%	endifequal %}
+
+
+									    		</td>
+									    		<td style="width: 10%">
+									    			<a>{{b.folio}}</a>
+									    		</td>
+									    		<td style="width: 10%"><a>{{b.sucursal.sucursal}}</a></td>									    		
+									    		<td style="width: 10%"><a>{{b.fecha | date:"d/m/Y" }}</a></td>
+									    		<td style="width: 10%; text-align: right;"><a>${{b.importe}}</a></td>									    		
+									    		<td style="width: 40%"><a>{{b.boleta.cliente.nombre}} {{b.boleta.cliente.apellido_p}} {{b.boleta.cliente.apellido_m}}</a></td>
+									    		<td style="width: 10%">
+									    			<a>
+									    				{{b.estatus}}
+									    			</a>
+									    		</td>
+
+									    	</tr>
+									     	{% endfor %}
+									    </tbody>
+									</table>
+							</div>					
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+	{%ifequal estatus '0' %}
+
+	<div class="fondo_mensaje " >
+	</div >
+
+	<div class="mensaje " >
+		<div class="cls_encabezado_alert" >
+			Error!!
+		</div>	
+		<div class="panel panel-default">	
+			<label class="page-header" id="msj_notificacion">{{msj_error}}</label>
+			<br>				
+			<a class="btn btn-primary btn-sm" href="{%url 'seguridad:admin_administracion' %}"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+			<br>
+			<br>
+		</div>
+	</div>
+	{%endifequal%}
+
+	<div class="fondo_mensaje cls_mensaje_error" >
+	</div >
+
+	<div class="mensaje cls_mensaje_error" >
+		<div class="cls_encabezado_alert" >
+			Error!!
+		</div>	
+		<div class="panel panel-default">	
+			<label class="page-header" id="msj_error"></label>
+			<br>				
+			<a class="btn btn-primary btn-sm" id="btn_aceptar_error">
+				<span class="glyphicon glyphicon-ok">				
+				</span> 
+				Aceptar
+			</a>
+			<br>
+			<br>
+		</div>
+	</div>
+		<div class="fondo_mensaje cls_msj_exito" >
+	</div >
+	<div class="mensaje cls_msj_exito" >
+		<div class="cls_encabezado_alert" >
+			Aviso
+		</div>	
+		<div class="panel panel-default">	
+			<label class="page-header" >El abono se cancelo correctamente.</label>
+			<br>				
+			<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_administracion' %}">
+				<span class="glyphicon glyphicon-ok">				
+				</span> 
+				Aceptar
+			</a>
+			<br>
+			<br>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		$(document).ready(function()
+				{
+					fn_inicio("{{csrf_token}}","{{IP_LOCAL}}");
+				}
+			)
+	</script>
+{%endblock%}

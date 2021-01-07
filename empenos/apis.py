@@ -17,6 +17,22 @@ from django.db.models import Sum
 import json
 from django.db import transaction
 
+#api para cancelar abono semanal
+@api_view(["PUT"])
+def api_cancela_abono(request):
+	id_abono = request.data["id_abono"]
+	abono = Abono.objects.get(id = int(id_abono))
+
+	resp = abono.fn_cancela_abono()
+
+	respuesta = []
+	if len(resp) == 0:
+		respuesta.append({"estatus":"1"})#se cancelo correctamente
+	else:
+		respuesta.append({"estatus":"0","msj":resp[1]})
+
+	return Response(json.dumps(respuesta))
+
 #api para aplicar los refrendos semanales.
 #regresa el id del abono que se acaba de aplicar.
 @api_view(["POST"])
@@ -59,24 +75,34 @@ def api_aplica_refrendo_semanal(request):
 	abono.save()
 
 	
-	importe_a_pagos = float(importe_abono) - float(comision_pg)
+
+	#esta informacion es necesaria para en caso de cancelar el refrendo.
+	boleta.estatus_anterior = boleta.estatus
+	boleta.fecha_vencimiento_anterior = boleta.fecha_vencimiento
+	boleta.fecha_vencimiento_real_anterior = boleta.fecha_vencimiento_real
+	boleta.save()
+	
+	importe_a_pagos = float(importe_abono) - (float(comision_pg) - float(descuento_comision_pg))
 
 	#si la funcion regreso false es porque fallo
 	if float(comision_pg) > 0:
 		if not boleta.fn_paga_comision_pg(descuento_comision_pg,abono):
 			respuesta.append({"estatus":"0","msj":"Error al saldar las comisiones de periodo de gracia."})
+			transaction.set_rollback(True)
 			return Response(json.dumps(respuesta))
-	print("llego 1")
+	
 	if int(numero_semanas_a_pagar) > 0:
 		if not boleta.fn_salda_pagos(int(numero_semanas_a_pagar),importe_a_pagos,abono):
 			respuesta.append({"estatus":"0","msj":"Error al pagar las semanas seleccionadas."})
+			transaction.set_rollback(True)
 			return Response(json.dumps(respuesta))
-	print("llego 2")
+	
 	if int(importe_capital) > 0:
 		if not boleta.fn_abona_capital(int(importe_capital),abono):
 			respuesta.append({"estatus":"0","msj":"Error al aplicar el abono a capital."})
+			transaction.set_rollback(True)
 			return Response(json.dumps(respuesta))
-	print("llego 3")
+	
 	ia=Imprime_Abono()
 	ia.usuario=usuario
 	ia.abono=abono
