@@ -1059,6 +1059,7 @@ class Boleta_Empeno(models.Model):
 	@transaction.atomic
 	def fn_abona_capital(self,importe_capital,abono):
 		try:
+
 			#validamos que la boleta tenga como maximo numero de pagos 0
 			#ya que de lo contrario, no puede abonar a capital.
 			max_semanas_a_refrendar = self.fn_get_min_y_max_semanas_a_pagar()["max_semanas_a_refrendar"]
@@ -1095,7 +1096,6 @@ class Boleta_Empeno(models.Model):
 			est_refrendo = Tipo_Pago.objects.get(id = 1)
 			#buscamos los abonos no pagados y no vencidos para actualizar su importe en base al nuevo mutuo
 			pagos_t=Pagos.objects.filter(pagado="N",tipo_pago=est_refrendo,boleta=self,vencido="N").order_by("id")
-
 
 
 			#actualizamos el importe de los pagos con el nuevo refrendo.
@@ -1539,7 +1539,7 @@ class Pagos_No_Usados(models.Model):
 	pagado=models.CharField(max_length=1,default='N',null=False)
 	fecha_pago=models.DateTimeField(null=True,blank=True)
 	fecha_vencimiento_real=models.DateTimeField(null=True,blank=True)#cuando la fecha de vencimiento cai en dia de asueto, la fecha de vencimienot se recorre un dia, esta fecha nos indica cual es la fecha de vencimiento real para calcular el las futuras fechas de vencimiento.
-	abono = models.ForeignKey(Abono,on_delete = models.PROTECT,related_name = "abono_genero" )#nos indica el abono que lo genero
+	abono = models.ForeignKey(Abono,on_delete = models.PROTECT,related_name = "abono_genero",null = True, blank = True )#nos indica el abono que lo genero
 	abono_respaldo = models.ForeignKey(Abono,on_delete = models.PROTECT,related_name = "abono_respaldo",null = True,blank = True)#el abono que genero el respaldo
 
 
