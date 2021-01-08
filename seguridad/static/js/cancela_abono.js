@@ -1,5 +1,6 @@
 var csrf_token;
 var ip_local;
+var id_usuario;
 $(document).ready(function()
 		{
 				$("#btn_aceptar_error").click(
@@ -12,10 +13,11 @@ $(document).ready(function()
 
 		}
 	)
-function fn_inicio(p_csrf_token,ip_l)
+function fn_inicio(p_csrf_token,ip_l,id_usr)
 {
 	csrf_token = p_csrf_token;
 	ip_local = ip_l;
+	id_usuario = id_usr;
 
 	$(".cls_mensaje_error").hide();
 	$(".cls_msj_exito").hide();
@@ -26,6 +28,7 @@ function fn_cancela_abono(id)
 	$("#fondo_preloader").show();			
 			var paramdata = {};
 			paramdata["id_abono"] = id;
+			paramdata["id_usuario"] = id_usuario;
 			
 			var datajson=JSON.stringify(paramdata);
 

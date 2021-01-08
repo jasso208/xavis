@@ -21,9 +21,18 @@ from django.db import transaction
 @api_view(["PUT"])
 def api_cancela_abono(request):
 	id_abono = request.data["id_abono"]
+	id_usuario = request.data["id_usuario"]
+
+	usuario = User.objects.get(id = int(id_usuario))
+	user_2 = User_2.objects.get (user = usuario)
+
+	if user_2.perfil.id != 3:
+		respuesta.append({"estatus":"0","msj" : "El usuario no tiene permiso para cancelar el abono."})
+		return Response(json.dumps(respuesta))
+
 	abono = Abono.objects.get(id = int(id_abono))
 
-	resp = abono.fn_cancela_abono()
+	resp = abono.fn_cancela_abono(usuario)
 
 	respuesta = []
 	if len(resp) == 0:

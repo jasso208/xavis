@@ -15,7 +15,6 @@ import math
 GENERO_CHOICES = (
     ('1','HOMBRE'),
     ('2', 'MUJER'),
-    
 )
 
 ESTADO_CIVIL_CHOICES = (
@@ -1286,15 +1285,16 @@ class Abono(models.Model):
 	tipo_movimiento = models.ForeignKey(Tipo_Movimiento,on_delete=models.PROTECT,null=True,blank=True)
 	sucursal = models.ForeignKey(Sucursal,on_delete=models.PROTECT,null=True,blank=True)	
 	fecha = models.DateTimeField(default=timezone.now)
-	usuario = models.ForeignKey(User,on_delete=models.PROTECT)
+	usuario = models.ForeignKey(User,on_delete=models.PROTECT,related_name = "usuario_alta_abono")
 	importe = models.DecimalField(max_digits=20,decimal_places=2,default=0.00)	
 	caja = models.ForeignKey(Cajas,on_delete=models.PROTECT,blank=True,null=True)
 	boleta = models.ForeignKey(Boleta_Empeno,on_delete=models.PROTECT,blank=True,null=True)
 	estatus = models.CharField(choices = ESTATUS_ABONO,max_length = 10,default = "ACTIVO")
+	usuario_cancela = models.ForeignKey(User,on_delete = models.PROTECT,null = True,blank = True,related_name = "usuario_cancela_abono")
 
 	#funcion para cancelar abono
 	@transaction.atomic
-	def fn_cancela_abono(self):
+	def fn_cancela_abono(self,usuario):
 		hoy = datetime.combine(date.today(),time.min)
 		fecha_abono = datetime.combine(self.fecha,time.min)
 
@@ -1427,6 +1427,7 @@ class Abono(models.Model):
 				p.save()
 
 		self.estatus = "CANCELADO"
+		self.usuario_cancela = usuario
 		self.importe = 0
 
 		self.save()

@@ -3879,6 +3879,7 @@ def refrendo(request,id_boleta):
 	#buscamos la boleta a refrendar.
 	boleta=Boleta_Empeno.objects.get(id=int(id_boleta))
 
+	det_boleta = Det_Boleto_Empeno.objects.filter(boleta_empeno = boleta)
 	#validamos si la boleta acepta refrendos o no.
 	if not boleta.fn_acepta_refrendo():
 		msj_error = "La boleta no permite refrendos."

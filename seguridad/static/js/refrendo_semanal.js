@@ -9,7 +9,8 @@ var ip_local;
 var mutuo_boleta;
 var csrf_token;
 var id_caja;
-
+var total_pagar;
+var cambio;
 $(document).ready(
 		function ()
 		{
@@ -65,6 +66,12 @@ $(document).ready(
 								fn_aplica_refrendo();
 							}
 						);
+					$("#int_importe_recibi").change(
+							function ()
+							{
+								fn_calcula_cambio();
+							}
+						);
 
 
 
@@ -87,6 +94,7 @@ function fn_inicio(min_sr,max_sr,imp_ref,imp_compg,num_dias_venc,id_b,ip_l,imp_m
 	id_usuario = id_usr;
 	descuento = 0;
 	id_caja = idcaja;
+	total_pagar = 0;
 	$(".cls_mensaje_error").hide();
 	$(".cls_form_simulacion").hide();
 	$("#fondo_preloader").hide();
@@ -98,9 +106,21 @@ function fn_inicio(min_sr,max_sr,imp_ref,imp_compg,num_dias_venc,id_b,ip_l,imp_m
 	//funciones de loading
 	fn_ingreso_semanas_a_pagar();
 
+
 }
 
+function fn_calcula_cambio()
+{
+	if ($("#int_importe_recibi").val() == "")
+	{
+		$("#int_importe_recibi").val("0")	;
+	}
+	var  importe_recibi = parseInt($("#int_importe_recibi").val());
 
+	 cambio = importe_recibi - total_pagar;
+	$("#lbl_cambio").text("$"+parseFloat(cambio).toFixed(2).toString());
+
+}
 function fn_valida_abono_capital()
 {
 	$("#int_abono_capital").val(parseInt($("#int_abono_capital").val()))
@@ -195,7 +215,7 @@ function fn_ingreso_semanas_a_pagar()
 	$("#p_subtotal").text("$" + subtotal.toString());
 
 	total_pagar = parseFloat(parseInt(subtotal) + parseInt(importe_compg) - parseInt(descuento) + parseInt(abono_capital)).toFixed(2);
-
+	fn_calcula_cambio();
 	$("#p_total_pagar").text("$"+total_pagar.toString());
 }
 
@@ -272,6 +292,12 @@ function fn_aplica_refrendo()
 		{
 			
 
+			if (cambio < 0)
+			{
+				$(".cls_mensaje_error").show();
+				$("#msj_error").text("El importe recibido no cubre el refrendo.");
+				return false;
+			}
 			$("#fondo_preloader").show();			
 			var paramdata = {};
 			paramdata["id_boleta"] = id_boleta;
