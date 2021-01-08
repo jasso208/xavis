@@ -10,6 +10,7 @@ from django.db.models import Sum,Max
 import decimal
 from django.db.models import Min
 from django.db import transaction
+import math
 
 GENERO_CHOICES = (
     ('1','HOMBRE'),
@@ -1387,12 +1388,15 @@ class Abono(models.Model):
 		#calculamos el refrendo en base al nuevo mutuo
 		r = self.boleta.fn_calcula_refrendo()
 
-		self.boleta.refrendo = decimal.Decimal(r[0]["refrendo"])
-		self.boleta.save()
+
 		almacenaje = decimal.Decimal(r[0]["almacenaje"])/decimal.Decimal(4.00)
 		interes = decimal.Decimal(r[0]["interes"])/decimal.Decimal(4.00)
 		iva = decimal.Decimal(r[0]["iva"])/decimal.Decimal(4.00)
 		refrendo = round(decimal.Decimal(r[0]["refrendo"])/decimal.Decimal(4.00))
+
+		self.boleta.refrendo = math.ceil((refrendo * 4.00))
+		self.boleta.save()
+
 
 		#en cso d que se haya abonado a capital, aplicamos rollback a el importe de refrendo semanal.
 		for pago in Pagos.objects.filter(boleta = self.boleta,pagado = "N").exclude(tipo_pago__id = 2):
