@@ -25,7 +25,113 @@
 		</a>	
 	</div>
 	<div class="col-xs-12">
+		<div class="row" >
+				<div class="col-xs-12 cls_encabezado_body_2">
+					<a>
+						Operación general
+					</a>
+					<br>
+				</div>
+				<div class="row cls_row_body"  >
+					<div class="col-xs-2">
+						<div class="cls_boton_body">
+							<a href="{% url 'empenos:admin_porc_avaluo' %}">
+								<span class="glyphicon glyphicon-usd"></span>
+								<br>
+								<br>
+								% sobre avaluo
+							</a>	
+						</div>
+
+						
+					</div>
+					<div class="col-xs-2">
+						<div class="cls_boton_body">
+							<a href="{% url 'empenos:admin_min_apartado' id=1 %}">
+								<span class="glyphicon glyphicon-usd"></span>
+								<br>
+								<br>
+								% p/apartado
+							</a>	
+						</div>
+					</div>
+					<div class="col-xs-2">
+						<div class="cls_boton_body">
+							<a href="{% url 'empenos:admin_min_apartado' id=1 %}">
+								<span class="glyphicon" style="text-decoration-line: line-through;">
+									day
+								</span>
+								<br>
+								<br>
+								Dias no laboral.
+							</a>	
+						</div>
+					</div>
+
+				</div>
+		</div>
+
 			<div class="row" >
+
+				<div class="col-xs-12 cls_encabezado_body_2">
+					<a>
+						Administración de sucursal.
+					</a>
+					<br>
+				</div>
+				<div class="row cls_row_body"  >
+					<div class="col-xs-2">
+						<div class="cls_boton_body">
+							<a >
+								<span class="glyphicon glyphicon-home"></span>
+								<br>
+								<br>
+								Inf. de sucursal.
+							</a>	
+						</div>						
+					</div>
+					<div class="col-xs-2">
+						<div class="cls_boton_body">
+							<a href="{% url 'empenos:concepto_retiro'  %}">
+								<span class="glyphicon glyphicon-arrow-right"></span>
+								<br>
+								<br>
+								Concep. retiro
+							</a>	
+						</div>					
+					</div>
+					<div class="col-xs-2">
+							<div class="cls_boton_body">
+								<a href="{% url 'empenos:administracion_interes_empeno'  %}">
+									<span class="glyphicon glyphicon-sort"></span>
+									<br>
+									<br>
+									Admin. Int. Emp.
+								</a>	
+							</div>
+							
+						</div>
+					<div class="col-xs-2">
+					<div class="cls_boton_body">
+						<a href="{% url 'empenos:administracion_porcentaje_mutuo'  %}">
+							<span class="glyphicon">
+								<strong>
+									%
+								</strong>
+							</span>
+							<br>
+							<br>
+							Admin. Mutuo.
+						</a>	
+					</div>
+					
+				</div>
+
+				</div>
+
+			</div>
+			<div class = "row">
+
 				<div class="col-xs-12 cls_encabezado_body_2">
 					<a>
 						Edición catalogos
@@ -33,7 +139,6 @@
 					<br>
 				</div>
 				<div class="row cls_row_body"  >
-
 					<div class="col-xs-2">
 						<div class="cls_boton_body">
 							<a href="{% url 'empenos:admin_kilataje' %}">
@@ -42,12 +147,11 @@
 								<br>
 								Admin kilataje
 							</a>	
-						</div>
-						
+						</div>						
 					</div>
 				</div>
 
-		</div>
+			</div>
 		<div class="row" >
 				<div class="col-xs-12 cls_encabezado_body_2">
 					<a>
@@ -92,80 +196,7 @@
 				</div>
 
 		</div>
-		<div class="row" >
-				<div class="col-xs-12 cls_encabezado_body_2">
-					<a>
-						Configuración operación
-					</a>
-					<br>
-				</div>
-				<div class="row cls_row_body"  >
-					<div class="col-xs-2">
-						<div class="cls_boton_body">
-							<a href="{% url 'empenos:admin_porc_avaluo' %}">
-								<span class="glyphicon glyphicon-usd"></span>
-								<br>
-								<br>
-								% sobre avaluo
-							</a>	
-						</div>
 
-						
-					</div>
-					<div class="col-xs-2">
-						<div class="cls_boton_body">
-							<a href="{% url 'empenos:admin_min_apartado' id=1 %}">
-								<span class="glyphicon glyphicon-usd"></span>
-								<br>
-								<br>
-								% min. apartado
-							</a>	
-						</div>
-					</div>
-					
-						<div class="col-xs-2">
-							<div class="cls_boton_body">
-								<a href="{% url 'empenos:concepto_retiro'  %}">
-									<span class="glyphicon glyphicon-arrow-right"></span>
-									<br>
-									<br>
-									Concep. retiro
-								</a>	
-							</div>
-							
-						</div>
-						<div class="col-xs-2">
-							<div class="cls_boton_body">
-								<a href="{% url 'empenos:administracion_interes_empeno'  %}">
-									<span class="glyphicon glyphicon-sort"></span>
-									<br>
-									<br>
-									Admin. Int. Emp.
-								</a>	
-							</div>
-							
-						</div>
-						<div class="col-xs-2">
-							<div class="cls_boton_body">
-								<a href="{% url 'empenos:administracion_porcentaje_mutuo'  %}">
-									<span class="glyphicon">
-										<strong>
-											%
-										</strong>
-									</span>
-									<br>
-									<br>
-									Admin. % Mutuo.
-								</a>	
-							</div>
-							
-						</div>
-
-					
-				</div>
-
-
-		</div>
 
 
 	</div>
