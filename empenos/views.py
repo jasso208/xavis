@@ -1899,9 +1899,9 @@ def rep_flujo_caja(request):
 				avaluo_activo=bea["avaluo__sum"]
 
 			#obtenemos el importe de boletas en almoneda
-			bea=Boleta_Empeno.objects.filter(estatus=est_almoneda,sucursal=sucursal).aggregate(Sum("avaluo"))
-			be=Boleta_Empeno.objects.filter(estatus=est_almoneda,sucursal=sucursal).aggregate(Sum("mutuo"))
-			cont_almoneda=Boleta_Empeno.objects.filter(estatus=est_almoneda,sucursal=sucursal).count()
+			bea = Boleta_Empeno.objects.filter(estatus = est_almoneda,sucursal = sucursal).aggregate(Sum("avaluo"))
+			be = Boleta_Empeno.objects.filter(estatus = est_almoneda,sucursal = sucursal).aggregate(Sum("mutuo"))
+			cont_almoneda = Boleta_Empeno.objects.filter(estatus = est_almoneda,sucursal = sucursal).count()
 
 			mutuo_almoneda=0.00
 			if be["mutuo__sum"]!=None:

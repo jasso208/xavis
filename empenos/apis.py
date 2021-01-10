@@ -925,6 +925,20 @@ def api_job_diario(request):
 		
 	return Response(respuesta)
 
+@api_view(["GET"])
+def api_guarda_estatus_cartera(request):
+	respuesta = []
+	try:
+		estatus = fn_guarda_estatus_cartera()
+		if estatus:
+			fn_envia_mail("Exito El guardado de estatus de cartera","Exito Job guarda estatus cartera","jasso.gallegos@gmail.com")
+		else:
+			fn_envia_mail("Fallo el guardado de estatus de cartera","Error Job guarda estatus cartera","jasso.gallegos@gmail.com")
+
+	except:
+		fn_envia_mail(str(e),"Error Job guarda estatus cartera","jasso.gallegos@gmail.com")
+
+	return Response(respuesta)
 
 @api_view(['GET'])
 def api_consulta_linea(request):

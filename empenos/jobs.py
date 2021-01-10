@@ -512,3 +512,83 @@ def fn_comision_pg(hoy):
 		#	p.pagado="N"
 		#	p.save()
 
+
+
+#se ejecuta a diario para almacenar diario el estatus de cartera.
+@transaction.atomic
+def fn_guarda_estatus_cartera():
+	try:
+
+		est_abierta = Estatus_Boleta.objects.get(id = 1)
+		est_almoneda = Estatus_Boleta.objects.get(id = 3)
+		est_remate = Estatus_Boleta.objects.get(id = 5)
+
+		hoy = datetime.combine(date.today(),time.min)
+		sucursal = Sucursal.objects.all()
+
+		for s in sucursal:			
+			hec = Historico_Estatus_Cartera()
+			hec.sucursal = s
+			hec.fecha = hoy
+
+			hec.num_boletas_activas = Boleta_Empeno.objects.filter(sucursal = s,estatus = est_abierta).count()
+			hec.num_boletas_almoneda = Boleta_Empeno.objects.filter(sucursal = s,estatus = est_almoneda).count()
+			hec.num_boletas_remate = Boleta_Empeno.objects.filter(sucursal = s,estatus = est_remate).count()
+
+			importe_mutuo_activas = 0
+			importe_mutuo_almoneda = 0
+			importe_mutuo_remate = 0
+
+			ima = Boleta_Empeno.objects.filter(sucursal = s,estatus = est_abierta).aggregate(Sum("mutuo"))
+			if ima["mutuo__sum"] != None:
+				importe_mutuo_activas = ima["mutuo__sum"]
+
+			ima = Boleta_Empeno.objects.filter(sucursal = s,estatus = est_almoneda).aggregate(Sum("mutuo"))
+			if ima["mutuo__sum"] != None:
+				importe_mutuo_almoneda = ima["mutuo__sum"]
+
+			ima = Boleta_Empeno.objects.filter(sucursal = s,estatus = est_remate).aggregate(Sum("mutuo"))
+			if ima["mutuo__sum"] != None:
+				importe_mutuo_remate = ima["mutuo__sum"]
+			
+
+			hec.importe_mutuo_activas = importe_mutuo_activas
+			hec.importe_mutuo_almoneda = importe_mutuo_almoneda
+			hec.importe_mutuo_remate = importe_mutuo_remate
+
+
+			importe_avaluo_activas = 0
+			importe_avaluo_almoneda = 0
+			importe_avaluo_remate = 0
+
+			ima = Boleta_Empeno.objects.filter(sucursal = s,estatus = est_abierta).aggregate(Sum("avaluo"))
+			if ima["avaluo__sum"] != None:
+				importe_avaluo_activas = ima["avaluo__sum"]
+
+			ima = Boleta_Empeno.objects.filter(sucursal = s,estatus = est_almoneda).aggregate(Sum("avaluo"))
+			if ima["avaluo__sum"] != None:
+				importe_avaluo_almoneda = ima["avaluo__sum"]
+
+			ima = Boleta_Empeno.objects.filter(sucursal = s,estatus = est_remate).aggregate(Sum("avaluo"))
+			if ima["avaluo__sum"] != None:
+				importe_avaluo_remate = ima["avaluo__sum"]
+			
+
+			hec.importe_avaluo_activas = importe_avaluo_activas
+			hec.importe_avaluo_almoneda = importe_avaluo_almoneda
+			hec.importe_avaluo_remate = importe_avaluo_remate
+			
+
+			hec.save()
+
+
+		return True
+	except Exception as e:
+		print(e)
+		return False
+
+
+
+
+
+

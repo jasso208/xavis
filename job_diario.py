@@ -24,6 +24,15 @@ if r.status_code == 200:
 else:
 	print("Fallo")
 
+print("Guardamos el estatus de la cartera al ciere del dia")
+
+#https://empeno.jassdel.com/
+r = requests.get("https://empeno.jassdel.com/empenos/api_guarda_estatus_cartera/")
+
+if r.status_code == 200:
+	print("Exito")
+else:
+	print("Fallo")
 
 
 
