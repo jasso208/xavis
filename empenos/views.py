@@ -1690,6 +1690,11 @@ def rep_comparativo_estatus_cartera(request):
 			msj_error = "La fecha 2 debe ser mayor a la fecha 1."
 			return render(request,'empenos/rep_comparativo_estatus_cartera.html',locals())	
 
+		if fecha_final == datetime.combine(date.today(),time.min):
+			estatus = "2"
+			msj_error = "No puede seleccionar el dia de hoy para comparar."
+			return render(request,'empenos/rep_comparativo_estatus_cartera.html',locals())				
+
 		if id_sucursal != "":
 
 			sucursal = Sucursal.objects.get(id = int(id_sucursal))
