@@ -21,11 +21,13 @@ from django.http import HttpResponse
 from django.utils import timezone
 from io import BytesIO
 from reportlab.pdfgen import canvas
-from django.http import HttpResponse
+
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.lib.pagesizes import A4
 import math
 from empenos.funciones import *
+from empenos.report import *
+
 IP_LOCAL = settings.IP_LOCAL
 LOCALHOST=settings.LOCALHOST
 
@@ -1612,6 +1614,255 @@ def otros_ingresos(request):
 		form=Otros_Ingresos_Form()
 	return render(request,'empenos/otros_ingresos.html',locals())
 
+
+def rep_comparativo_estatus_cartera(request):
+	#si regresa nonem, es porque el usuario no esta logueado.
+	user_2 = User_2.fn_is_logueado(request.user)
+
+	if user_2 == None:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+
+	#validamos si el usuario tiene caja abierta
+	caja = user_2.fn_tiene_caja_abierta()
+
+	c = ""
+	if caja != None:
+		c=caja.caja
+	
+	msj_error = ""
+
+	#el estatus 1 indica que todo esta ok, 
+	#el estatus 0 indica que se presento un error. el error debe venir acompalñado de una leyenda en la variable msj_error
+	estatus = "1" 
+
+	if user_2.perfil.id != 3:
+		estatus = "0"
+		msj_error = "No cuentas con permiso para acceder a esta opción."
+		return render(request,'empenos/rep_comparativo_estatus_cartera.html',locals())	
+
+	sucursales = Sucursal.objects.all()
+
+	txt_sucursal = ""
+
+	if request.method == "POST":
+		#si contiene 0 es que no se exporta
+		#si contiene 1 es que se exporta
+		export_pdf = request.POST.get("export_pdf")
+
+		print(export_pdf)
+		id_sucursal = request.POST.get("sucursal")
+
+		fecha_inicial= datetime.strptime(request.POST.get("fecha_inicial"), "%Y-%m-%d").date()
+		fecha_final = datetime.strptime(request.POST.get("fecha_final"),"%Y-%m-%d").date()
+
+		fecha_inicial = datetime.combine(fecha_inicial,time.min)
+		fecha_final = datetime.combine(fecha_final,time.min)
+
+		cont_activas_1 = 0
+		mutuo_activo_1 = 0.00
+		avaluo_activo_1 = 0.00
+
+		cont_almoneda_1 = 0
+		mutuo_almoneda_1 = 0.00
+		avaluo_almoneda_1 = 0.00
+
+
+		cont_remate_1 = 0
+		mutuo_remate_1 = 0.00
+		avaluo_remate_1 = 0.00
+
+		cont_activas_2 = 0
+		mutuo_activo_2 = 0.00
+		avaluo_activo_2 = 0.00
+
+		cont_almoneda_2 = 0
+		mutuo_almoneda_2 = 0.00
+		avaluo_almoneda_2 = 0.00
+
+
+		cont_remate_2 = 0
+		mutuo_remate_2 = 0.00
+		avaluo_remate_2 = 0.00
+
+
+		if fecha_inicial >= fecha_final:
+			estatus = "2"
+			msj_error = "La fecha 2 debe ser mayor a la fecha 1."
+			return render(request,'empenos/rep_comparativo_estatus_cartera.html',locals())	
+
+		if id_sucursal != "":
+
+			sucursal = Sucursal.objects.get(id = int(id_sucursal))
+
+			txt_sucursal = sucursal.sucursal
+
+			try:
+				cartera_1 = Historico_Estatus_Cartera.objects.get(fecha = fecha_inicial,sucursal = sucursal) 			
+
+			except Exception as e:				
+				print(e)
+				estatus = "2"
+				msj_error = "La fecha 1 no cuenta información."
+				return render(request,'empenos/rep_comparativo_estatus_cartera.html',locals())	
+
+			try:
+				cartera_2 = Historico_Estatus_Cartera.objects.get(fecha = fecha_final,sucursal = sucursal) 
+			except Exception as e:
+				cartera_1 = None
+				print(e)
+				estatus = "2"
+				msj_error = "La fecha 2 no cuenta información."
+				return render(request,'empenos/rep_comparativo_estatus_cartera.html',locals())	
+			cont_activas_1 = cartera_1.num_boletas_activas
+			mutuo_activo_1 = cartera_1.importe_mutuo_activas
+			avaluo_activo_1 = cartera_1.importe_avaluo_activas
+
+			cont_almoneda_1 = cartera_1.num_boletas_almoneda
+			mutuo_almoneda_1 = cartera_1.importe_mutuo_almoneda
+			avaluo_almoneda_1 = cartera_1.importe_avaluo_almoneda
+
+			cont_remate_1 = cartera_1.num_boletas_remate
+			mutuo_remate_1 = cartera_1.importe_mutuo_remate
+			avaluo_remate_1 = cartera_1.importe_avaluo_remate
+
+			cont_total_1 = cont_activas_1 + cont_almoneda_1 + cont_remate_1
+			total_mutuo_1 = mutuo_activo_1 + mutuo_almoneda_1 + mutuo_remate_1
+			total_avaluo_1 = avaluo_activo_1 + avaluo_almoneda_1 + avaluo_remate_1
+
+			cont_activas_2 = cartera_2.num_boletas_activas
+			mutuo_activo_2 = cartera_2.importe_mutuo_activas
+			avaluo_activo_2 = cartera_2.importe_avaluo_activas
+
+			cont_almoneda_2 = cartera_2.num_boletas_almoneda
+			mutuo_almoneda_2 = cartera_2.importe_mutuo_almoneda
+			avaluo_almoneda_2 = cartera_2.importe_avaluo_almoneda
+
+			cont_remate_2 = cartera_2.num_boletas_remate
+			mutuo_remate_2 = cartera_2.importe_mutuo_remate
+			avaluo_remate_2 = cartera_2.importe_avaluo_remate
+
+		else:#comparamos todas las sucursales.
+			resp_fecha_1 = Historico_Estatus_Cartera.objects.filter(fecha = fecha_inicial)
+			resp_fecha_2 = Historico_Estatus_Cartera.objects.filter(fecha = fecha_final)
+
+			if not resp_fecha_1.exists():
+				estatus = "2"
+				msj_error = "La fecha 1 no cuenta información."
+				return render(request,'empenos/rep_comparativo_estatus_cartera.html',locals())	
+
+			if not resp_fecha_2.exists():
+				estatus = "2"
+				msj_error = "La fecha 2 no cuenta información."
+				return render(request,'empenos/rep_comparativo_estatus_cartera.html',locals())	
+
+			txt_sucursal = "Todas"
+
+			cont_activas_1 = resp_fecha_1.aggregate(Sum("num_boletas_activas"))["num_boletas_activas__sum"]
+			mutuo_activo_1 = resp_fecha_1.aggregate(Sum("importe_mutuo_activas"))["importe_mutuo_activas__sum"]
+			avaluo_activo_1 = resp_fecha_1.aggregate(Sum("importe_avaluo_activas"))["importe_avaluo_activas__sum"]
+
+			cont_almoneda_1 = resp_fecha_1.aggregate(Sum("num_boletas_almoneda"))["num_boletas_almoneda__sum"]
+			mutuo_almoneda_1 = resp_fecha_1.aggregate(Sum("importe_mutuo_almoneda"))["importe_mutuo_almoneda__sum"]
+			avaluo_almoneda_1 = resp_fecha_1.aggregate(Sum("importe_avaluo_almoneda"))["importe_avaluo_almoneda__sum"]
+
+			cont_remate_1 = resp_fecha_1.aggregate(Sum("num_boletas_remate"))["num_boletas_remate__sum"]
+			mutuo_remate_1 = resp_fecha_1.aggregate(Sum("importe_mutuo_remate"))["importe_mutuo_remate__sum"]
+			avaluo_remate_1 = resp_fecha_1.aggregate(Sum("importe_avaluo_remate"))["importe_avaluo_remate__sum"]
+
+
+			cont_activas_2 = resp_fecha_2.aggregate(Sum("num_boletas_activas"))["num_boletas_activas__sum"]
+			mutuo_activo_2 = resp_fecha_2.aggregate(Sum("importe_mutuo_activas"))["importe_mutuo_activas__sum"]
+			avaluo_activo_2 = resp_fecha_2.aggregate(Sum("importe_avaluo_activas"))["importe_avaluo_activas__sum"]
+
+			cont_almoneda_2 = resp_fecha_2.aggregate(Sum("num_boletas_almoneda"))["num_boletas_almoneda__sum"]
+			mutuo_almoneda_2 = resp_fecha_2.aggregate(Sum("importe_mutuo_almoneda"))["importe_mutuo_almoneda__sum"]
+			avaluo_almoneda_2 = resp_fecha_2.aggregate(Sum("importe_avaluo_almoneda"))["importe_avaluo_almoneda__sum"]
+
+			cont_remate_2 = resp_fecha_2.aggregate(Sum("num_boletas_remate"))["num_boletas_remate__sum"]
+			mutuo_remate_2 = resp_fecha_2.aggregate(Sum("importe_mutuo_remate"))["importe_mutuo_remate__sum"]
+			avaluo_remate_2 = resp_fecha_2.aggregate(Sum("importe_avaluo_remate"))["importe_avaluo_remate__sum"]
+
+
+		cont_total_1 = cont_activas_1 + cont_almoneda_1 + cont_remate_1
+		total_mutuo_1 = mutuo_activo_1 + mutuo_almoneda_1 + mutuo_remate_1
+		total_avaluo_1 = avaluo_activo_1 + avaluo_almoneda_1 + avaluo_remate_1
+
+		cont_total_2 = cont_activas_2 + cont_almoneda_2 + cont_remate_2
+		total_mutuo_2 = mutuo_activo_2 + mutuo_almoneda_2 + mutuo_remate_2
+		total_avaluo_2 = avaluo_activo_2 + avaluo_almoneda_2 + avaluo_remate_2
+
+
+		cont_activas_c = cont_activas_2 - cont_activas_1
+		mutuo_activo_c = mutuo_activo_2 - mutuo_activo_1
+		avaluo_activo_c = avaluo_activo_2 - avaluo_activo_1
+
+		cont_almoneda_c = cont_almoneda_2 - cont_almoneda_1
+		mutuo_almoneda_c = mutuo_almoneda_2 - mutuo_almoneda_1
+		avaluo_almoneda_c = avaluo_almoneda_2 - avaluo_almoneda_1
+
+		cont_remate_c = cont_remate_2 - cont_remate_1
+		mutuo_remate_c = mutuo_remate_2 - mutuo_remate_1
+		avaluo_remate_c = avaluo_remate_2 - avaluo_remate_1
+
+
+	
+
+
+
+		cont_total_c = cont_total_2 - cont_total_1
+		total_mutuo_c = total_mutuo_2 - total_mutuo_1
+		total_avaluo_c = total_avaluo_2 - total_avaluo_1
+
+		mutuo_activo_c = "{:0,.2f}".format(mutuo_activo_c)
+		avaluo_activo_c = "{:0,.2f}".format(avaluo_activo_c)
+		mutuo_almoneda_c = "{:0,.2f}".format(mutuo_almoneda_c)
+		avaluo_almoneda_c = "{:0,.2f}".format(avaluo_almoneda_c)
+		avaluo_remate_c = "{:0,.2f}".format(avaluo_remate_c)
+		mutuo_remate_c = "{:0,.2f}".format(mutuo_remate_c)
+		total_mutuo_c = "{:0,.2f}".format(total_mutuo_c)
+		total_avaluo_c = "{:0,.2f}".format(total_avaluo_c)
+
+
+		mutuo_activo_1 =  "{:0,.2f}".format(mutuo_activo_1)
+		avaluo_activo_1 = "{:0,.2f}".format(avaluo_activo_1)
+		
+		mutuo_almoneda_1 =  "{:0,.2f}".format(mutuo_almoneda_1)
+		avaluo_almoneda_1 = "{:0,.2f}".format(avaluo_almoneda_1)
+
+		mutuo_remate_1 =  "{:0,.2f}".format(mutuo_remate_1)
+		avaluo_remate_1 = "{:0,.2f}".format(avaluo_remate_1)
+
+		total_mutuo_1 =  "{:0,.2f}".format(total_mutuo_1)
+		total_avaluo_1 = "{:0,.2f}".format(total_avaluo_1)
+
+
+
+		mutuo_activo_2 =  "{:0,.2f}".format(mutuo_activo_2)
+		avaluo_activo_2 = "{:0,.2f}".format(avaluo_activo_2)
+		
+		mutuo_almoneda_2 =  "{:0,.2f}".format(mutuo_almoneda_2)
+		avaluo_almoneda_2 = "{:0,.2f}".format(avaluo_almoneda_2)
+
+		mutuo_remate_2 =  "{:0,.2f}".format(mutuo_remate_2)
+		avaluo_remate_2 = "{:0,.2f}".format(avaluo_remate_2)
+
+		total_mutuo_2 =  "{:0,.2f}".format(total_mutuo_2)
+		total_avaluo_2 = "{:0,.2f}".format(total_avaluo_2)
+
+
+		txt_fecha_inicial = fecha_inicial.strftime("%Y-%m-%d")
+		txt_fecha_final = fecha_final.strftime("%Y-%m-%d")
+		if export_pdf == "1":
+			dic_fecha_1 = {"cont_activas":str(cont_activas_1),"cont_almoneda":str(cont_almoneda_1),"cont_remate":str(cont_remate_1),"mutuo_activo":mutuo_activo_1,"mutuo_almoneda":mutuo_almoneda_1,"mutuo_remate":mutuo_remate_1,"avaluo_activo":avaluo_activo_1,"avaluo_almoneda":avaluo_almoneda_1,"avaluo_remate":avaluo_remate_1,"cont_total":str(cont_total_1),"mutuo_total":total_mutuo_1,"avaluo_total":total_avaluo_1}
+			dic_fecha_2 = {"cont_activas":str(cont_activas_2),"cont_almoneda":str(cont_almoneda_2),"cont_remate":str(cont_remate_2),"mutuo_activo":mutuo_activo_2,"mutuo_almoneda":mutuo_almoneda_2,"mutuo_remate":mutuo_remate_2,"avaluo_activo":avaluo_activo_2,"avaluo_almoneda":avaluo_almoneda_2,"avaluo_remate":avaluo_remate_2,"cont_total":str(cont_total_2),"mutuo_total":total_mutuo_2,"avaluo_total":total_avaluo_2}
+			dic_comparacion = {"cont_activas":str(cont_activas_c),"cont_almoneda":str(cont_almoneda_c),"cont_remate":str(cont_remate_c),"mutuo_activo":mutuo_activo_c,"mutuo_almoneda":mutuo_almoneda_c,"mutuo_remate":mutuo_remate_c,"avaluo_activo":avaluo_activo_c,"avaluo_almoneda":avaluo_almoneda_c,"avaluo_remate":avaluo_remate_c,"cont_total":str(cont_total_c),"mutuo_total":total_mutuo_c,"avaluo_total":total_avaluo_c}
+			dic = { "fecha_1" : dic_fecha_1 , "fecha_2" : dic_fecha_2,"comparacion" : dic_comparacion }
+			return reporte_comparativo_carteras(dic,user_2.user,txt_fecha_inicial,txt_fecha_final,txt_sucursal)
+	else:
+		form  = Comp_Carteras_Form()
+
+	return render(request,'empenos/rep_comparativo_estatus_cartera.html',locals())
+	
 def rep_flujo_caja(request):
 
 	#si no esta logueado mandamos al login
@@ -5031,7 +5282,6 @@ def imprime_boleta(request):
 		no_paginas=math.ceil(ndet/size)
 		cont_pag=1
 		while cont_pag<=no_paginas:
-
 			#p.setFont("Helvetica",20)
 			#p.drawString(55,770,"Empeños Express $")
 			if x.reimpresion==0:

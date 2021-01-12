@@ -4,6 +4,13 @@ from empenos.models import *
 from datetime import date, datetime, time
 from django.utils import timezone
 
+
+SI_NO=(
+	('1','SI'),
+	('2','NO'),
+)
+
+
 class Min_Apartado_Form(forms.ModelForm):
 	class Meta:
 		model=Min_Apartado
@@ -155,6 +162,17 @@ class Flujo_Caja_Form(forms.Form):
 	sucursal=forms.ModelChoiceField(queryset=Sucursal.objects.all())	
 	fecha_inicial=forms.DateTimeField()
 	fecha_final=forms.DateTimeField()
+		
+	def __init__(self, *args, **kwargs):
+		super(self.__class__, self).__init__(*args, **kwargs)
+		# asi vuelves tus campos no requeridos
+		self.fields['sucursal'].required = False
+
+class Comp_Carteras_Form(forms.Form):
+	sucursal=forms.ModelChoiceField(queryset=Sucursal.objects.all())	
+	fecha_inicial=forms.DateTimeField()
+	fecha_final=forms.DateTimeField()
+	export_pdf = forms.IntegerField()
 		
 	def __init__(self, *args, **kwargs):
 		super(self.__class__, self).__init__(*args, **kwargs)

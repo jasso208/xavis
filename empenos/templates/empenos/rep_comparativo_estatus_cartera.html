@@ -1,0 +1,478 @@
+{% extends 'base.html'%}
+{% load static %}
+{% block archivos_staticos%}
+<script type="text/javascript" src="{% static 'js/rep_comparativo_estatus_cartera.js' %}"></script>
+{% endblock %}
+
+{% block usuario %}
+
+			<div class="col-xs-6">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{user_2.user.username}} {{user_2.perfil.perfil}}</label> 
+				
+			</div>
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-home"></span> Sucursal: {{user_2.sucursal}}</label> 	
+			</div>
+
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-inbox"></span> Caja: {{c}} </label> 	
+			</div>
+
+
+{% endblock  %}
+{% block content %}
+	<div class="col-xs-12 cls_encabezado_body">
+	
+		<a >
+			Comprar estatus de cartera.
+		</a>		
+	
+	</div>
+
+		<div class="col-xs-12">
+		<form method="post" action="#" class="cls_form_1">
+			{%csrf_token%}
+	
+			<div class="row cls_form_consulta">
+				<div class="col-xs-12">
+							<div class="panel panel-default" id="panel_principal" >						 
+								<div class="panel-body">
+
+									<div class="col-xs-12">
+										<div class="panel panel-default">						
+											<div class="panel-body">
+												<div class="col-xs-2">
+													<label>Sucursal</label>										
+													<select name="sucursal" class="form-control" title="" id="id_sucursal">
+													  <option value="" selected="">---------</option>
+
+													  {% for s in sucursales %}
+													  <option value="{{s.id}}">{{s.sucursal}}</option>			
+													  {% endfor %}											  
+
+													</select>
+
+												</div>
+												<div class="col-xs-3">
+													<label>Fecha 1</label>
+													<input type="date" name="fecha_inicial" class="form-control" placeholder="Fecha 1" title=""  id="id_fecha_inicial">
+												</div>
+												<div class="col-xs-3">
+													<label>Fecha 2</label>
+													<input type="date" name="fecha_final" class="form-control" placeholder="Fecha 2" title="" id="id_fecha_final">
+												</div>
+												<div class ="col-xs-2">
+													<label>Exportar a PDF</label>
+													<select name="export_pdf" class="form-control" placeholder="" title="" id="id_export_pdf" value = "0">
+														<option value = "1">SI</option>
+														<option value = "2" selected = "">NO</option>
+													</select>
+												</div>
+												<div class="col-xs-2">
+													<br>
+													<button id="btn_consultar" class="btn btn-primary btn-sm">
+														<span class="glyphicon glyphicon-ok">
+														</span> 
+														Consultar
+													</button>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+
+
+
+
+
+								<div class="col-xs-12">
+									<div class="col-xs-12">								
+										<div class="col-xs-4">
+											<label>Sucursal: <span id="span_sucursal">{{txt_sucursal}}</span></label>
+										</div>	
+										<div class="col-xs-8 text-right">	
+
+										</div>								
+									</div>
+									<br>
+									<br>
+									<div class = "col-xs-6">										
+										<div class="col-xs-12">
+											<div class="cls_encabezado_alert" >
+												<label>Cartera del {{txt_fecha_inicial}}</label>
+											</div>
+											<div class="panel panel-default">
+												<div class="col-xs-12">
+													<div class="col-xs-4">
+														
+													</div>
+													<div class="col-xs-2">											
+														<label>Cantidad</label>
+													</div>
+													<div class="col-xs-3 text-right">
+														
+														<label>Mutuo</label>
+													</div>	
+
+													<div class="col-xs-3 text-right">
+														<label>Avaluo</label>
+														
+													</div>	
+
+												</div>
+
+												<div class="col-xs-12">
+													<div class="col-xs-4">
+														Boleta Activa
+													</div>
+													<div class="col-xs-2">											
+														{{cont_activas_1}}
+													</div>
+													<div class="col-xs-3 text-right">
+														${{mutuo_activo_1}}
+													</div>	
+
+													<div class="col-xs-3 text-right">
+														${{avaluo_activo_1}}
+													</div>	
+												</div>
+
+
+												<div class="col-xs-12">
+													<div class="col-xs-4">
+														Boleta Almoneda
+													</div>
+													<div class="col-xs-2">											
+														{{cont_almoneda_1}}
+													</div>
+													<div class="col-xs-3 text-right">
+														${{mutuo_almoneda_1}}
+													</div>	
+
+													<div class="col-xs-3 text-right">
+														${{avaluo_almoneda_1}}
+													</div>	
+												</div>
+
+
+
+												<div class="col-xs-12">
+													<div class="col-xs-4">
+														Boleta Remate
+													</div>
+													<div class="col-xs-2">					
+														{{cont_remate_1}}
+													</div>
+													<div class="col-xs-3 text-right">
+														${{mutuo_remate_1}}
+													</div>	
+
+													<div class="col-xs-3 text-right">
+														${{avaluo_remate_1}}
+													</div>	
+												</div>
+
+
+												<div class="col-xs-12">
+													<hr>
+												</div>
+
+
+												<div class="col-xs-12">
+													<div class="col-xs-4">
+														Total
+													</div>
+													<div class="col-xs-2">											
+														{{cont_total_1}}
+													</div>
+													<div class="col-xs-3 text-right">
+														${{total_mutuo_1}}
+													</div>	
+
+													<div class="col-xs-3 text-right">
+														${{total_avaluo_1}}
+													</div>	
+												</div>
+												&nbsp;
+											</div>
+										</div>
+									</div>
+									<div class = "col-xs-6">										
+										<div class="col-xs-12">
+											<div class="cls_encabezado_alert" >
+												<label>Cartera del {{txt_fecha_final}} </label>
+											</div>
+											<div class="panel panel-default">
+												<div class="col-xs-12">
+													<div class="col-xs-4">
+														
+													</div>
+													<div class="col-xs-2">											
+														<label>Cantidad</label>
+													</div>
+													<div class="col-xs-3 text-right">
+														
+														<label>Mutuo</label>
+													</div>	
+
+													<div class="col-xs-3 text-right">
+														<label>Avaluo</label>
+														
+													</div>	
+
+												</div>
+
+												<div class="col-xs-12">
+													<div class="col-xs-4">
+														Boleta Activa
+													</div>
+													<div class="col-xs-2">											
+														{{cont_activas_2}}
+													</div>
+													<div class="col-xs-3 text-right">
+														${{mutuo_activo_2}}
+													</div>	
+
+													<div class="col-xs-3 text-right">
+														${{avaluo_activo_2}}
+													</div>	
+												</div>
+
+
+												<div class="col-xs-12">
+													<div class="col-xs-4">
+														Boleta Almoneda
+													</div>
+													<div class="col-xs-2">											
+														{{cont_almoneda_2}}
+													</div>
+													<div class="col-xs-3 text-right">
+														${{mutuo_almoneda_2}}
+													</div>	
+
+													<div class="col-xs-3 text-right">
+														${{avaluo_almoneda_2}}
+													</div>	
+												</div>
+
+
+
+												<div class="col-xs-12">
+													<div class="col-xs-4">
+														Boleta Remate
+													</div>
+													<div class="col-xs-2">					
+														{{cont_remate_2}}
+													</div>
+													<div class="col-xs-3 text-right">
+														${{mutuo_remate_2}}
+													</div>	
+
+													<div class="col-xs-3 text-right">
+														${{avaluo_remate_2}}
+													</div>	
+												</div>
+
+
+												<div class="col-xs-12">
+													<hr>
+												</div>
+
+
+												<div class="col-xs-12">
+													<div class="col-xs-4">
+														Total
+													</div>
+													<div class="col-xs-2">											
+														{{cont_total_2}}
+													</div>
+													<div class="col-xs-3 text-right">
+														${{total_mutuo_2}}
+													</div>	
+
+													<div class="col-xs-3 text-right">
+														${{total_avaluo_2}}
+													</div>	
+												</div>
+												&nbsp;
+											</div>
+										</div>
+									</div>
+									<div class = col-xs-3>
+										&nbsp;
+									</div>
+									<div class = "col-xs-6 ">										
+										<div class="col-xs-12">
+											<div class="cls_encabezado_alert" >
+												<label>Crecimiento de cartera del {{txt_fecha_inicial}} vs {{txt_fecha_final}}. </label>
+											</div>
+											<div class="panel panel-default">
+												<div class="col-xs-12">
+													<div class="col-xs-4">
+														
+													</div>
+													<div class="col-xs-2">											
+														<label>Cantidad</label>
+													</div>
+													<div class="col-xs-3 text-right">
+														
+														<label>Mutuo</label>
+													</div>	
+
+													<div class="col-xs-3 text-right">
+														<label>Avaluo</label>
+														
+													</div>	
+
+												</div>
+
+												<div class="col-xs-12">
+													<div class="col-xs-4">
+														Boleta Activa
+													</div>
+													<div class="col-xs-2">											
+														{{cont_activas_c}}
+													</div>
+													<div class="col-xs-3 text-right">
+														${{mutuo_activo_c}}
+													</div>	
+
+													<div class="col-xs-3 text-right">
+														${{avaluo_activo_c}}
+													</div>	
+												</div>
+
+
+												<div class="col-xs-12">
+													<div class="col-xs-4">
+														Boleta Almoneda
+													</div>
+													<div class="col-xs-2">											
+														{{cont_almoneda_c}}
+													</div>
+													<div class="col-xs-3 text-right">
+														${{mutuo_almoneda_c}}
+													</div>	
+
+													<div class="col-xs-3 text-right">
+														${{avaluo_almoneda_c}}
+													</div>	
+												</div>
+
+
+
+												<div class="col-xs-12">
+													<div class="col-xs-4">
+														Boleta Remate
+													</div>
+													<div class="col-xs-2">					
+														{{cont_remate_c}}
+													</div>
+													<div class="col-xs-3 text-right">
+														${{mutuo_remate_c}}
+													</div>	
+
+													<div class="col-xs-3 text-right">
+														${{avaluo_remate_c}}
+													</div>	
+												</div>
+
+
+												<div class="col-xs-12">
+													<hr>
+												</div>
+
+
+												<div class="col-xs-12">
+													<div class="col-xs-4">
+														Total
+													</div>
+													<div class="col-xs-2">											
+														{{cont_total_c}}
+													</div>
+													<div class="col-xs-3 text-right">
+														${{total_mutuo_c}}
+													</div>	
+
+													<div class="col-xs-3 text-right">
+														${{total_avaluo_c}}
+													</div>	
+												</div>
+												&nbsp;
+											</div>
+										</div>
+									</div>
+									<div class = col-xs-3>
+										&nbsp;
+									</div>
+
+								</div>
+								&nbsp;
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+	<div id="fondo_preloader">
+		<div class="preloader" id="preloader">
+		
+		</div>
+	</div>
+	{%ifequal estatus '0' %}
+		<div class="fondo_mensaje " >
+		</div >
+		<div class="mensaje " >
+			<div class="cls_encabezado_alert" >
+				Error!!
+			</div>	
+			<div class="panel panel-default">	
+				<label class="page-header" id="msj_notificacion">{{msj_error}}</label>
+				<br>				
+				<a class="btn btn-primary btn-sm" href="{%url 'seguridad:admin_reportes' %}"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+				<br>
+				<br>
+			</div>
+		</div>
+	{%endifequal%}
+
+	{%ifequal estatus '2' %}
+			<div class="fondo_mensaje cls_error_2" >
+			</div >
+			<div class="mensaje cls_error_2" >
+				<div class="cls_encabezado_alert" >
+					Error!!
+				</div>	
+				<div class="panel panel-default">	
+					<label class="page-header" >{{msj_error}}</label>
+					<br>				
+					<a class="btn btn-primary btn-sm" style="cursor: pointer;" id = "btn_aceptar_error_2"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+					<br>
+					<br>
+				</div>
+			</div>
+		{%endifequal%}
+
+			<div class="fondo_mensaje cls_error_3" >
+			</div >
+			<div class="mensaje cls_error_3" >
+				<div class="cls_encabezado_alert" >
+					Error!!
+				</div>	
+				<div class="panel panel-default">	
+					<label class="page-header" id="msj_notificacion">{{msj_error}}</label>
+					<br>				
+					<a class="btn btn-primary btn-sm" style="cursor: pointer;" id = "btn_aceptar_error_3"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+					<br>
+					<br>
+				</div>
+			</div>
+
+			<script type="text/javascript">
+				$(document).ready(
+						function()
+						{
+								fn_inicio("{{txt_fecha_inicial}}","{{txt_fecha_final}}","{{id_sucursal}}");
+						}
+					);
+			</script>
+{% endblock %}

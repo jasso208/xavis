@@ -1682,3 +1682,4 @@ class Historico_Estatus_Cartera(models.Model):
 	class Meta:
 		unique_together = ("sucursal","fecha")
 
+

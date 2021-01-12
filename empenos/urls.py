@@ -43,6 +43,7 @@ urlpatterns=[
 	url(r'^administracion_interes_empeno/$',administracion_interes_empeno,name="administracion_interes_empeno"),
 	url(r'^administracion_porcentaje_mutuo/$',administracion_porcentaje_mutuo,name="administracion_porcentaje_mutuo"),
 	url(r'^cancela_abono/$',cancela_abono,name="cancela_abono"),
+	url(r'^rep_comparativo_estatus_cartera/$',rep_comparativo_estatus_cartera,name="rep_comparativo_estatus_cartera"),
 
 
 	url(r'^consulta_abono$',consulta_abono,name="consulta_abono"),	
