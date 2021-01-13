@@ -1,4 +1,8 @@
 
+body
+{
+	width: 1345px;
+}
 .panel-body>div
 {
 	
@@ -299,7 +303,6 @@ box-shadow: 0px 1px 7px 0px rgba(0,0,0,0.75);
 
 .content-grid
 {
-	margin-top: 10px;
 	width: 100%;
 	padding: 10px;
 	background-color: white;

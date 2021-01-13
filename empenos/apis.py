@@ -805,7 +805,7 @@ def api_agregar_kilataje(request):
 	respuesta=[]
 	try:
 		kilataje=request.GET.get("desc_kilataje")
-		avaluo=int(request.GET.get("importe"))
+		avaluo=request.GET.get("importe")
 		id_tipo_producto=request.GET.get("id_tipo_producto")
 		id_tipo_kilataje=request.GET.get("id_tipo_kilataje")
 

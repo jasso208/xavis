@@ -18,7 +18,7 @@ import email.message
 from .forms import *
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models  import Permission,User
-from empenos.models import User_2,Cajas
+from empenos.models import User_2,Cajas,Perfil,Sucursal
 from datetime import date, datetime, time
 from random import randint
 
@@ -457,22 +457,50 @@ def cambio_sucursal(request):
 
 def alta_usuario(request,id=None):
 
+	is_edicion = "0"
 	#obtenemos el objeto a editar
 	if id:
 		#obtenemos el objeto a editar
 		usr=User.objects.get(id=id)
+		is_edicion = "1"
+		encabezado = "Edicion del usuario: " + usr.username 
 	else:
 		usr=User()
+		encabezado = "Alta de usuario"
 
-	user=request.POST.get("username")
+
 	if request.method=="POST":
+
+		user=request.POST.get("username")
+
 		form=User_Form(request.POST,instance=usr)
 
 		if form.is_valid():		
 			form.save()
 			usuario_creado=User.objects.get(username=user)
-			usuario_creado.set_password("123456789")
+			#si es edicion, no modificamos la contraseña
+			if is_edicion == "0":
+				usuario_creado.set_password("12345")
+			usuario_creado.is_staff = True
+			usuario_creado.is_active = True
 			usuario_creado.save()
+			#asignamosun perfil y sucursal por default
+			#solo cuando es alta de usuario
+			try:
+				usr_c = User_2()
+				usr_c.user = usuario_creado
+				usr_c.sucursal = Sucursal.objects.get(id = 1)
+				usr_c.perfil = Perfil.objects.get(id = 1)
+				usr_c.save()
+
+				sr = Sucursales_Regional()
+				sr.user = usuario_creado
+				sr.sucursal = Sucursal.objects.get(id = 1)
+				sr.save()
+
+			except:
+				pass
+
 			return HttpResponseRedirect(reverse('seguridad:consulta_usuarios'))
 	else:
 		form=User_Form( instance=usr)

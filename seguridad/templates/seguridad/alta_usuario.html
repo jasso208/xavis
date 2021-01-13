@@ -1,10 +1,14 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load bootstrap3%}
+{% block archivos_staticos%}
+<script type="text/javascript" src="{% static 'js/alta_usuario.js' %}"></script>
+{% endblock %}
+
 {%block content%}
 <div class="col-xs-12 cls_encabezado_body">
 	<a >
-		Usuario
+		{{encabezado}}
 	</a>	
 </div>
 <div class="col-xs-12">
@@ -13,13 +17,48 @@
 		
 		<div class="row cls_form_consulta">
 			<div class="col-xs-12">
-				<div class="panel panel-default">
-					
+				<div class="panel panel-default">					
 					<div class="panel-body">
-						{% bootstrap_form form %}
+						<div class = "row">
+							<div class="col-xs-3">
+								<label>Nombre de usuario</label>
+								{% bootstrap_field form.username show_label=False%}		
+							</div>
+							
+						</div>
+						<div class="row">
+							<div class="col-xs-3">
+								<label>Nombre(s)</label>
+								{% bootstrap_field form.first_name show_label=False %}
+							</div>
+							<div class="col-xs-6">
+								<label>Apellidos</label>
+								{% bootstrap_field form.last_name show_label=False %}
+							</div>							
+						</div>
+						<div class="row">
+							<div class="col-xs-6">
+								<label>E-mail</label>
+								{% bootstrap_field form.email show_label=False %}
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-xs-3">
+								<label>Contraseña</label>
+								{% bootstrap_field form.password show_label=False %}	
+							</div>
+						</div>
+
+
+						
+
+						<!--{% bootstrap_form form %}-->
+
 						<div class="row">
 							<div class="col-xs-12" style="text-align:center">
-								<button class="btn btn-primary">
+								<button class="btn btn-primary btn-sm" id="btn_guardar">
+									<span class="glyphicon glyphicon-floppy-disk">
+									</span>
 									Guardar
 								</button>
 							</div>
@@ -30,11 +69,32 @@
 		</div>
 	</form>
 </div>
+			<div class="fondo_mensaje cls_error" >
+			</div >
+			<div class="mensaje cls_error" >
+				<div class="cls_encabezado_alert" >
+					Error!!
+				</div>	
+				<div class="panel panel-default">	
+					<label class="page-header" id="msj_notificacion"></label>
+					<br>				
+					<a class="btn btn-primary btn-sm" style="cursor: pointer;" id = "btn_aceptar_error"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+					<br>
+					<br>
+				</div>
+			</div>
+
+				<div id="fondo_preloader">
+		<div class="preloader" id="preloader">
+		
+		</div>
+	</div>
+
 <script type="text/javascript">
 	$(document).ready(
-		function()
-			{				
-				$("#id_password").val("123456789")
+			function()
+			{
+				fn_inicio("{{is_edicion}}");
 			}
 		);
 </script>

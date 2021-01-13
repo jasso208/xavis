@@ -25,7 +25,55 @@
 		</a>	
 	</div>
 	<div class="col-xs-12">
+			<div class="row" >
+			
+				<div class="col-xs-12 cls_encabezado_body_2">
+					<a>
+						Administración de usuarios
+					</a>
+					<br>
+				</div>
+				<div class="row cls_row_body"  >
+					<div class="col-xs-2">
+						<div class="cls_boton_body">
+							<a href="{% url 'seguridad:alta_usuario' %}">
+								<span class="glyphicon glyphicon-user"></span>
+								<br>
+								<br>
+								Nuevo usuario.
+								<br>
+							&nbsp;
+							</a>	
+						</div>
+					</div>
+					<div class="col-xs-2">
+						<div class="cls_boton_body">
+							<a href="{% url 'seguridad:consulta_usuarios' %}">
+								<span class="glyphicon glyphicon-search"></span>
+								<br>
+								<br>
+								Consulta <br>usuarios
+								
+							
+							</a>	
+						</div>						
+					</div>	
+					<div class="col-xs-2">
+						<div class="cls_boton_body">
+							<a href="{% url 'seguridad:cambio_sucursal' %}">
+								<span class="glyphicon glyphicon-home"></span>
+								<br>
+								<br>
+								Asigna sucursal a usr.
+							</a>	
+						</div>
+					</div>	
+
+				</div>
+			</div>
+
 		<div class="row" >
+
 				<div class="col-xs-12 cls_encabezado_body_2">
 					<a>
 						Operación general
@@ -39,7 +87,8 @@
 								<span class="glyphicon glyphicon-usd"></span>
 								<br>
 								<br>
-								% sobre avaluo
+								% sobre avaluo<br>
+							&nbsp;
 							</a>	
 						</div>
 
@@ -51,7 +100,8 @@
 								<span class="glyphicon glyphicon-usd"></span>
 								<br>
 								<br>
-								% p/apartado
+								% p/apartado<br>
+							&nbsp;
 							</a>	
 						</div>
 					</div>
@@ -63,7 +113,8 @@
 								</span>
 								<br>
 								<br>
-								Dias no laboral.
+								Dias no laboral.<br>
+							&nbsp;
 							</a>	
 						</div>
 					</div>
@@ -86,7 +137,8 @@
 								<span class="glyphicon glyphicon-home"></span>
 								<br>
 								<br>
-								Inf. de sucursal.
+								Inf. de sucursal.<br>
+							&nbsp;
 							</a>	
 						</div>						
 					</div>
@@ -96,7 +148,7 @@
 								<span class="glyphicon glyphicon-arrow-right"></span>
 								<br>
 								<br>
-								Concep. retiro
+								Conceptos de retiro.
 							</a>	
 						</div>					
 					</div>
@@ -106,7 +158,7 @@
 									<span class="glyphicon glyphicon-sort"></span>
 									<br>
 									<br>
-									Admin. Int. Emp.
+									Admin. interes de emp.
 								</a>	
 							</div>
 							
@@ -121,7 +173,7 @@
 							</span>
 							<br>
 							<br>
-							Admin. Mutuo.
+							Admin. porcentaje p/mutuo.
 						</a>	
 					</div>
 					
@@ -145,7 +197,8 @@
 								<span class="glyphicon glyphicon-tags"></span>
 								<br>
 								<br>
-								Admin kilataje
+								Admin. kilataje<br>
+							&nbsp;
 							</a>	
 						</div>						
 					</div>
@@ -166,7 +219,7 @@
 								<span class="glyphicon glyphicon-trash"></span>
 								<br>
 								<br>
-								Ingresos extras
+								Cancela ingresos (No refrendos)
 							</a>	
 						</div>
 						
@@ -178,7 +231,8 @@
 								<span class="glyphicon glyphicon-arrow-right"></span>
 								<br>
 								<br>
-								Cancela retiro
+								Cancela retiro<br>
+							&nbsp;
 							</a>	
 						</div>						
 					</div>	
@@ -188,7 +242,8 @@
 								<span class="glyphicon glyphicon-usd"></span>
 								<br>
 								<br>
-								Cancela refrendo
+								Cancela refrendo<br>
+							&nbsp;
 							</a>	
 						</div>						
 					</div>		
