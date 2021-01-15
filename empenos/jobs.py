@@ -81,8 +81,20 @@ def fn_job_diario():
 	fn_pagos_vencidos(hoy)
 	fn_comision_pg(hoy)
 	fn_boletas_10d_alomneda(hoy)
-
+	fn_boletas_vendidas()
 	return True
+
+#existe una falla que hace que las boletas vendidas se pongan en estatus de remate o almoneda,
+# esta rutina es para validar que todas la boletas vendidas esten con estatus vendido.
+def fn_boletas_vendidas():
+	for d in Det_Venta_Piso.objects.all():
+		d.boleta.estatus = Estatus_Boleta.objects.get(id = 6)
+		d.boleta.save()
+
+	for d in Det_Venta_Granel.objects.all():
+		d.boleta.estatus = Estatus_Boleta.objects.get(id = 6)
+		d.boleta.save()
+
 
 #buscamos las boletas que ya tienen 10 dias en almoneda,
 #y le cambiamos el estatus a remate.
