@@ -5,6 +5,20 @@
 <script type="text/javascript" src="{% static 'js/alta_usuario.js' %}"></script>
 {% endblock %}
 
+{% block usuario %}
+
+			<div class="col-xs-6">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{user_2.user.username}} {{user_2.perfil.perfil}}</label> 
+				
+			</div>
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-home"></span> Sucursal: {{user_2.sucursal}}</label> 	
+			</div>
+
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-inbox"></span> Caja: {{c}} </label> 	
+			</div>
+{% endblock  %}
 {%block content%}
 <div class="col-xs-12 cls_encabezado_body">
 	<a >
@@ -36,31 +50,59 @@
 								{% bootstrap_field form.last_name show_label=False %}
 							</div>							
 						</div>
-						<div class="row">
-							<div class="col-xs-6">
-								<label>E-mail</label>
-								{% bootstrap_field form.email show_label=False %}
+
+						<div class="row"  id  ="id_password">
+							<div class="col-xs-3">
+								<label>Contraseña</label>
+								<br>
+								<label>12345</label>
 							</div>
+						</div>
+
+
+						<div class="row">
+							<div class="col-xs-3">
+								<label>Perfil</label>
+								{% bootstrap_field form.perfil show_label=False %}
+							</div>			
 						</div>
 						<div class="row">
 							<div class="col-xs-3">
-								<label>Contraseña</label>
-								{% bootstrap_field form.password show_label=False %}	
+								<label>Sucursal</label>
+								{% bootstrap_field form.sucursal show_label=False %}
 							</div>
+											
 						</div>
 
 
-						
+						<div class="row">
+							<div class="col-xs-3">							
+
+								{% bootstrap_field form.activo show_label=False %}
+							</div>			
+						</div>
 
 						<!--{% bootstrap_form form %}-->
 
 						<div class="row">
-							<div class="col-xs-12" style="text-align:center">
-								<button class="btn btn-primary btn-sm" id="btn_guardar">
+							
+							<div class="col-xs-8">
+								
+							</div>
+							<div class="col-xs-2 text-center" >
+								<a class="btn btn-primary btn-sm" id="btn_reinicia_psw">
+									<span class="glyphicon glyphicon-lock">
+									</span>
+									Reiniciar contraseña
+								</a>
+							</div>
+							
+							<div class="col-xs-2 text-center" >
+								<a class="btn btn-primary btn-sm" id="btn_guardar">
 									<span class="glyphicon glyphicon-floppy-disk">
 									</span>
 									Guardar
-								</button>
+								</a>
 							</div>
 						</div>
 					</div>
@@ -84,6 +126,52 @@
 				</div>
 			</div>
 
+			<div class="fondo_mensaje cls_exito" >
+			</div >
+			<div class="mensaje cls_exito" >
+				<div class="cls_encabezado_alert" >
+					Aviso
+				</div>	
+				<div class="panel panel-default">	
+					<label class="page-header" id="msj_aviso"></label>
+					<br>				
+					<a class="btn btn-primary btn-sm" style="cursor: pointer;" href = "{% url 'seguridad:consulta_usuarios' %}"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+					<br>
+					<br>
+				</div>
+			</div>
+
+			<div class="fondo_mensaje cls_confirma_reinicio_psw" id="fondo_confirmacion" >
+			</div >
+
+			<div class="mensaje cls_confirma_reinicio_psw" >
+				<div class="cls_encabezado_alert" >
+					Aviso
+				</div>	
+				<div class="panel panel-default">	
+					<label class="page-header">						
+						La nueva contraseña del usuario sera 12345. ¿Desea continuar?
+					</label>
+					<br>	
+
+					<a class="btn btn-primary btn-sm" style="cursor: pointer;" id="btn_cancelar_confirmacion">
+						<span class="glyphicon glyphicon-ok">
+							
+						</span> 
+						Cancelar
+					</a>			
+					<a class="btn btn-primary btn-sm" style="cursor: pointer;" id="btn_confirmar_reset_pws">
+						<span class="glyphicon glyphicon-ok">
+							
+						</span> 
+						Continuar
+					</a>
+					<br>
+					<br>
+				</div>
+			</div>
+
+
 				<div id="fondo_preloader">
 		<div class="preloader" id="preloader">
 		
@@ -94,7 +182,7 @@
 	$(document).ready(
 			function()
 			{
-				fn_inicio("{{is_edicion}}");
+				fn_inicio("{{is_edicion}}","{{id_usuario}}","{{csrf_token}}","{{IP_LOCAL}}","{{user_name}}","{{first_name}}","{{last_name}}","{{id_perfil}}","{{id_sucursal}}","{{activo}}");
 			}
 		);
 </script>

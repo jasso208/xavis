@@ -402,10 +402,14 @@ class Sucursales_Regional(models.Model):
 
 #esta tabla es un complemento de la tabla user de django.
 class User_2(models.Model):
-	user=models.ForeignKey(User,on_delete=models.PROTECT)
+	user=models.ForeignKey(User,on_delete=models.PROTECT,related_name = "usuario_sistema")
 	sucursal=models.ForeignKey(Sucursal,on_delete=models.PROTECT)
 	perfil=models.ForeignKey(Perfil,on_delete=models.PROTECT)
 	sesion=models.IntegerField(blank=True,null=True)
+	usuario_alta = models.ForeignKey(User,on_delete = models.PROTECT,related_name = "usuario_alta_usuario",blank = True,null = True)
+	fecha_alta = models.DateTimeField(default = timezone.now())
+	usuario_modifica = models.ForeignKey(User,on_delete = models.PROTECT,related_name = "usuario_modifica_usuario",blank = True,null = True)
+	fecha_modificacion = models.DateTimeField(default = timezone.now())
 
 	class Meta:
 		unique_together=('user',)
@@ -440,6 +444,121 @@ class User_2(models.Model):
 			print(e)
 			return None
 			
+	def fn_alta_usuario(user_name,first_name,last_name,id_sucursal,id_perfil,id_usuario_alta):
+		resp = []
+		if user_name == "" or user_name == None:
+			resp.append(False)
+			resp.append("El nombre de usuario es requerido.")
+			return resp
+
+		try:
+			sucursal = Sucursal.objects.get(id = id_sucursal)
+		except:
+			resp.append(False)
+			resp.append("Debe indicar una sucursal valida.")
+			return resp
+
+		try:
+			Perfil.objects.get(id = id_perfil)
+		except:
+			resp.append(False)
+			resp.append("Debe indicar un perfil valido.")
+			return resp
+
+
+		usuario = User.objects.filter(username = user_name)
+
+		if usuario.exists():
+			resp.append(False)
+			resp.append("El nombre de usuario indicado ya existe.")
+			return resp
+
+		print(Perfil.objects.get(id = int(id_perfil)))
+
+		try:
+			usuario_alta = User.objects.get(id = int(id_usuario_alta))
+			usuario = User()
+			usuario.username = user_name
+			usuario.first_name = first_name
+			usuario.last_name = last_name
+			usuario.is_staff = True
+			usuario.is_active = True
+			usuario.save()
+
+			user_2 = User_2()
+			user_2.user = usuario
+			user_2.sucursal = Sucursal.objects.get(id = int(id_sucursal))
+
+			user_2.perfil = Perfil.objects.get(id = int(id_perfil))
+			user_2.usuario_alta = usuario_alta
+			user_2.save()
+
+			resp.append(True)
+			resp.append("El usuario se creo correctamente.")
+		except Exception as e:
+			print(e)
+			resp.append(False)
+			resp.append("Error al crear el usuario, intente nuevamente.")
+			return resp
+
+		return resp
+
+
+	def fn_edita_usuario(user_name,first_name,last_name,id_sucursal,id_perfil,id_usuario_alta,activo):
+		resp = []
+		if user_name == "" or user_name == None:
+			resp.append(False)
+			resp.append("El nombre de usuario es requerido.")
+			return resp
+
+		try:
+			sucursal = Sucursal.objects.get(id = id_sucursal)
+		except:
+			resp.append(False)
+			resp.append("Debe indicar una sucursal valida.")
+			return resp
+
+		try:
+			Perfil.objects.get(id = id_perfil)
+		except:
+			resp.append(False)
+			resp.append("Debe indicar un perfil valido.")
+			return resp
+
+
+		try:
+			usr_modifica = User.objects.get(id = int(id_usuario_alta))
+
+			usr_a_modificar = User.objects.get(username = user_name)
+			
+			
+			usr_a_modificar.first_name = first_name
+			usr_a_modificar.last_name = last_name
+			
+			if activo == 0:
+				usr_a_modificar.is_active = False
+			else:				
+				usr_a_modificar.is_active = True
+
+			usr_a_modificar.save()
+
+			user_2 = User_2.objects.get(user = usr_a_modificar)
+			user_2.sucursal = Sucursal.objects.get(id = int(id_sucursal))
+			user_2.perfil = Perfil.objects.get(id = int(id_perfil))
+			user_2.usuario_modifica = usr_modifica
+			user_2.fecha_modificacion = timezone.now()
+
+			user_2.save()
+
+			resp.append(True)
+			resp.append("El usuario actualizo correctamente.")
+		except Exception as e:
+			print(e)
+			resp.append(False)
+			resp.append("Error al actualizar el usuario, intente nuevamente.")
+			return resp
+
+		return resp
 
 class Control_Folios(models.Model):
 	folio=models.IntegerField(null=False)

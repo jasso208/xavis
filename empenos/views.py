@@ -1522,7 +1522,7 @@ def admin_kilataje(request):
 		return HttpResponseRedirect(reverse('seguridad:login'))
 	
 	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
+	try:		
 		user_2=User_2.objects.get(user=request.user)
 	except Exception as e:		
 		print(e)

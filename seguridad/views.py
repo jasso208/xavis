@@ -57,8 +57,9 @@ encabezado_link_consulta_venta_2="""
 </html>
 """
 def Login(request):
-	#en caso de que ya este logueado, lo redireccionamos a la pantalla de bienvenidos.
+		#en caso de que ya este logueado, lo redireccionamos a la pantalla de bienvenidos.
 	if request.user.is_authenticated:
+		print("aqui esta la falla")
 		return HttpResponseRedirect("/bienvenidos")
 
 	if request.method=="POST":
@@ -76,7 +77,7 @@ def Login(request):
 				
 				form=Login_Form(request.POST)
 				estatus=0
-				msj="La cuenta del usuario esta incompleta."			
+				msj="La cuenta del usuario esta incompleta1."			
 				return render(request,'login.html',locals())
 			
 			#cada que iniciamos sesion, se genera un nuevo folio.
@@ -97,9 +98,7 @@ def Login(request):
 	else:
 		form=Login_Form()
 		return render(request,'login.html',locals())
-
-
-		
+	
 def cerrar_session(request):
 
 	logout(request)
@@ -109,6 +108,7 @@ def bienvenidos(request):
 	if not request.user.is_authenticated:
 		return HttpResponseRedirect(reverse('seguridad:login'))
 	
+	print(request.user)
 	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
 	try:
 		user_2=User_2.objects.get(user=request.user)
@@ -116,7 +116,7 @@ def bienvenidos(request):
 	except Exception as e:		
 		form=Login_Form(request.POST)
 		estatus=0
-		msj="La cuenta del usuario esta incompleta."			
+		msj="La cuenta del usuario esta incompleta 2."			
 		return render(request,'login.html',locals())
 
 	caja_abierta="0"
@@ -457,53 +457,57 @@ def cambio_sucursal(request):
 
 def alta_usuario(request,id=None):
 
+	#si regresa nonem, es porque el usuario no esta logueado.
+	user_2 = User_2.fn_is_logueado(request.user)
+	if user_2 == None:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+	#validamos si el usuario tiene caja abierta
+	caja = user_2.fn_tiene_caja_abierta()
+
+
+
+	try:
+		c=caja.caja
+	except:
+		c=""
+
+	msj_error = ""
+	#el estatus 1 indica que todo esta ok, 
+	#el estatus 0 indica que se presento un error. el error debe venir acompalñado de una leyenda en la variable msj_error
+	estatus = "1" 
+
+
 	is_edicion = "0"
+
+	user_name = ""
+	first_name = ""
+	last_name = ""
+	id_perfil = ""
+	id_sucursal = ""
+
 	#obtenemos el objeto a editar
-	if id:
+	if id != None :
 		#obtenemos el objeto a editar
 		usr=User.objects.get(id=id)
 		is_edicion = "1"
 		encabezado = "Edicion del usuario: " + usr.username 
+
+		u2 = User_2.objects.get(user = usr)
+
+		user_name = usr.username
+		first_name = usr.first_name
+		last_name = usr.last_name
+		id_perfil = u2.perfil.id
+		id_sucursal = u2.sucursal.id
+		activo = usr.is_active
+
 	else:
-		usr=User()
+		is_edicion = "0"
 		encabezado = "Alta de usuario"
 
+	id_usuario = request.user.id
+	form=User_Form()
 
-	if request.method=="POST":
-
-		user=request.POST.get("username")
-
-		form=User_Form(request.POST,instance=usr)
-
-		if form.is_valid():		
-			form.save()
-			usuario_creado=User.objects.get(username=user)
-			#si es edicion, no modificamos la contraseña
-			if is_edicion == "0":
-				usuario_creado.set_password("12345")
-			usuario_creado.is_staff = True
-			usuario_creado.is_active = True
-			usuario_creado.save()
-			#asignamosun perfil y sucursal por default
-			#solo cuando es alta de usuario
-			try:
-				usr_c = User_2()
-				usr_c.user = usuario_creado
-				usr_c.sucursal = Sucursal.objects.get(id = 1)
-				usr_c.perfil = Perfil.objects.get(id = 1)
-				usr_c.save()
-
-				sr = Sucursales_Regional()
-				sr.user = usuario_creado
-				sr.sucursal = Sucursal.objects.get(id = 1)
-				sr.save()
-
-			except:
-				pass
-
-			return HttpResponseRedirect(reverse('seguridad:consulta_usuarios'))
-	else:
-		form=User_Form( instance=usr)
 	return render(request,'seguridad/alta_usuario.html',locals())
 
 

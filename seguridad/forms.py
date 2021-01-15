@@ -24,10 +24,15 @@ class Permisos_Form(forms.ModelForm):
 		model=Permission
 		fields=("name","content_type","codename")
 
-class User_Form(forms.ModelForm):
-	class Meta:
-		model=User
-		fields=("username","first_name","last_name","email","password","groups","is_staff","is_active","is_superuser")
+class User_Form(forms.Form):
+	username = forms.CharField()
+	first_name = forms.CharField()
+	last_name = forms.CharField()
+	sucursal = forms.ModelChoiceField(queryset = Sucursal.objects.all())
+	perfil = forms.ModelChoiceField(queryset = Perfil.objects.all())
+	activo = forms.BooleanField()	
+
+
 
 class Cambio_Sucursal_Form(forms.Form):
 	usuario=forms.ModelChoiceField(queryset=User.objects.all())

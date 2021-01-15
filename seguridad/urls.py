@@ -1,6 +1,6 @@
 from django.conf.urls import url
 from seguridad.views import *
-
+from seguridad.apis import *
 app_name="seguridad"
 
 urlpatterns=[
@@ -25,6 +25,7 @@ urlpatterns=[
 	url(r'^modifica_usr/(?P<id>\d+)/$',alta_usuario,name="modifica_usr"),	
 	url(r'^alta_usuario/$',alta_usuario,name="alta_usuario"),
 
+
 	url(r'^consulta_usuarios$',consulta_usuarios,name="consulta_usuarios"),	
 	url(r'^bienvenidos$',bienvenidos,name="bienvenidos"),	
 	
@@ -40,10 +41,8 @@ urlpatterns=[
 	url(r'^cambia_psw_token/$',api_cambia_psw_token,name="cambia_psw_token"),
 	url(r'^kill_session/$',api_kill_session,name="kill_session"),
 	url(r'^reinicia_direccion_envio/$',api_reinicia_direccion_temporal,name="reinicia_direccion_envio"),
-
-
-
-
+	url(r'^api_usuario/$',api_usuario,name="api_usuario"),
+	url(r'^api_reinicia_psw/$',api_reinicia_psw,name="api_reinicia_psw"),
 
 ]
 
