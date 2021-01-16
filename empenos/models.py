@@ -6,8 +6,10 @@ from decimal import Decimal
 from seguridad.models import Session
 from datetime import date, datetime, time,timedelta
 import calendar
-from django.db.models import Sum
+from django.db.models import Sum,Max
 import decimal
+from django.db.models import Min
+from django.db import transaction
 
 GENERO_CHOICES = (
     ('1','HOMBRE'),
@@ -283,13 +285,7 @@ class Sucursal(models.Model):
 		if ret["importe__sum"]!=None:
 			importe_retiros=ret["importe__sum"]
 
-		return importe_retiros
-			
-
-
-
-
-
+		return importe_retiros			
 
 class Concepto_Retiro(models.Model):
 	concepto = models.CharField(max_length = 40,null = False)
@@ -382,12 +378,6 @@ class Concepto_Retiro(models.Model):
 		#para saber cuando saldo le queda a este concepto
 		return int(self.importe_maximo_retiro) - int(total_retirado)
 
-		
-
-
-
-
-
 class Control_Folios(models.Model):
 	folio=models.IntegerField(default=0)
 	tipo_movimiento=models.ForeignKey(Tipo_Movimiento,on_delete=models.PROTECT)
@@ -397,8 +387,7 @@ class Control_Folios(models.Model):
 		return self.sucursal.sucursal+' '+self.tipo_movimiento.tipo_movimiento
 
 	class Meta:
-		unique_together=('tipo_movimiento','sucursal',)
-	
+		unique_together=('tipo_movimiento','sucursal',)	
 
 class Sucursales_Regional(models.Model):
 	user=models.ForeignKey(User,on_delete=models.PROTECT)
@@ -419,6 +408,34 @@ class User_2(models.Model):
 
 	def __str__(self):
 		return self.user.username
+
+	def fn_is_logueado(usuario):
+		#si no esta logueado mandamos al login
+		if not usuario.is_authenticated:
+			return None
+		
+		#Para que un usuario sea vañido, adebas de estar creado en la tabla User
+		#tambien debe tener informacion en la tabla User_2
+		try:
+			user_2=User_2.objects.get(user=usuario)
+		except Exception as e:							
+			return None
+
+		return user_2
+
+	#funcion para validar si el usuario tiene caja abierta,
+	#en caso de tenerle regresa un objeto de la caja
+	#en caso de que no, regresa None
+	def fn_tiene_caja_abierta(self):
+		try:
+			hoy_min = datetime.combine(date.today(),time.min)
+			hoy_max = datetime.combine(date.today(),time.max)
+			#validamos si el usuaario tiene caja abierta para mostrarla en el encabezado.
+			return Cajas.objects.get(fecha__range = (hoy_min,hoy_max),fecha_cierre__isnull = True,usuario = self.user)			
+		except Exception as e:
+			print(e)
+			return None
+			
 
 class Control_Folios(models.Model):
 	folio=models.IntegerField(null=False)
@@ -656,8 +673,6 @@ class Boleta_Empeno(models.Model):
 	interes = models.DecimalField(max_digits = 20,decimal_places = 2,default = 0)
 	iva = models.DecimalField(max_digits = 20,decimal_places = 2,default = 0)
 
-
-
 	@classmethod
 	def nuevo_empeno(self,sucursal,tp,caja,usuario,avaluo,mutuo,fecha_vencimiento,cliente,nombre_cotitular,apellido_paterno,apellido_materno,plazo,fecha_vencimiento_real,estatus,folio,tm):
 
@@ -687,6 +702,403 @@ class Boleta_Empeno(models.Model):
 		respuesta.append({"estatus":"1","almacenaje":almacenaje,"interes":interes,"iva":iva,"refrendo":refrendo})
 		
 		return respuesta
+
+
+	#funcion para simular el refrendo sin afectar la boleta.
+	#regresa una lista.
+	def fn_simula_calcula_refrendo(self,mutuo):
+		p_almacenaje = decimal.Decimal(self.almacenaje)/decimal.Decimal(100)
+		p_interes = decimal.Decimal(self.interes)/decimal.Decimal(100)
+		p_iva = decimal.Decimal(self.iva)/decimal.Decimal(100)
+
+		almacenaje = 0.00
+		interes = 0.00
+		iva=0.00
+		refrendo = 0.00
+
+		respuesta = []
+
+		almacenaje = (decimal.Decimal(mutuo) * p_almacenaje)
+		interes = (decimal.Decimal(mutuo) * p_interes)
+		iva = ((almacenaje+interes) * p_iva)
+		refrendo = round(almacenaje + interes + iva)
+		respuesta.append({"estatus":"1","almacenaje":almacenaje,"interes":interes,"iva":iva,"refrendo":refrendo})		
+		return respuesta
+
+
+	#funcion que regresa un diccionario con los valores "min_semanas" y "max_semanas"
+	# el min de semanas es el mino de semanas a refrendar por la boleta
+	# el max de semanas es el maximo de semanas a regrendar permitidas por la boleta.
+	# aplica solo para boletas semanales.
+	def fn_get_min_y_max_semanas_a_pagar(self):
+		
+		max_semanas_a_refrendar = 0
+		min_semanas_a_refrendar = 0
+
+		#consultamos el numero de pagos que estan vencidos y sin pagar de la boleta, excluyendo las comision de periodo de gracia (tipo 2)
+		num_pagos_vencidos = Pagos.objects.filter(boleta = self, vencido = 'S',pagado = "N").exclude(tipo_pago__id = 2).count()
+		
+		#si no tiene pagos vencidos.
+		if num_pagos_vencidos == 0:
+			#buscamos el proximo pago
+			id_proximo_pago = Pagos.objects.filter(boleta = self, vencido = "N").aggregate(Min("id"))["id__min"]
+
+			prox_pago = Pagos.objects.get(id = id_proximo_pago)
+
+			#validamos si el dia actual esta dentro del rango de este pago.
+			today = datetime.combine(date.today(),time.min)
+			
+			dif_dias = abs((today - prox_pago.fecha_vencimiento_real).days)
+
+			#Si la diferencia entre hoy y la fecha de vencimiento real, es mayor a 7, quiere decir que el dia de
+			#hoy aun es parte de alguna semana de pago.
+			if dif_dias > 7 :
+				if prox_pago.pagado == "N":
+					max_semanas_a_refrendar = 1
+					min_semanas_a_refrendar = 1
+				else:
+					max_semanas_a_refrendar = 0
+					min_semanas_a_refrendar = 0
+			#si la diferencia entre hoy y la fecha de vencimiento real, es menor o igual a 7, quiere edcir que el dia de 
+			#hoy si pertenece a una semana de pago
+			else:
+				if prox_pago.pagado == "S":
+					max_semanas_a_refrendar = 0
+					min_semanas_a_refrendar = 0
+				else:
+					max_semanas_a_refrendar = 1
+					min_semanas_a_refrendar = 1
+
+		elif num_pagos_vencidos > 0 and num_pagos_vencidos <= 4:
+			min_semanas_a_refrendar = 1
+			max_semanas_a_refrendar = num_pagos_vencidos + 1
+		else:
+			min_semanas_a_refrendar = num_pagos_vencidos - 3
+			max_semanas_a_refrendar = num_pagos_vencidos + 1
+
+		return {"max_semanas_a_refrendar":max_semanas_a_refrendar,"min_semanas_a_refrendar":min_semanas_a_refrendar}
+
+	#funcion que regresa true en caso de que la boleta acepte refrendo (es porque esta en estatus 1-abierta, 3-almoneda o 5-remate)
+	#o false si no acepta refrendo.
+	def fn_acepta_refrendo(self):
+		if self.estatus.id == 1 or self.estatus.id == 3 or self.estatus.id == 5:
+			return True
+		else:
+			return False
+
+	def fn_get_comision_pg(self):		
+		#sumamos todas las comisiones de periodos de gracia que no han sido pagados
+		importe_cpg = Pagos.objects.filter(boleta = self,pagado = "N", tipo_pago__id = 2).aggregate(Sum("importe"))["importe__sum"]
+		if importe_cpg == None:
+			importe_cpg = 0
+		return importe_cpg
+
+	def fn_get_dias_vencida(self):
+		#si es estatus almoneda o remate, regresamos el tiempo que lleva vencida la boleta.
+		if self.estatus.id == 3 or self.estatus.id == 5:
+			today = datetime.combine(date.today(),time.max)
+			dias_vencido = (today-self.fecha_vencimiento_real).days
+
+			#no deberia pasar que sea negativo, pero por si acaso
+			if dias_vencido < 0:
+				dias_vencido = 0
+
+			return dias_vencido
+		else:
+			return 0 
+
+	def fn_simula_proximos_pagos(self,semanas_a_refrendar):
+		min_semanas = self.fn_get_min_y_max_semanas_a_pagar()["min_semanas_a_refrendar"]
+		max_semanas = self.fn_get_min_y_max_semanas_a_pagar()["max_semanas_a_refrendar"]
+
+		#si el numero de semanas esta fuera de rango
+		if semanas_a_refrendar < min_semanas or semanas_a_refrendar > max_semanas:
+			return None
+
+		#despues de aplicar un refrendo, deben quedar siempre 4 pagos sin pagar, sin importar si estan vencidos o no.
+
+		#si la boleta esta vencida
+		if self.estatus.id ==3 or self.estatus.id ==5:					
+
+			pagos_que_continuan = Pagos.objects.filter(boleta = self, pagado = "N").exclude(tipo_pago__id = "2").order_by("id")[semanas_a_refrendar:max_semanas]
+
+			#Solo puede haber 4 pagos maximos sin pagar despues de aplicar el refrendo,			
+			num_nuevos_pagos = 4 - pagos_que_continuan.count()
+
+
+		else:
+			#en toda boleta no venvida, debera haber 4 semanas sin pagar.
+			pagos_que_continuan = Pagos.objects.filter(boleta = self, pagado = "N").exclude(tipo_pago__id = "2").order_by("id")[semanas_a_refrendar:]
+
+			#por cada semana a refrendar vamos a generar un nuevo pago.
+			num_nuevos_pagos = semanas_a_refrendar
+
+		#creamos una lista para almacenar los nuevos pagos
+		nuevos_pagos = []
+		ultima_fecha_vencimiento = None
+
+		#se agregan los pagos que continuan a la lista de nuevos pagos
+		#aunq estos ya estan vencidos, se mostraran en pantalla de simulacion de proximos pagos
+		for p in pagos_que_continuan:				
+			ultima_fecha_vencimiento = p.fecha_vencimiento						
+			nuevos_pagos.append(p.fecha_vencimiento.strftime('%Y-%m-%d'))
+
+		if ultima_fecha_vencimiento == None:
+			id_ultimo_abono = Pagos.objects.filter(boleta = self, pagado = "N").exclude(tipo_pago__id = "2").aggregate(Max("id"))["id__max"]
+			ultima_fecha_vencimiento = Pagos.objects.get(id=id_ultimo_abono).fecha_vencimiento
+
+		seven_days = timedelta(days = 7)
+		fecha_real = ultima_fecha_vencimiento
+
+		for n in range(0,num_nuevos_pagos):			
+			
+			fecha_real = datetime.combine((fecha_real+seven_days),time.min)				
+			ultima_fecha_vencimiento = fecha_real
+			ultima_fecha_vencimiento = fn_fecha_vencimiento_valida(ultima_fecha_vencimiento)				
+			print(ultima_fecha_vencimiento)
+			nuevos_pagos.append(ultima_fecha_vencimiento.strftime('%Y-%m-%d'))
+			
+		return nuevos_pagos
+
+	#si regresa false es que algo fallo, y no debemos continuar con la aplicacion del refrendo.
+	@transaction.atomic
+	def fn_paga_comision_pg(self,descuento,abono):
+
+		#si el estatus es diferente de almoneda o remate y se va a aplicar un decuento es que algo salio mal.
+		#ya que no es posible aplicar descuento a una boleta que no esta en almoneda o en remate.
+		if self.estatus.id != 3 and self.estatus.id != 5:
+			if int(descuento) > 0:
+				return False
+			else:
+				return True
+
+		print("si es almoneda")
+		#SI ESTAMOS EN ESTE PUNTO ES QUE LA BOLETA SI ESTA EN ALMONEDA O REMATE.
+		#obtenemos todos las comisiones de Pg que no han sido pagadoas.
+		comision_pg = Pagos.objects.filter(boleta = self,tipo_pago__id = 2,pagado = "N")
+
+		pagos_no_pagados = Pagos.objects.filter(boleta = self,pagado = "N")
+
+		importe_comision_pg = comision_pg.aggregate(Sum("importe"))["importe__sum"]
+
+
+		if importe_comision_pg == None:
+			importe_comision_pg = 0		
+
+		if float(descuento) > 0:
+			#validamos que el descuento cubra todas las comisiones de periodo de gracia.
+			if float(descuento) < float(importe_comision_pg):				
+				return False
+
+			#validamos que tenga 3 o menos comision de periodo de gracia sin pagar.
+			#ya que de tener mas, es incorrecto que aplique descuento.
+			if comision_pg.count() > 3:				
+				return False
+
+		if comision_pg.exists():			
+
+			print("descuento")
+			print(descuento)
+			if descuento == 0:					
+				try:
+					for cpg in comision_pg:
+						cpg.pagado = "S"
+						cpg.fecha_pago=timezone.now()
+						cpg.save()								
+
+						#creamos la relacion entre el abono y los pagos
+						rel=Rel_Abono_Pago()
+						rel.abono=abono
+						rel.pago=cpg
+						rel.save()
+				except Exception as e:					
+					return False
+
+			else:				
+				#al aplicar descuento, no se cobran las comisiones pg,
+				#por lo tanto se eliminan, pero en cas de querer cancelar el refrendo
+				#se almacenan en la tabla tempora Pagos_Com_Pg_No_Usados por un dia
+				#osea que un refrendo solo se puede cancelar el mismo dia en que se aplico.				
+				try:
+					for cpg in comision_pg:
+						resp_com_pg = Pagos_Com_Pg_No_Usados()
+						resp_com_pg.tipo_pago = cpg.tipo_pago
+						resp_com_pg.boleta = cpg.boleta
+						resp_com_pg.fecha_vencimiento = cpg.fecha_vencimiento
+						resp_com_pg.almacenaje = cpg.almacenaje
+						resp_com_pg.interes = cpg.interes
+						resp_com_pg.iva = cpg.iva
+						resp_com_pg.importe = cpg.importe
+						resp_com_pg.vencido = cpg.vencido
+						resp_com_pg.pagado = cpg.pagado
+						resp_com_pg.fecha_pago = cpg.fecha_pago
+						resp_com_pg.fecha_vencimiento_real = cpg.fecha_vencimiento_real
+						resp_com_pg.abono = abono
+						resp_com_pg.save()
+					comision_pg.delete()															
+				except Exception as e:							
+					return False
+		
+		return True
+
+	#el importe a pagos que aqui se recibe es el importe despues de haber descontado 
+	#el importe a comision de PG (en caso de que los tenga.)
+	@transaction.atomic
+	def fn_salda_pagos(self,numero_semanas_a_pagar,importe_a_pagos,abono):
+
+		#el importe a pagos debe ser mayor o igual a el importe que corresponde al numero de semanas a pagar
+
+		comision_pg = Pagos.objects.filter(boleta = self, pagado = "N",tipo_pago__id = 2)
+		#si existe comision Pg, es que algo salio mal, y no debemos continuar
+		if comision_pg.exists():
+			return False
+
+
+		#sin contar los pagos por comision pg
+		importe_semanal = Pagos.objects.filter(boleta = self, pagado = "N").exclude(tipo_pago__id = 2).aggregate(Max("importe"))["importe__max"]
+
+		#si no encuentra el importe semanal es porque algo fallo.
+		if importe_semanal == None:			
+			return False
+
+		importe_pagos = int(importe_semanal) * numero_semanas_a_pagar
+
+		#validamos que el importe a pagos (ya descontamos el importe de comision pg)
+		#cubra al 100% el importe a pagos.
+		#de lo contrario regresa false.
+		if importe_a_pagos < importe_pagos:		
+			return False
+
+
+		#si paso las validaciones anteriores, aplicamos el abono.
+
+
+		#obtenemos los proximos pagos.
+		nuevos_pagos = self.fn_simula_proximos_pagos(numero_semanas_a_pagar)
+
+		#buscamos los pagos a los que afectara.
+		pagos = Pagos.objects.filter(boleta = self,pagado = "N").exclude(tipo_pago__id = 2).order_by("id")[:numero_semanas_a_pagar]
+		
+		try:
+			for p in pagos:
+				p.pagado = "S"
+				p.fecha_pago = timezone.now()
+				p.save()
+
+				#creamos la relacion entre el abono y los pagos
+				rel=Rel_Abono_Pago()
+				rel.abono=abono
+				rel.pago=p
+				rel.save()
+
+
+			tp_refrendo = Tipo_Pago.objects.get(id = 1)
+
+			resp=self.fn_calcula_refrendo()
+			
+			almacenaje=decimal.Decimal(resp[0]["almacenaje"])/decimal.Decimal(4.00)
+			interes=decimal.Decimal(resp[0]["interes"])/decimal.Decimal(4.00)
+			iva=decimal.Decimal(resp[0]["iva"])/decimal.Decimal(4.00)
+			refrendo=round(decimal.Decimal(resp[0]["refrendo"])/decimal.Decimal(4.00))
+
+			fecha_vencimiento_real = self.fecha_vencimiento_real
+
+			#creamos los nuevos pagos.
+			for np in nuevos_pagos:
+				pago = Pagos.objects.filter(boleta = self,pagado = "N",fecha_vencimiento = datetime.strptime(np,'%Y-%m-%d')).exclude(tipo_pago__id = 2)
+				
+				fecha_vencimiento_real = fecha_vencimiento_real + timedelta(days = 7)
+				if not pago.exists():
+					pgo=Pagos()					
+					pgo.tipo_pago=tp_refrendo
+					pgo.boleta=self
+					pgo.fecha_vencimiento=datetime.strptime(np,'%Y-%m-%d')
+					pgo.almacenaje=almacenaje
+					pgo.interes=interes
+					pgo.iva=iva
+					pgo.importe=refrendo
+					pgo.vencido="N"
+					pgo.pagado="N"
+					pgo.fecha_vencimiento_real=fecha_vencimiento_real
+					pgo.save()
+				else:
+					for p in pago:
+						p.tipo_pago = tp_refrendo
+						p.save()
+
+				self.fecha_vencimiento = datetime.strptime(np,'%Y-%m-%d')
+				self.fecha_vencimiento_real = fecha_vencimiento_real
+			estatus_abierta = Estatus_Boleta.objects.get(id = 1)
+
+			self.estatus = estatus_abierta
+			self.save()
+		except Exception as e:
+			print(str(e))
+			return False
+
+		return True
+
+	@transaction.atomic
+	def fn_abona_capital(self,importe_capital,abono):
+		try:
+			#validamos que la boleta tenga como maximo numero de pagos 0
+			#ya que de lo contrario, no puede abonar a capital.
+			max_semanas_a_refrendar = self.fn_get_min_y_max_semanas_a_pagar()["max_semanas_a_refrendar"]
+
+			if max_semanas_a_refrendar != 0:
+				print("aqui 1")
+				return False
+
+			if type(importe_capital) != type(0):
+				print("aqui 2")
+				return False
+
+			mutuo=self.mutuo
+			mutuo=int(mutuo)-int(importe_capital)
+
+			#actualizamos el mutuo del la boleta.
+			self.mutuo=mutuo
+			self.save()
+
+			rel_cap = Rel_Abono_Capital()
+			rel_cap.boleta = self
+			rel_cap.abono = abono
+			rel_cap.importe = importe_capital
+			rel_cap.capital_restante = mutuo
+			rel_cap.save()
+
+			resp=self.fn_calcula_refrendo()
+
+			almacenaje=decimal.Decimal(resp[0]["almacenaje"])/decimal.Decimal(4.00)
+			interes=decimal.Decimal(resp[0]["interes"])/decimal.Decimal(4.00)
+			iva=decimal.Decimal(resp[0]["iva"])/decimal.Decimal(4.00)
+			refrendo=round(decimal.Decimal(resp[0]["refrendo"])/decimal.Decimal(4.00))		
+
+			est_refrendo = Tipo_Pago.objects.get(id = 1)
+			#buscamos los abonos no pagados y no vencidos para actualizar su importe en base al nuevo mutuo
+			pagos_t=Pagos.objects.filter(pagado="N",tipo_pago=est_refrendo,boleta=self,vencido="N").order_by("id")
+
+
+			#actualizamos el importe de los pagos con el nuevo refrendo.
+			for pt in pagos_t:
+				if mutuo!=0:
+					pt.importe=refrendo
+					pt.almacenaje=almacenaje
+					pt.interes=interes
+					pt.iva=iva
+					pt.save()
+				else:
+					pt.delete()
+					#marcamos la boleeta como desempeñada.
+					desempenada=Estatus_Boleta.objects.get(id=4)
+					self.estatus=desempenada
+					self.mutuo=0
+					self.refrendo=0
+					self.save()
+			return True
+		except Exception as e:
+			print(e)			
+			return False
 
 	class Meta:
 		unique_together=("folio",'sucursal',)
@@ -846,6 +1258,8 @@ class Pagos(models.Model):
 	fecha_vencimiento_real=models.DateTimeField(null=True,blank=True)#cuando la fecha de vencimiento cai en dia de asueto, la fecha de vencimienot se recorre un dia, esta fecha nos indica cual es la fecha de vencimiento real para calcular el las futuras fechas de vencimiento.
 
 
+
+
 class Tipo_Periodo(models.Model):
 	tipo_periodo=models.CharField(max_length=20,null=False)
 
@@ -909,6 +1323,23 @@ class Abono(models.Model):
 	boleta=models.ForeignKey(Boleta_Empeno,on_delete=models.PROTECT,blank=True,null=True)
 
 
+#cuando se aplica un refrendo y se le descuento los periodos PG
+#se almacenan en esta tabla durante el dia, esto con la finalidad de poder cancelar
+#el refrendo en caso de querer. asi podemos regresar los abonos pg.
+# por la noche deberan borrarse.
+class Pagos_Com_Pg_No_Usados(models.Model):
+	tipo_pago=models.ForeignKey(Tipo_Pago,on_delete=models.PROTECT,null=False,blank=True)
+	boleta=models.ForeignKey(Boleta_Empeno,on_delete=models.PROTECT,null=False,blank=True)
+	fecha_vencimiento=models.DateTimeField(null=False)
+	almacenaje=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)
+	interes=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)
+	iva=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)
+	importe=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)
+	vencido=models.CharField(max_length=1,default='N')
+	pagado=models.CharField(max_length=1,default='N',null=False)
+	fecha_pago=models.DateTimeField(null=True,blank=True)
+	fecha_vencimiento_real=models.DateTimeField(null=True,blank=True)#cuando la fecha de vencimiento cai en dia de asueto, la fecha de vencimienot se recorre un dia, esta fecha nos indica cual es la fecha de vencimiento real para calcular el las futuras fechas de vencimiento.
+	abono = models.ForeignKey(Abono,on_delete = models.PROTECT)
 
 
 class Imprime_Abono(models.Model):
@@ -997,3 +1428,36 @@ class Configuracion_Porcentaje_Mutuo(models.Model):
 
 
 
+#valida que la fecha de vencimiento no caiga en algun dia de azueto, 
+#en caso de caer en dia de azueto, le asigna el siguiente dia habil.
+def fn_fecha_vencimiento_valida(fecha_vencimiento):
+	try:
+		#si el dia es de azueto, buscamos el siguiente hata encontrar un dia que no sea de azueto.
+		dv=Dia_No_Laboral.objects.get(fecha=fecha_vencimiento)
+
+		dia_mas = timedelta(days=1)
+		#si la fecha de vencimiento existe en los dias inhabiles, buscamos el siguiente dia para que sea el de vencimiento.
+		fecha_vencimiento=datetime.combine(fecha_vencimiento+dia_mas, time.min)
+
+		dv=Dia_No_Laboral.objects.get(fecha=fecha_vencimiento)
+		dia_mas = timedelta(days=1)
+
+		#si la fecha de vencimiento existe en los dias inhabiles, buscamos el siguiente dia para que sea el de vencimiento.
+		fecha_vencimiento=datetime.combine(fecha_vencimiento+dia_mas, time.min)
+
+		dv=Dia_No_Laboral.objects.get(fecha=fecha_vencimiento)
+		dia_mas = timedelta(days=1)
+
+		#si la fecha de vencimiento existe en los dias inhabiles, buscamos el siguiente dia para que sea el de vencimiento.
+		fecha_vencimiento=datetime.combine(fecha_vencimiento+dia_mas, time.min)
+
+		dv=Dia_No_Laboral.objects.get(fecha=fecha_vencimiento)
+		dia_mas = timedelta(days=1)
+
+		#si la fecha de vencimiento existe en los dias inhabiles, buscamos el siguiente dia para que sea el de vencimiento.
+		fecha_vencimiento=datetime.combine(fecha_vencimiento+dia_mas, time.min)
+
+	except Exception as e:
+		print(e)
+		print("la fecha de vencimiento es valida")
+	return  fecha_vencimiento

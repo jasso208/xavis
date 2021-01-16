@@ -88,6 +88,10 @@ urlpatterns=[
 	url(r'^api_porcentaje_mutuo/$',api_porcentaje_mutuo,name="api_porcentaje_mutuo"),
 	url(r'^api_cliente/$',api_cliente,name="api_cliente"),
 	url(r'^api_backup/$',api_backup,name="api_backup"),
+	url(r'^api_simula_proximos_pagos_semanal/$',api_simula_proximos_pagos_semanal,name="api_simula_proximos_pagos_semanal"),
+	url(r'^api_aplica_refrendo_semanal/$',api_aplica_refrendo_semanal,name="api_aplica_refrendo_semanal"),
+
+
 
 
 ]

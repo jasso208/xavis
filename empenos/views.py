@@ -63,7 +63,7 @@ def abrir_caja(request):
 		caja_abierta="1"#si tiene caja abierta enviamos este estatus para no dejar entrar a la pantalla.
 		msj_caja="Solo se puede abrir una caja por dia en la sucursal, si ya fue cerrada, solicite la reapertura para seguir operando."
 
-	sucursales=Sucursales_Regional.objects.filter(user=user_2.user,sucursal=user_2.sucursal)
+	sucursales = Sucursales_Regional.objects.filter(user=user_2.user,sucursal=user_2.sucursal)
 	
 	id_sucursal=0
 	if user_2.perfil.id==1 or user_2.perfil.id==2:
@@ -2276,7 +2276,9 @@ def rep_flujo_caja(request):
 	avaluo_almoneda="{:0,.2f}".format(avaluo_almoneda)
 	importe_ventas="{:0,.2f}".format(importe_ventas)
 
-
+	mutuo_remate = "{:0,.2f}".format(mutuo_remate)
+	avaluo_remate = "{:0,.2f}".format(avaluo_remate)
+	im_retiros_aux = "{:0,.2f}".format(im_retiros_aux)
 	importe_total="{:0,.2f}".format(importe_total)
 	total_mutuo="{:0,.2f}".format(total_mutuo)
 	total_almoneda="{:0,.2f}".format(total_almoneda)
@@ -3812,21 +3814,64 @@ def nvo_empeno(request):
 
 #Se aplican refrendos para cuantro semanas.
 def refrendo(request,id_boleta):
-	#obtenemos el importe de una comision pg
-	est_comisionpg=Tipo_Pago.objects.get(id=2)
-	#si no esta logueado mandamos al login
-	if not request.user.is_authenticated:
+
+	#si regresa nonem, es porque el usuario no esta logueado.
+	user_2 = User_2.fn_is_logueado(request.user)
+
+	if user_2 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
+
+	#validamos si el usuario tiene caja abierta
+	caja = user_2.fn_tiene_caja_abierta()
+
+	c=caja.caja
 	
-	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
-		user_2=User_2.objects.get(user=request.user)
-	except Exception as e:		
-		form=Login_Form(request.POST)
-		estatus=0
-		msj="La cuenta del usuario esta incompleta."			
-		return render(request,'login.html',locals())
+	msj_error = ""
+
+	#el estatus 1 indica que todo esta ok, 
+	#el estatus 0 indica que se presento un error. el error debe venir acompalñado de una leyenda en la variable msj_error
+	estatus = "1" 
+
+	if caja == None:		
+		msj_error="No cuentas con caja abierta."
+		estatus = "0"
+		return render(request,'empenos/refrendo_semanal.html',locals())
+
+	#buscamos la boleta a refrendar.
+	boleta=Boleta_Empeno.objects.get(id=int(id_boleta))
+
+	#validamos si la boleta acepta refrendos o no.
+	if not boleta.fn_acepta_refrendo():
+		msj_error = "La boleta no permite refrendos."
+		estatus = "0"
+		return render(request,'empenos/refrendo_semanal.html',locals())
+
+	min_semanas_refrendar = boleta.fn_get_min_y_max_semanas_a_pagar()["min_semanas_a_refrendar"]
+	max_semanas_refrendar = boleta.fn_get_min_y_max_semanas_a_pagar()["max_semanas_a_refrendar"]
+
+	semanas_vencidas = max_semanas_refrendar - 1
+	if semanas_vencidas < 0:
+		semanas_vencidas = 0
+	#obtenemos el importe de una comision pg
+	est_comisionpg=Tipo_Pago.objects.get(id=2)	
 	
+	importe_refrendo = str(round(float(Pagos.objects.filter(boleta = boleta,pagado = "N").exclude(tipo_pago__id = 2).aggregate(Max("importe"))["importe__max"])))+".00"
+
+	importe_compg = float(boleta.fn_get_comision_pg())
+	
+	dias_vencido = boleta.fn_get_dias_vencida()
+
+	return render(request,"empenos/refrendo_semanal.html",locals())
+
+
+
+
+
+
+
+
+"""
+
 	id_usuario=user_2.user.id
 
 	IP_LOCAL=settings.IP_LOCAL
@@ -3925,7 +3970,7 @@ def refrendo(request,id_boleta):
 
 	form=Refrendo_Form()	
 	return render(request,'empenos/refrendo.html',locals())
-
+"""
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
 @transaction.atomic

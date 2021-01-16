@@ -124,7 +124,7 @@ def fn_pago_parcial(boleta,hoy,refrendo,pago):
 
 	contador=contador+1
 
-	print("periodo 2")
+	
 	#segundo periodo
 	#dias fijos
 	periodo_7=Tipo_Periodo.objects.get(id=1)
@@ -143,7 +143,7 @@ def fn_pago_parcial(boleta,hoy,refrendo,pago):
 	per.save()
 
 	contador=contador+1
-	print("periodo 3")
+	
 	#tercer periodo
 	#dias fijos
 	periodo_7=Tipo_Periodo.objects.get(id=1)
@@ -163,7 +163,7 @@ def fn_pago_parcial(boleta,hoy,refrendo,pago):
 
 	contador=contador+1
 
-	print("periodo 4")
+	
 	#cuarto periodo
 	#dias variable
 	periodo_variable=Tipo_Periodo.objects.get(id=2)
@@ -701,7 +701,6 @@ def fn_simula_refrendo(importe_abono,usuario,boleta,recursivo,desc_pg):
 
 
 
-#falta replicar el cambio de la simulacion pero en el real.
 @transaction.atomic
 def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 	hoy=datetime.now()#fecha actual
@@ -841,15 +840,8 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 					if pag_actual==pt:
 						pag_ac=1
 
-
-
-				
-
 			num_pagos_no_vencidos=int(Pagos.objects.filter(vencido="N",pagado='N',tipo_pago=est_refrendo,boleta=boleta).count())
 
-
-
-			
 			#si el importe del abono es mayor a cero
 			#y el numero de abonos no vencidos es 4
 			# y no estamos en el periodo de algun refrendo no vencido.
@@ -863,11 +855,11 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 				boleta.mutuo=mutuo
 				boleta.save()
 
-				rel_cap=Rel_Abono_Capital()
-				rel_cap.boleta=boleta
-				rel_cap.abono=abono
-				rel_cap.importe=importe_abono
-				rel_cap.capital_restante=mutuo
+				rel_cap = Rel_Abono_Capital()
+				rel_cap.boleta = boleta
+				rel_cap.abono = abono
+				rel_cap.importe = importe_abono
+				rel_cap.capital_restante = mutuo
 				rel_cap.save()
 
 				#actualizamos el refrendo en base al nuevo mutuo
@@ -1107,13 +1099,6 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 
 	return 1
 
-
-
-
-
-	
-
-
 #funcion para generar folio de movimiento
 def fn_folios(tipo_movimiento,sucursal):
 	try:
@@ -1187,3 +1172,5 @@ def fn_envia_mail(cad,asunto,destinatario):
 	s.login(msg['From'], password)		
 	s.sendmail(msg['From'], [msg['To']], msg.as_string())
 	return 0
+
+

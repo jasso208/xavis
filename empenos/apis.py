@@ -14,22 +14,116 @@ from empenos.jobs import *
 from django.conf import settings
 from django.utils import timezone
 from django.db.models import Sum
+import json
+from django.db import transaction
+
+#api para aplicar los refrendos semanales.
+#regresa el id del abono que se acaba de aplicar.
+@api_view(["POST"])
+@transaction.atomic
+def api_aplica_refrendo_semanal(request):
+	"""
+		Parametros
+	"""
+
+	id_boleta = request.data["id_boleta"]
+	numero_semanas_a_pagar = request.data["numero_semanas_a_pagar"]
+	comision_pg = request.data["comision_pg"]
+	descuento_comision_pg = request.data["descuento_comision_pg"]
+	id_usuario = request.data["id_usuario"]
+	importe_abono = request.data["importe_abono"]
+	id_caja = request.data["id_caja"]
+	importe_capital = request.data["importe_capital"]
+
+	"""
+		Parametros
+	"""
+	respuesta = []
+
+	usuario = User.objects.get(id = int(id_usuario))
+	boleta = Boleta_Empeno.objects.get(id = int(id_boleta))
+	caja = Cajas.objects.get(id = int(id_caja))
+
+	tm=Tipo_Movimiento.objects.get(id=5)
+	folio=fn_folios(tm,boleta.sucursal)
+
+	#creamos el abono
+	abono=Abono()
+	abono.usuario=usuario
+	abono.importe=importe_abono
+	abono.caja=caja
+	abono.boleta=boleta
+	abono.folio=folio
+	abono.tipo_movimiento=tm
+	abono.sucursal=boleta.sucursal
+	abono.save()
+
+	
+	importe_a_pagos = float(importe_abono) - float(comision_pg)
+
+	#si la funcion regreso false es porque fallo
+	if float(comision_pg) > 0:
+		if not boleta.fn_paga_comision_pg(descuento_comision_pg,abono):
+			respuesta.append({"estatus":"0","msj":"Error al saldar las comisiones de periodo de gracia."})
+			return Response(json.dumps(respuesta))
+	print("llego 1")
+	if int(numero_semanas_a_pagar) > 0:
+		if not boleta.fn_salda_pagos(int(numero_semanas_a_pagar),importe_a_pagos,abono):
+			respuesta.append({"estatus":"0","msj":"Error al pagar las semanas seleccionadas."})
+			return Response(json.dumps(respuesta))
+	print("llego 2")
+	if int(importe_capital) > 0:
+		if not boleta.fn_abona_capital(int(importe_capital),abono):
+			respuesta.append({"estatus":"0","msj":"Error al aplicar el abono a capital."})
+			return Response(json.dumps(respuesta))
+	print("llego 3")
+	ia=Imprime_Abono()
+	ia.usuario=usuario
+	ia.abono=abono
+	ia.save()
+
+	respuesta = []
+	respuesta.append({"estatus":"1"})
+
+	return Response(json.dumps(respuesta))
+
+
+@api_view(["GET"])
+def api_simula_proximos_pagos_semanal(request):
+
+	simulacion = []
+	try:		
+		simulacion.append({"estatus":"1"})
+		id_boleta = request.GET.get("id_boleta")
+		abono_capital = float(request.GET.get("abono_capital"))
+
+		semanas_a_refrendar = request.GET.get("semanas_a_refrendar")
+		boleta = Boleta_Empeno.objects.get(id = int(id_boleta))
+		simulacion.append(boleta.fn_simula_proximos_pagos(int(semanas_a_refrendar)))
+
+		
+
+		refrendo_semanal =round(float(boleta.fn_simula_calcula_refrendo(boleta.mutuo - abono_capital)[0]["refrendo"])/4.00)
+		if refrendo_semanal == 0 and int(boleta.mutuo - abono_capital)>0:
+			refrendo_semanal = 1
+		simulacion.append({"nuevo_mutuo":boleta.mutuo - abono_capital,"refrendo_semanal":refrendo_semanal})
+	except Exception as e:
+		print(e)
+		simulacion = []
+		simulacion.append({"estatus":"0"})
+
+	return Response(json.dumps(simulacion))
 
 
 @api_view(["GET"])
 def api_cliente(request):
 
 	id_cliente = request.GET.get("id_cliente")
-
-	
 	cliente = Cliente.objects.filter(id=id_cliente).values("nombre","apellido_p","apellido_m")
-	
 	return Response(cliente)
 
 
 
-
-	pass
 @api_view(["GET"])
 def api_porcentaje_mutuo(request):
 	respuesta=[]
@@ -112,6 +206,8 @@ def api_valida_importe_retiro(request):
 
 		saldo_concepto = Concepto_Retiro.objects.get(id = int(id_concepto_retiro)).fn_saldo_concepto()
 
+
+		print(saldo_concepto)
 
 		if int(saldo_concepto) >= int(importe_a_retirar):	
 			respuesta.append({"estatus" : "1"})

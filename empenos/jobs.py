@@ -19,39 +19,28 @@ def fn_job_backup_basededatos():
 def fn_job_libera_apartado():
 	hoy = datetime.now()
 	hoy = datetime.combine(hoy,time.min)
-
 	try:
 		estatus_apartado = Estatus_Apartado.objects.get(id = 1)
 		estatus_liberado = Estatus_Apartado.objects.get(id = 2)
-
 		estatus_remate = Estatus_Boleta.objects.get(id=5)
-
 		#obtenemos los apartados que vencen hoy
 		apartados = Apartado.objects.filter(fecha_vencimiento = hoy,estatus = estatus_apartado)
-
-		
-		for a in apartados:
-			
-			a.estatus = estatus_liberado
-			
+		for a in apartados:			
+			a.estatus = estatus_liberado			
 			a.boleta.estatus = estatus_remate
-
 			a.boleta.save()
-
 			a.boleta = None#desvinculamos la boleta, para que pueda ser vendida o apartada nuevamente.
-
 			a.save()
 	except Exception as e:
 		return false
-
 	return True
 
 #esta funcion se define para hacer pruebas.
 #para evitar que cuando se pase a produccion, se pase codigo de prueba
 @transaction.atomic
 def fn_job_diario_prueba():
-	hoy=datetime(2020,11,11,0,0)	
-	fecha_fin=datetime(2020,11,18,0,0)
+	hoy=datetime(2020,12,30,0,0)	
+	fecha_fin=datetime(2021,1,15,0,0)
 
 	while hoy<=fecha_fin:
 		print("fecha ejecucion")
