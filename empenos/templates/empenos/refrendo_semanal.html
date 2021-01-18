@@ -308,8 +308,14 @@
 											</div>
 										</div>
 										<div class="row">
-											<div class="col-xs-12">
-												<a class="btn btn-primary btn-block" style="cursor: pointer;" id="btn_refrendar">
+											<div class= "col-xs-6 text-center">
+												<a href="{% url 'empenos:consulta_boleta' %}" class="btn btn-primary btn-block ">
+													<span class="glyphicon"><<</span>
+													 Volver
+												</a>
+											</div>
+											<div class="col-xs-6 text-center">
+												<a class="btn btn-primary btn-block " style="cursor: pointer;" id="btn_refrendar">
 													<span class="glyphicon glyphicon-usd"></span>
 													Refrendar
 												</a>
@@ -471,3 +477,5 @@
 
 	</script>
 {% endblock %}
+
+
