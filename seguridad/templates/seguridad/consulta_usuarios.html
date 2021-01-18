@@ -1,5 +1,5 @@
 {%extends 'base.html'%}
-{%load static%}
+{%load static%} 
 {% load bootstrap3 %}
 {%block content%}
 <div class="col-xs-12 cls_encabezado_body">
@@ -15,49 +15,48 @@
         </a>
 	</div>
 </div>
-
 <div class="col-xs-12">
 	<form method="post" action="#" class="cls_form_1">
 		{%csrf_token%}
-		<div class="row cls_form_consulta">
-			<div class="col-xs-12">
-				<div class="panel panel-default">
-					
-					<div class="panel-body">
 
-						<div class="row">
-							<div class="col-xs-3">
-								<label>Nombre de Usuario</label>
+	<div class="row cls_form_consulta">
+		<div class="col-xs-12">
+			<div class="panel panel-default" id="panel_principal" >						 
+				<div class="panel-body">
+
+					<div class="col-xs-12">
+						<div class="panel panel-default">						
+							<div class="panel-body">
+								<div class="col-xs-3">
+									<label>Nombre de usuario</label>
+									{%bootstrap_field form.username show_label=False%}
+								</div>								
+								<div class="col-xs-3">
+									<br>
+									<button class="btn btn-primary btn-sm">
+										Consultar
+									</button>
+								</div>
 							</div>
 						</div>
-						<div class="row">
-							<div class="col-xs-6 col-sm-3">
-								{%bootstrap_field form.username show_label=False%}
-							</div>
-							<div class="col-xs-6 col-sm-3">
-								<button class="btn btn-default">
-									Consultar
-								</button>
-							</div>
-							
-						</div>
-						
 					</div>
 				</div>
-			</div>
-		</div>
-		<div class="row row_grid">	
-			<div class="col-xs-12" >
-				<div class="content-grid" >
+				<div class="col-xs-12">
+					<hr>
+				</div>
 
+				<div class="col-xs-12">
+					<div class="cls_encabezado_alert text-center" >
+						<label>Ventas</label>
+					</div>
 					<table class="table " >
 						<thead>
 							<th></th>
-							<th><a>Nombre USR</a></th>
-							<th><a>Nombre</a></th>
-							<th><a>Apellidos</a></th>
-							<th><a>Email</a></th>
-							<th><a>Super Usr</a></th>
+							<th>Nombre USR</th>
+							<th>Nombre</th>
+							<th>Apellidos</th>
+							<th>Email</th>
+							<th>Activo</th>
 						</thead>
 						<tbody>
 							{% for usr in usuarios %}
@@ -69,48 +68,51 @@
 									</a>
 								</td>
 								<td>
-									<a >
+									
 										{{usr.username}}
-									</a>
+									
 								</td>
 								<td>
-									<a>
+									
 										{{usr.first_name}}
-									</a>
+									
 								</td>
 								<td>
-									<a>
+									
 										{{usr.last_name}}
-									</a>
+									
 								</td>
 
 								<td>
-									<a>
+									
 										{{usr.email}}
-									</a>
+									
 								</td>
 
 								<td>
-									<a>
-										{{usr.is_superuser}}
-									</a>
+									
+										{{usr.is_active}}
+										
 								</td>
 							</tr>
 							{% endfor %}
 						</tbody>
 					</table>
 
-
-
-
-
-
-
-
-
 				</div>
+&nbsp;
+
 			</div>
 		</div>
+	</div>
+
+
+
+
+
+
+
+
 		
 	</form>
 </div>

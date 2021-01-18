@@ -228,20 +228,18 @@ def abona_apartado(request,id_apartado):
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
 
+"""
+idpermiso = 14
+"""
+
 def administracion_porcentaje_mutuo(request):
-	#si no esta logueado mandamos al login
-	if not request.user.is_authenticated:
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2 = User_2.fn_is_logueado(request.user)
+	if user_2 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
-	
-	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
-		user_2 = User_2.objects.get(user = request.user)
-	except Exception as e:		
-		print(e)
-		form = Login_Form(request.POST)
-		estatus = 0
-		msj = "La cuenta del usuario esta incompleta."			
-		return render(request,'login.html',locals())
+		
+	if not user_2.fn_tiene_acceso_a_vista(14):
+		return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
 
 	hoy = date.today()
 	hoy_inicial = datetime.combine(hoy, time.min) 
@@ -291,20 +289,17 @@ def administracion_porcentaje_mutuo(request):
 	form = Porcentaje_Mutuo_Form()
 	return render(request,'empenos/administracion_porcentaje_mutuo.html',locals())
 
+"""
+idpermiso = 13
+"""
 def administracion_interes_empeno(request):
-	#si no esta logueado mandamos al login
-	if not request.user.is_authenticated:
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2 = User_2.fn_is_logueado(request.user)
+	if user_2 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
-	
-	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
-		user_2 = User_2.objects.get(user = request.user)
-	except Exception as e:		
-		print(e)
-		form = Login_Form(request.POST)
-		estatus = 0
-		msj = "La cuenta del usuario esta incompleta."			
-		return render(request,'login.html',locals())
+		
+	if not user_2.fn_tiene_acceso_a_vista(13):
+		return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
 
 	hoy = date.today()
 	hoy_inicial = datetime.combine(hoy, time.min) 
@@ -386,21 +381,18 @@ def administracion_interes_empeno(request):
 
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
-
+"""
+idPermiso = 5
+"""
 def admin_min_apartado(request,id):
-	#si no esta logueado mandamos al login
-	if not request.user.is_authenticated:
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2 = User_2.fn_is_logueado(request.user)
+	if user_2 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
-	
-	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
-		user_2=User_2.objects.get(user=request.user)
-	except Exception as e:		
-		print(e)
-		form=Login_Form(request.POST)
-		estatus=0
-		msj="La cuenta del usuario esta incompleta."			
-		return render(request,'login.html',locals())
+	#validamos si tiene permisos para acceder a esta opcion.
+	if not user_2.fn_tiene_acceso_a_vista(5):
+		return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
+
 
 	pub_date = date.today()
 	min_pub_date_time = datetime.combine(pub_date, time.min) 
@@ -451,21 +443,17 @@ def admin_min_apartado(request,id):
 
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
-
+"""
+idpermiso = 12
+"""
 def concepto_retiro(request):
-	#si no esta logueado mandamos al login
-	if not request.user.is_authenticated:
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2 = User_2.fn_is_logueado(request.user)
+	if user_2 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
-	
-	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
-		user_2=User_2.objects.get(user=request.user)
-	except Exception as e:		
-		print(e)
-		form=Login_Form(request.POST)
-		estatus=0
-		msj="La cuenta del usuario esta incompleta."			
-		return render(request,'login.html',locals())
+		
+	if not user_2.fn_tiene_acceso_a_vista(12):
+		return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
 
 	pub_date = date.today()
 	min_pub_date_time = datetime.combine(pub_date, time.min) 
@@ -1177,21 +1165,17 @@ def imprime_venta_piso(request):
 
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
-
+"""
+idpermiso  =16
+"""
 def elimina_costo_extra(request):
-	#si no esta logueado mandamos al login
-	if not request.user.is_authenticated:
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2 = User_2.fn_is_logueado(request.user)
+	if user_2 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
-	
-	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
-		user_2=User_2.objects.get(user=request.user)
-	except Exception as e:		
-		print(e)
-		form=Login_Form(request.POST)
-		estatus=0
-		msj="La cuenta del usuario esta incompleta."			
-		return render(request,'login.html',locals())
+		
+	if not user_2.fn_tiene_acceso_a_vista(16):
+		return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
 
 
 
@@ -1227,20 +1211,17 @@ def elimina_costo_extra(request):
 	return render(request,'empenos/elimina_costo_extra.html',locals())
 
 
+"""
+idpermiso = 17
+"""
 def elimina_retiro (request):
-	#si no esta logueado mandamos al login
-	if not request.user.is_authenticated:
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2 = User_2.fn_is_logueado(request.user)
+	if user_2 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
-	
-	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
-		user_2=User_2.objects.get(user=request.user)
-	except Exception as e:		
-		print(e)
-		form=Login_Form(request.POST)
-		estatus=0
-		msj="La cuenta del usuario esta incompleta."			
-		return render(request,'login.html',locals())
+		
+	if not user_2.fn_tiene_acceso_a_vista(17):
+		return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
 
 	pub_date = date.today()
 	min_pub_date_time = datetime.combine(pub_date, time.min) 
@@ -1516,20 +1497,18 @@ def venta_granel(request):
 
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
+"""
+idpermiso = 9
+"""
 def admin_kilataje(request):
-	#si no esta logueado mandamos al login
-	if not request.user.is_authenticated:
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2 = User_2.fn_is_logueado(request.user)
+	if user_2 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
-	
-	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
-		user_2=User_2.objects.get(user=request.user)
-	except Exception as e:		
-		print(e)
-		form=Login_Form(request.POST)
-		estatus=0
-		msj="La cuenta del usuario esta incompleta."			
-		return render(request,'login.html',locals())
+		
+	if not user_2.fn_tiene_acceso_a_vista(9):
+		return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
+
 
 	pub_date = date.today()
 	min_pub_date_time = datetime.combine(pub_date, time.min) 
@@ -1614,13 +1593,19 @@ def otros_ingresos(request):
 		form=Otros_Ingresos_Form()
 	return render(request,'empenos/otros_ingresos.html',locals())
 
-
+"""
+idpermiso = 19
+"""
 def rep_comparativo_estatus_cartera(request):
-	#si regresa nonem, es porque el usuario no esta logueado.
+	#si regresa none, es porque el usuario no esta logueado.
 	user_2 = User_2.fn_is_logueado(request.user)
-
 	if user_2 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
+	
+	print(user_2.fn_tiene_acceso_a_vista(19))
+	if not user_2.fn_tiene_acceso_a_vista(19):
+		return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
+
 
 	#validamos si el usuario tiene caja abierta
 	caja = user_2.fn_tiene_caja_abierta()
@@ -3011,23 +2996,19 @@ def corte_caja(request):
 
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
-
+"""
+idpermiso = 20
+"""
 def reportes_caja(request):
 
 
-	#si no esta logueado mandamos al login
-	if not request.user.is_authenticated:
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2 = User_2.fn_is_logueado(request.user)
+	if user_2 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
-	
-	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
-		user_2=User_2.objects.get(user=request.user)
-	except Exception as e:		
-		print(e)
-		form=Login_Form(request.POST)
-		estatus=0
-		msj="La cuenta del usuario esta incompleta."			
-		return render(request,'login.html',locals())
+		
+	if not user_2.fn_tiene_acceso_a_vista(20):
+		return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
 
 
 
@@ -3364,13 +3345,17 @@ def consulta_abono(request):
 
 	return render(request,'empenos/consulta_abono.html',locals())
 
-
+"""
+idpermiso= 18
+"""
 def cancela_abono(request):
-	#si regresa nonem, es porque el usuario no esta logueado.
+	#si regresa none, es porque el usuario no esta logueado.
 	user_2 = User_2.fn_is_logueado(request.user)
-
 	if user_2 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
+		
+	if not user_2.fn_tiene_acceso_a_vista(18):
+		return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
 
 	#validamos si el usuario tiene caja abierta
 	caja = user_2.fn_tiene_caja_abierta()
@@ -3396,8 +3381,7 @@ def cancela_abono(request):
 
 		fecha_inicial = datetime.combine(hoy,time.min)
 		fecha_final = datetime.combine(hoy,time.max)
-		print(fecha_inicial)
-		print(fecha_final)
+
 		abonos=Abono.objects.filter(fecha__range=(fecha_inicial,fecha_final),sucursal=sucursal)	
 	else:
 		pass
@@ -3496,19 +3480,20 @@ def consulta_boleta(request):
 
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
+"""
+idpermiso = 4
+"""
 def admin_porc_avaluo(request):
-	#si no esta logueado mandamos al login
-	if not request.user.is_authenticated:
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2 = User_2.fn_is_logueado(request.user)
+	if user_2 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
+
+
+	#validamos si el usuario tiene acceso a la vista.
+	if not user_2.fn_tiene_acceso_a_vista(4):
+		return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
 	
-	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
-		user_2=User_2.objects.get(user=request.user)
-	except Exception as e:		
-		form=Login_Form(request.POST)
-		estatus=0
-		msj="La cuenta del usuario esta incompleta."			
-		return render(request,'login.html',locals())
 
 	IP_LOCAL = settings.IP_LOCAL
 	id_usuario=user_2.user.id

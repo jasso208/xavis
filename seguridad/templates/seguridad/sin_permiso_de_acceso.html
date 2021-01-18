@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block usuario %}
+
+			<div class="col-xs-6">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{user_2.user.username}} {{user_2.perfil.perfil}}</label> 
+				
+			</div>
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-home"></span> Sucursal: {{user_2.sucursal}}</label> 	
+			</div>
+
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-inbox"></span> Caja: {{c}} </label> 	
+			</div>
+
+
+{% endblock  %}
+
+{% block content%}
+			<div class="fondo_mensaje cls_error" >
+			</div >
+			<div class="mensaje cls_error" >
+				<div class="cls_encabezado_alert" >
+					Error!!
+				</div>	
+				<div class="panel panel-default">	
+					<label class="page-header" >No cuentas con permiso para acceder a esta opción.</label>
+					<br>				
+					<a class="btn btn-primary btn-sm" style="cursor: pointer;" id = "btn_aceptar_error" href = "{% url 'seguridad:bienvenidos' %}"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+					<br>
+					<br>
+				</div>
+			</div>
+
+
+{% endblock %}

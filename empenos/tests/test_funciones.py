@@ -219,7 +219,7 @@ class Refrendo_Semanal_TestCase(TestCase):
 
 
 		#1.- el refrendo no puede ser cancelada si no es del dia de hoy
-		resp = abono.fn_cancela_abono()
+		resp = abono.fn_cancela_abono(usuario)
 
 		self.assertEqual(resp[0],False)
 		self.assertEqual(resp[1],"El abono no puede ser cancelado ya que no es del dia de hoy.")
@@ -241,14 +241,14 @@ class Refrendo_Semanal_TestCase(TestCase):
 		abono2.save()
 
 
-		resp = abono.fn_cancela_abono()
+		resp = abono.fn_cancela_abono(usuario)
 		self.assertEqual(resp[0],False)
 		self.assertEqual(resp[1],"El abono no puede ser cancelado ya que existe un abono posterior al que intenta cancelar.")
 		
 
 		abono2.delete()
 		#3.- La boleta a la que afecto el refrendo debe contar con el estatus anterior para poder regresar el estatus.
-		resp = abono.fn_cancela_abono()
+		resp = abono.fn_cancela_abono(usuario)
 		self.assertEqual(resp[0],False)
 		self.assertEqual(resp[1],"El abono no puede ser cancelado ya que no es posible calcular el estatus de boleta anterior.")
 
@@ -257,7 +257,7 @@ class Refrendo_Semanal_TestCase(TestCase):
 		#4.- La boleta a la que afecto el refrendo debe contar con la fecha de vencimiento anteriory la fecha de vencimiento real anterior.
 
 
-		resp = abono.fn_cancela_abono()
+		resp = abono.fn_cancela_abono(usuario)
 
 		self.assertEqual(resp[0],False)
 		self.assertEqual(resp[1],"El abono no puede ser cancelado ya que no es posible calcular la fecha de vencimiento anterior.")
@@ -269,7 +269,7 @@ class Refrendo_Semanal_TestCase(TestCase):
 
 		#4.- La boleta a la que afecto el refrendo debe contar con  la fecha de vencimiento real anterior.
 	
-		resp = abono.fn_cancela_abono()	
+		resp = abono.fn_cancela_abono(usuario)	
 
 
 		self.assertEqual(resp[0],False)
@@ -279,7 +279,7 @@ class Refrendo_Semanal_TestCase(TestCase):
 		boleta.fecha_vencimiento_real_anterior = datetime.combine(hoy - timedelta(days = 1),time.min)
 		boleta.save()
 		
-		resp = abono.fn_cancela_abono()		
+		resp = abono.fn_cancela_abono(usuario)		
 
 		#5.- Si al refrendo se le aplicaron descuentos, se restauran los descuentos	
 

@@ -21,7 +21,7 @@
 {%block content%}
 <div class="col-xs-12 cls_encabezado_body">
 	<a>
-		Cajas
+		Reportes
 	</a>	
 </div>
 <div class="col-xs-12">
@@ -45,32 +45,55 @@
 					</div>
 					
 				</div>
+
 				<div class="col-xs-2">
 					<div class="cls_boton_body">
-						<a href="{% url 'empenos:rep_comparativo_estatus_cartera' %}">
-							<span class="glyphicon glyphicon-globe"></span>
+						<a href="{% url 'empenos:reportes_caja' %}">
+							<span class="glyphicon">								
+								<label>.CSV</label>
+							</span>
 							<br>
 							<br>
-							Comparativo est. cartera
+							Genera respaldos en .CSV
 						</a>	
 					</div>
 					
 				</div>
 				<div class="col-xs-2">
 					<div class="cls_boton_body">
-						<a href="{% url 'empenos:reportes_caja' %}">
-							<span class="glyphicon glyphicon-list"></span>
+						<a href="#">
+							<span class="glyphicon glyphicon-inbox"></span>
 							<br>
 							<br>
-							Exportar a CSV
-							<br>
-							&nbsp;
+							Reporte de apertura de cajas
 						</a>	
 					</div>
 					
 				</div>
 
+
 			</div>
 	</div>
+		<div class="row" >
+			<div class="col-xs-12 cls_encabezado_body_2">
+				<a>
+					Historico
+				</a>
+				<br>
+			</div>
+			<div class="col-xs-2">
+				<div class="cls_boton_body">
+					<a href="{% url 'empenos:rep_comparativo_estatus_cartera' %}">
+						<span class="glyphicon glyphicon-globe"></span>
+						<br>
+						<br>
+						Comparativo est. cartera
+					</a>	
+				</div>
+				
+			</div>
+
+
+		</div>
 </div>
 {% endblock %}
