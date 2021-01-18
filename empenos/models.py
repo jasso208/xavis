@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from decimal import Decimal
-from seguridad.models import Session
+from seguridad.models import *
 from datetime import date, datetime, time,timedelta
 import calendar
 from django.db.models import Sum,Max
@@ -559,6 +559,101 @@ class User_2(models.Model):
 			return resp
 
 		return resp
+
+	def fn_agrega_acceso_a_vista(self,id_menu,id_usuario_asigna):
+	
+		resp = []
+		if not self.user.is_active:
+			resp.append(False)
+			resp.append("El usuario esta inactivo, no puede modificar sus permisos.")
+			return resp
+
+		try:
+			menu = Menu.objects.get( id = id_menu)			
+		except Exception as e:			
+			print(e)
+			resp.append(False)
+			resp.append("La opción que intenta agregar no existe o no es valida.")
+			return resp
+
+		# Si el usuario ya tiene el permiso asignado, unicamente confirmamos que ya fue asignado
+		# para refrescar la pantalla.
+		try:
+			Permisos_Usuario.objects.get(usuario = self.user,opcion_menu = Menu.objects.get(id = id_menu))			
+			resp.append(True)
+			resp.append("Se actualizo correctamente.")
+			return resp
+		except:
+			pass
+		
+	
+			
+		try:
+			pu = Permisos_Usuario()
+			pu.usuario = self.user
+			pu.opcion_menu = Menu.objects.get(id = id_menu)
+			pu.usuario_otorga = User.objects.get(id = id_usuario_asigna)
+			pu.save()
+		except Exception as e:
+			print(e)
+			resp.append(False)
+			resp.append("Error al actualizar los permisos..")
+			return resp
+		
+
+		resp.append(True)
+		resp.append("Se actualizo correctamente.")
+		return resp
+
+	def fn_remover_acceso_a_vista(self,id_menu):
+		resp = []
+		if not self.user.is_active:
+			resp.append(False)
+			resp.append("El usuario esta inactivo, no puede modificar sus permisos.")
+			return resp
+
+		#si la opcion que intentamos remover no existe, no importa
+		#confirmaoms que ya se removio.
+		try:
+			menu = Menu.objects.get( id = id_menu)			
+		except Exception as e:			
+			print(e)
+			resp.append(True)
+			resp.append("Se actualizo correctamente.")
+			return resp
+
+		#removemos el permiso
+		Permisos_Usuario.objects.filter(usuario = self.user,opcion_menu = Menu.objects.get(id = id_menu)).delete()
+
+		resp.append(True)
+		resp.append("Se actualizo correctamente.")
+
+		return resp
+
+	#regresa true cuando tienepermiso
+	#regresa false cuando no tiene permiso
+	def fn_tiene_acceso_a_vista(self,id_menu):
+		
+		try:
+			Permisos_Usuario.objects.get(usuario = self.user,opcion_menu = Menu.objects.get(id = id_menu) )
+		except:
+			
+			return False		
+		
+		return True
+
+
+	###regresa una lista con todos los permsos del usuario
+	###se usa para laopcion "administra permisos de usuario"
+	###para cargar de inicio los permisos que ya tiene el usuario.
+	def fn_consulta_permisos(self):
+		resp = []
+		permisos = Permisos_Usuario.objects.filter(usuario = self.user)
+		for p in permisos:
+			resp.append(p.opcion_menu.id)
+		return resp
+
+
 
 class Control_Folios(models.Model):
 	folio=models.IntegerField(null=False)
@@ -1440,6 +1535,7 @@ class Abono(models.Model):
 			resp.append(False)
 			resp.append("El abono no puede ser cancelado ya que no es posible calcular la fecha de vencimiento anterior.")
 			return resp
+
 
 
 		#si llegamos a este punto es que el abono si se puede cancelar.

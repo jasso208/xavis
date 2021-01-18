@@ -104,6 +104,10 @@ def cerrar_session(request):
 	logout(request)
 	return HttpResponseRedirect("/")
 
+#direccionamos a esta pantalla cuando el usuario no tenga acceso a una opcion.
+def sin_permiso_de_acceso(request):
+	return render(request,'seguridad/sin_permiso_de_acceso.html',locals())
+
 def bienvenidos(request):
 	if not request.user.is_authenticated:
 		return HttpResponseRedirect(reverse('seguridad:login'))
@@ -178,6 +182,27 @@ def admin_catalogos(request):
 
 def admin_productos(request):
 	return render(request,'seguridad/admin_stock.html',{})
+
+"""
+idpermiso = 3
+"""
+def admin_permisos_usuario(request):
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2 = User_2.fn_is_logueado(request.user)
+	if user_2 == None:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+		
+	if not user_2.fn_tiene_acceso_a_vista(3):
+		return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
+
+	try:
+		c=caja.caja
+	except:
+		c=""
+
+
+	id_usuario_modifica = request.user.id
+	return render(request,'seguridad/admin_permisos_usuario.html',locals())
 
 def admin_ventas(request):
 		#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
@@ -454,13 +479,28 @@ def cambio_sucursal(request):
 		form=Cambio_Sucursal_Form()
 	return render(request,'seguridad/cambio_sucursal.html',locals())
 
+"""
 
+id_permiso = 1
+cuando se recibe id
+id_permiso = 2
+"""
 def alta_usuario(request,id=None):
 
-	#si regresa nonem, es porque el usuario no esta logueado.
+	#si regresa none, es porque el usuario no esta logueado.
 	user_2 = User_2.fn_is_logueado(request.user)
 	if user_2 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
+
+	#validamos si tiene acceso a esta opcion.
+	#cuando id es none, es que es alta
+	if id == None:
+		if not user_2.fn_tiene_acceso_a_vista(1):
+			return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
+	else:#cuando id no es none, es consulta y edicion.
+		if not user_2.fn_tiene_acceso_a_vista(2):
+			return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
+
 	#validamos si el usuario tiene caja abierta
 	caja = user_2.fn_tiene_caja_abierta()
 
@@ -511,7 +551,9 @@ def alta_usuario(request,id=None):
 	return render(request,'seguridad/alta_usuario.html',locals())
 
 
-
+"""
+id = 2
+"""
 def consulta_usuarios(request):
 	if request.method=="POST":
 		form=Busca_Usuario_Form(request.POST)

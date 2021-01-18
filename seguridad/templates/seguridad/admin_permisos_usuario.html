@@ -1,0 +1,431 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% block archivos_staticos%}
+<script type="text/javascript" src="{% static 'js/admin_permisos_usuario.js' %}"></script>
+{% endblock %}
+
+{% block usuario %}
+
+			<div class="col-xs-6">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{user_2.user.username}} {{user_2.perfil.perfil}}</label> 
+				
+			</div>
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-home"></span> Sucursal: {{user_2.sucursal}}</label> 	
+			</div>
+
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-inbox"></span> Caja: {{c}} </label> 	
+			</div>
+{% endblock %}
+
+{% block content %}
+	<div class="col-xs-12 cls_encabezado_body">
+		<a>
+			Administra permisos de usuario
+		</a>	
+	</div>
+	<div class="col-xs-12">
+		<form method="post" action="#" class="cls_form_1">
+			{%csrf_token%}
+	
+			<div class="row cls_form_consulta">
+				<div class="col-xs-12">
+							<div class="panel panel-default" id="panel_principal" >						 
+								<div class="panel-body">
+
+									<div class="col-xs-12">
+										<div class="panel panel-default">						
+											<div class="panel-body">
+												<div class="col-xs-3">
+													<label>Nombre de usuario</label>							
+													<input type="text" name="" id = "txt_nombre_de_usuario" placeholder="ej: jasso208" class= "form-control">																
+
+												</div>												
+												<div class="col-xs-2">
+													<br>
+													<a id="btn_consultar" class="btn btn-primary btn-sm">
+														<span class="glyphicon glyphicon-search">
+														</span> 
+														Consultar
+													</a>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-xs-12 cls-contenedor-seccion-perusuario">
+									<div class="col-xs-12">								
+										<div class="col-xs-12">
+											<label>Permisos del usuario: <span id="span_usuario"></span></label>
+										</div>	
+										<div class="col-xs-8 text-right">	
+
+										</div>								
+									</div>
+									<br>
+									<br>
+									<div class = "col-xs-4 " >										
+										<div class="col-xs-12">
+											<div class="cls_encabezado_alert" >
+												<label>Administración de usuarios</label>
+											</div>
+											<div class="panel panel-default">
+												<div class="col-xs-12">
+													<div class="col-xs-1">
+														
+													</div>
+													<div class="col-xs-11">	
+														<label>Descripción de opción</label>
+													</div>
+
+												</div>
+												<div class="col-xs-12">
+													<div class="col-xs-2">
+														<input type="checkbox" class ="form-check cls-chbx" id =  "cbx_001" onclick="fn_cambia_estatus_permiso(this,'1')">
+													</div>
+													<div class="col-xs-10">	
+														Nuevo usuario
+													</div>
+
+												</div>
+
+												<div class="col-xs-12">
+													<div class="col-xs-2">
+														<input type="checkbox" class ="form-check cls-chbx" id = "cbx_002" onclick="fn_cambia_estatus_permiso(this,'2')"> 
+													</div>
+													<div class="col-xs-10">	
+														Consulta y modifica usuarios
+													</div>
+
+												</div>
+
+
+												<div class="col-xs-12">
+													<div class="col-xs-2">
+														<input type="checkbox" class ="form-check cls-chbx" id = "cbx_003" onclick="fn_cambia_estatus_permiso(this,'3')">
+													</div>
+													<div class="col-xs-10">	
+														Administra permisos de usuario
+													</div>
+												</div>
+												&nbsp;
+											</div>
+										</div>	
+
+									</div>
+
+									<div class = "col-xs-4">										
+										<div class="col-xs-12">
+											<div class="cls_encabezado_alert" >
+												<label>Operación general</label>
+											</div>
+											<div class="panel panel-default">
+												<div class="col-xs-12">
+													<div class="col-xs-1">
+														
+													</div>
+													<div class="col-xs-11">	
+														<label>Descripción de opción</label>
+													</div>
+
+												</div>
+												<div class="col-xs-12">
+													<div class="col-xs-2">
+														<input type="checkbox" class ="form-check cls-chbx" id = "cbx_004" onclick="fn_cambia_estatus_permiso(this,'4')">
+													</div>
+													<div class="col-xs-10">	
+														% sobre avaluo p/venta y apartado
+													</div>
+
+												</div>
+
+												<div class="col-xs-12">
+													<div class="col-xs-2">
+														<input type="checkbox" class ="form-check cls-chbx" id = "cbx_005" onclick="fn_cambia_estatus_permiso(this,'5')">
+													</div>
+													<div class="col-xs-10">	
+														% para apartado
+													</div>
+
+												</div>
+
+												<div class="col-xs-12">
+													<div class="col-xs-2">
+														<input type="checkbox" class ="form-check cls-chbx" id = "cbx_006" onclick="fn_cambia_estatus_permiso(this,'6')">
+													</div>
+													<div class="col-xs-10">	
+														Administra dias no laborales
+													</div>
+												</div>
+
+												<div class="col-xs-12">
+													<div class="col-xs-2">
+														<input type="checkbox" class ="form-check cls-chbx" id = "cbx_007" onclick="fn_cambia_estatus_permiso(this,'7')">
+													</div>
+													<div class="col-xs-10">	
+														Administra notificaciones por correo
+													</div>
+												</div>
+
+												<div class="col-xs-12">
+													<div class="col-xs-2">
+														<input type="checkbox" class ="form-check cls-chbx" id = "cbx_008" onclick="fn_cambia_estatus_permiso(this,'8')">
+													</div>
+													<div class="col-xs-10">	
+														Asigna precio de venta y apartado
+													</div>
+												</div>
+
+												<div class="col-xs-12">
+													<div class="col-xs-2">
+														<input type="checkbox" class ="form-check cls-chbx" id = "cbx_009" onclick="fn_cambia_estatus_permiso(this,'9')">
+													</div>
+													<div class="col-xs-10">	
+														Administración catalogo de kilatajes
+													</div>
+												</div>	
+												&nbsp;
+											</div>
+										</div>	
+									</div>
+
+									<div class = "col-xs-4">										
+										<div class="col-xs-12">
+											<div class="cls_encabezado_alert" >
+												<label>Admin. de sucursales</label>
+											</div>
+											<div class="panel panel-default">
+												<div class="col-xs-12">
+													<div class="col-xs-1">
+														
+													</div>
+													<div class="col-xs-11">	
+														<label>Descripción de opción</label>
+													</div>
+
+												</div>
+												<div class="col-xs-12">
+													<div class="col-xs-2">
+														<input type="checkbox" class ="form-check cls-chbx" id = "cbx_010" onclick="fn_cambia_estatus_permiso(this,'10')">
+													</div>
+													<div class="col-xs-10">	
+														Alta de sucursal
+													</div>
+
+												</div>
+
+												<div class="col-xs-12">
+													<div class="col-xs-2">
+														<input type="checkbox" class ="form-check cls-chbx" id = "cbx_011" onclick="fn_cambia_estatus_permiso(this,'11')">
+													</div>
+													<div class="col-xs-10">	
+														Edición de sucursal
+													</div>
+
+												</div>
+
+												<div class="col-xs-12">
+													<div class="col-xs-2">
+														<input type="checkbox" class ="form-check cls-chbx" id = "cbx_012" onclick="fn_cambia_estatus_permiso(this,'12')">
+													</div>
+													<div class="col-xs-10">	
+														Administra concepto de retiro
+													</div>
+												</div>
+
+												<div class="col-xs-12">
+													<div class="col-xs-2">
+														<input type="checkbox" class ="form-check cls-chbx" id = "cbx_013" onclick="fn_cambia_estatus_permiso(this,'13')">
+													</div>
+													<div class="col-xs-10">	
+														Configura % para interes de empeño
+													</div>
+												</div>
+
+												<div class="col-xs-12">
+													<div class="col-xs-2">
+														<input type="checkbox" class ="form-check cls-chbx" id = "cbx_014" onclick="fn_cambia_estatus_permiso(this,'14')">
+													</div>
+													<div class="col-xs-10">	
+														Configura % maximo de mutuo
+													</div>
+												</div>
+												&nbsp;
+											</div>
+										</div>	
+									</div>
+
+
+
+
+									<div class = "col-xs-4">										
+										<div class="col-xs-12">
+											<div class="cls_encabezado_alert" >
+												<label>Canc. movimientos de operación</label>
+											</div>
+											<div class="panel panel-default">
+												<div class="col-xs-12">
+													<div class="col-xs-1">
+														
+													</div>
+													<div class="col-xs-11">	
+														<label>Descripción de opción</label>
+													</div>
+
+												</div>
+												<div class="col-xs-12">
+													<div class="col-xs-2">
+														<input type="checkbox" class ="form-check cls-chbx" id = "cbx_015" onclick="fn_cambia_estatus_permiso(this,'15')">
+													</div>
+													<div class="col-xs-10">	
+														Cancelar boleta
+													</div>
+
+												</div>
+
+												<div class="col-xs-12">
+													<div class="col-xs-2">
+														<input type="checkbox" class ="form-check cls-chbx" id = "cbx_016" onclick="fn_cambia_estatus_permiso(this,'16')">
+													</div>
+													<div class="col-xs-10">	
+														Cancelar otros ingresos (no refrendos)
+													</div>
+
+												</div>
+
+												<div class="col-xs-12">
+													<div class="col-xs-2">
+														<input type="checkbox" class ="form-check cls-chbx" id = "cbx_017" onclick="fn_cambia_estatus_permiso(this,'17')">
+													</div>
+													<div class="col-xs-10">	
+														Cancela retiro
+													</div>
+												</div>
+
+												<div class="col-xs-12">
+													<div class="col-xs-2">
+														<input type="checkbox" class ="form-check cls-chbx" id = "cbx_018" onclick="fn_cambia_estatus_permiso(this,'18')">
+													</div>
+													<div class="col-xs-10">	
+														Cancela refrendos
+													</div>
+												</div>
+
+												&nbsp;
+											</div>
+										</div>	
+									</div>
+									<div class = "col-xs-4">										
+										<div class="col-xs-12">
+											<div class="cls_encabezado_alert" >
+												<label>Reportes</label>
+											</div>
+											<div class="panel panel-default">
+												<div class="col-xs-12">
+													<div class="col-xs-1">
+														
+													</div>
+													<div class="col-xs-11">	
+														<label>Descripciòn de opciòn</label>
+													</div>
+
+												</div>
+												<div class="col-xs-12">
+													<div class="col-xs-2">
+														<input type="checkbox" class ="form-check cls-chbx" id = "cbx_019" onclick="fn_cambia_estatus_permiso(this,'19')">
+													</div>
+													<div class="col-xs-10">	
+														Reporte comparaciòn de estatus de cartera
+													</div>
+
+												</div>
+
+												<div class="col-xs-12">
+													<div class="col-xs-2">
+														<input type="checkbox" class ="form-check cls-chbx" id = "cbx_020" onclick="fn_cambia_estatus_permiso(this,'20')">
+													</div>
+													<div class="col-xs-10">	
+														Genera respaldos en .csv
+													</div>
+
+												</div>
+
+												<div class="col-xs-12">
+													<div class="col-xs-2">
+														<input type="checkbox" class ="form-check cls-chbx" id = "cbx_021" onclick="fn_cambia_estatus_permiso(this,'21')">
+													</div>
+													<div class="col-xs-10">	
+														Reporte de apertura de cajas
+													</div>
+												</div>
+
+												&nbsp;
+											</div>
+										</div>	
+									</div>
+
+&nbsp;
+
+
+
+
+
+
+
+
+								</div>
+&nbsp;
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+
+
+
+
+			<div class="fondo_mensaje cls_exito" >
+			</div >
+			<div class="mensaje cls_exito" >
+				<div class="cls_encabezado_alert" >
+					Aviso
+				</div>	
+				<div class="panel panel-default">	
+					<label class="page-header" id="msj_aviso"></label>
+					<br>				
+					<a class="btn btn-primary btn-sm" style="cursor: pointer;" id = "btn_aceptar_exito"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+					<br>
+					<br>
+				</div>
+			</div>
+			<div class="fondo_mensaje cls_error" >
+			</div >
+			<div class="mensaje cls_error" >
+				<div class="cls_encabezado_alert" >
+					Error!!
+				</div>	
+				<div class="panel panel-default">	
+					<label class="page-header" id="msj_notificacion"></label>
+					<br>				
+					<a class="btn btn-primary btn-sm" style="cursor: pointer;" id = "btn_aceptar_error"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+					<br>
+					<br>
+				</div>
+			</div>
+	<div id="fondo_preloader">
+		<div class="preloader" id="preloader">
+		
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+
+			fn_inicio("{{id_usuario_modifica}}","{{csrf_token}}","{{IP_LOCAL}}");
+		});
+	</script>
+
+{% endblock %}
