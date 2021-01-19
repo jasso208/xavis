@@ -816,7 +816,7 @@ def api_agregar_kilataje(request):
 		respuesta.append({"estatus":"1"})
 	except Exception as e:	
 		print(e)
-		respuesta.append({"estatus":"0","msj":"Error al agregar la marca."})
+		respuesta.append({"estatus":"0","msj":"Error al agregar el nuevo kilataje."})
 
 	return Response(respuesta)	
 
@@ -1543,7 +1543,36 @@ def api_simula_refrendo(request):
 
 
 
+@api_view(["GET","PUT"])
+def api_kiltajes(request):
+	resp = []
+	if request.method == "GET":
+		try:
+			id_kilataje = request.GET.get("id_kilataje")
+			ob_kilataje = Costo_Kilataje.objects.get(id = id_kilataje)
 
+			if ob_kilataje.tipo_kilataje == None:
+				#si no tiene almacenado el tipo de kilataje le ponemos por default empeño
+				ob_kilataje.tipo_kilataje = Tipo_Kilataje.objects.get(id = 2)
+				ob_kilataje.save()
+
+			resp.append({"estatus":"1","tipo_producto":ob_kilataje.tipo_producto.id,"desc_kilataje":ob_kilataje.kilataje,"avaluo":str(ob_kilataje.avaluo),"tipo_kilataje":ob_kilataje.tipo_kilataje.id})
+		except Exception as e:
+			print(e)
+			resp.append({"estatus":"0","msj":"Error al consultar el kilataje"})
+	if request.method == "PUT":
+		try:
+			id_kilataje = request.data["id_kilataje"]
+			avaluo = decimal.Decimal(request.data["avaluo"])
+
+			ob_kilataje = Costo_Kilataje.objects.get(id = id_kilataje)
+			ob_kilataje.fn_actualiza_kilataje(avaluo)
+			resp.append({"estatus":"1"})
+		except Exception as e:
+			print(e)
+			resp.append({"estatus":"0"})
+
+	return Response(json.dumps(resp))
 
 
 

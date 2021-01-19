@@ -94,6 +94,7 @@ urlpatterns=[
 	url(r'^api_simula_proximos_pagos_semanal/$',api_simula_proximos_pagos_semanal,name="api_simula_proximos_pagos_semanal"),
 	url(r'^api_aplica_refrendo_semanal/$',api_aplica_refrendo_semanal,name="api_aplica_refrendo_semanal"),
 	url(r'^api_cancela_abono/$',api_cancela_abono,name="api_cancela_abono"),
+	url(r'^api_kiltajes/$',api_kiltajes,name="api_kiltajes"),
 
 
 

@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load bootstrap3 %}
+{% block archivos_staticos%}
+<script type="text/javascript" src="{% static 'js/admin_kilataje.js' %}"></script>
+{% endblock %}
+
 {% block usuario %}
 
 			<div class="col-xs-6">
@@ -42,7 +46,7 @@
 										      <tr>
 										      	<th style="width: 10%"></th>
 										        <th style="width: 40%">Kilataje</th>
-										        <th style="width: 30%">Avaluo</th>
+										        <th style="width: 30%">Precio por gramo</th>
 										        <th style="width: 20%">Tipo K</th>
 										      </tr>
 										    </thead>
@@ -53,16 +57,19 @@
 
 										    		
 												    	<tr>
-												    		<td style="width: 10%">
+												    		<td style="width: 20%">
 												    			
 												    			<a onclick="fn_eliminar('{{c.id}}')" class='btn btn-default btn-sm'>
 												    				<span class='glyphicon glyphicon-remove'>
 												    					
 												    				</span>    					
 												    			</a> 
+												    			<a class="btn btn-default btn-sm" onclick = "fn_consulta_kilataje('{{c.id}}')">
+												    				<span clasS="glyphicon glyphicon-pencil"></span>
+												    			</a>
 												    		</td>
-												    		<td style="width: 40%">{{c.kilataje }}</td>
-												    		<td style="width: 30%">{{c.avaluo}}</td>		
+												    		<td style="width: 30%">{{c.kilataje }}</td>
+												    		<td style="width: 30%">$ {{c.avaluo}}</td>		
 												    		<td style="width: 20%">{{c.tipo_kilataje.tipo_kilataje}}</td>		
 												    	</tr>
 												    {% endifequal %}
@@ -82,7 +89,7 @@
 										      <tr>
 										      	<th style="width: 10%"></th>
 										        <th style="width: 40%">Kilataje</th>
-										        <th style="width: 30%">Avaluo</th>
+										        <th style="width: 30%">Precio por gramo</th>
 										        <th style="width: 20%">Tipo K</th>
 
 										        			
@@ -95,16 +102,19 @@
 
 										    		
 												    	<tr>
-												    		<td style="width: 10%">
+												    		<td style="width: 20%">
 												    			
 												    			<a onclick="fn_eliminar('{{c.id}}')" class='btn btn-default btn-sm'>
 												    				<span class='glyphicon glyphicon-remove'>
 												    					
 												    				</span>    					
 												    			</a> 
+												    				<a class="btn btn-default btn-sm" onclick = "fn_consulta_kilataje('{{c.id}}')">
+												    				<span clasS="glyphicon glyphicon-pencil"></span>
+												    			</a>
 												    		</td>
-												    		<td style="width: 40%">{{c.kilataje }}</td>
-												    		<td style="width: 30%">{{c.avaluo}}</td>		
+												    		<td style="width: 30%">{{c.kilataje }}</td>
+												    		<td style="width: 30%">$ {{c.avaluo}}</td>		
 												    		<td style="width: 20%">{{c.tipo_kilataje.tipo_kilataje}}</td>				
 												    	</tr>
 												    {% endifequal %}
@@ -189,7 +199,7 @@
 				</div>
 		</div>
 
-	<div class="fondo_mensaje cls_exito_alta" id="fondo_exito_alta" >
+		<div class="fondo_mensaje cls_exito_alta" id="fondo_exito_alta" >
 			
 		</div >
 		<div class="mensaje cls_exito_alta" >
@@ -206,68 +216,79 @@
 				</div>
 		</div>
 
-	<div id="fondo_preloader">
-		<div class="preloader" id="preloader">
-		
+		<div id="fondo_preloader">
+			<div class="preloader" id="preloader">
+			
+			</div>
 		</div>
-	</div>
 
-	<div class="cls_fondo_form_emergente_2 cls_agregar_kilataje" id="div_fondo_agregar_kilataje">
-		
-	</div>
+
+		<div class="cls_fondo_form_emergente_2 cls_agregar_kilataje" id="div_fondo_agregar_kilataje">	
+		</div>
+
 	<div class="cls_form_emergente_2 cls_agregar_kilataje"  style="overflow: visible;top:15%">
-				<div class="cls_encabezado_alert" >
-					<label>Agregar Kilataje</label>
-				</div>
-				<div class="col-xs-12">	
-				<br>				
-					<label>Kilataje</label>
-					<input type="text" name="" id="txt_kilataje" clasS="form-control" placeholder="ej: 21 k" maxlength="10">
-						<div class="help-block" id="id_error_kilataje">
-								<span id="error_kilataje"></span>
-						</div>
-				</div>
+		<div class="cls_encabezado_alert" >
+			<label id = "txt_agregar_kilataje">Agregar Kilataje</label>
+		</div>
+		<div class="col-xs-12">	
+			<br>				
+			<label>Kilataje</label>
+			<input type="text" name="" id="txt_kilataje" clasS="form-control" placeholder="ej: 21 k" maxlength="10">
+			<div class="help-block" id="id_error_kilataje">
+					<span id="error_kilataje">
+						
+					</span>
+			</div>
+		</div>
 
-				<div class="col-xs-12">	
-					<br>				
-					<label>Importe</label>
-					<input type="number" name="" id="int_importe" clasS="form-control" placeholder="0.00" value="0">
-						<div class="help-block" id="id_error_importe">
-								<span id="error_importe"></span>
-						</div>
+		<div class="col-xs-12">	
+			<br>				
+			<label>Importe</label>
+			<input type="number" name="" id="int_importe" clasS="form-control" placeholder="0.00" value="0">
+				<div class="help-block" id="id_error_importe">
+						<span id="error_importe"></span>
 				</div>
+		</div>
 
-				<div class="col-xs-12">	
-					<br>				
-					<label>Tipo Producto</label>
-					<select name="tipo_producto" class="form-control" title="" required="" id="id_tipo_producto">		
-						{% for x in cat_tipo_producto %}										
-							<option value="{{x.id}}">{{ x.tipo_producto }}</option>
-						{% endfor %}
-					</select>
-					
-				</div>
+		<div class="col-xs-12">	
+			<br>				
+			<label>Tipo Producto</label>
+			<select name="tipo_producto" class="form-control" title="" required="" id="id_tipo_producto">		
+				{% for x in cat_tipo_producto %}										
+					<option value="{{x.id}}">{{ x.tipo_producto }}</option>
+				{% endfor %}
+			</select>
+			
+		</div>
 
-				<div class="col-xs-12">	
-					<br>				
-					<label>Tipo Kilataje</label>
-					<select name="tipo_kilataje" class="form-control" title="" required="" id="id_tipo_kilataje">		
-						{% for x in cat_tipo_kilataje %}										
-							<option value="{{x.id}}">{{ x.tipo_kilataje }}</option>
-						{% endfor %}
-					</select>
-					
-				</div>
-				<div class="col-xs-12 text-center">	
-					<br>
+		<div class="col-xs-12">	
+			<br>				
+			<label>Tipo Kilataje</label>
+			<select name="tipo_kilataje" class="form-control" title="" required="" id="id_tipo_kilataje">		
+				{% for x in cat_tipo_kilataje %}										
+					<option value="{{x.id}}">{{ x.tipo_kilataje }}</option>
+				{% endfor %}
+			</select>
+			
+		</div>
+		<div class="col-xs-12 text-center">	
+			<br>
 
-						<div class="help-block" id="id_error_guardar">
-								<span >Error al guardar.</span>
-						</div>
-					<br>
-					<a class="btn btn-primary btn-sm" id="btn_guardar_kilataje" ><span class="glyphicon glyphicon-ok"></span> Guardar</a>
-					<br><br>
+				<div class="help-block" id="id_error_guardar">
+						<span >Error al guardar.</span>
 				</div>
+			<br>
+			<a class="btn btn-primary btn-sm" id="btn_guardar_kilataje" >
+				<span class="glyphicon glyphicon-ok"></span> 
+				Guardar
+			</a>
+
+			<a class="btn btn-primary btn-sm" id="btn_editar_kilataje" >
+				<span class="glyphicon glyphicon-ok"></span> 
+				Guardar
+			</a>
+			<br><br>
+		</div>
 	</div>
 
 	
@@ -290,180 +311,50 @@
 		</div>
 		{%endifequal%}
 
-	<script type="text/javascript">
-		var id_registro="";
-			$(document).ready(
-					function()
-					{
-							fn_inicio();
-							$("#btn_no_eliminar,#fondo_confirmacion_baja").click(
-								function()
-								{
-									$(".cls_confirmacion_baja").hide();
-								}
-							);
 
-						$("#fondo_exito_baja,#btn_exito_baja,#fondo_no_baja,#btn_no_baja").click(
-								function()
-								{
-									
-									location.reload();
-								}
-							);
-						$("#btn_aceptar_baja").click(
-								function()
-								{
-										$(".cls_confirmacion_baja").hide();
-									fn_elimina_costo();
-								}
-							);
-						$("#btn_guardar_kilataje").click(
-								function()
-								{
-									fondo_agregar_kilataje();
-								}
-							);
 
-						$("#btn_no_kilataje").click(
-								function()
-								{
-									$(".cls_error_alta").hide();
-								}
-							);
+		<div class="fondo_mensaje cls_msj_error"  >
+			
+		</div >
+		<div class="mensaje cls_msj_error" >
+				<div class="cls_encabezado_alert" >
+					Error!!
+				</div>	
+				<div class="panel panel-default">	
+					<label class="page-header" id = "msj_error"></label>
+					<br>
+					<a class="btn btn-primary btn-sm" id="btn_aceptar_error" > <span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+					<br>
+					<br>
 
-						$("#fondo_error_alta").click(
-								function()
-								{
-									$(".cls_error_alta").hide();
-								}
-							);
+				</div>
+		</div>
 
-						$("#btn_agregar_kilataje").click(
-								function()
-								{
-									$(".cls_agregar_kilataje").show();
-								}
-							);
 
-						$("#div_fondo_agregar_kilataje").click(
-								function()
-								{
-									$(".cls_agregar_kilataje").hide();	
-								}
-							);
-					}
-				);
-		
-			function fondo_agregar_kilataje()
+	<div class="fondo_mensaje cls_exito_edicion"  >
+			
+		</div >
+		<div class="mensaje cls_exito_edicion" >
+				<div class="cls_encabezado_alert" >
+					Aviso
+				</div>	
+				<div class="panel panel-default">	
+					<label class="page-header">Se actualizo correctamente</label>
+					<br>
+					<a class="btn btn-primary btn-sm" id="btn_exito_kilataje_edicion" > <span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+					<br>
+					<br>
+
+				</div>
+		</div>
+
+
+<script type="text/javascript">
+	$(document).ready(
+			function()
 			{
-
-				$("#id_error_kilataje").hide();
-				$("#id_error_importe").hide();
-				$("#id_error_guardar").hide();	
-
-				if($("#txt_kilataje").val()=="")
-				{
-					$("#id_error_kilataje").show();
-					$("#error_kilataje").text("Debe ingresar la descripción de kilataje.");
-					return false;
-				}
-				if($("#int_importe").val()=="0" | $("#int_importe").val()=="")
-				{
-					$("#id_error_importe").show();
-					$("#error_importe").text("Debe ingresar el avaluo.");
-					return false;
-						
-				}
-				fn_agregar_kilatake_2();
+				fn_inicio("{{IP_LOCAL}}","{{csrf_token}}");
 			}
-			function fn_eliminar(id)
-			{
-				id_registro=id;
-				$(".cls_confirmacion_baja").show();	
-			}
-			function fn_inicio()
-			{
-				$(".cls_confirmacion_baja").hide();
-				$(".cls_exito_baja").hide();
-				$(".cls_no_baja").hide();
-				
-				$("#fondo_preloader").hide();
-				$("#id_error_kilataje").hide();
-				$("#id_error_importe").hide();
-				$(".cls_error_alta").hide();		
-				$(".cls_exito_alta").hide();		
-				$("#id_error_guardar").hide();
-						
-				$(".cls_agregar_kilataje").hide();
-				
-			}
-			function fn_elimina_costo()
-			{
-				
-				$("#fondo_preloader").show();
-				$.ajax({
-					type: "GET",
-			        url: "{{IP_LOCAL}}/empenos/api_elimina_costo_kilataje/",
-			        data: {"id":id_registro},
-			        contentType: "application/json; charset=utf-8",
-			        dataType: "json",
-			        success: function (r) {
-		    			if (r[0].estatus=="0")
-			        	{
-			        		
-							$(".cls_no_baja").show();				
-			        	}
-			        	else
-			        	{	        		
-
-			        		$(".cls_exito_baja").show();
-			        	}    	
-			        	$("#fondo_preloader").hide();
-			        },
-			        error: function (r) {
-			        		$(".cls_no_baja").show();				
-							$("#fondo_preloader").hide();
-			        },
-			        failure: function (r) {
-			        		$(".cls_no_baja").show();				
-							$("#fondo_preloader").hide();
-			        }
-				});
-				
-			}
-			function fn_agregar_kilatake_2()
-			{
-				$("#fondo_preloader").show();
-				$.ajax({
-					type: "GET",
-			        url: "{{IP_LOCAL}}/empenos/api_agregar_kilataje/",
-			        data: {"desc_kilataje":$("#txt_kilataje").val(),"importe":$("#int_importe").val(),"id_tipo_producto":$("#id_tipo_producto").val(),"id_tipo_kilataje":$("#id_tipo_kilataje").val()},
-			        contentType: "application/json; charset=utf-8",
-			        dataType: "json",
-			        success: function (r) {
-		    			if (r[0].estatus=="0")
-			        	{
-			        		
-							$("#id_error_guardar").show();			
-			        	}
-			        	else
-			        	{	        		
-
-			        		location.reload();
-			        	}
-
-			        	$("#fondo_preloader").hide();
-			        },
-			        error: function (r) {
-			        		$("#id_error_guardar").show();				
-							$("#fondo_preloader").hide();
-			        },
-			        failure: function (r) {
-			        		$("#id_error_guardar").show();				
-							$("#fondo_preloader").hide();
-			        }
-				});
-			}
-
-	</script>
+		);
+</script>
 {%endblock%}

@@ -450,12 +450,7 @@ def cambio_sucursal(request):
 		print(e)
 		c="CERRADA"
 
-	#si es Gerente Regional o Administrador de Sistema
-	tiene_permiso="1"
-	if user_2.perfil.id==3 or user_2.perfil.id==4:
-		tiene_permiso="1"
-	else:
-		tiene_permiso="0"
+
 
 	exito="2"
 	if request.method=="POST":
