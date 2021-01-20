@@ -292,8 +292,13 @@
 
 										</div>
 										<div class="col-xs-4">
-											<label for=""> Token Seguridad</label>
+											<label for=""> Token seguridad</label>
 											{% bootstrap_field form.token  show_label=False%}
+											<div class="help-block" id="id_error_token">
+													<span id="">
+													Debe ingresar el token de seguridad.		
+													</span>
+											</div>
 											
 										</div>
 										<div class="col-xs-4">								
@@ -302,7 +307,7 @@
 											</label>
 											<br>
 											<a class="btn btn-default" style="float: right;"   id="generar_codigo">
-												Generar Codigo
+												Generar token
 											</a>		
 										</div>
 										<div class="col-xs-12" id="tipo_movimiento">
@@ -408,7 +413,31 @@
 	</div>
 
 
+	<div class="fondo_mensaje cls_exito" >
+		
+	</div >
+	<div class="mensaje cls_exito" >
+			<div class="cls_encabezado_alert" >
+				Aviso
+			</div>	
+			<div class="panel panel-default">	
+				<label class="page-header" >El retiro se realizó con exito</label>
+				<br>				
+				<a class="btn btn-primary btn-sm" href = "{% url 'seguridad:admin_cajas'  %}">
+					<span class="glyphicon glyphicon-ok" ></span> 
+					Aceptar
+				</a>
+				<br>
+				<br>
+			</div>
+	</div>
+
+<a href="{% url 'empenos:imprime_comprobante_retiro' id_retiro %}" id="abrir_1">
+	abrir
+</a>
+
 	<script type="text/javascript">
+		var id_concepto;
 			$(document).ready(
 					function()
 					{
@@ -445,8 +474,21 @@
 						$("#retirar").click(
 								function () 
 								{
+									$("#id_error_token").hide();
+
+									$("#id_concepto").prop("disabled",false);
+
+
+									$("#id_concepto").val(id_concepto);
+
+									if ($("#id_token").val() == "")
+									{
+										$("#id_error_token").show();
+										return false		
+									}
 									$("#fondo_preloader").show();
-								}
+									
+							}
 							);
 
 						
@@ -515,6 +557,9 @@
 									return 0;									
 								}
 								$("#fondo_preloader").show();
+
+								id_concepto = $("#id_concepto").val();
+
 							   $.ajax({
 							        type: "GET",
 							        url: "{{IP_LOCAL}}/empenos/envia_token/",
@@ -531,6 +576,7 @@
 										$("#id_importe").prop("readonly",true);
 										$("#id_comentario").prop("readonly",true);
 										$("#id_concepto").prop("disabled",true);
+
 										$(".cls_notificacion").show();
 										$("#msj_notificacion").text("El código de confirmación se envío al gerente regional.");
 										$("#fondo_preloader").hide();
@@ -624,30 +670,48 @@
 		{
 			$("#fondo_preloader").hide();
 			read_only="{{read_only}}";
-			//esta condicion es cuando se intenta guardar el formulario y falla
+						//esta condicion es cuando se intenta guardar el formulario y falla
 			//para que mantenga bloqueado el formulario
 			//en caso de que se requiera editar el cmotivo o importe debera refrescar la pagina
+
+			$("#id_concepto").val("{{id_concepto}}");
+			id_concepto = "{{id_concepto}}";
 			if(read_only=="1")
 			{
 					$("#id_importe").prop("readonly",true);
 					$("#id_comentario").prop("readonly",true);
+					$("#id_concepto").prop("disabled",true)
 			}
 			$(".cls_error_formulario").hide();
 
+			$("#id_error_token").hide();
+			$("#btn_retirar").hide();
+			$("#error_importe_cero").hide();
+			
+			$("#error_importe_excedido").hide();
+			$("#id_tipo_movimiento").val("3");
+			$("#tipo_movimiento").hide();
+			$(".cls_notificacion").hide();
+			$(".cls_error_concepto_retiro").hide();
+			$(".cls_exito").hide();
 			if("{{error_token}}"=="1")
 			{
-					$(".cls_error_formulario").show();
-					$("#msj_error_form").text("El token ingresado es invalido.");
-					return 0;
+				$(".cls_error_formulario").show();
+				$("#msj_error_form").text("El token ingresado es invalido.");
+				return 0;
+
 			}
-						$("#btn_retirar").hide();
-						$("#error_importe_cero").hide();
-						
-						$("#error_importe_excedido").hide();
-						$("#id_tipo_movimiento").val("3");
-						$("#tipo_movimiento").hide();
-						$(".cls_notificacion").hide();
-						$(".cls_error_concepto_retiro").hide();
+
+			if( "{{id_retiro}}" != "0" )
+			{
+
+					link = $("#abrir_1").attr("href");
+					window.open(link,'popup', 'width=400px,height=400px')
+					$(".cls_exito").show();
+
+				
+			}
+			
 		}
 	</script>
 {% endblock %}

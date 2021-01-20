@@ -1620,11 +1620,6 @@ def rep_comparativo_estatus_cartera(request):
 	#el estatus 0 indica que se presento un error. el error debe venir acompalñado de una leyenda en la variable msj_error
 	estatus = "1" 
 
-	if user_2.perfil.id != 3:
-		estatus = "0"
-		msj_error = "No cuentas con permiso para acceder a esta opción."
-		return render(request,'empenos/rep_comparativo_estatus_cartera.html',locals())	
-
 	sucursales = Sucursal.objects.all()
 
 	txt_sucursal = ""
@@ -2567,7 +2562,9 @@ def retiro_efectivo(request):
 	#si no esta logueado mandamos al login
 	if not request.user.is_authenticated:
 		return HttpResponseRedirect(reverse('seguridad:login'))
-	
+
+	id_retiro = "0"
+
 	#si el usuario y contraseña son correctas pero el usuario esta incompleto, bloquea el acceso.
 	try:
 		user_2=User_2.objects.get(user=request.user)
@@ -2577,6 +2574,8 @@ def retiro_efectivo(request):
 		estatus=0
 		msj="La cuenta del usuario esta incompleta."			
 		return render(request,'login.html',locals())
+
+		
 
 	pub_date = date.today()
 	min_pub_date_time = datetime.combine(pub_date, time.min) 
@@ -2825,11 +2824,12 @@ def retiro_efectivo(request):
 
 	conceptos = Concepto_Retiro.objects.filter(sucursal = caja.sucursal, activo = 1)
 	
+	id_concepto = ""
+
+
 	if request.method=="POST":
-
-
-
 		read_only="1"
+
 		form=Retiro_Efectivo_Form(request.POST)				
 		
 		folio=fn_folios(tm,suc)
@@ -2847,13 +2847,16 @@ def retiro_efectivo(request):
 		if form.is_valid():
 			f=form.save(commit=False)
 			error_token='0'
-
+			id_concepto = f.concepto.id
 			try:
 				#validamos el token de seguridad
+				
+				
 				if f.token!=token:
 					error_token='1'
 					return render(request,'empenos/retiro_efectivo.html',locals())
 			except Exception as e:
+				print(e)
 				error_token='1'
 				return render(request,'empenos/retiro_efectivo.html',locals())
 				print (e)
@@ -2869,7 +2872,9 @@ def retiro_efectivo(request):
 			f.usuario=request.user
 			f.concepto = concepto
 			f.save()
-			return HttpResponseRedirect(reverse('seguridad:admin_cajas'))
+
+			id_retiro = f.id
+			#return HttpResponseRedirect(reverse('seguridad:admin_cajas'))
 	else:
 
 		try:

@@ -88,7 +88,7 @@
 	</div>
 
 
-	<div class="cls_form_busca_cliente cls_alta_concepto" style="width: 40%;left: 30%; overflow-x: hidden;">		
+	<div class="cls_form_emergente_2 cls_alta_concepto" style="width: 20%;left: 40%;overflow: visible; " >		
 		<div class="cls_encabezado_alert" >
 			<label>
 			Alta concepto retiro
@@ -96,36 +96,49 @@
 
 		</div>
 
-		<div class="row">
-		<br>
+	
 		<div class="col-xs-12">
+			<br>	
 			<label>Concepto</label>
 			<input type="text" name="" id="txt_concepto" maxlength="40" class="form-control">
+			<div class="help-block" id="id_error_desc_concepto">
+					<span id="error_kilataje">
+					Debe indicar la descripción del concepto.			
+					</span>
+			</div>
+
 		</div>
-		<div class="col-xs-6">
+		<div class="col-xs-12">
+			<br>	
 			<label>Importe maximo</label>
-			<input type="number" id="int_importe" class="form-control" name="">			 
+			<input type="number" id="int_importe" class="form-control" name="">		
+			<div class="help-block" id="id_error_importe">
+					<span id="error_kilataje">
+					Debe indicar el importe de retiro
+					</span>
+			</div>
+	 
 		</div>
-		<div clasS="col-xs-6">
-			
-		</div>
-		<div class="col-xs-12 text-right">
+		<div class="col-xs-12 text-center">
+			<br>	
 			<a class="btn btn-primary btn-sm" id="btn_guardar_concepto"> 
 				<span class="glyphicon glyphicon-floppy-disk">
 					
 				</span>
 			Guardar</a>
+
+			<br><br>
 		</div>
 
 
-		</div>
+		
 	</div>	
 
 	<div class="fondo_mensaje cls_alta_concepto" id="fondo_alta_concepto">
 		
 	</div>
 
-	<div class="cls_form_busca_cliente cls_form_actualiza" style="width: 20%;left: 40%" >		
+	<div class="cls_form_emergente_2 cls_form_actualiza" style="width: 20%;left: 40%;overflow: visible; ">		
 		<div class="cls_encabezado_alert" >
 			<label>
 			Actualiza importe maximo retiro
@@ -133,22 +146,29 @@
 
 		</div>
 
-		<div class="row">
-		<br>	
+		
 		<div class="col-xs-12">
+			<br>
 			<label>Importe maximo</label>
-			<input type="number" id="int_importe_act" class="form-control" name="">			 
+			<input type="number" id="int_importe_act" class="form-control" name="">	
+			<div class="help-block" id="id_error_importe_edita">
+					<span id="error_kilataje">
+					Debe indicar el importe de retiro
+					</span>
+			</div>
+
 		</div>
 		<div class="col-xs-12 text-center">
+			<br>
 			
 			<a class="btn btn-primary btn-sm" id="btn_guardar_importe" > 
 				<span class="glyphicon glyphicon-floppy-disk">					
 				</span>
 			Guardar</a>
+			<br><br>
 		</div>
 
 
-		</div>
 	</div>	
 
 	<div class="fondo_mensaje cls_form_actualiza" id="fondo_actualiza">
@@ -413,6 +433,10 @@
 
 		function fn_inicio()
 		{
+			$("#id_error_importe").hide();
+			$("#id_error_desc_concepto").hide();
+			$("#id_error_importe_edita").hide();
+			
 			$("#btn_agregar_concepto").hide();
 			$("#fondo_preloader").hide();
 			$(".cls_alta_concepto").hide();
@@ -428,6 +452,13 @@
 		function fn_actualiza_importe_retiro()
 		{
 			
+			$("#id_error_importe_edita").show();
+			if ($("#int_importe_act").val() == "0" || $("#int_importe_act").val() =="" )
+			{
+				$("#id_error_importe_edita").show();
+				return false
+			}
+
 			$("#fondo_preloader").show();
 			$(".cls_form_actualiza").hide();
 			
@@ -563,12 +594,12 @@
 							for (x = 0; x < cont; x++)
 							{
 								var htmlTags = '<tr>'+
-									'<th style="width: 10%">'+
+									'<td style="width: 10%">'+
 									'<a class="btn btn-default btn-sm" onclick="fn_confirma_eliminar_concepto('+data[1].lista[x].id_concepto+')"><span class="glyphicon glyphicon-remove"></span></a>'+
 									'<a class="btn btn-default btn-sm" onclick="fn_muestra_form_edita('+data[1].lista[x].id_concepto+')"><span class="glyphicon glyphicon-pencil"></span></a>'
-									+'</th>'+
-									        '<th style="width: 70%;">'+data[1].lista[x].concepto+'</th>'	+
-									        '<th style="width: 20%;text-align:right">$'+data[1].lista[x].importe_maximo+'</th>	'+
+									+'</td>'+
+									        '<td style="width: 70%;">'+data[1].lista[x].concepto+'</td>'	+
+									        '<td style="width: 20%;text-align:right">$'+data[1].lista[x].importe_maximo+'</td>	'+
 								'</tr>'
 
 								$('#tabla_conceptos_retiro tbody').append(htmlTags);
@@ -598,7 +629,7 @@
 		function fn_muestra_form_edita(id)
 		{
 
-
+			$("#id_error_importe_edita").hide();
 			$(".cls_form_actualiza").show();
 			id_concepto=id;	
 			$("#int_importe_act").val("");
@@ -611,8 +642,25 @@
 			id_concepto=id;
 		}
 		function fn_agrega_concepto()
-		{
+		{	
+			$("#id_error_desc_concepto").hide();	
+			$("#id_error_importe").hide();
+			if($("#txt_concepto").val() == "" )
+			{
+				$("#id_error_desc_concepto").show();	
+				return false
+			}
+			
 
+			if ($("#int_importe").val() == "0" || $("#int_importe").val() =="" )
+			{
+				$("#id_error_importe").show();
+				return false
+			}
+
+
+
+			
 
 		
 			

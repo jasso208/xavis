@@ -473,7 +473,6 @@ class User_2(models.Model):
 			resp.append("El nombre de usuario indicado ya existe.")
 			return resp
 
-		print(Perfil.objects.get(id = int(id_perfil)))
 
 		try:
 			usuario_alta = User.objects.get(id = int(id_usuario_alta))
@@ -511,6 +510,8 @@ class User_2(models.Model):
 			resp.append("El nombre de usuario es requerido.")
 			return resp
 
+
+
 		try:
 			sucursal = Sucursal.objects.get(id = id_sucursal)
 		except:
@@ -531,7 +532,14 @@ class User_2(models.Model):
 
 			usr_a_modificar = User.objects.get(username = user_name)
 			
-			
+			u2 = User_2.objects.get(user = usr_a_modificar)
+
+			if u2.fn_tiene_caja_abierta() != None:
+				resp.append(False)
+				resp.append("El usuario no puede ser modificado ya que cuenta con caja abierta.")
+				return resp
+
+
 			usr_a_modificar.first_name = first_name
 			usr_a_modificar.last_name = last_name
 			
@@ -718,7 +726,7 @@ class Retiro_Efectivo(models.Model):
 	fecha=models.DateTimeField(default = timezone.now)
 	usuario=models.ForeignKey(User,on_delete = models.PROTECT,related_name = "usuario_alta")
 	importe=models.IntegerField(default = 0, validators = [MinValueValidator(Decimal('1'))])
-	comentario=models.TextField(default = '')
+	comentario=models.TextField(default = '',max_length = 100)
 	caja=models.CharField(max_length = 1,null = True)
 	token=models.IntegerField()
 	concepto = models.ForeignKey(Concepto_Retiro,on_delete = models.PROTECT,blank = True,null = True)

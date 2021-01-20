@@ -1,5 +1,6 @@
 from django.conf.urls import include, url
 from .views import *
+from .report import *
 from empenos.apis import *
 
 app_name="empenos"
@@ -45,6 +46,7 @@ urlpatterns=[
 	url(r'^cancela_abono/$',cancela_abono,name="cancela_abono"),
 	url(r'^rep_comparativo_estatus_cartera/$',rep_comparativo_estatus_cartera,name="rep_comparativo_estatus_cartera"),
 
+	url(r'^imprime_comprobante_retiro/(?P<id>\w+)/$',imprime_comprobante_retiro,name="imprime_comprobante_retiro"),
 
 	url(r'^consulta_abono$',consulta_abono,name="consulta_abono"),	
 	url(r'^cierra_caja/$',api_cierra_caja,name="cierra_caja"),

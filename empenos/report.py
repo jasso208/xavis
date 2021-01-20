@@ -4,9 +4,79 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.lib.pagesizes import A4
 from django.conf import settings
+from empenos.models import *
 IP_LOCAL = settings.IP_LOCAL
 LOCALHOST=settings.LOCALHOST
 from datetime import datetime,date
+
+def imprime_comprobante_retiro(request,id):
+	hoy = date.today()
+	txt_hoy = hoy.strftime("%Y-%m-%d")
+	# Create the HttpResponse object with the appropriate PDF headers.
+	response = HttpResponse(content_type='application/pdf')
+	response['Content-Disposition'] = f'inline; filename=hello.pdf'
+	buffer=BytesIO()
+
+	try:
+		obj = Retiro_Efectivo.objects.get(id = id)
+	except Exception as e:
+		print(e)
+		return response 
+
+	p=canvas.Canvas(buffer,pagesize=A4)
+
+	p.drawImage(settings.IP_LOCAL+'/static/img/logo.jpg', 55, 730,200, 60)
+
+	p.setFont("Helvetica-Bold",15)
+
+	p.drawString(400,750, "Folio retiro: " + str(obj.folio))	
+
+	p.setFont("Helvetica-Bold",10)
+	p.drawString(55,700, "Fecha: " + txt_hoy)	
+	p.drawString(55,680, "Usuario: " + request.user.username + ":- " + request.user.first_name + " " + request.user.last_name)
+	p.drawString(55,660, "Sucursal: " + obj.sucursal.sucursal)
+	p.drawString(55,640, "Comprobante de retiro de efectivo ")
+
+	row_act = 620
+	row_size = 20
+
+	p.line(55,row_act,545,row_act)
+	row_act = row_act - row_size
+	p.drawString(60,row_act + 5,"Concepto de retiro")
+	p.drawString(155,row_act + 5,obj.concepto.concepto)
+	p.line(55,row_act,545,row_act)
+	row_act = row_act - row_size
+	
+
+	importe = "{:0,.2f}".format(float(obj.importe))
+	p.drawString(60,row_act + 5,"Importe")
+	p.drawString(155,row_act + 5,"$" + importe)
+	p.line(55,row_act,545,row_act)
+	row_act = row_act - row_size
+
+	p.drawString(60,row_act + 5,"Comentarios")
+
+	p.setFont("Helvetica-Bold",7)	
+	p.drawString(155,row_act + 5,obj.comentario)
+
+	p.setFont("Helvetica-Bold",10)
+	p.line(55,row_act,545,row_act)
+	row_act = row_act - row_size
+	p.drawString(60,row_act + 5,"Folio autorización")
+	p.drawString(155,row_act + 5,str(obj.token))
+	p.line(55,row_act,545,row_act)
+	
+
+	p.line(55,620,55,row_act)
+	p.line(150,620,150,row_act )
+	p.line(545,620,545,row_act )
+
+	p.save()
+	pdf=buffer.getvalue()
+	buffer.close()
+	response.write(pdf)
+	return response
+
 def reporte_comparativo_carteras(dic,user,fecha_1,fecha_2,txt_sucursal):
 
 	hoy = date.today()
