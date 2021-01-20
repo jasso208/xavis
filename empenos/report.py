@@ -97,7 +97,7 @@ def reporte_comparativo_carteras(dic,user,fecha_1,fecha_2,txt_sucursal):
 
 	p.drawString(55,680, "Sucursal (es): " + txt_sucursal)
 	p.setFont("Helvetica-Bold",10)
-	p.drawString(55,660, "Comparacion del estatus de cartera del día " + fecha_2 + " contra el día " + fecha_1 )
+	p.drawString(55,660, "Comparación del estatus de cartera del día " + fecha_2 + " contra el día " + fecha_1 )
 
 	row_act = 640
 	row_size = 20
@@ -108,7 +108,7 @@ def reporte_comparativo_carteras(dic,user,fecha_1,fecha_2,txt_sucursal):
 
 	row_act -= row_size
 	
-	p.drawString(60,row_act+5,"Cartera del dia  " + fecha_1 )
+	p.drawString(60,row_act+5,"Cartera del día  " + fecha_1 )
 
 	p.line(55,row_act,545,row_act)	
 
@@ -179,7 +179,7 @@ def reporte_comparativo_carteras(dic,user,fecha_1,fecha_2,txt_sucursal):
 
 	row_act -= row_size
 	
-	p.drawString(60,row_act+5,"Cartera del dia  " + fecha_2 )
+	p.drawString(60,row_act+5,"Cartera del día  " + fecha_2 )
 
 	p.line(55,row_act,545,row_act)	
 
