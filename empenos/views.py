@@ -257,11 +257,7 @@ def administracion_porcentaje_mutuo(request):
 		caja_abierta = "0"
 		caja = Cajas
 
-	permiso="0"
-
-	#Si el perfil es gerente regional, permite entrar.
-	if user_2.perfil.id == 3:
-		permiso="1"
+	permiso="1"
 
 	estatus = "2"	
 
@@ -317,11 +313,7 @@ def administracion_interes_empeno(request):
 		caja_abierta = "0"
 		caja = Cajas
 
-	permiso="0"
-
-	#Si el perfil es gerente regional, permite entrar.
-	if user_2.perfil.id == 3:
-		permiso="1"
+	permiso="1"
 
 	estatus = "0"#no hace nada
 
@@ -410,10 +402,8 @@ def admin_min_apartado(request,id):
 		caja_abierta="0"
 		caja=Cajas
 
+	permiso="1"
 
-	permiso="0"
-	if user_2.perfil.id==3:		#solo el gerente regional puede entrar a esta opcion.
-		permiso="1"
 	try:
 		query=Min_Apartado.objects.get(id=int(id))
 	except:
@@ -472,10 +462,8 @@ def concepto_retiro(request):
 		caja=Cajas
 
 
-	#solo el gerente regional tiene permiso para acceder a esta opción
-	permiso = "0"
-	if user_2.perfil.id == 3:
-		permiso = "1"
+	#solo el gerente regional tiene permiso para acceder a esta opción	
+	permiso = "1"
 
 	form = Alta_Concepto_Retiro_Form()	
 	id_usuario = user_2.user.id
@@ -1196,9 +1184,8 @@ def elimina_costo_extra(request):
 		caja_abierta="0"
 		caja=Cajas
 
-	permiso="0"
-	if user_2.perfil.id==3:		
-		permiso="1"
+	
+	permiso="1"
 
 
 
@@ -1244,9 +1231,7 @@ def elimina_retiro (request):
 	id_usuario=user_2.user.id
 
 
-	permiso="0"
-	if user_2.perfil.id==3:		#solo el gerente regional puede entrar a esta opcion.
-		permiso="1"
+	permiso="1"
 		
 	if request.method == "POST":
 
@@ -1291,13 +1276,8 @@ def consulta_apartado(request):
 		print(e)
 		caja_abierta="0"
 		caja=Cajas
-
-	permiso="0"
-
-	print(user_2.perfil.id)
-	if user_2.perfil.id==3 or user_2.perfil.id==2:
-		print("entr")		
-		permiso="1"	
+	
+	permiso="1"	
 
 	if request.method=="POST":
 
@@ -1360,12 +1340,8 @@ def consulta_venta(request):
 		caja_abierta="0"
 		caja=Cajas
 
-	permiso="0"
-
-	print(user_2.perfil.id)
-	if user_2.perfil.id==3 or user_2.perfil.id==2:
-		print("entr")		
-		permiso="1"	
+		
+	permiso="1"	
 
 	if request.method=="POST":		
 		fecha_inicial=datetime.strptime(request.POST.get("fecha_inicial"),"%Y-%m-%d").date()
@@ -1416,10 +1392,7 @@ def venta_granel(request):
 		caja=Cajas
 		return render(request,'empenos/venta_granel.html',locals())
 
-	print(caja_abierta)
-	permiso="0"
-	if user_2.perfil.id==3 or user_2.perfil.id==2:		
-		permiso="1"	
+	permiso="1"	
 
 
 	error="0"#no muestra error
@@ -1525,9 +1498,7 @@ def admin_kilataje(request):
 		caja_abierta="0"
 		caja=Cajas
 
-	permiso="0"
-	if user_2.perfil.id==3:		
-		permiso="1"		
+	permiso="1"		
 
 	cat_kilataje=Costo_Kilataje.objects.filter(activo="S").order_by("kilataje")
 	cat_tipo_kilataje=Tipo_Kilataje.objects.all()
@@ -2918,10 +2889,6 @@ def corte_caja(request):
 		return render(request,'login.html',locals())
 
 	perfil_valido='1'
-	#validamos que el perfil sea gerente sucursal o gerente regional
-	# el perfil 1 es el valuador y no tiene acceso a esta pantalla.
-	if user_2.perfil.id==1:
-		perfil_valido='0'
 
 	id_perfil=user_2.perfil.id
 
@@ -3034,9 +3001,7 @@ def reportes_caja(request):
 		caja_abierta="0"
 		caja=Cajas
 
-	permiso="0"
-	if user_2.perfil.id==3:
-		permiso="1"
+	permiso="1"
 		
 	if request.method=="POST" and permiso=="1":		
 		
@@ -3370,14 +3335,8 @@ def cancela_abono(request):
 	
 	msj_error = ""
 
-	#el estatus 1 indica que todo esta ok, 
-	#el estatus 0 indica que se presento un error. el error debe venir acompalñado de una leyenda en la variable msj_error
 	estatus = "1" 
 
-	if user_2.perfil.id != 3:
-		estatus = "0"
-		msj_error = "No cuentas con permiso para acceder a esta opción."
-		return render(request,'empenos/cancela_abono.html',locals())
 		
 	if request.method  == "POST":
 		id_sucursal = request.POST.get("sucursal")
@@ -3519,9 +3478,8 @@ def admin_porc_avaluo(request):
 	except Exception as e:
 		msj_error="No cuentas con caja abierta."
 		print(e)
-	permiso="0"
-	if user_2.perfil.id==3:
-		permiso="1"#si tiene permiso para entrar a esta opcion.
+
+	permiso="1"#si tiene permiso para entrar a esta opcion.
 		
 
 	error="0"

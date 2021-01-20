@@ -482,7 +482,7 @@
 						if (data[0].estatus == "0")
 						{
 
-							$("#mensaje_error_actualiza").text("Error al actualizar el importe de retiro.");
+							$("#mensaje_error_actualiza").text(data[0].msj);
 							$(".cls_error_actualiza").show();
 						}
 						else

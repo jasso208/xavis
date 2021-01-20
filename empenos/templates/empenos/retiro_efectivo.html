@@ -633,11 +633,13 @@
 						dataType : "json",
 						success : function(data)
 						{
+						
 							if (data[0].estatus == "0")
 							{
 								$(".cls_error_concepto_retiro").show();
 								$("#msj_error_concepto_retiro").text(data[0].msj);
 								$("#id_concepto").val("")
+								
 							}
 					
 							$("#fondo_preloader").hide();

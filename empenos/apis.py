@@ -257,6 +257,7 @@ def api_valida_importe_retiro(request):
 
 
 @api_view(['POST','GET','DELETE','PUT'])
+@transaction.atomic
 def api_concepto_retiro(request):
 	
 	respuesta=[]
@@ -283,7 +284,7 @@ def api_concepto_retiro(request):
 			lista = []
 			id_sucursal = request.GET.get("id_sucursal")
 			resp = Concepto_Retiro.fn_get_conceptos(id_sucursal)
-			print(resp)
+		
 			for r in resp:
 				importe_maximo_retiro = "{:0,.2f}".format(r.importe_maximo_retiro)
 				lista.append({"id_concepto" : r.id,"concepto" : r.concepto,"importe_maximo" : importe_maximo_retiro})
@@ -298,13 +299,18 @@ def api_concepto_retiro(request):
 
 		try:
 
-			resp = Concepto_Retiro.fn_delete_concepto(id_concepto,id_usuario);			
-			if resp:
-				respuesta.append({"estatus" : "1"})
+			resp = Concepto_Retiro.fn_delete_concepto(id_concepto,id_usuario);	
+
+
+
+			if resp:				
+					respuesta.append({"estatus" : "1"})
 			else:
 				respuesta.append({"estatus" : "0","msj" : "Error al eliminar el concepto"})
+				
 		except:
 			respuesta.append({"estatus" : "0","msj" : "Error al eliminar el concepto"})
+			
 
 	if request.method == "PUT":
 		id_concepto = request.data["id_concepto"]
@@ -315,10 +321,18 @@ def api_concepto_retiro(request):
 			resp = Concepto_Retiro.fn_update_importe_maximo_retiro(id_concepto,importe_maximo_retiro,id_usuario)
 			if resp:
 
-				respuesta.append({"estatus":"1"})
+				saldo = Concepto_Retiro.objects.get( id = int(id_concepto)).fn_saldo_concepto()
+
+				if saldo < 0:
+					
+					respuesta.append({"estatus" : "0","msj" : "El importe indicado no es valido. Durante el mes actual se ha retirado mas de esta cantidad."})
+					transaction.set_rollback(True)
+				else:
+					respuesta.append({"estatus":"1"})
 			else:
 				respuesta.append({"estatus":"0","msj":"Error al actualizar el importe maximo de retiro del concepto."})
-		except:
+		except Exception as e:
+			print(e)
 			respuesta.append({"estatus":"0","msj":"Error al actualizar el importe maximo de retiro del concepto."})
 
 	return Response(respuesta)
