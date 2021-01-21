@@ -46,8 +46,14 @@ urlpatterns=[
 	url(r'^cancela_abono/$',cancela_abono,name="cancela_abono"),
 	url(r'^rep_comparativo_estatus_cartera/$',rep_comparativo_estatus_cartera,name="rep_comparativo_estatus_cartera"),
 	url(r'^reporte_retiros_efectivo/$',reporte_retiros_efectivo,name="reporte_retiros_efectivo"),
+	url(r'^reporte_ingresos_efectivo/$',reporte_ingresos_efectivo,name="reporte_ingresos_efectivo"),
+
+
 
 	url(r'^imprime_comprobante_retiro/(?P<id>\w+)/$',imprime_comprobante_retiro,name="imprime_comprobante_retiro"),
+	url(r'^imprime_comprobante_ingreso/(?P<id>\w+)/$',imprime_comprobante_ingreso,name="imprime_comprobante_ingreso"),
+
+
 
 	url(r'^consulta_abono$',consulta_abono,name="consulta_abono"),	
 	url(r'^cierra_caja/$',api_cierra_caja,name="cierra_caja"),

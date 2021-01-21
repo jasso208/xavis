@@ -21,7 +21,7 @@ from django.http import HttpResponse
 from django.utils import timezone
 from io import BytesIO
 from reportlab.pdfgen import canvas
-
+ 
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.lib.pagesizes import A4
 import math
@@ -1287,6 +1287,52 @@ def reporte_retiros_efectivo(request):
 	form = Reporte_Retiros_Form()
 
 	return render(request,'empenos/reporte_retiros_efectivo.html',locals())
+
+#*******************************************************************************************************************************************************
+#*¨**************************************************************************************************************************************************************
+def reporte_ingresos_efectivo(request):
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2 = User_2.fn_is_logueado(request.user)
+	if user_2 == None:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+		
+	#if not user_2.fn_tiene_acceso_a_vista(22):
+	#	return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
+
+	caja = user_2.fn_tiene_caja_abierta()
+
+	if caja != None:
+		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
+		suc=caja.sucursal
+		c=caja.caja
+	else:
+		caja_abierta="0"
+		caja=Cajas
+
+	leyenda = ""
+	if request.method == "POST":
+
+		id_sucursal = request.POST.get("sucursal")
+
+		hoy = date.today()
+
+		fecha_inicial = datetime.strptime(request.POST.get("fecha_inicial"),'%Y-%m-%d').date()
+		fecha_final = datetime.strptime(request.POST.get("fecha_final"),'%Y-%m-%d').date()
+
+		fecha_inicial = datetime.combine(fecha_inicial,time.min)
+		fecha_final = datetime.combine(fecha_final,time.max)
+		sucursal = Sucursal.objects.get(id = id_sucursal).sucursal
+
+		leyenda = " de la sucursal " + sucursal + " del " + request.POST.get("fecha_inicial") + " al " +request.POST.get("fecha_final")
+
+		ingresos = Otros_Ingresos.objects.filter(sucursal__id = int(id_sucursal), fecha__range = (fecha_inicial,fecha_final)).order_by("folio")
+
+		if request.POST.get("export_pdf") == "1":
+			return rep_ingresos_efectivo(ingresos,request.POST.get("fecha_inicial"),request.POST.get("fecha_final"),request,sucursal)
+
+	form = Reporte_Retiros_Form()
+
+	return render(request,'empenos/reporte_ingreso_efectivo.html',locals())
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
 
@@ -1552,39 +1598,24 @@ def admin_kilataje(request):
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
 def otros_ingresos(request):
-	#si no esta logueado mandamos al login
-	if not request.user.is_authenticated:
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2 = User_2.fn_is_logueado(request.user)
+	if user_2 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
-	
-	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
-		user_2=User_2.objects.get(user=request.user)
-	except Exception as e:		
-		print(e)
-		form=Login_Form(request.POST)
-		estatus=0
-		msj="La cuenta del usuario esta incompleta."			
-		return render(request,'login.html',locals())
 
+	#validamos si el usuario tiene caja abierta
+	caja = user_2.fn_tiene_caja_abierta()
 
-
-	pub_date = date.today()
-	min_pub_date_time = datetime.combine(pub_date, time.min) 
-	max_pub_date_time = datetime.combine(pub_date, time.max)  
-
-	try:
-		#validamos si el usuario tiene caja abierta en el dia actual.
-		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
-		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
-		suc=caja.sucursal
+	c = ""
+	caja_abierta="0"
+	if caja != None:
 		c=caja.caja
+		caja_abierta="1"
+		suc = caja.sucursal
 
-	except Exception as e:
-		print(e)
-		caja_abierta="0"
-		caja=Cajas
 
 	exito="0"
+	id_ingreso = "0"
 	if request.method=="POST":
 		form=Otros_Ingresos_Form(request.POST)
 
@@ -1600,6 +1631,9 @@ def otros_ingresos(request):
 			f.usuario=request.user
 			f.caja=c
 			f.save()
+
+			id_ingreso = f.id
+
 			#return HttpResponseRedirect(reverse('seguridad:admin_cajas'))
 			exito="1"
 			form=Otros_Ingresos_Form()
@@ -2113,11 +2147,11 @@ def rep_flujo_caja(request):
 			rce=Reg_Costos_Extra.objects.filter(fecha__range=(fecha_inicial,fecha_final))
 
 			for x in rce:
-				if x.caja.sucursal==sucursal:
-					cont_otros=cont_otros+1
-					importe_otros=importe_otros+x.importe
+				if x.caja.sucursal == sucursal:
+					cont_otros = cont_otros+1
+					importe_otros = importe_otros+x.importe
 
-			oi=Otros_Ingresos.objects.filter(sucursal=sucursal,fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("importe"))
+			oi = Otros_Ingresos.objects.filter(sucursal=sucursal,fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("importe"))
 
 			cont_otros=cont_otros+Otros_Ingresos.objects.filter(sucursal=sucursal,fecha__range=(fecha_inicial,fecha_final)).count()
 
@@ -2573,23 +2607,12 @@ def rep_flujo_caja(request):
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
 def retiro_efectivo(request):
-	#si no esta logueado mandamos al login
-	if not request.user.is_authenticated:
-		return HttpResponseRedirect(reverse('seguridad:login'))
-
 	id_retiro = "0"
 
-	#si el usuario y contraseña son correctas pero el usuario esta incompleto, bloquea el acceso.
-	try:
-		user_2=User_2.objects.get(user=request.user)
-	except Exception as e:		
-		print(e)
-		form=Login_Form(request.POST)
-		estatus=0
-		msj="La cuenta del usuario esta incompleta."			
-		return render(request,'login.html',locals())
-
-		
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2 = User_2.fn_is_logueado(request.user)
+	if user_2 == None:
+		return HttpResponseRedirect(reverse('seguridad:login'))
 
 	pub_date = date.today()
 	min_pub_date_time = datetime.combine(pub_date, time.min) 
@@ -4138,7 +4161,7 @@ def refrendo(request,id_boleta):
 
 	semanas_vencidas = max_semanas_refrendar - 1
 	if semanas_vencidas < 0:
-		semanas_vencidas = 0
+		semanas_vencidas = 0 
 	#obtenemos el importe de una comision pg
 	est_comisionpg=Tipo_Pago.objects.get(id=2)	
 	

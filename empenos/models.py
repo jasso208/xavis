@@ -718,6 +718,7 @@ class Otros_Ingresos(models.Model):
 	importe=models.IntegerField(default=0, validators=[MinValueValidator(Decimal('1'))])
 	comentario=models.CharField(max_length=200,default='')
 	caja=models.CharField(max_length=1,null=True)
+	activo = models.CharField(choices = SI_NO,default = 1, max_length=2)
 
 class Retiro_Efectivo(models.Model):
 	folio=models.CharField(max_length = 7,null = True)
@@ -984,9 +985,9 @@ class Boleta_Empeno(models.Model):
 		
 		#si no tiene pagos vencidos.
 		if num_pagos_vencidos == 0:
-			#buscamos el proximo pago
-			id_proximo_pago = Pagos.objects.filter(boleta = self, vencido = "N").aggregate(Min("id"))["id__min"]
-
+			#buscamos el proximo pago que no este vencido ni pagado y que sea refrendo o refrendo pg
+			id_proximo_pago = Pagos.objects.filter(boleta = self, vencido = "N",pagado = "N").exclude(tipo_pago__id = 2).aggregate(Min("id"))["id__min"]
+			
 			prox_pago = Pagos.objects.get(id = id_proximo_pago)
 
 			#validamos si el dia actual esta dentro del rango de este pago.
