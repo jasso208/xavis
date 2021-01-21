@@ -1265,6 +1265,7 @@ def reporte_retiros_efectivo(request):
 	else:
 		caja_abierta="0"
 		caja=Cajas
+	leyenda = ""
 	if request.method == "POST":
 
 		id_sucursal = request.POST.get("sucursal")
@@ -1276,10 +1277,11 @@ def reporte_retiros_efectivo(request):
 
 		fecha_inicial = datetime.combine(fecha_inicial,time.min)
 		fecha_final = datetime.combine(fecha_final,time.max)
-
+		sucursal = Sucursal.objects.get(id = id_sucursal).sucursal
+		leyenda = " de la sucursal " + sucursal + " del " + request.POST.get("fecha_inicial") + " al " +request.POST.get("fecha_final")
 		retiros = Retiro_Efectivo.objects.filter(sucursal__id = int(id_sucursal), fecha__range = (fecha_inicial,fecha_final)).order_by("folio")
 		if request.POST.get("export_pdf") == "1":
-			sucursal = Sucursal.objects.get(id = id_sucursal).sucursal
+			
 			return reporte_retiro_efectivo(retiros,request.POST.get("fecha_inicial"),request.POST.get("fecha_final"),request,sucursal)
 
 	form = Reporte_Retiros_Form()
