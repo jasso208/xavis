@@ -45,6 +45,7 @@ urlpatterns=[
 	url(r'^administracion_porcentaje_mutuo/$',administracion_porcentaje_mutuo,name="administracion_porcentaje_mutuo"),
 	url(r'^cancela_abono/$',cancela_abono,name="cancela_abono"),
 	url(r'^rep_comparativo_estatus_cartera/$',rep_comparativo_estatus_cartera,name="rep_comparativo_estatus_cartera"),
+	url(r'^reporte_retiros_efectivo/$',reporte_retiros_efectivo,name="reporte_retiros_efectivo"),
 
 	url(r'^imprime_comprobante_retiro/(?P<id>\w+)/$',imprime_comprobante_retiro,name="imprime_comprobante_retiro"),
 

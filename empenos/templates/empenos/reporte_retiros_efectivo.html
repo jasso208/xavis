@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load bootstrap3 %}
+{% load static%}
+{% block archivos_staticos%}
+<script type="text/javascript" src="{% static 'js/reporte_retiro_efectivo.js' %}"></script>
+{% endblock %}
+{% block usuario %}
+
+			<div class="col-xs-6">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{user_2.user.username}} {{user_2.perfil.perfil}}</label> 
+				
+			</div>
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-home"></span> Sucursal: {{user_2.sucursal}}</label> 	
+			</div>
+
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-inbox"></span> Caja: {{c}} </label> 	
+			</div>
+
+
+{% endblock  %}
+
+{% block content %}
+	<div class="col-xs-12 cls_encabezado_body">
+		<a>
+			Reporte de retiros de efectivo
+		</a>	
+	</div>
+
+	<div class="col-xs-12">
+		<form method="post" action="#" class="cls_form_1" id="form_principal">
+			{%csrf_token%}  
+			<div class="row cls_form_consulta">
+
+				<div class="col-xs-12">
+					<div class="panel panel-default" id="panel_principal" >						 
+						<div class="panel-body">
+
+							<div class="col-xs-12">
+								<div class="panel panel-default">						
+									<div class="panel-body">
+
+										<div class="col-xs-2"  >
+											<label for="">Sucursal</label>
+											{% bootstrap_field form.sucursal show_label=False %}
+										</div>
+
+										<div class="col-xs-3"  >
+											<label for="">Fecha inicial</label>
+											<input type="date" name="fecha_inicial"  class="form-control" placeholder="Fecha inicial" title="" required="" id="id_fecha_inicial">
+										</div>
+
+										<div class="col-xs-3"  >
+											<label for="">Fecha final</label>
+											<input type="date" name="fecha_final"  class="form-control" placeholder="Fecha inicial" title="" required="" id="id_fecha_final">
+										</div>	
+										<div class ="col-xs-2">
+											<label>Exportar a PDF</label>
+											<select name="export_pdf" class="form-control" placeholder="" title="" id="id_export_pdf" value = "0">
+												<option value = "1">SI</option>
+												<option value = "2" selected = "">NO</option>
+											</select>
+										</div>
+										<div class="col-xs-2">
+											<button class="btn btn-primary btn-sm" style = "margin-top: 25px" ><span  class="glyphicon glyphicon-search"></span> Consultar</button>
+
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="col-xs-12">
+								<div class="cls_encabezado_alert " >
+									<label>Reporte retiro de efectivo</label>
+								</div>
+
+									<table id="tabla_conceptos_retiro" class="table table-bordered">
+									    <thead>
+										      <tr>
+											      	<th ></th>
+											        <th >Folio</th>	
+											        <th >Usuario retira</th>								        
+											        <th >Importe</th>	
+											        
+											        <th >Comentario</th>	
+											        <th >Concepto</th>	
+											       	<th>Fecha</th> 
+											        <th>Activo</th>
+										      </tr>
+									    </thead>
+
+									    <tbody>
+									    	{% for r in retiros%}
+									    	<tr>
+									    		<td>
+									    			<a class="btn btn-default btn-sm" onclick='fn_reimprime_comprobante_retiro("{{r.id}}")';>
+									    				<span class="glyphicon glyphicon-print">
+									    					
+									    				</span>
+									    			</a>
+									    		</td>
+									    		<td>{{r.folio}}</td>
+									    		<td>{{r.usuario.username}}</td>
+									    		<td style="text-align: right;">${{ r.importe | floatformat:2 }}</td>
+									    		<td>{{r.comentario}}</td>
+									    		<td>{{r.concepto.concepto}}</td>
+									    		<td>{{r.fecha|date:'Y-m-d'}}</td>
+									    		<td>
+									    			{% ifequal r.activo '1' %}
+									    				SI
+									    			{% endifequal %}
+									    			{% ifequal r.activo '2' %}
+									    				NO
+									    			{% endifequal %}
+									    		</td>
+									    	</tr>
+									    	{% endfor %}
+
+									    </tbody>
+									</table>
+								</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+
+
+{% endblock %}

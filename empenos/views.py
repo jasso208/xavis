@@ -1247,6 +1247,47 @@ def elimina_retiro (request):
 	return render(request,'empenos/elimina_retiro.html',locals())
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
+def reporte_retiros_efectivo(request):
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2 = User_2.fn_is_logueado(request.user)
+	if user_2 == None:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+		
+	if not user_2.fn_tiene_acceso_a_vista(22):
+		return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
+
+	caja = user_2.fn_tiene_caja_abierta()
+
+	if caja != None:
+		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
+		suc=caja.sucursal
+		c=caja.caja
+	else:
+		caja_abierta="0"
+		caja=Cajas
+	if request.method == "POST":
+
+		id_sucursal = request.POST.get("sucursal")
+
+		hoy = date.today()
+
+		fecha_inicial = datetime.strptime(request.POST.get("fecha_inicial"),'%Y-%m-%d').date()
+		fecha_final = datetime.strptime(request.POST.get("fecha_final"),'%Y-%m-%d').date()
+
+		fecha_inicial = datetime.combine(fecha_inicial,time.min)
+		fecha_final = datetime.combine(fecha_final,time.max)
+
+		retiros = Retiro_Efectivo.objects.filter(sucursal__id = int(id_sucursal), fecha__range = (fecha_inicial,fecha_final)).order_by("folio")
+		if request.POST.get("export_pdf") == "1":
+			sucursal = Sucursal.objects.get(id = id_sucursal).sucursal
+			return reporte_retiro_efectivo(retiros,request.POST.get("fecha_inicial"),request.POST.get("fecha_final"),request,sucursal)
+
+	form = Reporte_Retiros_Form()
+
+	return render(request,'empenos/reporte_retiros_efectivo.html',locals())
+#*******************************************************************************************************************************************************
+#*¨**************************************************************************************************************************************************************
+
 def consulta_apartado(request):
 	#si no esta logueado mandamos al login
 	if not request.user.is_authenticated:
@@ -1600,7 +1641,7 @@ def rep_comparativo_estatus_cartera(request):
 		#si contiene 1 es que se exporta
 		export_pdf = request.POST.get("export_pdf")
 
-		print(export_pdf)
+		
 		id_sucursal = request.POST.get("sucursal")
 
 		fecha_inicial= datetime.strptime(request.POST.get("fecha_inicial"), "%Y-%m-%d").date()

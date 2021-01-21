@@ -14,7 +14,7 @@
 			<div class="col-xs-3">
 				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-inbox"></span> Caja: {{c}} </label> 	
 			</div>
-
+ 
 
 {% endblock  %}
 {% block content %}
@@ -110,9 +110,9 @@
 	<div class="fondo_mensaje cls_confirma_cancelacion" id="fondo_confirma_cancelacion">
 		
 	</div>
+ 
 
-
-	<div class="cls_form_busca_cliente cls_confirma_cancelacion" style="width: 40%;left: 30%; overflow-x: hidden;">		
+	<div class="cls_form_emergente_2 cls_confirma_cancelacion" style="width: 40%;left: 30%; overflow: visible;">		
 		<div class="cls_encabezado_alert" >
 			<label>
 			Motivo de cancelación
@@ -120,26 +120,27 @@
 
 		</div>
 
-		<div class="row">
-		<br>
-		<div class="col-xs-12">
-			<label>Motivo</label>
-			<input type="text" name="" id="txt_motivo_cancelacion" maxlength="40" class="form-control">
-		</div>
-		
-		<div clasS="col-xs-6">
+
+			<div class="col-xs-12">
+					<br>
+				<label>Motivo</label>
+				<input type="text" name="" id="txt_motivo_cancelacion" maxlength="40" class="form-control">
+			</div>
 			
-		</div>
-		<div class="col-xs-12 text-right">
-			<a class="btn btn-primary btn-sm" id="btn_confirma_cancelacion"> 
-				<span class="glyphicon glyphicon-ok">
-					
-				</span>
-			Confirmar</a>
-		</div>
+			<div clasS="col-xs-6">
+				
+			</div>
+			<div class="col-xs-12 text-center">
+					<br>
+				<a class="btn btn-primary btn-sm" id="btn_confirma_cancelacion"> 
+					<span class="glyphicon glyphicon-ok">
+						
+					</span>
+				Confirmar</a>
+				<br><br>
+			</div>
 
 
-		</div>
 	</div>	
 
 		<div class="fondo_mensaje cls_error_cancela_retiro" id="fondo_error_actualiza" >			

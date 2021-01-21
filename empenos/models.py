@@ -74,7 +74,7 @@ class Sucursal(models.Model):
 	saldo=models.IntegerField(default=0)
 
 	def __str__(self):
-		return str(self.id)+' '+self.sucursal
+		return self.sucursal
 
 	def fn_actualiza_porcentaje_mutuo(self,porcentaje_oro,porcentaje_plata,porcentaje_articulos_varios):
 
