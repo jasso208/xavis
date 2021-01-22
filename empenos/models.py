@@ -1140,7 +1140,7 @@ class Boleta_Empeno(models.Model):
 		if self.fn_get_dias_vencida() != comision_pg.count():
 			
 			resp.append(False)
-			resp.append("La boleta presenta inconcistencias entre los dias vencidos y importe de comisiones pg.")
+			resp.append("La boleta presenta inconcistencias entre los dias vencidos y el importe de comisiones pg.")
 			return resp
 
 		
@@ -1260,19 +1260,16 @@ class Boleta_Empeno(models.Model):
 
 		#obtenemos los proximos pagos.
 		nuevos_pagos = self.fn_simula_proximos_pagos(numero_semanas_a_pagar)
-		print("nuevos pagos")
-		print(nuevos_pagos)
+
 		#buscamos los pagos a los que afectara.
 		pagos = Pagos.objects.filter(boleta = self,pagado = "N").exclude(tipo_pago__id = 2).order_by("id")[:numero_semanas_a_pagar]
 
-		print("pagos a los que afectara")
-		print(Pagos.objects.filter(boleta = self,pagado = "N").exclude(tipo_pago__id = 2).count())
 
 		try:
 			for p in pagos:
-				print(p.id)
-				print(p.fecha_vencimiento)
+
 				p.pagado = "S"
+				p.tipo_pago = Tipo_Pago.objects.get(id = 1)#cambiamos el pago a refrendo (esto porque de lo contrario fallaria en el job de pagos vencidos.)
 				p.fecha_pago = timezone.now()
 				p.save()
 
@@ -1292,6 +1289,7 @@ class Boleta_Empeno(models.Model):
 			iva=decimal.Decimal(resp[0]["iva"])/decimal.Decimal(4.00)
 			refrendo=round(decimal.Decimal(resp[0]["refrendo"])/decimal.Decimal(4.00))
 
+			#obtenemos la fecha de vencimiento real de la boleta
 			fecha_vencimiento_real = self.fecha_vencimiento_real
 
 			print("creamo los nuevos pagos")
@@ -1299,8 +1297,7 @@ class Boleta_Empeno(models.Model):
 			for np in nuevos_pagos:
 				
 				pago = Pagos.objects.filter(boleta = self,pagado = "N",fecha_vencimiento = datetime.strptime(np,'%Y-%m-%d')).exclude(tipo_pago__id = 2)
-				print("validamos existencia de pago")
-				print(pago)
+				
 				fecha_vencimiento_real = fecha_vencimiento_real + timedelta(days = 7)
 				if not pago.exists():
 					pgo=Pagos()					
