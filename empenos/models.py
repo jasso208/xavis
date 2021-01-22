@@ -999,10 +999,6 @@ class Boleta_Empeno(models.Model):
 			#validamos si el dia actual esta dentro del rango de este pago.
 			today = datetime.combine(date.today(),time.min)
 
-			print("proximo pago")
-			print(prox_pago.id)
-			print(prox_pago.fecha_vencimiento_real)
-			print((today - prox_pago.fecha_vencimiento_real).days)
 
 			dif_dias = abs((today - prox_pago.fecha_vencimiento_real).days)
 
@@ -1121,19 +1117,33 @@ class Boleta_Empeno(models.Model):
 	#si regresa false es que algo fallo, y no debemos continuar con la aplicacion del refrendo.
 	@transaction.atomic
 	def fn_paga_comision_pg(self,descuento,abono):
+		resp = []
+		hoy = date.today()
+		hoy = datetime.combine(hoy,time.min)
 
 		#si el estatus es diferente de almoneda o remate y se va a aplicar un decuento es que algo salio mal.
 		#ya que no es posible aplicar descuento a una boleta que no esta en almoneda o en remate.
 		if self.estatus.id != 3 and self.estatus.id != 5:
-			if int(descuento) > 0:
-				return False
+			if int(descuento) > 0:				
+				resp.append(False)
+				resp.append("No es posible aplicar descuento a la boleta.")
+				return resp
 			else:
-				return True
+				resp.append(True)
+				return resp
 
 		#SI ESTAMOS EN ESTE PUNTO ES QUE LA BOLETA SI ESTA EN ALMONEDA O REMATE.
 		#obtenemos todos las comisiones de Pg que no han sido pagadoas.
 		comision_pg = Pagos.objects.filter(boleta = self,tipo_pago__id = 2,pagado = "N")
 
+		#en caso de quela boleta tenga inconsistencias entre el numero de dias vencidos y el nuero de comisiones pg no pagadas.
+		if self.fn_get_dias_vencida() != comision_pg.count():
+			
+			resp.append(False)
+			resp.append("La boleta presenta inconcistencias entre los dias vencidos y importe de comisiones pg.")
+			return resp
+
+		
 		pagos_no_pagados = Pagos.objects.filter(boleta = self,pagado = "N")
 
 		importe_comision_pg = comision_pg.aggregate(Sum("importe"))["importe__sum"]
@@ -1143,14 +1153,20 @@ class Boleta_Empeno(models.Model):
 			importe_comision_pg = 0		
 
 		if float(descuento) > 0:
+			#para aplicar descuento debe tener mas de 0 y 3 o menos dias vencidos			
+			if comision_pg.count() > 3:				
+				resp.append(False)
+				resp.append("No es posible aplicar descuento a la boleta. Tiene mas de tres dias vencida.")
+				print(resp)
+				return resp
+
 			#validamos que el descuento cubra todas las comisiones de periodo de gracia.
 			if float(descuento) < float(importe_comision_pg):				
-				return False
+				resp.append(False)
+				resp.append("El importe a descontar no cubre las comisiones de periodo de gracia.")
+				return resp
 
-			#validamos que tenga 3 o menos comision de periodo de gracia sin pagar.
-			#ya que de tener mas, es incorrecto que aplique descuento.
-			if comision_pg.count() > 3:				
-				return False
+
 
 		if comision_pg.exists():			
 
@@ -1167,8 +1183,9 @@ class Boleta_Empeno(models.Model):
 						rel.abono=abono
 						rel.pago=cpg
 						rel.save()
-				except Exception as e:					
-					return False
+				except Exception as e:	
+					resp.append(False)				
+					return resp
 
 			else:				
 				#al aplicar descuento, no se cobran las comisiones pg,
@@ -1193,17 +1210,20 @@ class Boleta_Empeno(models.Model):
 						resp_com_pg.save()
 					comision_pg.delete()															
 				except Exception as e:							
-					return False
+					resp.append(False)				
+					return resp
+
+		resp.append(True)				
+		return resp
+	
 		
-		return True
 
 	#el importe a pagos que aqui se recibe es el importe despues de haber descontado 
 	#el importe a comision de PG (en caso de que los tenga.)
 	@transaction.atomic
 	def fn_salda_pagos(self,numero_semanas_a_pagar,importe_a_pagos,abono):
 
-		print("numero de pagos")
-		print(numero_semanas_a_pagar)
+
 		#el importe a pagos debe ser mayor o igual a el importe que corresponde al numero de semanas a pagar
 
 		comision_pg = Pagos.objects.filter(boleta = self, pagado = "N",tipo_pago__id = 2)

@@ -95,8 +95,9 @@ def api_aplica_refrendo_semanal(request):
 
 	#si la funcion regreso false es porque fallo
 	if float(comision_pg) > 0:
-		if not boleta.fn_paga_comision_pg(descuento_comision_pg,abono):
-			respuesta.append({"estatus":"0","msj":"Error al saldar las comisiones de periodo de gracia."})
+		rcpg = boleta.fn_paga_comision_pg(descuento_comision_pg,abono)
+		if not rcpg[0]:
+			respuesta.append({"estatus":"0","msj":rcpg[1]})
 			transaction.set_rollback(True)
 			return Response(json.dumps(respuesta))
 	
