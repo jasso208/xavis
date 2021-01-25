@@ -1267,7 +1267,6 @@ class Boleta_Empeno(models.Model):
 
 		try:
 			for p in pagos:
-
 				p.pagado = "S"
 				p.tipo_pago = Tipo_Pago.objects.get(id = 1)#cambiamos el pago a refrendo (esto porque de lo contrario fallaria en el job de pagos vencidos.)
 				p.fecha_pago = timezone.now()
@@ -1292,14 +1291,14 @@ class Boleta_Empeno(models.Model):
 			#obtenemos la fecha de vencimiento real de la boleta
 			fecha_vencimiento_real = self.fecha_vencimiento_real
 
-			print("creamo los nuevos pagos")
 			#creamos los nuevos pagos.
-			for np in nuevos_pagos:
-				
+			for np in nuevos_pagos:	
 				pago = Pagos.objects.filter(boleta = self,pagado = "N",fecha_vencimiento = datetime.strptime(np,'%Y-%m-%d')).exclude(tipo_pago__id = 2)
 				
-				fecha_vencimiento_real = fecha_vencimiento_real + timedelta(days = 7)
+				
 				if not pago.exists():
+					#la fecha de vencimiento real se incrementa de a 7 dias.
+					fecha_vencimiento_real = fecha_vencimiento_real + timedelta(days = 7)
 					pgo=Pagos()					
 					pgo.tipo_pago=tp_refrendo
 					pgo.boleta=self
@@ -1310,7 +1309,8 @@ class Boleta_Empeno(models.Model):
 					pgo.importe=refrendo
 					pgo.vencido="N"
 					pgo.pagado="N"
-					pgo.fecha_vencimiento_real = datetime.strptime(np,'%Y-%m-%d')
+					pgo.fecha_vencimiento_real = fecha_vencimiento_real#datetime.strptime(np,'%Y-%m-%d')
+
 					#en caso de cancelar el refrendo, necesitamos saber que semanas genero el refrendo.
 					#para poder eliminarlas.
 					pgo.abono = abono

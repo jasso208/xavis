@@ -221,7 +221,7 @@ class Refrendo_Semanal_Test(TestCase):
 
 		rcpg = boleta.fn_paga_comision_pg(24,abono2)		
 		self.assertEqual(False,rcpg[0])
-		self.assertEqual("La boleta presenta inconcistencias entre los dias vencidos y importe de comisiones pg.",rcpg[1])
+		self.assertEqual("La boleta presenta inconcistencias entre los dias vencidos y el importe de comisiones pg.",rcpg[1])
 	#3: La boleta tiene mas d ters dias vencida, no se le puede aplicar descuento
 	def test_validamos_dias_vencida_para_descuento(self):
 		hoy = date.today()
