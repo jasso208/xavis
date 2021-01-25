@@ -1994,6 +1994,9 @@ def rep_flujo_caja(request):
 	importe_avaluo_piso=0.00
 	importe_mutuo_piso=0.00
 
+	importe_reimpresion_boleta = 0.00
+	cont_reimpresion_boleta = 0
+
 	cont_venta_piso=0
 
 	importe_venta_granel=0.00
@@ -2146,10 +2149,11 @@ def rep_flujo_caja(request):
 			#obtenemos los costos extras
 			rce=Reg_Costos_Extra.objects.filter(fecha__range=(fecha_inicial,fecha_final))
 
+
 			for x in rce:
 				if x.caja.sucursal == sucursal:
-					cont_otros = cont_otros+1
-					importe_otros = importe_otros+x.importe
+					cont_reimpresion_boleta = cont_reimpresion_boleta+1
+					importe_reimpresion_boleta = importe_reimpresion_boleta+x.importe
 
 			oi = Otros_Ingresos.objects.filter(sucursal=sucursal,fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("importe"))
 
@@ -2386,8 +2390,8 @@ def rep_flujo_caja(request):
 			rce=Reg_Costos_Extra.objects.filter(fecha__range=(fecha_inicial,fecha_final))
 
 			for x in rce:
-				cont_otros=cont_otros+1
-				importe_otros=importe_otros+x.importe
+				cont_reimpresion_boleta = cont_reimpresion_boleta+1
+				importe_reimpresion_boleta = importe_reimpresion_boleta+x.importe
 
 			oi=Otros_Ingresos.objects.filter(fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("importe"))
 
