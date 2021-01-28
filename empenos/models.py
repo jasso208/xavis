@@ -1283,6 +1283,11 @@ class Boleta_Empeno(models.Model):
 		pagos = Pagos.objects.filter(boleta = self,pagado = "N").exclude(tipo_pago__id = 2).order_by("id")[:numero_semanas_a_pagar]
 
 
+
+		#se obtiene la ultima fecha de vencimiento real de refrendo o refrendo pg
+		#ya que desde ahi se empieza a contar la fecha de vencimiento real de  los nuevos pagos			
+		fecha_vencimiento_real = Pagos.objects.filter(boleta = self,pagado = "N").exclude(tipo_pago__id = 2).aggregate(Max("fecha_vencimiento_real"))["fecha_vencimiento_real__max"]
+
 		try:
 			for p in pagos:
 				p.pagado = "S"
@@ -1306,8 +1311,7 @@ class Boleta_Empeno(models.Model):
 			iva=decimal.Decimal(resp[0]["iva"])/decimal.Decimal(4.00)
 			refrendo=round(decimal.Decimal(resp[0]["refrendo"])/decimal.Decimal(4.00))
 
-			#obtenemos la fecha de vencimiento real de la boleta
-			fecha_vencimiento_real = self.fecha_vencimiento_real
+
 
 			#creamos los nuevos pagos.
 			for np in nuevos_pagos:	
