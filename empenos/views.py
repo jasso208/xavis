@@ -2014,6 +2014,12 @@ def rep_flujo_caja(request):
 	im_retiros_aux = 0.00
 
 
+	cont_t_entradas = 0
+	importe_t_entradas = 0.00
+
+	cont_t_salidas = 0
+	importe_t_salidas = 0.00
+
 	if request.method=="POST":
 
 		post="1"
@@ -2522,15 +2528,28 @@ def rep_flujo_caja(request):
 
 	form=Flujo_Caja_Form()
 
+
+	
+
 	
 	
+
+	cont_t_entradas = 1 + cont_otros + cont_com_pg + cont_refrendos + cont_capital + cont_desempenos + cont_ventas + cont_ab_apartado + cont_reimpresion_boleta
+	importe_t_entradas  = float(saldo_inicial) + float(importe_desempenos) + float(importe_capital) + float(importe_refrendo) + float(importe_com_pg) + float(importe_otros) + float(importe_reimpresion_boleta) + float(importe_ventas) + float(importe_ab_apartado) 
+
+
+
+	cont_t_salidas = cont_retiros + cont_empenos
+	importe_t_salidas = float(importe_empenos) + float(importe_retiros)
+	
+
 	importe_refrendo=round(importe_refrendo)
 
-	importe_total = decimal.Decimal(importe_ab_apartado) + decimal.Decimal(saldo_inicial) - decimal.Decimal(importe_empenos) + decimal.Decimal(importe_desempenos)+decimal.Decimal(importe_capital)+decimal.Decimal(importe_refrendo)+decimal.Decimal(importe_com_pg)+decimal.Decimal(importe_otros)-decimal.Decimal(importe_retiros)+decimal.Decimal(importe_ventas)
+	importe_total = decimal.Decimal(importe_ab_apartado) + decimal.Decimal(saldo_inicial) - decimal.Decimal(importe_empenos) + decimal.Decimal(importe_desempenos)+decimal.Decimal(importe_capital)+decimal.Decimal(importe_refrendo)+decimal.Decimal(importe_com_pg)+decimal.Decimal(importe_otros)-decimal.Decimal(importe_retiros)+decimal.Decimal(importe_ventas) + decimal.Decimal(importe_reimpresion_boleta)
 
 	importe_total=math.ceil(importe_total)
 
-	cont_total=1+cont_otros+cont_com_pg+cont_refrendos+cont_capital+cont_desempenos+cont_empenos+cont_ventas+cont_ab_apartado+cont_retiros
+	cont_total=1+cont_otros+cont_com_pg+cont_refrendos+cont_capital+cont_desempenos+cont_empenos+cont_ventas+cont_ab_apartado+cont_retiros + cont_reimpresion_boleta
 
 	cont_total_2=cont_almoneda+cont_activas+cont_remate
 
@@ -2583,6 +2602,17 @@ def rep_flujo_caja(request):
 
 	cont_total_vta=cont_venta_granel+cont_venta_piso
 
+
+	cont_t_entradas = "{:0,.2f}".format(cont_t_entradas)
+	importe_t_entradas  = "{:0,.2f}".format(importe_t_entradas)
+
+
+
+	cont_t_salidas = "{:0,.2f}".format(cont_t_salidas)
+	importe_t_salidas = "{:0,.2f}".format(importe_t_salidas)
+	
+
+	importe_ab_apartado = "{:0,.2f}".format(importe_ab_apartado)
 	
 	importe_venta_piso="{:0,.2f}".format(importe_venta_piso)
 	importe_avaluo_piso="{:0,.2f}".format(importe_avaluo_piso)

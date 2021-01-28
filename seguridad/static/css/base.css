@@ -2,20 +2,25 @@
 body
 {
 	width: 1345px;
+	margin: 0 auto;
 }
+
 .panel-body>div
 {
 	
 	margin-top: 10px;
 }
+
 th
 {
 	font-size: 12px;
 }
+
 td
 {
-font-size: 12px;	
+	font-size: 12px;	
 }
+
 .cls_encabezado_alert
 {
 	background-color: #455a64;
@@ -24,6 +29,7 @@ font-size: 12px;
 	color:white;
 	padding-left: 10px;
 }
+
 .fondo_mensaje
 {
 	position:fixed;
@@ -183,9 +189,6 @@ font-size: 12px;
 	background-color: #7bb33a;
 	padding-top:10px;
 	padding-bottom: 10px;
--webkit-box-shadow: 13px -30px 24px 27px rgba(0,0,0,0.34);
--moz-box-shadow: 13px -30px 24px 27px rgba(0,0,0,0.34);
-box-shadow: 13px -30px 24px 27px rgba(0,0,0,0.34);
 }
 #logo_peque img
 {
