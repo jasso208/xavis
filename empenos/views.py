@@ -1296,8 +1296,8 @@ def reporte_ingresos_efectivo(request):
 	if user_2 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
 		
-	#if not user_2.fn_tiene_acceso_a_vista(22):
-	#	return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
+	if not user_2.fn_tiene_acceso_a_vista(23):
+		return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
 
 	caja = user_2.fn_tiene_caja_abierta()
 
@@ -3480,9 +3480,10 @@ def consulta_boleta(request):
 			sucursal=Sucursal.objects.get(id=id_sucursal)
 
 			if cliente!="":
-				cl=Cliente.objects.filter(nombre__contains=cliente) | Cliente.objects.filter(apellido_p__contains=cliente) | Cliente.objects.filter(apellido_m__contains=cliente)
-				
-				boletas=Boleta_Empeno.objects.filter(sucursal=sucursal) & Boleta_Empeno.objects.filter(cliente__in=cl).order_by("-folio")
+
+				cl = Cliente.objects.filter(nombre__contains=cliente) | Cliente.objects.filter(apellido_p__contains=cliente) | Cliente.objects.filter(apellido_m__contains=cliente)
+
+				boletas = Boleta_Empeno.objects.filter(sucursal=sucursal) & Boleta_Empeno.objects.filter(cliente__in=cl).order_by("-folio")
 
 			elif no_boleta!="":		
 				boletas=Boleta_Empeno.objects.filter(folio=int(no_boleta),sucursal=sucursal).order_by("-folio")
