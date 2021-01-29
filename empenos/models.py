@@ -854,8 +854,6 @@ class Plazo(models.Model):
 	def __str__(self):
 		return self.plazo
 
-
-
 class Cliente(models.Model):
 	nombre=models.CharField(max_length=20,null=False)
 	apellido_p=models.CharField(max_length=20,null=False)
@@ -874,11 +872,31 @@ class Cliente(models.Model):
 	telefono_celular=models.CharField(max_length=10,null=False)
 	usuario=models.ForeignKey(User,on_delete=models.PROTECT,blank=True,null=True)
 	fecha=models.DateTimeField(default=timezone.now)
+	nombre_completo = models.CharField (max_length = 100,null = True,blank = True)
 
 	def __str__(self):
 		return self.nombre+' '+self.apellido_p+' '+self.apellido_m
 
+	def fn_actualiza_nombre_completo():
+		clientes = Cliente.objects.filter(nombre_completo = None) or Cliente.objects.filter(nombre_completo = "")
 
+		for c in clientes:
+			apellido_m = ""
+			apellido_p = ""
+			nombre = ""
+
+			if c.nombre != None:
+				nombre = c.nombre
+
+			if c.apellido_m != None:
+				apellido_m = c.apellido_m
+
+			if c.apellido_p != None:
+				apellido_p = c.apellido_p
+
+			c.nombre_completo = nombre + ' ' +apellido_p + ' ' + apellido_m 
+			c.save()
+			
 	def save(self, *args, **kwargs):
 		self.nombre = (self.nombre).upper()
 		self.apellido_p = (self.apellido_p).upper()

@@ -361,6 +361,7 @@ def api_tipo_producto(request):
 def api_consulta_cliente_2(request):
 	respuesta=[]
 	try:
+		
 
 		id=request.GET.get("id")
 		cliente=Cliente.objects.get(id=id)
@@ -1200,9 +1201,15 @@ def api_consulta_cliente(request):
 	palabra=request.GET.get("palabra").upper()
 	respuesta=[]
 	try:
+
 		respuesta.append({"estatus":"1"})
 		lista=[]
-		clientes=Cliente.objects.filter(nombre__contains=palabra) | Cliente.objects.filter(apellido_p__contains=palabra) | Cliente.objects.filter(apellido_m__contains=palabra)
+
+		Cliente.fn_actualiza_nombre_completo()
+
+
+		clientes=Cliente.objects.filter(nombre_completo__contains=palabra) 
+		
 		for c in clientes:
 			lista.append({"id":c.id,"nombre":c.nombre+' '+c.apellido_p+' '+c.apellido_m,"telefono_fijo":c.telefono_fijo,"telefono_celular":c.telefono_celular})
 		respuesta.append({"lista":lista})

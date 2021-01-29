@@ -2603,12 +2603,12 @@ def rep_flujo_caja(request):
 	cont_total_vta=cont_venta_granel+cont_venta_piso
 
 
-	cont_t_entradas = "{:0,.2f}".format(cont_t_entradas)
+	#cont_t_entradas = "{:0,.2f}".format(cont_t_entradas)
 	importe_t_entradas  = "{:0,.2f}".format(importe_t_entradas)
 
 
 
-	cont_t_salidas = "{:0,.2f}".format(cont_t_salidas)
+	#cont_t_salidas = "{:0,.2f}".format(cont_t_salidas)
 	importe_t_salidas = "{:0,.2f}".format(importe_t_salidas)
 	
 
@@ -3510,9 +3510,13 @@ def consulta_boleta(request):
 			sucursal=Sucursal.objects.get(id=id_sucursal)
 
 			if cliente!="":
+				
+				Cliente.fn_actualiza_nombre_completo()
 
-				cl = Cliente.objects.filter(nombre__contains=cliente) | Cliente.objects.filter(apellido_p__contains=cliente) | Cliente.objects.filter(apellido_m__contains=cliente)
 
+
+				#cl = Cliente.objects.filter(nombre__contains=cliente) | Cliente.objects.filter(apellido_p__contains=cliente) | Cliente.objects.filter(apellido_m__contains=cliente)
+				cl = Cliente.objects.filter(nombre_completo__contains = cliente) 
 				boletas = Boleta_Empeno.objects.filter(sucursal=sucursal) & Boleta_Empeno.objects.filter(cliente__in=cl).order_by("-folio")
 
 			elif no_boleta!="":		
