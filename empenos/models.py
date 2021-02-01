@@ -1001,18 +1001,12 @@ class Boleta_Empeno(models.Model):
 		#consultamos el numero de pagos que estan vencidos y sin pagar de la boleta, excluyendo las comision de periodo de gracia (tipo 2)
 		num_pagos_vencidos = Pagos.objects.filter(boleta = self, vencido = 'S',pagado = "N").exclude(tipo_pago__id = 2).count()
 		
-		print("num_pagos_vencidos")
-		print(num_pagos_vencidos)
-
 		#si no tiene pagos vencidos.
 		if num_pagos_vencidos == 0:
 			#buscamos el proximo pago que no este vencido ni pagado y que sea refrendo o refrendo pg
 			id_proximo_pago = Pagos.objects.filter(boleta = self, vencido = "N",pagado = "N").exclude(tipo_pago__id = 2).aggregate(Min("id"))["id__min"]
-			
-
+		
 			prox_pago = Pagos.objects.get(id = id_proximo_pago)
-
-
 
 			#validamos si el dia actual esta dentro del rango de este pago.
 			today = datetime.combine(date.today(),time.min)
@@ -1020,12 +1014,18 @@ class Boleta_Empeno(models.Model):
 
 			dif_dias = abs((today - prox_pago.fecha_vencimiento_real).days)
 
-			#Si la diferencia entre hoy y la fecha de vencimiento real, es mayor a 7, quiere decir que el dia de
+			
+
+			#Si la diferencia entre hoy y la fecha de vencimiento real, es mayor a 6, quiere decir que el dia de
 			#hoy aun es parte de alguna semana de pago.
 			if dif_dias > 6 :
 				
-				max_semanas_a_refrendar = 0
-				min_semanas_a_refrendar = 0
+				if dif_dias == 7:#si es 7, es porque estamos intentando refrendar el dia en que se genero la boleta.
+					max_semanas_a_refrendar = 1
+					min_semanas_a_refrendar = 1
+				else:
+					max_semanas_a_refrendar = 0
+					min_semanas_a_refrendar = 0
 				#if prox_pago.pagado == "N":
 				#	max_semanas_a_refrendar = 1
 				#	min_semanas_a_refrendar = 1
@@ -1092,30 +1092,22 @@ class Boleta_Empeno(models.Model):
 
 		#si la boleta esta vencida
 		if self.estatus.id ==3 or self.estatus.id ==5:					
-
 			pagos_que_continuan = Pagos.objects.filter(boleta = self, pagado = "N").exclude(tipo_pago__id = "2").order_by("id")[semanas_a_refrendar:max_semanas]
-
 			#Solo puede haber 4 pagos maximos sin pagar despues de aplicar el refrendo,			
 			num_nuevos_pagos = 4 - pagos_que_continuan.count()
-
-
 		else:
 			#en toda boleta no venvida, debera haber 4 semanas sin pagar.
 			pagos_que_continuan = Pagos.objects.filter(boleta = self, pagado = "N").exclude(tipo_pago__id = "2").order_by("id")[semanas_a_refrendar:]
-
 			#por cada semana a refrendar vamos a generar un nuevo pago.
 			num_nuevos_pagos = semanas_a_refrendar
-
 		#creamos una lista para almacenar los nuevos pagos
 		nuevos_pagos = []
 		ultima_fecha_vencimiento = None
-
 		#se agregan los pagos que continuan a la lista de nuevos pagos
 		#aunq estos ya estan vencidos, se mostraran en pantalla de simulacion de proximos pagos
 		for p in pagos_que_continuan:				
 			ultima_fecha_vencimiento = p.fecha_vencimiento						
 			nuevos_pagos.append(p.fecha_vencimiento.strftime('%Y-%m-%d'))
-
 		if ultima_fecha_vencimiento == None:
 			id_ultimo_abono = Pagos.objects.filter(boleta = self, pagado = "N").exclude(tipo_pago__id = "2").aggregate(Max("id"))["id__max"]
 			ultima_fecha_vencimiento = Pagos.objects.get(id=id_ultimo_abono).fecha_vencimiento
@@ -1175,7 +1167,7 @@ class Boleta_Empeno(models.Model):
 			if comision_pg.count() > 3:				
 				resp.append(False)
 				resp.append("No es posible aplicar descuento a la boleta. Tiene mas de tres dias vencida.")
-				print(resp)
+				
 				return resp
 
 			#validamos que el descuento cubra todas las comisiones de periodo de gracia.
@@ -1233,30 +1225,59 @@ class Boleta_Empeno(models.Model):
 
 		resp.append(True)				
 		return resp
-	
-		
 
 	#el importe a pagos que aqui se recibe es el importe despues de haber descontado 
 	#el importe a comision de PG (en caso de que los tenga.)
 	@transaction.atomic
 	def fn_salda_pagos(self,numero_semanas_a_pagar,importe_a_pagos,abono):
 
+		resp = []
 
 		#el importe a pagos debe ser mayor o igual a el importe que corresponde al numero de semanas a pagar
-
 		comision_pg = Pagos.objects.filter(boleta = self, pagado = "N",tipo_pago__id = 2)
 		#si existe comision Pg, es que algo salio mal, y no debemos continuar
 		if comision_pg.exists():
-			return False
+			resp.append(False)
+			resp.append("Error al pagar las semanas indicadas. No se liquidaron correctamente las comisiones de periodo de gracia.")
+			return resp
 
+		#validamos que la boleta tenga la fecha de vencimiento y fecha de vencimiento real correctas
+		if (self.fecha_vencimiento-self.fecha_vencimiento_real).days !=0 and (self.fecha_vencimiento-self.fecha_vencimiento_real).days !=1:
+			resp.append(False)
+			resp.append("Error al pagar las semanas indicadas. La fecha de vencimiento de la boleta es diferente a la fecha de vencimiento real.")
+			return resp
+
+
+		#buscamos los pagos que se van a saldar
+		pagos = Pagos.objects.filter(boleta = self,pagado = "N").exclude(tipo_pago__id = 2)
+		#validamos que los pagos tengan la fecha de vencimiento real correcta
+		for p in pagos:
+			if (p.fecha_vencimiento - p.fecha_vencimiento_real).days != 0 and (p.fecha_vencimiento - p.fecha_vencimiento_real).days != 1:
+				resp.append(False)
+				resp.append("Error al pagar las semanas indicadas. La fecha de vencimiento es diferente a la fecha de vencimiento real.")
+				return resp
+
+		#validamos que las semanas a pagar sean correctas
+		sem_max_min = self.fn_get_min_y_max_semanas_a_pagar()
+
+		if sem_max_min['max_semanas_a_refrendar'] == 0:
+			resp.append(False)
+			resp.append("Error al pagar las semanas indicadas. El numero maximo de semanas a pagar es cero.")
+			return resp
+
+		if numero_semanas_a_pagar > sem_max_min['max_semanas_a_refrendar'] or numero_semanas_a_pagar < sem_max_min['min_semanas_a_refrendar']:
+			resp.append(False)
+			resp.append("Error al pagar las semanas indicadas. El numero de semanas a pagar no es correcto.")
+			return resp
 
 		#sin contar los pagos por comision pg
 		importe_semanal = Pagos.objects.filter(boleta = self, pagado = "N").exclude(tipo_pago__id = 2).aggregate(Max("importe"))["importe__max"]
 
 		#si no encuentra el importe semanal es porque algo fallo.
 		if importe_semanal == None:			
-			
-			return False
+			resp.append(False)
+			resp.append("Error al pagar las semanas indicadas.")
+			return resp
 			
 
 		importe_pagos = int(importe_semanal) * numero_semanas_a_pagar
@@ -1265,13 +1286,11 @@ class Boleta_Empeno(models.Model):
 		#cubra al 100% el importe a pagos.
 		#de lo contrario regresa false.
 		if importe_a_pagos < importe_pagos:		
-			
-			return False
-
-
+			resp.append(False)
+			resp.append("Error al pagar las semanas indicadas. El importe destinado a refrendos no cubre el numero de semanas indicadas.")
+			return resp
 
 		#si paso las validaciones anteriores, aplicamos el abono.
-
 
 		fecha_vencimiento_aux = self.fecha_vencimiento 
 		fecha_vencimiento_real_aux = self.fecha_vencimiento_real 
@@ -1279,10 +1298,9 @@ class Boleta_Empeno(models.Model):
 		#obtenemos los proximos pagos.
 		nuevos_pagos = self.fn_simula_proximos_pagos(numero_semanas_a_pagar)
 
+
 		#buscamos los pagos a los que afectara.
 		pagos = Pagos.objects.filter(boleta = self,pagado = "N").exclude(tipo_pago__id = 2).order_by("id")[:numero_semanas_a_pagar]
-
-
 
 		#se obtiene la ultima fecha de vencimiento real de refrendo o refrendo pg
 		#ya que desde ahi se empieza a contar la fecha de vencimiento real de  los nuevos pagos			
@@ -1301,17 +1319,14 @@ class Boleta_Empeno(models.Model):
 				rel.pago=p
 				rel.save()
 
-
 			tp_refrendo = Tipo_Pago.objects.get(id = 1)
 
-			resp = self.fn_calcula_refrendo()
+			resp_cr = self.fn_calcula_refrendo()
 			
-			almacenaje=decimal.Decimal(resp[0]["almacenaje"])/decimal.Decimal(4.00)
-			interes=decimal.Decimal(resp[0]["interes"])/decimal.Decimal(4.00)
-			iva=decimal.Decimal(resp[0]["iva"])/decimal.Decimal(4.00)
-			refrendo=round(decimal.Decimal(resp[0]["refrendo"])/decimal.Decimal(4.00))
-
-
+			almacenaje=decimal.Decimal(resp_cr[0]["almacenaje"])/decimal.Decimal(4.00)
+			interes=decimal.Decimal(resp_cr[0]["interes"])/decimal.Decimal(4.00)
+			iva=decimal.Decimal(resp_cr[0]["iva"])/decimal.Decimal(4.00)
+			refrendo=round(decimal.Decimal(resp_cr[0]["refrendo"])/decimal.Decimal(4.00))
 
 			#creamos los nuevos pagos.
 			for np in nuevos_pagos:	
@@ -1349,11 +1364,31 @@ class Boleta_Empeno(models.Model):
 			
 			self.estatus = estatus_abierta
 			self.save()
+
+			#despues de haber aplicado el abono, validamos que la boleta este correcta.
+			#validamos las fechas de vencimiento y vencimiento real de la boleta
+			if (self.fecha_vencimiento-self.fecha_vencimiento_real).days !=0 and (self.fecha_vencimiento-self.fecha_vencimiento_real).days !=1:
+				resp.append(False)
+				resp.append("Error al pagar las semanas indicadas. No se pudo calcular la fecha de vencimiento de la boleta.")
+				return resp
+
+			pagos = Pagos.objects.filter(boleta = self,pagado = "N")
+
+			for p in pagos:
+				if (p.fecha_vencimiento - p.fecha_vencimiento_real).days != 0 and (p.fecha_vencimiento - p.fecha_vencimiento_real).days != 1:
+					resp.append(False)
+					resp.append("Error al pagar las semanas indicadas. No se pudo calcular la fecha de vencimiento de los proximos pagos.")
+					return resp										
+
+
+			resp.append(True)
+			
+			return resp
 		except Exception as e:
 			print(str(e))
-			return False
-
-		return True
+			resp.append(False)
+			resp.append("Error al pagar las semanas indicadas.")
+			return resp
 
 	@transaction.atomic
 	def fn_abona_capital(self,importe_capital,abono):
@@ -1363,8 +1398,7 @@ class Boleta_Empeno(models.Model):
 			#validamos que la boleta tenga como maximo numero de pagos 0
 			#ya que de lo contrario, no puede abonar a capital.
 			max_semanas_a_refrendar = self.fn_get_min_y_max_semanas_a_pagar()["max_semanas_a_refrendar"]
-			print("max_semanas_a_refrendar")
-			print(max_semanas_a_refrendar)
+			
 			if max_semanas_a_refrendar != 0:
 				return False
 

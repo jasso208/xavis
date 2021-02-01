@@ -333,7 +333,8 @@ function fn_aplica_refrendo()
 							else
 							{
 									url =$("#imprime_abono").attr("href");
-		      						window.open(url, '_blank');	
+
+		      						window.open(url, 'popup', 'width=400px,height=400px');	
 									$(".cls_msj_exito").show();
 							}
 							$("#fondo_preloader").hide();

@@ -102,8 +102,9 @@ def api_aplica_refrendo_semanal(request):
 			return Response(json.dumps(respuesta))
 	
 	if int(numero_semanas_a_pagar) > 0:
-		if not boleta.fn_salda_pagos(int(numero_semanas_a_pagar),importe_a_pagos,abono):
-			respuesta.append({"estatus":"0","msj":"Error al pagar las semanas seleccionadas."})
+		resp_pagos = boleta.fn_salda_pagos(int(numero_semanas_a_pagar),importe_a_pagos,abono)
+		if not resp_pagos[0]:
+			respuesta.append({"estatus":"0","msj":resp_pagos[1]})
 			transaction.set_rollback(True)
 			return Response(json.dumps(respuesta))
 	
