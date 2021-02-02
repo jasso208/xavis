@@ -1630,9 +1630,7 @@ def otros_ingresos(request):
 			f.usuario=request.user
 			f.caja=c
 			f.save()
-
 			id_ingreso = f.id
-
 			#return HttpResponseRedirect(reverse('seguridad:admin_cajas'))
 			exito="1"
 			form=Otros_Ingresos_Form()
