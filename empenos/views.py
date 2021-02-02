@@ -2556,7 +2556,7 @@ def rep_flujo_caja(request):
 	total_utilidad = decimal.Decimal(refrendo_aux) + decimal.Decimal(cpg_aux) + decimal.Decimal(ce_aux) + decimal.Decimal(ganancia_ventas_aux) - decimal.Decimal(im_retiros_aux)
 
 
-	ganancias_t = ganancia_ventas_aux + ce_aux + cpg_aux + refrendo_aux
+	ganancias_t = float(ganancia_ventas_aux) + float(ce_aux) + float(cpg_aux) + float(refrendo_aux)
 
 	ganancias_t = "{:0,.2f}".format(ganancias_t)
 	
