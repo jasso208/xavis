@@ -21,7 +21,6 @@ from django.http import HttpResponse
 from django.utils import timezone
 from io import BytesIO
 from reportlab.pdfgen import canvas
- 
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.lib.pagesizes import A4
 import math
@@ -4176,7 +4175,10 @@ def admin_comisionpg(request):
 
 	#validamos si el usuario tiene caja abierta
 	caja = user_2.fn_tiene_caja_abierta()
-	c=caja.caja	
+	if caja == None:
+		c=""
+	else:
+		c=caja.caja	
 
 	estatus = "1"
 	if request.method == "POST":		
