@@ -47,6 +47,7 @@ urlpatterns=[
 	url(r'^rep_comparativo_estatus_cartera/$',rep_comparativo_estatus_cartera,name="rep_comparativo_estatus_cartera"),
 	url(r'^reporte_retiros_efectivo/$',reporte_retiros_efectivo,name="reporte_retiros_efectivo"),
 	url(r'^reporte_ingresos_efectivo/$',reporte_ingresos_efectivo,name="reporte_ingresos_efectivo"),
+	url(r'^admin_comisionpg/$',admin_comisionpg,name="admin_comisionpg"),
 
 
 

@@ -104,7 +104,6 @@ class Sucursal(models.Model):
 			cpm = Configuracion_Porcentaje_Mutuo()
 			cpm.sucursal = self
 
-
 		cpm.porcentaje_oro = porcentaje_oro
 		cpm.porcentaje_plata = porcentaje_plata
 		cpm.porcentaje_articulos_varios = porcentaje_articulos_varios
@@ -290,6 +289,10 @@ class Sucursal(models.Model):
 			importe_retiros=ret["importe__sum"]
 
 		return importe_retiros			
+
+class Porcentaje_Comision_PG(models.Model):	
+	porcentaje = models.DecimalField(max_digits=20,decimal_places=2,default=0.00)
+	usuario = models.ForeignKey(User,on_delete = models.PROTECT,null=True,blank=True) #el usuario que actualiza por ultimavez
 
 class Concepto_Retiro(models.Model):
 	concepto = models.CharField(max_length = 40,null = False)

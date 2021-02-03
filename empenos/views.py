@@ -4160,8 +4160,52 @@ def nvo_empeno(request):
 		empeno_exitoso="2"
 	return render(request,'empenos/nvo_empeno.html',locals())		
 
+
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
+def admin_comisionpg(request):
+	#si regresa nonem, es porque el usuario no esta logueado.
+	user_2 = User_2.fn_is_logueado(request.user)
+
+	if user_2 == None:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+
+	if not user_2.fn_tiene_acceso_a_vista(24):
+		return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
+
+
+	#validamos si el usuario tiene caja abierta
+	caja = user_2.fn_tiene_caja_abierta()
+	c=caja.caja	
+
+	estatus = "1"
+	if request.method == "POST":		
+		try:
+			pcp = Porcentaje_Comision_PG.objects.get(id = 1)			
+		except:
+			pcp = Porcentaje_Comision_PG()
+		try:	
+			pcp.porcentaje = request.POST.get("porcentaje")
+			pcp.usuario = request.user
+			pcp.save()
+			estatus = "2"
+		except:
+			estatus = "0"
+
+	form = Porcenaje_Comisionpg_Form()
+	try:
+		pcp_inf = Porcentaje_Comision_PG.objects.get(id = 1)
+		valor = pcp_inf.porcentaje
+	except:
+		valor = 0.00
+
+	
+
+	return render(request,'empenos/admin_comisionpg.html',locals())
+
+#*******************************************************************************************************************************************************
+#*¨**************************************************************************************************************************************************************
+
 
 #Se aplican refrendos para cuantro semanas.
 def refrendo(request,id_boleta):
