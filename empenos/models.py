@@ -1023,9 +1023,14 @@ class Boleta_Empeno(models.Model):
 			#hoy aun es parte de alguna semana de pago.
 			if dif_dias > 6 :
 				
-				if dif_dias == 7:#si es 7, es porque estamos intentando refrendar el dia en que se genero la boleta.
-					max_semanas_a_refrendar = 1
-					min_semanas_a_refrendar = 1
+				if dif_dias == 7:#si es 7
+					#si es el dia en que se genero la boleta se cobra
+					if self.fecha == today :
+						max_semanas_a_refrendar = 1
+						min_semanas_a_refrendar = 1
+					else:
+						max_semanas_a_refrendar = 1
+						min_semanas_a_refrendar = 1
 				else:
 					max_semanas_a_refrendar = 0
 					min_semanas_a_refrendar = 0
