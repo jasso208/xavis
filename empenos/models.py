@@ -1078,7 +1078,7 @@ class Boleta_Empeno(models.Model):
 		#si es estatus almoneda o remate, regresamos el tiempo que lleva vencida la boleta.
 		if self.estatus.id == 3 or self.estatus.id == 5:
 			today = datetime.combine(date.today(),time.max)
-			dias_vencido = (today-self.fecha_vencimiento_real).days
+			dias_vencido = (today-self.fecha_vencimiento).days
 
 			#no deberia pasar que sea negativo, pero por si acaso
 			if dias_vencido < 0:
