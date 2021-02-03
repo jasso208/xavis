@@ -39,8 +39,8 @@ def fn_job_libera_apartado():
 #para evitar que cuando se pase a produccion, se pase codigo de prueba
 @transaction.atomic
 def fn_job_diario_prueba():
-	hoy=datetime(2021,1,27,0,0)	
-	fecha_fin=datetime(2021,1,27,0,0)
+	hoy=datetime(2021,2,3,0,0)	
+	fecha_fin=datetime(2021,2,5,0,0)
 
 	while hoy<=fecha_fin:
 		print("fecha ejecucion")
@@ -422,7 +422,17 @@ def fn_comision_pg(hoy):
 
 
 		if dias_vencido>=0:
-			compg=b.mutuo*0.0073
+			try:
+				pcpg = Porcentaje_Comision_PG.objects.get(id = 1)
+			except:
+				#en casl de que no hayan captuado el porcentaje para comision de pg, lo creamos en ceros.
+				pcpg = Porcentaje_Comision_PG()
+				pcpg.porcentaje = 0
+				pcpg.usuario = None
+				pcpg.save()
+
+			compg=float(b.mutuo) * (float(pcpg.porcentaje) / float(100.00))
+
 			p=Pagos()
 			p.tipo_pago=comision_pg
 			p.boleta=b

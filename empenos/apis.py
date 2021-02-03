@@ -855,7 +855,6 @@ def api_elimina_costo_kilataje(request):
 	return Response(respuesta)
 
 
-
 @api_view(['GET'])
 def api_elimina_costo_extra(request):
 	respuesta=[]
@@ -1221,7 +1220,7 @@ def api_consulta_cliente(request):
 
 @api_view(['GET'])
 def api_consulta_boleta(request):
-	print("entro")
+	
 	respuesta=[]
 	id_boleta=request.GET.get("id_boleta")
 	try:
@@ -1239,10 +1238,12 @@ def api_consulta_boleta(request):
 		lista=[]
 
 		for x in pagos:
+
 			if x.fecha_pago==None:
 				fecha_pago=" "
 			else:
 				fecha_pago=x.fecha_pago.strftime('%d/%m/%Y')	
+
 			lista_periodos=[]
 			periodos=Periodo.objects.filter(pago=x).order_by("-fecha_vencimiento")	
 			for y in periodos:
@@ -1252,9 +1253,12 @@ def api_consulta_boleta(request):
 				else:
 					fecha_pago_p=y.fecha_pago.strftime('%d/%m/%Y')	
 				lista_periodos.append({"tipo_pago":str(y.consecutivo)+" Refrendo Parcial","fecha_vencimiento":y.fecha_vencimiento.strftime('%d/%m/%Y'),"importe":y.importe,"fecha_pago":fecha_pago_p,"vencido":y.vencido,"pagado":y.pagado})
-
-
-			lista.append({"tipo_pago":x.tipo_pago.tipo_pago,"fecha_vencimiento":x.fecha_vencimiento.strftime('%d/%m/%Y'),"importe":x.importe,"fecha_pago":fecha_pago,"vencido":x.vencido,"pagado":x.pagado,"lista_periodos":lista_periodos})
+			#si es comision de pg de importe 0, no se muestra
+			if x.tipo_pago.id == 2 and int(x.importe) == 0:
+				pass
+			else:
+				lista.append({"tipo_pago":x.tipo_pago.tipo_pago,"fecha_vencimiento":x.fecha_vencimiento.strftime('%d/%m/%Y'),"importe":x.importe,"fecha_pago":fecha_pago,"vencido":x.vencido,"pagado":x.pagado,"lista_periodos":lista_periodos})
+			#lista.append({"tipo_pago":x.tipo_pago.tipo_pago,"fecha_vencimiento":x.fecha_vencimiento.strftime('%d/%m/%Y'),"importe":x.importe,"fecha_pago":fecha_pago,"vencido":x.vencido,"pagado":x.pagado,"lista_periodos":lista_periodos})
 
 		respuesta.append({"lista":lista})
 		
