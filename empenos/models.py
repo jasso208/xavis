@@ -1029,8 +1029,8 @@ class Boleta_Empeno(models.Model):
 						max_semanas_a_refrendar = 1
 						min_semanas_a_refrendar = 1
 					else:
-						max_semanas_a_refrendar = 1
-						min_semanas_a_refrendar = 1
+						max_semanas_a_refrendar = 0
+						min_semanas_a_refrendar = 0
 				else:
 					max_semanas_a_refrendar = 0
 					min_semanas_a_refrendar = 0
