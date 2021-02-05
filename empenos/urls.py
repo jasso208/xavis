@@ -48,8 +48,7 @@ urlpatterns=[
 	url(r'^reporte_retiros_efectivo/$',reporte_retiros_efectivo,name="reporte_retiros_efectivo"),
 	url(r'^reporte_ingresos_efectivo/$',reporte_ingresos_efectivo,name="reporte_ingresos_efectivo"),
 	url(r'^admin_comisionpg/$',admin_comisionpg,name="admin_comisionpg"),
-
-
+	url(r'^admin_precio_venta/$',admin_precio_venta,name="admin_precio_venta"),
 
 	url(r'^imprime_comprobante_retiro/(?P<id>\w+)/$',imprime_comprobante_retiro,name="imprime_comprobante_retiro"),
 	url(r'^imprime_comprobante_ingreso/(?P<id>\w+)/$',imprime_comprobante_ingreso,name="imprime_comprobante_ingreso"),
@@ -105,6 +104,7 @@ urlpatterns=[
 	url(r'^api_aplica_refrendo_semanal/$',api_aplica_refrendo_semanal,name="api_aplica_refrendo_semanal"),
 	url(r'^api_cancela_abono/$',api_cancela_abono,name="api_cancela_abono"),
 	url(r'^api_kiltajes/$',api_kiltajes,name="api_kiltajes"),
+	url(r'^api_precio_venta_fijo/$',api_precio_venta_fijo,name="api_precio_venta_fijo"),
 
 
 

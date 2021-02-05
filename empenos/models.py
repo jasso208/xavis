@@ -917,7 +917,7 @@ class Boleta_Empeno(models.Model):
 	folio=models.IntegerField(null=False)
 	tipo_producto=models.ForeignKey(Tipo_Producto,on_delete=models.PROTECT)
 	caja=models.ForeignKey(Cajas,on_delete=models.PROTECT,blank=True,null=True)
-	usuario=models.ForeignKey(User,on_delete=models.PROTECT)
+	usuario=models.ForeignKey(User,on_delete=models.PROTECT,related_name = "usuario_empena")
 	avaluo=models.IntegerField()
 	mutuo=models.IntegerField()	#este campo se ira actualizando cuando se abona a capital
 	fecha=models.DateTimeField(default=timezone.now)
@@ -938,6 +938,9 @@ class Boleta_Empeno(models.Model):
 	fecha_vencimiento_anterior = models.DateTimeField(null = True, blank = True)
 	estatus_anterior = models.ForeignKey(Estatus_Boleta,on_delete = models.PROTECT, related_name = "estatus_anterior",null = True,blank = True)
 	fecha_vencimiento_real_anterior = models.DateTimeField(null = True, blank = True)
+	precio_venta_fijo = models.DecimalField(max_digits = 20,decimal_places = 2,default = 0 ) #Cuando el precio de venta que se calcula en base a la configuracion de la tabla Porcentaje_Sobre_Avaluo
+	#																					     no es el correcto, se establece un precio fijo.		
+	usuario_establece_precio_fijo = models.ForeignKey(User,on_delete = models.PROTECT,null=True,blank = True,related_name = "usuario_establece_precio_fijo")																							 	
 
 	@classmethod
 	def nuevo_empeno(self,sucursal,tp,caja,usuario,avaluo,mutuo,fecha_vencimiento,cliente,nombre_cotitular,apellido_paterno,apellido_materno,plazo,fecha_vencimiento_real,estatus,folio,tm):
@@ -1472,8 +1475,55 @@ class Boleta_Empeno(models.Model):
 			print(e)			
 			return False
 
+
+	def fn_calcula_precio_venta(self):
+		#si se definio un precio de venta fijo, ese es el que regresa
+		if self.precio_venta_fijo != 0:
+			return self.precio_venta_fijo
+
+		importe_venta=0.00
+
+		porcentaje = Porcentaje_Sobre_Avaluo.objects.all().aggregate(Sum("porcentaje"))
+
+		porce = 0;
+		if porcentaje["porcentaje__sum"]!=None:
+			porce = decimal.Decimal(porcentaje["porcentaje__sum"])
+
+		importe_venta = decimal.Decimal(self.avaluo) + (decimal.Decimal(self.avaluo)*(decimal.Decimal(porce)/decimal.Decimal(100.00)))
+		return importe_venta
+
+	def fn_calcula_precio_apartado(self):	
+		#si se definio un precio de venta fijo, ese es el que regresa
+		if self.precio_venta_fijo != 0:
+			return self.precio_venta_fijo
+			
+		importe_venta=0.00
+		porcentaje=Porcentaje_Sobre_Avaluo.objects.all().aggregate(Sum("porcentaje_apartado"))
+		porce=0;
+
+		if porcentaje["porcentaje_apartado__sum"]!=None:
+			porce=decimal.Decimal(porcentaje["porcentaje_apartado__sum"])
+
+			importe_venta=decimal.Decimal(self.avaluo)+(decimal.Decimal(self.avaluo)*(decimal.Decimal(porce)/decimal.Decimal(100.00)))
+
+		return importe_venta
+	def fn_establece_precio_venta_y_apartado(self,importe,id_usuario):
+		resp = []
+		try:
+			self.precio_venta_fijo = importe
+			self.usuario_establece_precio_fijo = User.objects.get(id = id_usuario)
+			self.save()
+			resp.append(True)			
+		except Exception as e:
+			print("fn_establece_precio_venta_y_apartado:- " + str(e))
+			resp.append(False)			
+		return resp
+
+
 	class Meta:
 		unique_together=("folio",'sucursal',)
+
+
 
 
 class Venta_Temporal_Piso(models.Model):

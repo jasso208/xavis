@@ -37,6 +37,12 @@ class Alta_Concepto_Retiro_Form(forms.Form):
 class Elimina_Retiro_Form(forms.Form):
 	sucursal = forms.ModelChoiceField(queryset = Sucursal.objects.all())
 
+class Establece_Precio_Venta_Form(forms.Form):
+	sucursal = forms.ModelChoiceField(queryset = Sucursal.objects.all())
+	folio = forms.CharField()
+	precio_venta = forms.CharField()
+
+
 class Reporte_Retiros_Form(forms.Form):
 	fecha_inicial=forms.DateTimeField(initial=timezone.now())
 	fecha_final=forms.DateTimeField(initial=timezone.now())
