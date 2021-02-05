@@ -10,13 +10,9 @@ from django.db.models import Sum
 from random import randint
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-import smtplib
-import email.message
 from django.conf import settings
 from django.utils.dateparse import parse_date
 from django.contrib.auth.models import User
-import decimal
-import csv
 from django.http import HttpResponse
 from django.utils import timezone
 from io import BytesIO
@@ -26,6 +22,10 @@ from reportlab.lib.pagesizes import A4
 import math
 from empenos.funciones import *
 from empenos.report import *
+import decimal
+import csv
+import smtplib
+import email.message
 
 IP_LOCAL = settings.IP_LOCAL
 LOCALHOST=settings.LOCALHOST
@@ -432,6 +432,30 @@ def admin_min_apartado(request,id):
 
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
+def admin_precio_venta(request):
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2 = User_2.fn_is_logueado(request.user)
+	if user_2 == None:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+		
+	if not user_2.fn_tiene_acceso_a_vista(8):
+		return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
+
+	caja = user_2.fn_tiene_caja_abierta()
+
+	if caja != None:
+		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
+		suc=caja.sucursal
+		c=caja.caja
+	else:
+		caja_abierta="0"
+		caja=Cajas
+
+	form = Establece_Precio_Venta_Form()
+	id_usuario = request.user.id
+	return render(request,'empenos/admin_precio_venta.html',locals())
+#*******************************************************************************************************************************************************
+#*¨**************************************************************************************************************************************************************
 """
 idpermiso = 12
 """
@@ -543,7 +567,7 @@ def apartado(request):
 
 			estatus_apartado=Estatus_Apartado.objects.get(id=1)
 
-			importe_venta=math.ceil(fn_calcula_precio_apartado(boleta))
+			importe_venta=math.ceil(boleta.fn_calcula_precio_apartado())
 
 			if int(pago_cliente)>=int(importe_venta):
 				form=Apartado_Form()
@@ -894,9 +918,6 @@ def venta_piso(request):
 		print(e)
 		caja_abierta="0"
 		caja=Cajas
-		
-
-
 
 	username=request.user.username
 	id_sucursal=user_2.sucursal.id
@@ -922,7 +943,7 @@ def venta_piso(request):
 			for v in vtp:
 				importe_mutuo=decimal.Decimal(importe_mutuo)+decimal.Decimal(v.boleta.mutuo)
 				importe_avaluo=decimal.Decimal(importe_avaluo)+decimal.Decimal(v.boleta.avaluo)
-				importe_total=decimal.Decimal(importe_total)+fn_calcula_precio_venta_producto(v.boleta)
+				importe_total=decimal.Decimal(importe_total) + v.boleta.fn_calcula_precio_venta()
 
 			#es la clave para vENTA pISO.
 			tm=Tipo_Movimiento.objects.get(id=6)
@@ -945,9 +966,9 @@ def venta_piso(request):
 
 			for v in vtp:
 				dvp=Det_Venta_Piso()
-				dvp.venta=vp
-				dvp.boleta=v.boleta
-				dvp.importe_venta=fn_calcula_precio_venta_producto(v.boleta)
+				dvp.venta = vp
+				dvp.boleta = v.boleta
+				dvp.importe_venta = v.boleta.fn_calcula_precio_venta()
 				dvp.save()
 
 				#cambiamos el estatus de la boleta a vendida.

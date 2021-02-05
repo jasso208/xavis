@@ -17,6 +17,45 @@ from django.db.models import Sum
 import json
 from django.db import transaction
 
+#api para establecer el precio de venta y apartado fijo
+@api_view(["PUT","GET"])
+def api_precio_venta_fijo(request):
+	resp = []
+	if request.method == "PUT":
+
+		print(request.data["folio_boleta"])
+
+		id_sucursal = request.data["id_sucursal"]
+		folio_boleta = request.data["folio_boleta"]
+		id_usuario = request.data["id_usuario"]
+
+		importe = request.data["importe"]
+		
+		try:
+			boleta = Boleta_Empeno.objects.get(sucursal__id = int(id_sucursal),folio = folio_boleta)
+			re = boleta.fn_establece_precio_venta_y_apartado(importe,id_usuario)
+			if re[0]:
+				resp.append({"estatus":"1"})
+			else:
+				resp.append({"estatus":"0","msj":"Error al actualizar la información."})
+		except Exception as e:
+			print("api_establace_precio_venta" + str(e))
+			resp.append({"estatus":"0","msj":"Error al actualizar la información."})
+	elif request.method == "GET":
+		id_sucursal = request.GET.get("id_sucursal")
+		folio_boleta = request.GET.get("folio_boleta")
+
+		try:
+			boleta = Boleta_Empeno.objects.get(sucursal__id = int(id_sucursal),folio = folio_boleta)
+
+			resp.append({"estatus":"1","importe":str(math.ceil(boleta.fn_calcula_precio_venta()))})
+		except Exception as e:
+			print("api_establace_precio_venta" + str(e))
+			resp.append({"estatus":"0","msj":"La boleta indicada no existe."})
+
+	return Response(json.dumps(resp))
+
+
 #api para cancelar abono semanal
 @api_view(["PUT"])
 def api_cancela_abono(request):
@@ -471,15 +510,12 @@ def api_consulta_prod_temporal_apartado(request):
 
 				descripcion=descripcion+d.descripcion+", "+ob+"; "
 
-			total=math.ceil(fn_calcula_precio_apartado(v.boleta))#decimal.Decimal(d.avaluo)+(decimal.Decimal(d.avaluo)*(decimal.Decimal(porce)/decimal.Decimal(100.00)))
+			total=math.ceil(v.boleta.fn_calcula_precio_apartado())#decimal.Decimal(d.avaluo)+(decimal.Decimal(d.avaluo)*(decimal.Decimal(porce)/decimal.Decimal(100.00)))
 
 			#trabajamos con el mutuo de la boleta no con el mutuo origina, ya que para fines de utilidad, nos barsaremos en lo que realmene se le dio al cliente.
 			total_mutuo=decimal.Decimal(total_mutuo)+decimal.Decimal(v.boleta.mutuo)
 			total_avaluo=decimal.Decimal(total_avaluo)+decimal.Decimal(v.boleta.avaluo)
-			total_pagar=math.ceil(decimal.Decimal(total_pagar)+decimal.Decimal(fn_calcula_precio_apartado(v.boleta)))
-
-
-
+			total_pagar=math.ceil(decimal.Decimal(total_pagar)+decimal.Decimal(v.boleta.fn_calcula_precio_apartado()))
 
 			total="{:0,.2f}".format(total)
 			mutuo="{:0,.2f}".format(v.boleta.mutuo)
@@ -574,12 +610,12 @@ def api_consulta_prod_temporal_piso(request):
 
 				descripcion=descripcion+d.descripcion+", "+ob+"; "
 
-			total=fn_calcula_precio_venta_producto(v.boleta)#decimal.Decimal(d.avaluo)+(decimal.Decimal(d.avaluo)*(decimal.Decimal(porce)/decimal.Decimal(100.00)))
+			total = v.boleta.fn_calcula_precio_venta()#decimal.Decimal(d.avaluo)+(decimal.Decimal(d.avaluo)*(decimal.Decimal(porce)/decimal.Decimal(100.00)))
 
 			#trabajamos con el mutuo de la boleta no con el mutuo origina, ya que para fines de utilidad, nos barsaremos en lo que realmene se le dio al cliente.
 			total_mutuo=decimal.Decimal(total_mutuo)+decimal.Decimal(v.boleta.mutuo)
 			total_avaluo=decimal.Decimal(total_avaluo)+decimal.Decimal(v.boleta.avaluo)
-			total_pagar=decimal.Decimal(total_pagar)+decimal.Decimal(fn_calcula_precio_venta_producto(v.boleta))
+			total_pagar=decimal.Decimal(total_pagar)+decimal.Decimal(v.boleta.fn_calcula_precio_venta())
 
 			total="{:0,.2f}".format(total)
 			mutuo="{:0,.2f}".format(v.boleta.mutuo)

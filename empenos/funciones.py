@@ -29,29 +29,29 @@ def fn_last_day_of_month(today,opc):
 
 
 
-def fn_calcula_precio_apartado(boleta):	
-	importe_venta=0.00
-	porcentaje=Porcentaje_Sobre_Avaluo.objects.all().aggregate(Sum("porcentaje_apartado"))
-	porce=0;
+#def fn_calcula_precio_apartado(boleta):	
+#	importe_venta=0.00
+#	porcentaje=Porcentaje_Sobre_Avaluo.objects.all().aggregate(Sum("porcentaje_apartado"))
+#	porce=0;
+#
+#	if porcentaje["porcentaje_apartado__sum"]!=None:
+#		porce=decimal.Decimal(porcentaje["porcentaje_apartado__sum"])
+#
+#	importe_venta=decimal.Decimal(boleta.avaluo)+(decimal.Decimal(boleta.avaluo)*(decimal.Decimal(porce)/decimal.Decimal(100.00)))
+#	return importe_venta
 
-	if porcentaje["porcentaje_apartado__sum"]!=None:
-		porce=decimal.Decimal(porcentaje["porcentaje_apartado__sum"])
 
-	importe_venta=decimal.Decimal(boleta.avaluo)+(decimal.Decimal(boleta.avaluo)*(decimal.Decimal(porce)/decimal.Decimal(100.00)))
-	return importe_venta
-
-
-def fn_calcula_precio_venta_producto(boleta):
-	importe_venta=0.00
-
-	porcentaje=Porcentaje_Sobre_Avaluo.objects.all().aggregate(Sum("porcentaje"))
-
-	porce=0;
-	if porcentaje["porcentaje__sum"]!=None:
-		porce=decimal.Decimal(porcentaje["porcentaje__sum"])
-
-	importe_venta=decimal.Decimal(boleta.avaluo)+(decimal.Decimal(boleta.avaluo)*(decimal.Decimal(porce)/decimal.Decimal(100.00)))
-	return importe_venta
+#def fn_calcula_precio_venta_producto(boleta):
+#	importe_venta=0.00
+#
+#	porcentaje = Porcentaje_Sobre_Avaluo.objects.all().aggregate(Sum("porcentaje"))
+#
+#	porce = 0;
+#	if porcentaje["porcentaje__sum"]!=None:
+#		porce = decimal.Decimal(porcentaje["porcentaje__sum"])
+#
+#	importe_venta = decimal.Decimal(boleta.avaluo) + (decimal.Decimal(boleta.avaluo)*(decimal.Decimal(porce)/decimal.Decimal(100.00)))
+#	return importe_venta
 
 
 #def fn_calcula_refrendo(mutuo,tipo_producto):

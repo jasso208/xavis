@@ -40,8 +40,10 @@ def fn_job_libera_apartado():
 @transaction.atomic
 def fn_job_diario_prueba():
 
+
 	hoy=datetime(2021,3,5,0,0)	
 	fecha_fin=datetime(2021,4,20,0,0)
+
 
 
 	while hoy<=fecha_fin:

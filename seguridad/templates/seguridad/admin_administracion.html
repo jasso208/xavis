@@ -81,7 +81,9 @@
 					<div class="col-xs-2">
 						<div class="cls_boton_body">
 							<a href="{% url 'empenos:admin_porc_avaluo' %}">
-								<span class="glyphicon glyphicon-usd"></span>
+								<span class="glyphicon">
+									<strong>%</strong>	
+								</span>
 								<br>
 								<br>
 								% sobre avaluo p/venta y apart
@@ -90,8 +92,20 @@
 					</div>
 					<div class="col-xs-2">
 						<div class="cls_boton_body">
-							<a href="{% url 'empenos:admin_comisionpg' %}">
+							<a href="{% url 'empenos:admin_precio_venta' %}">
 								<span class="glyphicon glyphicon-usd"></span>
+								<br>
+								<br>
+								Establecer precio venta
+							</a>	
+						</div>
+					</div>
+					<div class="col-xs-2">
+						<div class="cls_boton_body">
+							<a href="{% url 'empenos:admin_comisionpg' %}">
+								<span class="glyphicon">
+									<strong>%</strong>	
+								</span>
 								<br>
 								<br>
 								% para comisión periodo de gracia
@@ -101,10 +115,12 @@
 					<div class="col-xs-2">
 						<div class="cls_boton_body">
 							<a href="{% url 'empenos:admin_min_apartado' id=1 %}">
-								<span class="glyphicon glyphicon-usd"></span>
+								<span class="glyphicon">
+									<strong>%</strong>	
+								</span>
 								<br>
 								<br>
-								% sobre mutuo p/apartado
+								Admin porcentaje para apartado
 							</a>	
 						</div>
 					</div>
@@ -134,7 +150,7 @@
 							</a>	
 						</div>
 					</div>
-					<div class="col-xs-2">
+					<div class="col-xs-2" style="margin-top:10px">
 						<div class="cls_boton_body">
 							<a style="background-color: gray">
 								<span class="glyphicon glyphicon-usd" >
@@ -146,7 +162,7 @@
 							</a>	
 						</div>
 					</div>
-					<div class="col-xs-2">
+					<div class="col-xs-2" style="margin-top:10px">
 						<div class="cls_boton_body">
 							<a href="{% url 'empenos:admin_kilataje' %}">
 								<span class="glyphicon glyphicon-tags"></span>
