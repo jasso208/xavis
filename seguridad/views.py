@@ -8,7 +8,7 @@ from django.contrib.auth import logout
 from django.urls import reverse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from seguridad.models import Cliente,Direccion_Envio_Cliente,Clientes_Logueados,Direccion_Envio_Cliente_Temporal
+from seguridad.models import Direccion_Envio_Cliente,Clientes_Logueados,Direccion_Envio_Cliente_Temporal
 from seguridad.models import E_Mail_Notificacion,Recupera_pws
 from django.core.mail import EmailMessage
 #from ventas.models import Venta,Detalle_Venta
@@ -244,13 +244,16 @@ def admin_perfil(request):
 		estatus=0
 		msj="La cuenta del usuario esta incompleta."			
 		return render(request,'login.html',locals())
+
+
+
 	IP_LOCAL = settings.IP_LOCAL
 	id_usuario=user_2.user.id
 
 	pub_date = date.today()
 	min_pub_date_time = datetime.combine(pub_date, time.min) 
 	max_pub_date_time = datetime.combine(pub_date, time.max) 
-
+ 
 	c=""
 	try:		
 		#validamos si el usuario tiene caja abierta en el dia actual.
@@ -261,34 +264,35 @@ def admin_perfil(request):
 	except Exception as e:		
 		print(e)
 		caja_abierta="0"
-		caja=Cajas
-	print("caja")
-	print(c)
+		caja=Cajas	
 	return render(request,'seguridad/admin_perfil.html',locals())
 
 def admin_cajas(request):
-	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
-		user_2=User_2.objects.get(user=request.user)
-	except:
-		form=Login_Form(request.POST)
-		estatus=0
-		msj="La cuenta del usuario esta incompleta."			
-		return render(request,'login.html',locals())
 
 
 	pub_date = date.today()
 	min_pub_date_time = datetime.combine(pub_date, time.min) 
 	max_pub_date_time = datetime.combine(pub_date, time.max)  
 
-	try:
-		#validamos si el usuario tiene caja abierta en el dia actual.
-		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+	
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2_1 = User_2.fn_is_logueado(request.user)
+	if user_2_1 == None:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+
+	#obtenemos el usuario virtual de la sucursal.
+	#ya que sobre este usuario se registran los ingresos.
+	user_2 = User_2.objects.get(user = user_2_1.sucursal.usuario_virtual)
+
+	#validamos si el usuario tiene caja abierta
+	caja = user_2.fn_tiene_caja_abierta()
+
+
+	if caja != None:
 		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
 		suc=caja.sucursal
 		c=caja.caja
-	except Exception as e:
-		print(e)
+	else:
 		caja_abierta="0"
 		caja=Cajas
 
@@ -550,6 +554,13 @@ def alta_usuario(request,id=None):
 id = 2
 """
 def consulta_usuarios(request):
+	user_2 = User_2.fn_is_logueado(request.user)
+	if user_2 == None:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+		
+	if not user_2.fn_tiene_acceso_a_vista(2):
+		return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
+
 	if request.method=="POST":
 		form=Busca_Usuario_Form(request.POST)
 		if request.POST.get("username")=="":
@@ -565,19 +576,20 @@ def consulta_usuarios(request):
 
 #esta api recibe la session y la desvincula de la cuenta logueada,
 #esto con la finalidad de no perder los carritos agregados al carrito de compras.
-@api_view(['POST'])
+"""@api_view(['POST'])
 def api_kill_session(request):
 	error=[]
 	if request.method=="POST":
 		session=request.POST.get("session")
 		Clientes_Logueados.objects.get(session=session).delete()
 	return Response(error)
+"""
 
 #api para crear cuentas de clientes
 #en caso de ya existir, actualiza la cuenta.
 #	En caso de que se reciba la session, es porque se trata de un actualizacion a un cliente
 #	En caso de que no se reciba la session, es porque es un cliente nuevo.
-@api_view(['POST'])
+"""@api_view(['POST'])
 def api_alta_cliente(request):
 	estatus=[]
 	if request.method=="POST":		
@@ -652,7 +664,9 @@ def api_alta_cliente(request):
 			estatus.append({"estatus":"0","msj":""})
 	return Response(estatus)	
 
-	
+"""
+
+"""
 #api para identificar al usuario
 @api_view(["POST"])
 def api_login_usuario(request):
@@ -748,7 +762,7 @@ def api_direccion_envio_temporal(request):
 		print(e)
 		estatus.append({"estatus":"0","msj":"Error al guardar la direccion de envio,intente nuevamente."})
 	return Response(estatus)
-			
+"""		
 @api_view(['POST'])
 def api_e_mail_notificacion(request):
 	estatus=[]
@@ -773,6 +787,7 @@ def api_e_mail_notificacion(request):
 #		session: recibe la session para obtener el correo del cliente que intenta cambiar contraseña
 #		contraseña actual: se recibe la contraseña actual para validar que otra persona no pueda cambiar la contraseña
 #		contraseña nueva: es la nueva contraseña
+"""
 @api_view(['POST'])
 def api_actualiza_contrasena(request):
 	estatus=[]
@@ -801,13 +816,14 @@ def api_actualiza_contrasena(request):
 		print(e)
 		estatus.append({"estatus":"0","msj":"Error al actualizar tu contraseña."})
 	return Response(estatus)
-
+"""
 #en esta api se llena la tabla creando la relacion del token con el email del que se desea recuperar la contraseña,
 #para posteriormente enviar el correo con el link para actualizar la contraseña.
 #parametros
 #		token: es el token unico que nos ayudara a crear el link para cambiar contraseña,
 #				este token se liga al correo
 #		e_mail:	Es el email de la cuenta que se desea cambiar contraseña.
+"""
 @api_view(['POST'])
 def api_envia_token(request):
 	estatus=[]
@@ -862,7 +878,7 @@ def api_envia_token(request):
 		estatus.append({"estatus":"0","msj":"Ocurrio un error, intentelo nuevamente."})
 
 	return Response(estatus)
-
+"""
 
 #actualiza la contraseña
 #parametro
@@ -870,6 +886,7 @@ def api_envia_token(request):
 #			es el token que se envio al correo y que se ligo al correo.
 #		psw nuevo:
 #			Es la nueva contraseña
+"""
 @api_view(['POST'])
 def api_cambia_psw_token(request):
 	estatus=[]
@@ -894,9 +911,10 @@ def api_cambia_psw_token(request):
 		print(e)
 		estatus.append({'estatus':'0','msj':'Error al actualizar la contraseña'})
 	return Response(estatus)
-
+"""
 #esta api es usada para al momento de confirmar informacion para la venta, 
 #se desea cargar la informacion que se tiene registrada en la cuenta.
+"""
 @api_view(['POST'])
 def api_reinicia_direccion_temporal(request):
 	estatus=[]
@@ -919,7 +937,7 @@ def api_reinicia_direccion_temporal(request):
 		print(e)
 		estatus.append({'estatus':"0","msj":"Error al consultar la informacion de su cuenta."})
 	return Response(estatus) 
-
+"""
 def fn_concatena_folio(folio):
 	f=""
 	if len(folio)==7:

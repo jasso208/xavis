@@ -49,6 +49,15 @@ class Reporte_Retiros_Form(forms.Form):
 	sucursal = forms.ModelChoiceField(queryset = Sucursal.objects.all())
 	export_pdf = forms.IntegerField()
 
+
+
+class Reporte_Cajas_Form(forms.Form):
+	fecha_inicial=forms.DateTimeField(initial=timezone.now())
+	fecha_final=forms.DateTimeField(initial=timezone.now())
+	sucursal = forms.ModelChoiceField(queryset = Sucursal.objects.all())
+	export_pdf = forms.IntegerField()
+
+
 class Apartado_Form(forms.Form):
 	id_cliente=forms.IntegerField()
 	pago_cliente=forms.IntegerField()

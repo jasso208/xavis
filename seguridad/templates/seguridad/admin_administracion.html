@@ -4,7 +4,7 @@
 {% block usuario %}
 
 			<div class="col-xs-6">
-				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{user_2.user.username}} {{user_2.perfil.perfil}}</label> 
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{request.user.username}}: {{request.user.first_name}} {{request.user.last_name}}</label> 
 			</div>
 			<div class="col-xs-3">
 				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-home"></span> Sucursal: {{user_2.sucursal}}</label> 	
@@ -150,18 +150,7 @@
 							</a>	
 						</div>
 					</div>
-					<div class="col-xs-2" style="margin-top:10px">
-						<div class="cls_boton_body">
-							<a style="background-color: gray">
-								<span class="glyphicon glyphicon-usd" >
-									
-								</span>
-								<br>
-								<br>
-								Asig. precio venta y apartado
-							</a>	
-						</div>
-					</div>
+
 					<div class="col-xs-2" style="margin-top:10px">
 						<div class="cls_boton_body">
 							<a href="{% url 'empenos:admin_kilataje' %}">

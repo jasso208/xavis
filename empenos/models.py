@@ -71,10 +71,86 @@ class Sucursal(models.Model):
 	estado=models.CharField(max_length=50,null=True,default='')
 	pais=models.CharField(max_length=50,null=True,default='')
 	telefono=models.CharField(max_length=10,null=True,default='')
-	saldo=models.IntegerField(default=0)
+	saldo = models.IntegerField(default=0)
+	usuario_virtual = models.ForeignKey(User,on_delete = models.PROTECT,null = True,blank = True)
 
 	def __str__(self):
 		return self.sucursal
+
+	def fn_abre_caja(self,importe_apertura,usuario_apertura):
+		hoy = date.today()
+
+		hoy_min = datetime.combine(hoy,time.min)
+		hoy_max = datetime.combine(hoy,time.max)
+
+		resp = []
+
+		#validamos que la sucursal no tenga caja abierta		
+		caja = Cajas.objects.filter(fecha_cierre__isnull = True,sucursal = self)
+		if caja.exists():
+			resp.append(False)			
+			resp.append("La sucursal cuenta con caja abierta. Solo puede abrir una caja por sucursal.")
+			return resp
+
+		#buscamos el importe con el que cerro la ultima caja
+		ultima_caja = Cajas.objects.filter(sucursal = self).aggregate(Max("id"))["id__max"]
+		importe_ultima_caja = 0#si es la primera vez que se apertura caja el importe es cero, de lo contrario, se toma el importe con el que cerro anteriormente
+		if ultima_caja != None: 
+			importe_ultima_caja = Cajas.objects.get(id = int(ultima_caja)).teorico_efectivo
+
+		if float(importe_apertura) != float(importe_ultima_caja) or float(importe_apertura) != self.saldo:
+			resp.append(False)			
+			resp.append("El importe con el que desea aperturar, es diferente al importe con el que cerro la ùltima caja.")
+			return resp
+
+		if self.usuario_virtual == None:
+			resp.append(False)			
+			resp.append("La sucursal no tiene asignado usuario virtual, contacte con el administrador del sistema.")
+			return resp
+
+		caja_abierta = Cajas.objects.filter(fecha__range = (hoy_min,hoy_max),sucursal = self,fecha_cierre__isnull = False)
+
+		if caja_abierta.exists():
+			resp.append(False)			
+			resp.append("La caja de esta sucursal ya fue cerrada.")
+			return resp
+
+		tm = Tipo_Movimiento.objects.get(id=1)
+		folio = fn_folios(tm,self)
+		str_folio = fn_str_clave(folio)
+
+		caja = Cajas()
+		
+		caja.folio = str_folio
+		caja.tipo_movimiento = tm
+		caja.sucursal = self		
+		caja.usuario = self.usuario_virtual
+		caja.importe = float(importe_apertura)
+		caja.caja = "A"#como solo se puede aperturar una caja por sucursal, siempre sera la caja A
+		caja.usuario_real_abre_caja = usuario_apertura
+		caja.save()
+
+		resp.append(True)	
+
+		return resp
+		
+	#si no contamos con caja abierta, regresa None
+	def fn_get_caja_abierta(self):
+		hoy = date.today()
+		hoy_min = datetime.combine(hoy,time.min)
+		hoy_max = datetime.combine(hoy,time.max)
+
+		try:
+			#buscamos la caja abierta
+			caja = Cajas.objects.get(fecha__range = (hoy_min,hoy_max),sucursal = self,fecha_cierre__isnull = True)
+		except:
+			caja = None
+
+		return caja
+
+
+
+
 
 	def fn_actualiza_porcentaje_mutuo(self,porcentaje_oro,porcentaje_plata,porcentaje_articulos_varios):
 
@@ -367,6 +443,7 @@ class Concepto_Retiro(models.Model):
 		#obtenemos la fecha inicial y fecha final del mes en curso
 		fecha = timezone.now()
 		rangos_fecha = calendar.monthrange(fecha.year , fecha.month)
+
 		mes = rangos_fecha[1]
 		fecha_inicial = datetime(int(fecha.year),int(fecha.month),1,0,0)
 		fecha_final = datetime(fecha.year,fecha.month,mes,0,0)
@@ -375,6 +452,7 @@ class Concepto_Retiro(models.Model):
 
 		#obtenemos todos los retiros pertenecientes al consepto consultado
 		re = Retiro_Efectivo.objects.filter(concepto = self,fecha__range = (fecha_inicial,fecha_final)).aggregate(Sum("importe"))
+		
 		total_retirado = 0
 		if re["importe__sum"] != None:
 			total_retirado = re["importe__sum"]
@@ -677,7 +755,7 @@ class Cajas(models.Model):
 	tipo_movimiento=models.ForeignKey(Tipo_Movimiento,on_delete=models.PROTECT)
 	sucursal=models.ForeignKey(Sucursal,on_delete=models.PROTECT)
 	fecha=models.DateTimeField(default=timezone.now)
-	usuario=models.ForeignKey(User,on_delete=models.PROTECT)#usuario que abrio caja.
+	usuario=models.ForeignKey(User,on_delete=models.PROTECT)
 	importe=models.IntegerField(default=0)
 	caja=models.CharField(max_length=1,null=False)
 	real_tarjeta=models.IntegerField(default=0)
@@ -701,9 +779,11 @@ class Cajas(models.Model):
 	token_cierre_caja=models.IntegerField(null=True)
 	comentario=models.TextField(default='')
 	user_cierra_caja=models.ForeignKey(User,on_delete=models.CASCADE,related_name="user",blank = True,null=True)
+	usuario_real_abre_caja = models.ForeignKey(User,on_delete = models.PROTECT,null = True,blank = True,related_name = "usuario_real_abre_caja")
 	estatus_guardado=models.IntegerField(default=0)#cuando esta cero es que nunca se ha guardado informacion de cierre de caja, por lo tanto 
 												   #no debemos mostrarle el boton de cierre de caja.
-												   #cuando es 1, es que ya se ha guardado al menos una vez, y ya podemos mostrar el boton de cerrar caja.
+												   #cuando es 1, es que ya se ha guardado al menos una vez, y ya podemos mostrar el boton de cerrar caja
+
 
 	def __str__(self):
 		estatus="CERRADA"
@@ -713,15 +793,17 @@ class Cajas(models.Model):
 		return str(self.fecha)+' '+estatus
 
 class Otros_Ingresos(models.Model):
-	folio=models.CharField(max_length=7,null=True)
-	tipo_movimiento=models.ForeignKey(Tipo_Movimiento,on_delete=models.PROTECT)
-	sucursal=models.ForeignKey(Sucursal,on_delete=models.PROTECT)
-	fecha=models.DateTimeField(default=timezone.now)
-	usuario=models.ForeignKey(User,on_delete=models.PROTECT)
-	importe=models.IntegerField(default=0, validators=[MinValueValidator(Decimal('1'))])
-	comentario=models.CharField(max_length=200,default='')
-	caja=models.CharField(max_length=1,null=True)
+	folio = models.CharField(max_length=7,null=True)
+	tipo_movimiento = models.ForeignKey(Tipo_Movimiento,on_delete=models.PROTECT)
+	sucursal = models.ForeignKey(Sucursal,on_delete=models.PROTECT)
+	fecha = models.DateTimeField(default=timezone.now)
+	usuario = models.ForeignKey(User,on_delete=models.PROTECT) #
+	importe = models.IntegerField(default=0, validators=[MinValueValidator(Decimal('1'))])
+	comentario = models.CharField(max_length=200,default='')
+	caja = models.CharField(max_length=1,null=True)
 	activo = models.CharField(choices = SI_NO,default = 1, max_length=2)
+	ocaja = models.ForeignKey(Cajas,on_delete = models.PROTECT,null = True,blank = True)
+
 
 class Retiro_Efectivo(models.Model):
 	folio=models.CharField(max_length = 7,null = True)
@@ -737,7 +819,7 @@ class Retiro_Efectivo(models.Model):
 	#no requerimos fecha de cancelacion ya que solo se puede cancelar el dia en que se genera.
 	usuario_cancela = models.ForeignKey(User,on_delete = models.PROTECT,null = True, blank = True,related_name = 'usuario_cancela')
 	activo = models.CharField(choices = SI_NO,default = 1, max_length=2)
-
+	ocaja = models.ForeignKey(Cajas,on_delete = models.PROTECT,null = True,blank = True)
 
 	def fn_cancela_retiro(self,id_usuario_cancela,comentario_cancelacion):
 		try:
@@ -1020,7 +1102,6 @@ class Boleta_Empeno(models.Model):
 
 			dif_dias = abs((today - prox_pago.fecha_vencimiento_real).days)
 
-			
 
 			#Si la diferencia entre hoy y la fecha de vencimiento real, es mayor a 6, quiere decir que el dia de
 			#hoy aun es parte de alguna semana de pago.
@@ -1028,7 +1109,8 @@ class Boleta_Empeno(models.Model):
 				
 				if dif_dias == 7:#si es 7
 					#si es el dia en que se genero la boleta se cobra
-					if self.fecha == today :
+
+					if datetime.combine(self.fecha,time.min) == today :
 						max_semanas_a_refrendar = 1
 						min_semanas_a_refrendar = 1
 					else:
@@ -2075,3 +2157,34 @@ class Historico_Estatus_Cartera(models.Model):
 		unique_together = ("sucursal","fecha")
 
 
+
+#funcion para generar folio de movimiento
+def fn_folios(tipo_movimiento,sucursal):
+	try:
+		cf=Control_Folios.objects.get(tipo_movimiento=tipo_movimiento,sucursal=sucursal)
+		folio=cf.folio+1
+		cf.folio=folio
+		cf.save()		
+	except:
+		#si no existe registro, crea uno
+		Control_Folios.objects.create(tipo_movimiento=tipo_movimiento,sucursal=sucursal,folio=1)
+		cf=Control_Folios.objects.get(tipo_movimiento=tipo_movimiento,sucursal=sucursal)
+		folio=cf.folio
+	return folio
+
+
+def fn_str_clave(id):
+	if len(str(id))==1:
+		return '000000'+str(id)
+	if len(str(id))==2:
+		return '00000'+str(id)
+	if len(str(id))==3:
+		return '0000'+str(id)
+	if len(str(id))==4:
+		return '000'+str(id)
+	if len(str(id))==5:
+		return '00'+str(id)
+	if len(str(id))==6:
+		return '0'+str(id)
+	if len(str(id))==7:
+		return str(id)

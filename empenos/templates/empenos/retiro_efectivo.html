@@ -4,7 +4,7 @@
 {% block usuario %}
 
 			<div class="col-xs-6">
-				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{user_2.user.username}} {{user_2.perfil.perfil}}</label> 
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{request.user.username}}: {{request.user.first_name}} {{request.user.last_name}}</label> 
 				
 			</div>
 
@@ -235,7 +235,7 @@
 										<p>{{total_movs}}</p>
 									</div>
 									<div class="col-xs-3 text-right">
-										<p>${{total_efectivo}}</p>
+										<p>${{total_efectivo | floatformat:2}}</p>
 									</div>
 								</div>
 							</div>
@@ -350,7 +350,7 @@
 				Error!!
 			</div>	
 			<div class="panel panel-default">	
-				<label class="page-header">No cuentas con caja abierta.</label>
+				<label class="page-header">La sucursal no ha aperturado caja.</label>
 				<br>
 				<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_cajas' %}"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
 				<br>
@@ -559,7 +559,7 @@
 								$("#fondo_preloader").show();
 
 								id_concepto = $("#id_concepto").val();
-
+ 
 							   $.ajax({
 							        type: "GET",
 							        url: "{{IP_LOCAL}}/empenos/envia_token/",
@@ -703,6 +703,15 @@
 				return 0;
 
 			}
+
+			if("{{error_saldo_concepto}}"=="1")
+			{
+				$(".cls_error_formulario").show();
+				$("#msj_error_form").text("El concepto de retiro seleccionado no cuenta con saldo suficiente.");
+				return 0;
+
+			}
+
 			$("#abrir_1").hide();
 			if( "{{id_retiro}}" != "0" )
 			{

@@ -8,8 +8,9 @@
 
 {% block usuario %}
 
+
 			<div class="col-xs-6">
-				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{user_2.user.username}} {{user_2.perfil.perfil}}</label> 
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{request.user.username}}: {{request.user.first_name}} {{request.user.last_name}}</label> 
 				
 			</div>
 			<div class="col-xs-3">
@@ -40,7 +41,8 @@
 						<div class="panel-body">
 							<div class="col-xs-8">
 								<div class="col-xs-12">									
-									<div class = "col-xs-12" style="padding: 0">													<div class="cls_encabezado_alert" >
+									<div class = "col-xs-12" style="padding: 0">													
+										<div class="cls_encabezado_alert" >
 											<label>Información de empeño.</label>
 										</div>
 										<div class="panel panel-default">
@@ -270,6 +272,19 @@
 												<a style="cursor: pointer;" id="btn_simulacion">Ver simulación prox pagos.</a>
 											</div>
 										</div>
+											<div class="row">
+											<div class="col-xs-12">
+												<hr>
+											</div>
+										</div>
+										<div class="row">
+											<div class="col-xs-6">
+												<label>Total a pagar:</label>
+											</div>
+											<div class="col-xs-6 text-right">
+												<p id="p_total_pagar">$0.00</p>
+											</div>
+										</div>
 										<div class="row">
 											<div class="col-xs-12">
 												<hr>
@@ -294,19 +309,6 @@
 											</div>
 										</div>
 
-										<div class="row">
-											<div class="col-xs-12">
-												<hr>
-											</div>
-										</div>
-										<div class="row">
-											<div class="col-xs-6">
-												<label>Total a pagar:</label>
-											</div>
-											<div class="col-xs-6 text-right">
-												<p id="p_total_pagar">$0.00</p>
-											</div>
-										</div>
 										<div class="row">
 											<div class= "col-xs-6 text-center">
 												<a href="{% url 'empenos:consulta_boleta' %}" class="btn btn-primary btn-block ">
@@ -469,7 +471,7 @@
 		$(document).ready(
 				function()
 				{
-					fn_inicio("{{min_semanas_refrendar}}","{{max_semanas_refrendar}}","{{importe_refrendo}}","{{importe_compg}}","{{dias_vencido}}","{{boleta.id}}","{{IP_LOCAL}}","{{boleta.mutuo}}","{{csrf_token}}","{{user_2.user.id}}","{{caja.id}}");		
+					fn_inicio("{{min_semanas_refrendar}}","{{max_semanas_refrendar}}","{{importe_refrendo}}","{{importe_compg}}","{{dias_vencido}}","{{boleta.id}}","{{IP_LOCAL}}","{{boleta.mutuo}}","{{csrf_token}}","{{request.user.id}}","{{caja.id}}");		
 				}
 			);
 		

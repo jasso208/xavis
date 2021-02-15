@@ -4,7 +4,7 @@
 {% block usuario %}
 
 			<div class="col-xs-6">
-				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{user_2.user.username}} {{user_2.perfil.perfil}}</label> 
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{request.user.username}}: {{request.user.first_name}} {{request.user.last_name}}</label> 
 				
 			</div>
 			<div class="col-xs-3">
@@ -21,10 +21,17 @@
 {% block content %}
 	<div class="col-xs-12 cls_encabezado_body">
 	
-		<a >
-			Abrir Caja
-		</a>		
-	
+	<div class="col-xs-10">
+			<a >
+				Abrir Caja
+			</a>				
+		</div>
+		<div class="col-xs-2">
+			<a id = "btn_ayuda" style="cursor: pointer;" >
+				<span class="glyphicon glyphicon-question-sign"></span>
+				Ayuda
+			</a>
+		</div>
 	</div>
 	<div class="col-xs-12">
 		<form method="post" action="#" class="cls_form_1">
@@ -34,33 +41,17 @@
 					<div class="panel panel-default">						
 						<div class="panel-body">
 							<div class="col-xs-12 ">
-								<label for=""> Sucursal</label>					
-								<select name="sucursal" class="form-control" title="" required="" id="id_sucursal">
-								  <option value="" selected="">---------</option>
-									{% for x in sucursales %}										
-										<option value="{{x.sucursal.id}}">{{ x.sucursal }}</option>
-									{% endfor %}
-								</select>
+								<label > Sucursal: {{sucursal.sucursal}}</label>					
+								
 							</div>
 
-							<div class="col-xs-12 col-md-6">
-								<label for=""> Fondo Inicial</label>
-								{% bootstrap_field form.importe  show_label=False%}
-							</div>
-							<div class="col-xs-12 col-md-6" id="tipo_mov">
-								<label for="">Tipo Movimiento</label>
-								{% bootstrap_field form.tipo_movimiento  show_label=False%}
-							</div>
-							<div class="col-xs-12 col-md-6" id="diferencia">
-								<label for="">diferencia</label>
-								{% bootstrap_field form.diferencia  show_label=False%}
-							</div>
-							<div class="col-xs-12 col-md-6" id="usuario" >
-								<label for="">Usuario</label>
-								{% bootstrap_field form.usuario  show_label=False%}
-							</div>
+							<div class="col-xs-8 ">
+								<label for=""> Fondo Inicial: ${{sucursal.saldo | floatformat:2}}</label>
+								
 
-							<div class="col-xs-12">								
+							</div>
+							
+							<div class="col-xs-4">								
 								<button class="btn btn-primary btn-sm" style="float: right;"   id="abrir_caja">Abrir Caja</button>								
 							</div>	
 						</div>
@@ -71,47 +62,96 @@
 	</div>
 	
 
-{% ifequal exito '1' %}
+{% ifequal estatus '0' %}
+
 		<div class="fondo_mensaje" >
 			
 		</div >
 		<div class="mensaje" >	
 				<div class="cls_encabezado_alert" >
-					Aviso			
+					Error!!	
 				</div>
 
 				<div class="panel panel-default">	
-					<label class="page-header">La caja se abrio correctamente.</label>
+					<label class="page-header">{{msj_error}}</label>
 					<br>
+					<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_cajas' %}" ><span class="glyphicon glyphicon-ok"></span> 
 
-					<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_cajas' %}" ><span class="glyphicon glyphicon-ok"></span> Aceptar</a>		
+					Aceptar</a>		
 					<br>
 					<br>		
 
 				</div>
 		</div>
+
 {% endifequal  %}
-		<div class="fondo_mensaje cls_error_abrir_caja" >
+
+{% ifequal estatus '1' %}
+
+		<div class="fondo_mensaje" >
 			
 		</div >
-		<div class="mensaje cls_error_abrir_caja" >	
+		<div class="mensaje" >	
 				<div class="cls_encabezado_alert" >
-					Error!!
-				</div>			
+					Aviso
+				</div>
+
 				<div class="panel panel-default">	
-					<label class="page-header">Error al abrir caja.</label>
+					<label class="page-header">La caja se abrio correctamente.</label>
 					<br>
-					<a class="btn btn-primary btn-sm" id="btn_aceptar_error_aplicar_abono">Aceptar</a>
+					<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_cajas' %}" ><span class="glyphicon glyphicon-ok"></span> 
+
+					Aceptar</a>		
 					<br>
-					<br>
+					<br>		
 
 				</div>
 		</div>
+
+{% endifequal  %}
+
+		<div class="fondo_mensaje cls_ayuda"  >
+			
+		</div >
+		
+		<div class="mensaje cls_ayuda" >	
+				<div class="cls_encabezado_alert" >
+					Ayuda
+				</div>
+
+				<div class="panel panel-default">	
+					<p class="page-header" style="text-align: justify;padding-left: 10px;padding-right: 10px;" >
+						En esta opciòn podemos abrir caja.
+						<br>
+						<br>
+						Para realizar cualquier operaciòn relacionada con entrada o salida de dinero (empeños, refrendos, ventas, etc) es necesario que el usuario ingrese a esta opciòn (una unica vez al dìa) e indique 
+						con cuanto dinero inicio la operaciòn del dia.
+						<br>
+						<br>
+						El sistema ya carga por default el importe con el que inicia la operaciòn del dìa en base al ultimo cierre de caja (si es la primera vez que se apertura caja, aparecera con importe cero.). Aun asi es obligatorio que el usuario abra caja para que asi pueda validar que el importe que indica el sistema sea el correcto y de no ser asi, reportarlo al administrador del sistema.
+						<br>
+						<br>
+
+						Solo se apertura una caja por sucursal, pero cualquier usuario que pertenezca a esta sucursal puede realizar movimientos relacionados con entradas y salidas de dinero (empeños, refrendos, ventas, etc.). El saldo afectara a la caja unica de la sucursal pero se podra identificar que usuario realizo cada movimiento.
+
+
+					</p>
+					<br>
+
+					<a class="btn btn-primary btn-sm" id="btn_aceptar_ayuda" ><span class="glyphicon glyphicon-ok"></span> Aceptar</a>		
+					<br>
+					<br>		
+
+				</div>
+		</div>
+
 <div id="fondo_preloader">
 	<div class="preloader" id="preloader">
 	
 	</div>
 </div>
+
+
 	<script type="text/javascript">
 		$(document).ready(
 				function()
@@ -119,7 +159,19 @@
 
 
 					fn_inicio();
+					$("#btn_ayuda").click(
+							function()
+							{
+								$(".cls_ayuda").show();
+							}
 
+						);
+					$("#btn_aceptar_ayuda").click(
+							function()
+							{
+							$(".cls_ayuda").hide();	
+							}
+						);
 					$("#abrir_caja").click(
 							function()
 							{
@@ -127,94 +179,18 @@
 							}
 						);
 					
-					v_id_sucursal="{{id_sucursal}}";
-					//si del back nos mandan el id_sucursal, lo ponemos por default
-					if (v_id_sucursal!=0)
-					{
-						$("#id_sucursal").val(v_id_sucursal);
-						//validamos que en realidad se haya encontrado la sucursal,
-						//en caso de que no la haya tenido en la lista, manda error.
-						if($("#id_sucursal").val()!=v_id_sucursal)
-						{
-							$("#msj_error_bloquea_acceso").text("Error al detectar la sucursal del usuario. Contactese con el administrador de sistema.");
-							$(".error_bloquea_acceso").show();
-						}
-						else
-						{
-							$(".error_bloquea_acceso").hide();
-						}
-					}
-					else
-					{
-						$(".error_bloquea_acceso").hide();
-					}
-					$("#id_usuario").val("{{user_2.user.id}}");
+					
 				}
 			);
 
 		function fn_inicio()
 		{
-			var exito="{{exito}}";
-
-
+			
 				$("#fondo_preloader").hide();
-				if (parseInt(exito)==0 )
-				{
-					$(".cls_error_abrir_caja").show();
-				}
-				else
-				{	
-					$(".cls_error_abrir_caja").hide();	
-				}
-					$("#id_tipo_movimiento").val("1");
-					$("#tipo_mov").hide();
-					$("#diferencia").val("0");
-					$("#diferencia").hide();
-					$("#usuario").hide();
-
-					$("#id_sucursal").val("{{user_2.sucursal.id}}");
-
-					$("#id_importe").val("{{user_2.sucursal.saldo}}");
-					$("#id_importe").prop("readonly",true);
+				$(".cls_ayuda").hide();
+				
 		}
 	</script>
 	
 
-	{% if caja_abierta == '1' %}
-	<div class="fondo_mensaje" >
-		
-	</div >
-	<div class="mensaje" >
-			<div class="cls_encabezado_alert" >
-					Error!!
-			</div>		
-			
-			<div class="panel panel-default">	
-				<label class="page-header">{{msj_caja}}</label>
-				<br>
-				<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_cajas' %}"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
-				<br>
-				<br>
-
-			</div>
-	</div>
-	{% endif %}
-
-
-	<div class="fondo_mensaje error_bloquea_acceso"  >
-		
-	</div >
-	<div class="mensaje error_bloquea_acceso" >
-			<div class="cls_encabezado_alert" >
-					Aviso
-			</div>
-			<div class="panel panel-default">	
-				<label class="page-header" id="msj_error_bloquea_acceso"></label>
-				<br>
-				<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_cajas'%}"> <span class="glyphicon glyphicon-ok"></span> Aceptar</a>
-				<br>
-				<br>
-
-			</div>
-	</div>
 {% endblock %}

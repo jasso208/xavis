@@ -1099,36 +1099,6 @@ def fn_aplica_refrendo(usuario,importe_abono,caja,boleta,recursivo,abono=None):
 
 	return 1
 
-#funcion para generar folio de movimiento
-def fn_folios(tipo_movimiento,sucursal):
-	try:
-		cf=Control_Folios.objects.get(tipo_movimiento=tipo_movimiento,sucursal=sucursal)
-		folio=cf.folio+1
-		cf.folio=folio
-		cf.save()		
-	except:
-		#si no existe registro, crea uno
-		Control_Folios.objects.create(tipo_movimiento=tipo_movimiento,sucursal=sucursal,folio=1)
-		cf=Control_Folios.objects.get(tipo_movimiento=tipo_movimiento,sucursal=sucursal)
-		folio=cf.folio
-	return folio
-
-
-def fn_str_clave(id):
-	if len(str(id))==1:
-		return '000000'+str(id)
-	if len(str(id))==2:
-		return '00000'+str(id)
-	if len(str(id))==3:
-		return '0000'+str(id)
-	if len(str(id))==4:
-		return '000'+str(id)
-	if len(str(id))==5:
-		return '00'+str(id)
-	if len(str(id))==6:
-		return '0'+str(id)
-	if len(str(id))==7:
-		return str(id)
 
 
 def fn_envia_mail(cad,asunto,destinatario):

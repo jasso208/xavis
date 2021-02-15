@@ -4,7 +4,7 @@
 {% block usuario %}
 
 			<div class="col-xs-6">
-				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{user_2.user.username}} {{user_2.perfil.perfil}}</label> 
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{request.user.username}}: {{request.user.first_name}} {{request.user.last_name}}</label> 
 				
 			</div>
 			<div class="col-xs-3">
@@ -342,7 +342,7 @@
 
 				<div class="col-xs-3" style="text-align: center;">
 					<label for="">&nbsp;</label>
-					<a class="btn btn-default form-control" id="btn_nuevo_cliente" href="{% url 'empenos:alta_cliente' %}" target="_blank"><span class="glyphicon glyphicon-user"></span> Cl Nvo</a>
+					<a class="btn btn-default form-control" id="btn_nuevo_cliente"  target="_blank"><span class="glyphicon glyphicon-user"></span> Cl Nvo</a>
 
 					
 
@@ -673,7 +673,7 @@
 					if(empeno_exitoso==1)
 					{							
 					  url =$("#imprimir_boleta").attr("href");
-				      window.open(url, '_blank');	
+				      window.open(url, 'popup', 'width=400px,height=400px');	
 					}
 
 					fn_inicio();
@@ -739,13 +739,14 @@ $("#btn_error_plazo").click(
 		$("#btn_nuevo_cliente").click(
 					function()
 					{
-							$("#msj_error").text("Se actualizara la pantalla para que los nuevos clientes sean mostrados.");
+							//$("#msj_error").text("Se actualizara la pantalla para que los nuevos clientes sean mostrados.");
 
 
-							$("#btn_aceptar").attr('href',"/empenos/nvo_empeno");
+							//$("#btn_aceptar").attr('href',"/empenos/nvo_empeno");
 							
 
-							$(".cls_msj_error").show();
+							//$(".cls_msj_error").show();
+							window.open('/empenos/alta_cliente/','popup','width = 700px,height = 700px')
 					}
 			);
 
@@ -980,6 +981,7 @@ $("#btn_error_plazo").click(
 				$(".cls_form_busca_cliente").hide();
 				fn_oculta_errores();
 				fn_consulta_cotizacion();
+
 				$(".cls_agregar_marca").hide();	
 				$("#id_error_marca_2").hide();
 				
@@ -1634,6 +1636,13 @@ $("#btn_error_plazo").click(
 
 			function fn_consulta_cotizacion()
 			{
+				
+				
+				if ("{{empeno_exitoso}}" == "1")
+				{
+					return 0;
+				}
+ 
 				$("#tabla_cotizacion tbody tr").remove();
 				$("#fondo_preloader").show();
 				$.ajax({
@@ -1652,6 +1661,7 @@ $("#btn_error_plazo").click(
 			        	//fallo
 			        	if (r[0].estatus=="0")
 			        	{
+
 			        		$("#msj_error").text(r[0].msj);
 
 							$(".cls_msj_error").show();
@@ -1705,12 +1715,14 @@ $("#btn_error_plazo").click(
 			        	}
 			        },
 			        error: function (r) {
+			        	
 			        		$("#msj_error").text("Error al consultar la cotización");
 							$(".cls_msj_error").show();
 							$("#fondo_preloader").hide();
 			        },
 			        failure: function (r) {
-			        		$("#msj_error").text("Error al consultarconsultar la cotización");
+
+			        		$("#msj_error").text("Error al consultar la cotización");
 							$(".cls_msj_error").show();
 							$("#fondo_preloader").hide();
 			        }

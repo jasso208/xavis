@@ -2,7 +2,7 @@
 {% load bootstrap3 %}
 {% load static%}
 {% block archivos_staticos%}
-<script type="text/javascript" src="{% static 'js/reporte_retiro_efectivo.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/reporte_cajas_abiertas.js' %}"></script>
 {% endblock %}
 {% block usuario %}
 
@@ -13,18 +13,14 @@
 			<div class="col-xs-3">
 				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-home"></span> Sucursal: {{user_2.sucursal}}</label> 	
 			</div>
-
 			<div class="col-xs-3">
 				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-inbox"></span> Caja: {{c}} </label> 	
 			</div>
-
-
 {% endblock  %}
-
 {% block content %}
 	<div class="col-xs-12 cls_encabezado_body">
 		<a>
-			Reporte de retiros de efectivo
+			Reporte de ingresos de efectivo
 		</a>	
 	</div>
 
@@ -70,9 +66,9 @@
 								</div>
 							</div>
 
-							<div class="col-xs-12">
+												<div class="col-xs-12">
 								<div class="cls_encabezado_alert " >
-									<label>Reporte retiro de efectivo {{leyenda}}</label>
+									<label> Reporte de cajas abiertas {{leyenda}}</label>
 								</div>
 
 									<table id="tabla_conceptos_retiro" class="table table-bordered">
@@ -80,39 +76,36 @@
 										      <tr>
 											      	<th ></th>
 											        <th >Folio</th>	
-											        <th >Usuario retira</th>								        
-											        <th >Importe</th>	
+											        <th >Usuario abre</th>								        
+											        <th >Importe ap.</th>	
 											        
-											        <th >Comentario</th>	
-											        <th >Concepto</th>	
-											       	<th>Fecha</th> 
-											        <th>Activo</th>
+											        <th >Usuario cierre</th>
+											        <th >Importe cierre.</th>	
+											       	<th>Fecha ap</th> 
+											        <th>Fecha cierre</th>
 										      </tr>
 									    </thead>
 
 									    <tbody>
-									    	{% for r in retiros%}
+									    	{% for c in cajas %}
 									    	<tr>
 									    		<td>
-									    			<a class="btn btn-default btn-sm" onclick='fn_reimprime_comprobante_retiro("{{r.id}}")';>
+									    			<a class="btn btn-default btn-sm" onclick='fn_reimprime_comprobante_corte_caja("{{c.id}}")';>
 									    				<span class="glyphicon glyphicon-print">
-									    					
+									    					 
 									    				</span>
 									    			</a>
 									    		</td>
-									    		<td>{{r.folio}}</td>
-									    		<td>{{r.usuario.username}}</td>
-									    		<td style="text-align: right;">${{ r.importe | floatformat:2 }}</td>
-									    		<td>{{r.comentario}}</td>
-									    		<td>{{r.concepto.concepto}}</td>
-									    		<td>{{r.fecha|date:'Y-m-d'}}</td>
+									    		<td>{{c.folio}}</td>
+									    		<td>{{c.usuario_real_abre_caja.username}}</td>
+									    		<td style="text-align: right;">${{c.importe | floatformat:"2" }}</td>
+									    		<td>{{c.user_cierra_caja.username}}</td>
+									    		<td style="text-align: right;">${{c.teorico_efectivo | floatformat:"2" }}</td>
 									    		<td>
-									    			{% ifequal r.activo '1' %}
-									    				SI
-									    			{% endifequal %}
-									    			{% ifequal r.activo '2' %}
-									    				NO
-									    			{% endifequal %}
+									    			{{c.fecha}}
+									    		</td>
+									    		<td>
+									    			{{c.fecha_cierre}}
 									    		</td>
 									    	</tr>
 									    	{% endfor %}
@@ -127,6 +120,4 @@
 			</div>
 		</form>
 	</div>
-
-
-{% endblock %}
+	{% endblock %}

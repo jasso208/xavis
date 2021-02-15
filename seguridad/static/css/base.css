@@ -1,7 +1,7 @@
 
 body
 {
-	width: 1345px;
+	width: 1245px;
 	margin: 0 auto;
 }
 
@@ -44,7 +44,7 @@ td
 .mensaje
 {
 	position: fixed;
-	top:10%;
+	top:5%;
 	left: 30%;
 	width: 40%;
 	z-index: 111;
@@ -52,6 +52,8 @@ td
 	border-radius: 5px; 
 	box-shadow: 4px 4px 4px black;	
 	text-align: center;
+	max-height: 90%;
+	
 }
 #panel_principal
 {
@@ -255,7 +257,7 @@ td
 	display: block;
 	text-align: center;
 	background-color: white;
-
+	font-size: 13px;
 	width: 90%;
 	margin-left: 5%;
 	padding-top:20px;

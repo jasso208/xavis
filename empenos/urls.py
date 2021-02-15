@@ -49,9 +49,12 @@ urlpatterns=[
 	url(r'^reporte_ingresos_efectivo/$',reporte_ingresos_efectivo,name="reporte_ingresos_efectivo"),
 	url(r'^admin_comisionpg/$',admin_comisionpg,name="admin_comisionpg"),
 	url(r'^admin_precio_venta/$',admin_precio_venta,name="admin_precio_venta"),
+	url(r'^reporte_cajas_abiertas/$',reporte_cajas_abiertas,name="reporte_cajas_abiertas"),
+
 
 	url(r'^imprime_comprobante_retiro/(?P<id>\w+)/$',imprime_comprobante_retiro,name="imprime_comprobante_retiro"),
 	url(r'^imprime_comprobante_ingreso/(?P<id>\w+)/$',imprime_comprobante_ingreso,name="imprime_comprobante_ingreso"),
+	url(r'^imprime_corte_caja/(?P<id>\w+)/$',imprime_corte_caja,name="imprime_corte_caja"),
 
 
 

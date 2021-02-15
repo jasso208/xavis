@@ -1,0 +1,7 @@
+Django~=3.1.0
+djangorestframework
+django-cors-headers
+django-bootstrap3
+psycopg2-binary
+reportlab
+requests

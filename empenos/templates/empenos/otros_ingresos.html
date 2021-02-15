@@ -4,7 +4,7 @@
 {% block usuario %}
 
 			<div class="col-xs-6">
-				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{user_2.user.username}} {{user_2.perfil.perfil}}</label> 
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{request.user.username}}: {{request.user.first_name}} {{request.user.last_name}}</label> 
 			</div>
 			<div class="col-xs-3">
 				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-home"></span> Sucursal: {{user_2.sucursal}}</label> 	
@@ -155,7 +155,7 @@
 					Error!!
 				</div>	
 				<div class="panel panel-default">	
-					<label class="page-header">No cuentas con caja Abierta</label>
+					<label class="page-header">La sucursal no ha aperturado caja.</label>
 					<br>
 					<a class="btn btn-primary" href="{% url 'seguridad:admin_cajas' %}"> <span class="glyphicon glyphicon-ok"></span> Aceptar</a>
 					<br>

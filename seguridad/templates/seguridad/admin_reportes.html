@@ -4,7 +4,7 @@
 {% block usuario %}
 
 			<div class="col-xs-6">
-				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{user_2.user.username}} {{user_2.perfil.perfil}}</label> 
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{request.user.username}}: {{request.user.first_name}} {{request.user.last_name}}</label> 
 				
 			</div>
 			<div class="col-xs-3">
@@ -81,7 +81,8 @@
 							</span>
 							<br>
 							<br>
-							Genera respaldos en .CSV
+							Reportes en formato .CSV
+							
 						</a>	
 					</div>
 					
@@ -90,11 +91,11 @@
 				
 				<div class="col-xs-2">
 					<div class="cls_boton_body">
-						<a href="#">
+						<a href=" {% url 'empenos:reporte_cajas_abiertas' %} ">
 							<span class="glyphicon glyphicon-inbox"></span>
 							<br>
 							<br>
-							Reporte de apertura de cajas
+							Reporte de cajas abiertas
 						</a>	
 					</div>
 					

@@ -8,7 +8,7 @@
 {% block usuario %}
 
 			<div class="col-xs-6">
-				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{user_2.user.username}} {{user_2.perfil.perfil}}</label> 
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{request.user.username}}: {{request.user.first_name}} {{request.user.last_name}}</label> 
 				
 			</div>
 			<div class="col-xs-3">
@@ -367,7 +367,7 @@
 														<input type="checkbox" class ="form-check cls-chbx" id = "cbx_021" onclick="fn_cambia_estatus_permiso(this,'21')">
 													</div>
 													<div class="col-xs-10">	
-														Reporte de apertura de cajas
+														Reporte de cajas abiertas
 													</div>
 												</div>
 												<div class="col-xs-12">

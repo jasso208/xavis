@@ -61,7 +61,7 @@ class Session(models.Model):
 	sesion=models.IntegerField()
 
 #tabla de clientes
-class Cliente(models.Model):
+"""class Cliente(models.Model):
 	nombre=models.CharField(max_length=20,null=False) #es el nombre de quien recibe
 	apellido_p=models.CharField(max_length=20,null=False)
 	apellido_m=models.CharField(max_length=20)
@@ -69,9 +69,9 @@ class Cliente(models.Model):
 	e_mail=models.CharField(max_length=50,unique=True)
 	rfc=models.CharField(max_length=13,null=True)
 	psw=models.CharField(max_length=10)
-	
+"""	
 class Direccion_Envio_Cliente(models.Model):
-	cliente=models.ForeignKey(Cliente,on_delete=models.PROTECT,null=True)	
+	#cliente=models.ForeignKey(Cliente,on_delete=models.PROTECT,null=True)	
 	calle=models.CharField(max_length=50,null=False)
 	numero_interior=models.CharField(max_length=10,null=False)	
 	numero_exterior=models.CharField(max_length=10,null=False)
@@ -88,7 +88,7 @@ class Direccion_Envio_Cliente(models.Model):
 #tabla el token (session) generdo en el front end y el usuario que se autentico con ese token.
 #para que en posteriores movimientos de ese token, identificar a que cliente le pertenece.
 class Clientes_Logueados(models.Model):
-	cliente=models.ForeignKey(Cliente,on_delete=models.PROTECT)
+	#cliente=models.ForeignKey(Cliente,on_delete=models.PROTECT)
 	session=models.CharField(max_length=18,null=False)
 	
 #cuando el cliente no este logueado o este logueado e intente enviar su pedido

@@ -30,7 +30,64 @@ import email.message
 IP_LOCAL = settings.IP_LOCAL
 LOCALHOST=settings.LOCALHOST
 
+@transaction.atomic
 def abrir_caja(request):
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2 = User_2.fn_is_logueado(request.user)
+
+	if user_2 == None:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+
+	#estatus 0: indica error
+	#estatus 1: indica todo ok
+	#estatus 2: indica todo nada
+	estatus = "2" 
+	msj_error = ""
+
+	hoy = date.today()
+	hoy_min = datetime.combine(hoy,time.min)
+	hoy_max = datetime.combine (hoy,time.max)
+
+	#obtenemos la sucursal por default del cliente.
+	sucursal = user_2.sucursal
+
+	#validamos que la sucursal no cuente con caja abierta en el dia.
+
+	try:
+		#Si existe caja no permite entrada
+		caja = Cajas.objects.get(sucursal = sucursal, fecha__range = (hoy_min,hoy_max))
+		estatus = "0"
+		msj_error = "La sucursal ya aperturo caja el dìa de hoy. Si ya fue cerrada, solicite reapertura"
+		return render(request,'empenos/abre_caja.html',locals())
+	except Exception as e:
+		print(e)
+		pass
+
+	#validamos que la sucursal no cuente con caja abierta en dias anteriores
+	try:
+		caja = Cajas.objects.get(sucursal = sucursal,fecha_cierre__isnull = True)
+		estatus = "0"
+		msj_error = "La sucursal cuenta con caja abierta en dias anteriores. Cierrela para poder abrir nuevamente hoy."
+		return render(request,'empenos/abre_caja.html',locals())
+	except:
+		pass
+
+	#obtenemos el importe con el que se aperturara la caja.
+	#sucursal.saldo
+
+	if request.method == "POST":
+		r = sucursal.fn_abre_caja(sucursal.saldo,request.user)
+		if r[0]:
+			estatus = "1"
+		else:
+			estatus = "0"
+			msj_error = r[1]						
+			return render(request,'empenos/abre_caja.html',locals())
+
+	return render(request,'empenos/abre_caja.html',locals())
+
+
+	"""
 	if not request.user.is_authenticated:
 		return HttpResponseRedirect(reverse('seguridad:login'))
 	
@@ -109,7 +166,8 @@ def abrir_caja(request):
 			
 	else:
 		form=Abre_Caja_Form()
-	return render(request,'empenos/abre_caja.html',locals())
+	"""
+
 
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
@@ -889,35 +947,32 @@ def imprime_apartado(request):
 
 @transaction.atomic
 def venta_piso(request):
-	#si no esta logueado mandamos al login
-	if not request.user.is_authenticated:
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2_1 = User_2.fn_is_logueado(request.user)
+	if user_2_1 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
-	
-	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
-		user_2=User_2.objects.get(user=request.user)
-	except Exception as e:		
-		print(e)
-		form=Login_Form(request.POST)
-		estatus=0
-		msj="La cuenta del usuario esta incompleta."			
-		return render(request,'login.html',locals())
+
+	#obtenemos el usuario virtual de la sucursal.
+	#ya que sobre este usuario se registran los ingresos.
+	user_2 = User_2.objects.get(user = user_2_1.sucursal.usuario_virtual)
+
+	#validamos si el usuario tiene caja abierta
+	caja = user_2.fn_tiene_caja_abierta()
+
+
+	if caja == None:
+		caja_abierta="0"
+		caja=Cajas
+
+	suc  = user_2.sucursal
+
 
 	pub_date = date.today()
 	min_pub_date_time = datetime.combine(pub_date, time.min) 
 	max_pub_date_time = datetime.combine(pub_date, time.max)  
 
-	try:		
-		#validamos si el usuario tiene caja abierta en el dia actual.
-		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
-		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
-		suc=caja.sucursal
-		c=caja.caja
 
-	except Exception as e:
-		print(e)
-		caja_abierta="0"
-		caja=Cajas
+	suc  = user_2.sucursal
 
 	username=request.user.username
 	id_sucursal=user_2.sucursal.id
@@ -1356,6 +1411,54 @@ def reporte_ingresos_efectivo(request):
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
 
+def reporte_cajas_abiertas(request):
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2 = User_2.fn_is_logueado(request.user)
+	if user_2 == None:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+		
+	if not user_2.fn_tiene_acceso_a_vista(21):
+		return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
+
+	caja = user_2.fn_tiene_caja_abierta()
+
+	if caja != None:
+		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
+		suc=caja.sucursal
+		c=caja.caja
+	else:
+		caja_abierta="0"
+		caja=Cajas
+
+	leyenda = ""
+	if request.method == "POST":
+
+		id_sucursal = request.POST.get("sucursal")
+
+		hoy = date.today()
+
+		fecha_inicial = datetime.strptime(request.POST.get("fecha_inicial"),'%Y-%m-%d').date()
+		fecha_final = datetime.strptime(request.POST.get("fecha_final"),'%Y-%m-%d').date()
+
+		fecha_inicial = datetime.combine(fecha_inicial,time.min)
+		fecha_final = datetime.combine(fecha_final,time.max)
+		sucursal = Sucursal.objects.get(id = id_sucursal)
+
+		txt_sucursal = Sucursal.objects.get(id = id_sucursal).sucursal
+		leyenda = " de la sucursal " + txt_sucursal + " del " + request.POST.get("fecha_inicial") + " al " +request.POST.get("fecha_final")
+
+		cajas = Cajas.objects.filter(sucursal = sucursal,fecha__range = (fecha_inicial,fecha_final)).order_by("-fecha")
+
+		if request.POST.get("export_pdf") == "1":
+			return rep_cajas_abiertas(cajas,request.POST.get("fecha_inicial"),request.POST.get("fecha_final"),request,txt_sucursal)
+
+
+	form = Reporte_Cajas_Form()
+
+	return render(request,'empenos/reporte_cajas_abiertas.html',locals())
+#*******************************************************************************************************************************************************
+#*¨**************************************************************************************************************************************************************
+
 def consulta_apartado(request):
 	#si no esta logueado mandamos al login
 	if not request.user.is_authenticated:
@@ -1420,35 +1523,32 @@ def consulta_apartado(request):
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
 def consulta_venta(request):
-	#si no esta logueado mandamos al login
-	if not request.user.is_authenticated:
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2_1 = User_2.fn_is_logueado(request.user)
+	if user_2_1 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
-	
-	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
-		user_2=User_2.objects.get(user=request.user)
-	except Exception as e:		
-		print(e)
-		form=Login_Form(request.POST)
-		estatus=0
-		msj="La cuenta del usuario esta incompleta."			
-		return render(request,'login.html',locals())
 
+	#obtenemos el usuario virtual de la sucursal.
+	#ya que sobre este usuario se registran los ingresos.
+	user_2 = User_2.objects.get(user = user_2_1.sucursal.usuario_virtual)
+
+	#validamos si el usuario tiene caja abierta
+	caja = user_2.fn_tiene_caja_abierta()
+
+
+	if caja == None:
+		caja_abierta="0"
+		caja=Cajas
+		return render(request,'empenos/venta_granel.html',locals())
+
+	
+	suc=caja.sucursal
+	c=caja.caja
 	pub_date = date.today()
 	min_pub_date_time = datetime.combine(pub_date, time.min) 
 	max_pub_date_time = datetime.combine(pub_date, time.max)  
 
-	try:
-		#validamos si el usuario tiene caja abierta en el dia actual.
-		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
-		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
-		suc=caja.sucursal
-		c=caja.caja
-	except Exception as e:
-		print(e)
-		caja_abierta="0"
-		caja=Cajas
-
+	
 		
 	permiso="1"	
 
@@ -1471,50 +1571,39 @@ def consulta_venta(request):
 #*¨**************************************************************************************************************************************************************
 @transaction.atomic
 def venta_granel(request):
-	#si no esta logueado mandamos al login
-	if not request.user.is_authenticated:
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2_1 = User_2.fn_is_logueado(request.user)
+	if user_2_1 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
-	
-	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
-		user_2=User_2.objects.get(user=request.user)
-	except Exception as e:		
-		print(e)
-		form=Login_Form(request.POST)
-		estatus=0
-		msj="La cuenta del usuario esta incompleta."			
-		return render(request,'login.html',locals())
+
+	#obtenemos el usuario virtual de la sucursal.
+	#ya que sobre este usuario se registran los ingresos.
+	user_2 = User_2.objects.get(user = user_2_1.sucursal.usuario_virtual)
+
+	#validamos si el usuario tiene caja abierta
+	caja = user_2.fn_tiene_caja_abierta()
+
+
+	if caja == None:
+		caja_abierta="0"
+		caja=Cajas
+		return render(request,'empenos/venta_granel.html',locals())
+
+	suc  = user_2.sucursal
 
 	pub_date = date.today()
 	min_pub_date_time = datetime.combine(pub_date, time.min) 
 	max_pub_date_time = datetime.combine(pub_date, time.max)  
 
-	try:
-		#validamos si el usuario tiene caja abierta en el dia actual.
-		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
-		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
-		suc=caja.sucursal
-		c=caja.caja
-	except Exception as e:
-		print(e)
-		caja_abierta="0"
-		caja=Cajas
-		return render(request,'empenos/venta_granel.html',locals())
-
 	permiso="1"	
-
 
 	error="0"#no muestra error
 	#validamos tambien el permiso al hacer post, por si modificaron el front para tener acceso a la pantalla
 	if request.method=="POST" and permiso=="1":
 		try:
-
 			error="1"#todo bien
-
-
 			#obtenemos todas las boletas que estan marcadas para venta.
 			vt2=Venta_Temporal.objects.filter(usuario=user_2.user,vender="S")
-
 			#en caso de que no se haya seleccionado al menos una boleta para la venta, 
 			#se regresa error al guardar
 			if not vt2.exists():
@@ -1523,12 +1612,14 @@ def venta_granel(request):
 
 			avaluo=0.00
 			mutuo=0.00
+
 			for x in vt2:
 				avaluo=decimal.Decimal(avaluo)+decimal.Decimal(x.boleta.avaluo)
 				mutuo=decimal.Decimal(mutuo)+decimal.Decimal(x.boleta.mutuo)
 			
+			#la caja y el importe de venta se muestra hasta que se le da entrada al dinero.
 			vg=Venta_Granel()
-			vg.usuario=user_2.user
+			vg.usuario=request.user
 			vg.importe_mutuo=mutuo
 			vg.importe_avaluo=avaluo
 			vg.sucursal=user_2.sucursal
@@ -1541,9 +1632,9 @@ def venta_granel(request):
 			vendida=Estatus_Boleta.objects.get(id=6)
 
 			for x in vt2:
-				dvg=Det_Venta_Granel()
-				dvg.boleta=x.boleta
-				dvg.venta=vg
+				dvg = Det_Venta_Granel()
+				dvg.boleta = x.boleta
+				dvg.venta = vg
 				dvg.save()	
 
 				#todas las boletas que se incluyan el na venta, se marcara como boleta vendida.
@@ -1551,10 +1642,10 @@ def venta_granel(request):
 				x.boleta.save()					
 
 			#borramos las boletas que el usuario imprimio anterior mente, en caso de existir
-			Imprime_Venta_Granel.objects.filter(usuario=user_2.user).delete()
+			Imprime_Venta_Granel.objects.filter(usuario=request.user).delete()
 
 			#almacenamos la venta en la tabla para imprimir.
-			Imprime_Venta_Granel.objects.create(usuario=user_2.user,venta_granel=vg)
+			Imprime_Venta_Granel.objects.create(usuario=request.user,venta_granel=vg)
 
 			#borramos la venta temporal
 			Venta_Temporal.objects.filter(usuario=user_2.user).delete()
@@ -1619,9 +1710,13 @@ def admin_kilataje(request):
 #*¨**************************************************************************************************************************************************************
 def otros_ingresos(request):
 	#si regresa none, es porque el usuario no esta logueado.
-	user_2 = User_2.fn_is_logueado(request.user)
-	if user_2 == None:
+	user_2_1 = User_2.fn_is_logueado(request.user)
+	if user_2_1 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
+
+	#obtenemos el usuario virtual de la sucursal.
+	#ya que sobre este usuario se registran los ingresos.
+	user_2 = User_2.objects.get(user = user_2_1.sucursal.usuario_virtual)
 
 	#validamos si el usuario tiene caja abierta
 	caja = user_2.fn_tiene_caja_abierta()
@@ -1650,6 +1745,7 @@ def otros_ingresos(request):
 			f.folio=str_folio
 			f.usuario=request.user
 			f.caja=c
+			f.ocaja = caja
 			f.save()
 			id_ingreso = f.id
 			#return HttpResponseRedirect(reverse('seguridad:admin_cajas'))
@@ -2665,9 +2761,15 @@ def retiro_efectivo(request):
 	id_retiro = "0"
 
 	#si regresa none, es porque el usuario no esta logueado.
-	user_2 = User_2.fn_is_logueado(request.user)
-	if user_2 == None:
+	user_2_1 = User_2.fn_is_logueado(request.user)
+	if user_2_1 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
+
+
+	#obtenemos el usuario virtual de la sucursal.
+	#ya que sobre este usuario se registran los ingresos.
+	user_2 = User_2.objects.get(user = user_2_1.sucursal.usuario_virtual)
+
 
 	pub_date = date.today()
 	min_pub_date_time = datetime.combine(pub_date, time.min) 
@@ -2682,7 +2784,7 @@ def retiro_efectivo(request):
 	try:
 
 		#validamos si el usuario tiene caja abierta en el dia actual.,si no tiene fecha de cierre es prque aun no ha sido cerrada.
-		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=user_2.user)
 		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
 		suc=caja.sucursal
 		c=caja.caja
@@ -2691,28 +2793,29 @@ def retiro_efectivo(request):
 	except Exception as e:
 		print(e)
 		#si mandamos este estatus es que hay que bloquear el acceos ya que no tiene caja abierta
-		caja_abierta="0"
-		caja=Cajas
-		form=Retiro_Efectivo_Form()
+		caja_abierta = "0"
+		caja = Cajas
+		form = Retiro_Efectivo_Form()
 		return render(request,'empenos/retiro_efectivo.html',locals())
 
 	#buscamos las reimpresiones de boleta
-	cont_rebol=Reg_Costos_Extra.objects.filter(caja=caja).count()
-	sum_importe_rebol=Reg_Costos_Extra.objects.filter(caja=caja).aggregate(Sum('importe'))
+	cont_rebol = Reg_Costos_Extra.objects.filter(caja = caja).count()
+	sum_importe_rebol = Reg_Costos_Extra.objects.filter(caja = caja).aggregate(Sum('importe'))
 
-	importe_rebol=0.00
-	if sum_importe_rebol["importe__sum"]==None:
-		importe_rebol=0.00
+	importe_rebol = 0.00
+	if sum_importe_rebol["importe__sum"] == None:
+		importe_rebol = 0.00
 	else:
-		importe_rebol=int(sum_importe_rebol["importe__sum"])
+		importe_rebol = int(sum_importe_rebol["importe__sum"])
 
 
 
-	#buscamos si el cajero tubo otros ingresos
+	#como solo se puede abrir una caja por sucursal al dia (el usuario virtual la abre)	
 	try:
-		oi=Otros_Ingresos.objects.filter(sucursal=suc,usuario=request.user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c).aggregate(Sum('importe'))
-		cont_otros_ingresos=Otros_Ingresos.objects.filter(sucursal=suc,usuario=request.user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c).count()
-		total_movs=total_movs+cont_otros_ingresos
+		#oi=Otros_Ingresos.objects.filter(sucursal=suc,usuario=request.user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c).aggregate(Sum('importe'))
+		oi=Otros_Ingresos.objects.filter(ocaja = caja).aggregate(Sum('importe'))
+		cont_otros_ingresos = Otros_Ingresos.objects.filter(ocaja = caja).count()
+		total_movs = total_movs + cont_otros_ingresos
 
 		if oi["importe__sum"]!= None:
 			otros_ingresos=oi["importe__sum"]
@@ -2725,14 +2828,14 @@ def retiro_efectivo(request):
 
 	#buscamos los retiros
 	try:
-		ret=Retiro_Efectivo.objects.filter(sucursal=suc,usuario=request.user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c,activo = 1).aggregate(Sum('importe'))
-		cont_retiros=Retiro_Efectivo.objects.filter(sucursal=suc,usuario=request.user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c,activo = 1).count()
+		ret=Retiro_Efectivo.objects.filter(ocaja = caja,activo = 1).aggregate(Sum('importe'))
+		cont_retiros=Retiro_Efectivo.objects.filter(ocaja = caja,activo = 1).count()
 		total_movs=total_movs+cont_retiros #sumamos el total de retiros al total de movimientos
 		if ret["importe__sum"]!=None:
 			retiros=ret["importe__sum"]
 	except Exception as e:
 		print(e)
-		print("No tiene otros ingresos.")
+		print("No tiene retiros.")
 
 
 	try:
@@ -2818,25 +2921,19 @@ def retiro_efectivo(request):
 			if rel_ab_pagos_pg.exists():
 				cont_com_pg=cont_com_pg+1
 
-			
-
 			for p in rel_ab_pagos:
 				
 				if p.pago.tipo_pago==est_refrendo:#si afecto a refrendo acumulamos el importe.
 					
 					importe_refrendo=decimal.Decimal(importe_refrendo)+decimal.Decimal(p.pago.importe)
-					
 
-				
 				if p.pago.tipo_pago==est_com_pg:#si afecto a comision pg acumulamos el importe.
 					
 					comisiones_pg=decimal.Decimal(comisiones_pg)+decimal.Decimal(p.pago.importe)
 
-				
 				if p.pago.tipo_pago==est_ref_pg:#si afecto a refrebdis pg acumulamos el importe.
 					
 					importe_refrendo=decimal.Decimal(importe_refrendo)+decimal.Decimal(p.pago.importe)
-
 
 			#las boletas de plazo mensual se pagan en periodos			
 			rap=Rel_Abono_Periodo.objects.filter(abono=ab)
@@ -2849,14 +2946,14 @@ def retiro_efectivo(request):
 			importe_refrendo=round(importe_refrendo)
 
 			
-			rel_ab_cap=Rel_Abono_Capital.objects.filter(abono=ab).exclude(capital_restante=0).aggregate(Sum("importe"))#buscamos si el abono afecto a capital
+			rel_ab_cap = Rel_Abono_Capital.objects.filter(abono=ab).exclude(capital_restante=0).aggregate(Sum("importe"))#buscamos si el abono afecto a capital
 			cont_pc=cont_pc+Rel_Abono_Capital.objects.filter(abono=ab).exclude(capital_restante=0).count()
 
 			
 			if rel_ab_cap["importe__sum"]==None:
-				pago_capital=pago_capital+0
+				pago_capital = pago_capital+0
 			else:
-				pago_capital=pago_capital+int(rel_ab_cap["importe__sum"])
+				pago_capital = pago_capital+int(rel_ab_cap["importe__sum"])
 
 			rel_desem=Rel_Abono_Capital.objects.filter(abono=ab)#.exclude(capital_restante__gte=0).aggregate(Sum("importe"))#buscamos si el abono afecto a capital
 			#cont_desemp=cont_desemp+Rel_Abono_Capital.objects.filter(abono=ab).exclude(capital_restante__gte=0).count()
@@ -2923,6 +3020,8 @@ def retiro_efectivo(request):
 		read_only="1"
 
 		form=Retiro_Efectivo_Form(request.POST)				
+
+
 		
 		folio=fn_folios(tm,suc)
 		str_folio=fn_str_clave(folio)
@@ -2935,8 +3034,22 @@ def retiro_efectivo(request):
 			concepto =Concepto_Retiro.objects.get(id = q_token.aux_1) 
 		except:
 			print("no hay token")
+	
+		
+		saldo_concepto = concepto.fn_saldo_concepto()		
+
+		
+		error_saldo_concepto = "0"
+		if int(saldo_concepto) >= int(request.POST["importe"]):	
+			pass#
+			error_saldo_concepto = "0"
+		else:			
+			error_saldo_concepto = "1"
+			
+			return render(request,'empenos/retiro_efectivo.html',locals())
 
 		if form.is_valid():
+			#with transaction.atomic():
 			f=form.save(commit=False)
 			error_token='0'
 			id_concepto = f.concepto.id
@@ -2950,12 +3063,14 @@ def retiro_efectivo(request):
 			except Exception as e:
 				print(e)
 				error_token='1'
+				#transaction.set_rollback(True)
 				return render(request,'empenos/retiro_efectivo.html',locals())
-				print (e)
+				
 
 			#validamos que la caja tenga fondos suficiente para realizar el retiro.
 			if total_efectivo<f.importe:
 				error_no_fondos='1'
+				#transaction.set_rollback(True)
 				return render(request,'empenos/retiro_efectivo.html',locals())
 
 			f.folio=str_folio
@@ -2963,6 +3078,7 @@ def retiro_efectivo(request):
 			f.caja=c
 			f.usuario=request.user
 			f.concepto = concepto
+			f.ocaja = caja
 			f.save()
 
 			id_retiro = f.id
@@ -2982,7 +3098,7 @@ def retiro_efectivo(request):
 		Token.objects.create(tipo_movimiento=tm,sucursal=suc,caja=c,usuario=request.user,token=token)
 
 		asunto	="Retiro de Efectivo"
-		usuario =user_2.user.first_name+' '+user_2.user.last_name
+		usuario =request.user.first_name+' '+request.user.last_name
 		sucursal=suc
 		caja=c	
 		error_token='0'
@@ -2994,41 +3110,41 @@ def retiro_efectivo(request):
 # a esta pantalla solo pueden entrar el gerente de sucursal y el gerente regional.
 def corte_caja(request):
 
-	#si no esta logueado mandamos al login
-	if not request.user.is_authenticated:
+
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2_1 = User_2.fn_is_logueado(request.user)
+	if user_2_1 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
 
-	IP_LOCAL=settings.IP_LOCAL
+	#obtenemos el usuario virtual de la sucursal.
+	#ya que sobre este usuario se registran los ingresos.
+	user_2 = User_2.objects.get(user = user_2_1.sucursal.usuario_virtual)
 
-	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
-		user_2=User_2.objects.get(user=request.user)
-	except Exception as e:		
-		form=Login_Form(request.POST)
-		estatus=0
-		msj="La cuenta del usuario esta incompleta."			
-		return render(request,'login.html',locals())
-
-	perfil_valido='1'
-
-	id_perfil=user_2.perfil.id
+	#validamos si el usuario tiene caja abierta
+	caja = user_2.fn_tiene_caja_abierta()
 
 	c=""
+
+	if caja != None:
+		c = caja.caja
+		#return render(request,'login.html',locals())
+
+	IP_LOCAL = settings.IP_LOCAL
+
+	perfil_valido = '1'
+
 	pub_date = date.today()
 	min_pub_date_time = datetime.combine(pub_date, time.min) 
 	max_pub_date_time = datetime.combine(pub_date, time.max)  
 
-	try:
-		#validamos si el usuaario tiene caja abierta para mostrarla en el encabezado.
-		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
-		c=caja.caja
-	except Exception as e:
-		print(e)
+	id_perfil = user_2.perfil.id
 
-	sucursales=Sucursales_Regional.objects.filter(user=user_2.user,sucursal=user_2.sucursal)
+	#sucursales = Sucursales_Regional.objects.filter(user=user_2.user,sucursal=user_2.sucursal)
+
 
 	is_post="0"
 	error_guardar=""
+	imprime_comprobante = "0"
 	if request.method=='POST':
 		is_post="1"
 		try:
@@ -3076,7 +3192,7 @@ def corte_caja(request):
 			today = date.today()
 
 			
-			
+			imprime_comprobante = str(caja.id)
 
 		except Exception as e:
 			error_guardar="Error al cerrar la caja."
@@ -3094,7 +3210,7 @@ idpermiso = 20
 """
 def reportes_caja(request):
 
-
+ 
 	#si regresa none, es porque el usuario no esta logueado.
 	user_2 = User_2.fn_is_logueado(request.user)
 	if user_2 == None:
@@ -3147,6 +3263,7 @@ def reportes_caja(request):
 				msj_error="No existen cajas abiertas en la fecha indicada."
 				return render(request,'empenos/reportes_caja.html',locals())	
 
+			print(cajas)
 			try:
 				nom_archivo='Rep_Cajas_'+request.POST.get('fecha_inicial')+'-'+request.POST.get('fecha_final')+'.csv'
 				response = HttpResponse(content_type='text/csv')
@@ -3154,7 +3271,7 @@ def reportes_caja(request):
 
 				writer = csv.writer(response)
 
-				writer.writerow(['Fecha Apertura','Estatus','User Name', 'Nombre Usuario', 'Folio','Sucursal','Importe de Apertura','Caja','Real Efectivo','Teorico Efectivo','Diferencia','1 Peso','2 Pesos','5 Pesos','10 Pesos','20 Pesos','50 Pesos','100 Pesos','200 Pesos','500 Pesos','1000 Pesos','Fecha Cierre','User Name Cierre','Usuario Cierre','Comentario'])
+				writer.writerow(['Fecha Apertura','Estatus','User Name Apertura', 'Nombre Usuario Apertura', 'Folio','Sucursal','Importe de Apertura','Caja','Real Efectivo','Teorico Efectivo','Diferencia','1 Peso','2 Pesos','5 Pesos','10 Pesos','20 Pesos','50 Pesos','100 Pesos','200 Pesos','500 Pesos','1000 Pesos','Fecha Cierre','User Name Cierre','Usuario Cierre','Comentario'])
 
 				for c in cajas:				
 					estatus="Cerrada"
@@ -3165,8 +3282,18 @@ def reportes_caja(request):
 					if c.user_cierra_caja!=None:
 						nombre_user_cierra=c.user_cierra_caja.first_name+''+c.user_cierra_caja.last_name
 
+					txt_usuario_abre = ""
+					txt_username = ""
+					if c.usuario_real_abre_caja == None:
+						txt_usuario_abre = c.usuario.first_name+' '+c.usuario.last_name
+						txt_username = c.usuario.username
+					else:
+						txt_usuario_abre = c.usuario_real_abre_caja.first_name+' '+c.usuario_real_abre_caja.last_name
+						txt_username = c.usuario_real_abre_caja.username
 
-					writer.writerow([str(c.fecha),estatus, c.usuario.username, c.usuario.first_name+' '+c.usuario.last_name, c.folio,c.sucursal.sucursal,c.importe,c.caja,c.real_efectivo,c.teorico_efectivo,c.diferencia,c.pesos_1,c.pesos_2,c.pesos_5,c.pesos_10,c.pesos_20,c.pesos_50,c.pesos_100,c.pesos_200,c.pesos_500,c.pesos_1000,str(c.fecha_cierre),c.user_cierra_caja,nombre_user_cierra,c.comentario])					
+					
+
+					writer.writerow([str(c.fecha),estatus, txt_username,txt_usuario_abre , c.folio,c.sucursal.sucursal,c.importe,c.caja,c.real_efectivo,c.teorico_efectivo,c.diferencia,c.pesos_1,c.pesos_2,c.pesos_5,c.pesos_10,c.pesos_20,c.pesos_50,c.pesos_100,c.pesos_200,c.pesos_500,c.pesos_1000,str(c.fecha_cierre),c.user_cierra_caja,nombre_user_cierra,c.comentario])					
 
 				return response
 			except:
@@ -3379,19 +3506,6 @@ def alta_cliente(request,id_cliente=None):
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
 def consulta_abono(request):
-	#si no esta logueado mandamos al login
-	if not request.user.is_authenticated:
-		return HttpResponseRedirect(reverse('seguridad:login'))
-	
-	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
-		user_2=User_2.objects.get(user=request.user)
-	except Exception as e:		
-		form=Login_Form(request.POST)
-		estatus=0
-		msj="La cuenta del usuario esta incompleta."			
-		return render(request,'login.html',locals())
-
 	IP_LOCAL = settings.IP_LOCAL
 
 	c=""
@@ -3407,15 +3521,28 @@ def consulta_abono(request):
 		costo_reimpresion=0
 
 
-	try:
-		#validamos si el usuaario tiene caja abierta para mostrarla en el encabezado.
-		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
-		c=caja.caja
-		id_caja=caja.id
 
-	except Exception as e:
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2_1 = User_2.fn_is_logueado(request.user)
+	if user_2_1 == None:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+
+	#obtenemos el usuario virtual de la sucursal.
+	#ya que sobre este usuario se registran los ingresos.
+	user_2 = User_2.objects.get(user = user_2_1.sucursal.usuario_virtual)
+
+	#validamos si el usuario tiene caja abierta
+	caja = user_2.fn_tiene_caja_abierta()
+
+	if caja == None:
 		msj_error="No cuentas con caja abierta."
 		print(e)
+
+	c=caja.caja
+	id_caja=caja.id
+
+
+
 
 
 	if request.method=="POST":
@@ -3479,18 +3606,17 @@ def cancela_abono(request):
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
 def consulta_boleta(request):
-	#si no esta logueado mandamos al login
-	if not request.user.is_authenticated:
+
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2_1 = User_2.fn_is_logueado(request.user)
+	if user_2_1 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
-	
-	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
-		user_2=User_2.objects.get(user=request.user)
-	except Exception as e:		
-		form=Login_Form(request.POST)
-		estatus=0
-		msj="La cuenta del usuario esta incompleta."			
-		return render(request,'login.html',locals())
+
+	#obtenemos el usuario virtual de la sucursal.
+	#ya que sobre este usuario se registran los ingresos.
+	user_2 = User_2.objects.get(user = user_2_1.sucursal.usuario_virtual)
+
+
 	IP_LOCAL = settings.IP_LOCAL
 
 	c=""
@@ -3505,13 +3631,11 @@ def consulta_boleta(request):
 	except:
 		costo_reimpresion=0
 
-
 	try:
 		#validamos si el usuaario tiene caja abierta para mostrarla en el encabezado.
-		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=user_2.user)
 		c=caja.caja
 		id_caja=caja.id
-
 	except Exception as e:
 		msj_error="No cuentas con caja abierta."
 		print(e)
@@ -3519,15 +3643,12 @@ def consulta_boleta(request):
 	if request.method=="POST":
 		
 		try:
-			id_sucursal=request.POST.get("sucursal")		
-
+			id_sucursal=request.POST.get("sucursal")	
 			no_boleta=request.POST.get("boleta")
 			fecha_inicial=request.POST.get("fecha_inicial")
 			fecha_final=request.POST.get("fecha_final")
 			estatus_boleta=request.POST.get("estatus_boleta")
 			cliente=request.POST.get("cliente").upper()
-
-
 			sucursal=Sucursal.objects.get(id=id_sucursal)
 
 			if cliente!="":
@@ -3658,39 +3779,37 @@ def admin_porc_avaluo(request):
 #*¨**************************************************************************************************************************************************************
 @transaction.atomic
 def nvo_empeno(request):	
-	#si no esta logueado mandamos al login
-	if not request.user.is_authenticated:
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2_1 = User_2.fn_is_logueado(request.user)
+	if user_2_1 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
-	
-	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
-		user_2=User_2.objects.get(user=request.user)
-	except Exception as e:		
-		form=Login_Form(request.POST)
-		estatus=0
-		msj="La cuenta del usuario esta incompleta."			
-		return render(request,'login.html',locals())
+
+	#obtenemos el usuario virtual de la sucursal.
+	#ya que sobre este usuario se registran los ingresos.
+	user_2 = User_2.objects.get(user = user_2_1.sucursal.usuario_virtual)
+
 	IP_LOCAL = settings.IP_LOCAL
-	id_usuario=user_2.user.id
+
+	#el usuario real que hace el empeño
+	id_usuario = request.user.id
 
 	c=""
 	pub_date = date.today()
 	min_pub_date_time = datetime.combine(pub_date, time.min) 
 	max_pub_date_time = datetime.combine(pub_date, time.max)  
 
-	plazos=Plazo.objects.all()
+	plazos = Plazo.objects.all()
 
 	msj_error=""	
 	try:
-		#validamos si el usuaario tiene caja abierta para mostrarla en el encabezado.
-		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
-		
-		c=caja.caja
+		#validamos si el usuaario virtual tiene caja abierta
+		caja = Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=user_2.user)
+		c = caja.caja
 	except Exception as e:
-		msj_error="No cuentas con caja abierta."
+		msj_error = "La sucursal no ha aperturado caja."
 		print(e)
-		form=Nuevo_Empeno_Form()
-		empeno_exitoso="2"
+		form = Nuevo_Empeno_Form()
+		empeno_exitoso = "2"
 		return render(request,'empenos/nvo_empeno.html',locals())
 
 	id_sucursal = caja.sucursal.id
@@ -3779,8 +3898,8 @@ def nvo_empeno(request):
 				boleta = Boleta_Empeno()
 				boleta.folio = str_folio
 				boleta.tipo_producto = oro
-				boleta.caja = caja
-				boleta.usuario = request.user
+				boleta.caja = caja #por medio de la caja obtenemos el usuario virtual y la sucursal
+				boleta.usuario = request.user #con el usuario nos damos cuenta de quien realmente hizo el empeño
 				boleta.avaluo = avaluo
 				boleta.mutuo = mutuo
 				boleta.fecha = timezone.now()
@@ -4231,16 +4350,19 @@ def admin_comisionpg(request):
 #Se aplican refrendos para cuantro semanas.
 def refrendo(request,id_boleta):
 
-	#si regresa nonem, es porque el usuario no esta logueado.
-	user_2 = User_2.fn_is_logueado(request.user)
-
-	if user_2 == None:
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2_1 = User_2.fn_is_logueado(request.user)
+	if user_2_1 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
+
+	#obtenemos el usuario virtual de la sucursal.
+	#ya que sobre este usuario se registran los ingresos.
+	user_2 = User_2.objects.get(user = user_2_1.sucursal.usuario_virtual)
 
 	#validamos si el usuario tiene caja abierta
 	caja = user_2.fn_tiene_caja_abierta()
 
-	c=caja.caja
+	
 	
 	msj_error = ""
 
@@ -4252,6 +4374,8 @@ def refrendo(request,id_boleta):
 		msj_error="No cuentas con caja abierta."
 		estatus = "0"
 		return render(request,'empenos/refrendo_semanal.html',locals())
+
+	c=caja.caja
 
 	#buscamos la boleta a refrendar.
 	boleta=Boleta_Empeno.objects.get(id=int(id_boleta))
@@ -4392,20 +4516,32 @@ def refrendo(request,id_boleta):
 #*¨**************************************************************************************************************************************************************
 @transaction.atomic
 def refrendo_plazo_mensual(request,id_boleta):	
-
-	#si no esta logueado mandamos al login
-	if not request.user.is_authenticated:
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2_1 = User_2.fn_is_logueado(request.user)
+	if user_2_1 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
+
+	#obtenemos el usuario virtual de la sucursal.
+	#ya que sobre este usuario se registran los ingresos.
+	user_2 = User_2.objects.get(user = user_2_1.sucursal.usuario_virtual)
+
+	#validamos si el usuario tiene caja abierta
+	caja = user_2.fn_tiene_caja_abierta()
+
 	
-	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
-		user_2=User_2.objects.get(user=request.user)
-	except Exception as e:		
-		form=Login_Form(request.POST)
-		estatus=0
-		msj="La cuenta del usuario esta incompleta."			
-		return render(request,'login.html',locals())
 	
+	msj_error = ""
+
+	#el estatus 1 indica que todo esta ok, 
+	#el estatus 0 indica que se presento un error. el error debe venir acompalñado de una leyenda en la variable msj_error
+	
+
+	if caja == None:		
+		msj_error="No cuentas con caja abierta."
+		
+		return render(request,'empenos/refrendo_semanal.html',locals())
+
+	c=caja.caja
 
 	id_usuario=user_2.user.id
 
@@ -4419,13 +4555,7 @@ def refrendo_plazo_mensual(request,id_boleta):
 	plazos=Plazo.objects.all()
 
 	msj_error=""	
-	try:
-		#validamos si el usuaario tiene caja abierta para mostrarla en el encabezado.
-		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
-		c=caja.caja
-	except Exception as e:
-		msj_error="No cuentas con caja abierta."
-		print(e)
+
 
 	hoy=datetime.now()#fecha actual
 	hoy=datetime.combine(hoy, time.min)
@@ -4899,11 +5029,13 @@ def imprime_abono(request):
 
 		current_row=current_row-heigth_row
 
+		p.setFont("Helvetica",10)
+		p.drawString(350,current_row,"Cajero: " + abono.usuario.first_name + ' ' + abono.usuario.last_name)
 
 		current_row=current_row-heigth_row
 		
 
-
+	
 
 		p.setFont("Helvetica-Bold",10)
 		p.drawString(350,current_row,str(abono.fecha.strftime("%Y-%m-%d %H:%M:%S")))
@@ -5795,7 +5927,7 @@ def imprime_boleta(request):
 			p.line(550,245,550,200)
 
 			p.setFont("Helvetica-Bold",10)
-			p.drawString(435,205,"Valuador")
+			p.drawString(370,205,"Valuador: "+ x.boleta.usuario.first_name + ' ' + x.boleta.usuario.last_name)
 
 
 			u=0
@@ -5815,7 +5947,7 @@ def imprime_boleta(request):
 
 			p.line(420,100,545,100)
 
-			p.drawString(465,80,"Valuador")
+			p.drawString(420,80,"Valuador: "+ x.boleta.usuario.first_name + ' ' + x.boleta.usuario.last_name)
 
 
 			p.line(200,160,400,160)
@@ -6020,6 +6152,8 @@ def api_consulta_corte_caja(request):
 		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),usuario=user,caja__iexact=c,sucursal=sucursal)
 		imp_fondo_inicial=caja.importe
 
+		print("caja")
+		print(caja.usuario)
 		#si no tiene fecha de cierre es porque la caja aun esta abierta.
 		if caja.fecha_cierre ==None:
 			caja_abierta=1
@@ -6032,8 +6166,8 @@ def api_consulta_corte_caja(request):
 
 	#buscamos si el cajero tubo otros ingresos
 	try:
-		oi=Otros_Ingresos.objects.filter(sucursal=sucursal,usuario=user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c).aggregate(Sum('importe'))
-		cont_otros_ingresos=Otros_Ingresos.objects.filter(sucursal=sucursal,usuario=user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c).count()
+		oi=Otros_Ingresos.objects.filter(ocaja = caja).aggregate(Sum('importe'))       
+		cont_otros_ingresos=Otros_Ingresos.objects.filter(ocaja = caja).count()
 		total_movs=total_movs+cont_otros_ingresos
 
 		if oi["importe__sum"]!= None:
@@ -6061,8 +6195,8 @@ def api_consulta_corte_caja(request):
 
 	#buscamos los retiros
 	try:
-		ret=Retiro_Efectivo.objects.filter(sucursal=sucursal,usuario=user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c,activo = 1).aggregate(Sum('importe'))
-		cont_retiros=Retiro_Efectivo.objects.filter(sucursal=sucursal,usuario=user,fecha__range=(min_pub_date_time,max_pub_date_time),caja=c,activo = 1).count()
+		ret=Retiro_Efectivo.objects.filter(ocaja = caja,activo = 1).aggregate(Sum('importe'))
+		cont_retiros=Retiro_Efectivo.objects.filter(ocaja = caja,activo = 1).count()
 		total_movs=total_movs+cont_retiros #sumamos el total de retiros al total de movimientos
 		if ret["importe__sum"]!=None:
 			retiros=ret["importe__sum"]
@@ -6253,7 +6387,17 @@ def api_consulta_corte_caja(request):
 
 	respuesta=[]	
 
-
+	f_otros_ingresos = otros_ingresos
+	f_importe_refrendo = importe_refrendo
+	f_comisiones_pg = comisiones_pg
+	f_importe_desemp = importe_desemp
+	f_pago_capital = pago_capital
+	f_importe_rebol = importe_rebol
+	f_importe_ventas = importe_ventas
+	f_importe_apartado = importe_apartado
+	f_retiros = retiros
+	f_empenos = empenos
+	f_total_efectivo = total_efectivo
 	importe_ventas="{:0,.2f}".format(importe_ventas)
 	importe_rebol="{:0,.2f}".format(importe_rebol)
 	importe_desemp="{:0,.2f}".format(importe_desemp)
@@ -6262,10 +6406,10 @@ def api_consulta_corte_caja(request):
 	importe_refrendo="{:0,.2f}".format(importe_refrendo)
 	otros_ingresos="{:0,.2f}".format(otros_ingresos)
 	importe_apartado="{:0,.2f}".format(importe_apartado)
-	
-	
-
-	respuesta.append({'cont_ab_apartado':cont_ab_apartado,'importe_apartado':importe_apartado,'nombre_cajero':caja.usuario.first_name+' '+caja.usuario.last_name,'estatus_guardado':caja.estatus_guardado,'dia_valido':dia_valido,'caja_abierta':caja_abierta,'token':str(token),'estatus':1,'fondo_inicial':str(imp_fondo_inicial),'cont_fondo_inicial':'1','otros_ingresos':str(otros_ingresos),'cont_otros_ingresos':str(cont_otros_ingresos),'retiros':str(retiros),'cont_retiros':str(cont_retiros),'total_movs':str(total_movs),'total_efectivo':str(total_efectivo),'real_efectivo':caja.real_efectivo,'empenos':str(empenos),'cont_empenos':str(cont_empenos),'cont_refrendos':str(cont_refrendos),'cont_com_pg':str(cont_com_pg),'cont_ref_pg':str(cont_ref_pg),'importe_refrendo':str(importe_refrendo),'comisiones_pg':str(comisiones_pg),'refrendos_pg':str(refrendos_pg),'cont_pc':cont_pc,		'pago_capital':pago_capital,"importe_desemp":importe_desemp,"cont_desemp":cont_desemp,"importe_rebol":importe_rebol,"cont_rebol":cont_rebol,'importe_ventas':importe_ventas,'cont_ventas':cont_ventas})	
+	empenos = 	"$"+"{:0,.2f}".format(empenos)
+	retiros = "{:0,.2f}".format(retiros)
+	txt_total_efectivo = "{:0,.2f}".format(total_efectivo)
+	respuesta.append({'cont_ab_apartado':cont_ab_apartado,'importe_apartado':importe_apartado,'nombre_cajero':caja.usuario.first_name+' '+caja.usuario.last_name,'estatus_guardado':caja.estatus_guardado,'dia_valido':dia_valido,'caja_abierta':caja_abierta,'token':str(token),'estatus':1,'fondo_inicial':str(imp_fondo_inicial),'cont_fondo_inicial':'1','otros_ingresos':str(otros_ingresos),'cont_otros_ingresos':str(cont_otros_ingresos),'retiros':str(retiros),'cont_retiros':str(cont_retiros),'total_movs':str(total_movs),'total_efectivo':str(total_efectivo),'real_efectivo':caja.real_efectivo,'empenos':str(empenos),'cont_empenos':str(cont_empenos),'cont_refrendos':str(cont_refrendos),'cont_com_pg':str(cont_com_pg),'cont_ref_pg':str(cont_ref_pg),'importe_refrendo':str(importe_refrendo),'comisiones_pg':str(comisiones_pg),'refrendos_pg':str(refrendos_pg),'cont_pc':cont_pc,		'pago_capital':pago_capital,"importe_desemp":importe_desemp,"cont_desemp":cont_desemp,"importe_rebol":importe_rebol,"cont_rebol":cont_rebol,'importe_ventas':importe_ventas,'cont_ventas':cont_ventas,"sucursal":caja.sucursal.sucursal,"txt_total_efectivo":txt_total_efectivo,"f_otros_ingresos":f_otros_ingresos,"f_importe_refrendo":f_importe_refrendo,"f_comisiones_pg":f_comisiones_pg,"f_pago_capital":f_pago_capital,"f_importe_desemp":f_importe_desemp,"f_importe_rebol":f_importe_rebol,"f_importe_ventas":f_importe_ventas,"f_importe_apartado":f_importe_apartado,"f_retiros":f_retiros,"f_empenos":f_empenos,"f_total_efectivo":f_total_efectivo})	
 	
 	#agregamos una segunda lina con la informacion guardada ne el corte de caja	
 	respuesta.append({'comentario':caja.comentario,'centavos_10':caja.centavos_10,'centavos_50':caja.centavos_50,'pesos_1':caja.pesos_1,'pesos_2':caja.pesos_2,'pesos_5':caja.pesos_5,'pesos_10':caja.pesos_10,'pesos_20':caja.pesos_20,'pesos_50':caja.pesos_50,'pesos_100':caja.pesos_100,'pesos_200':caja.pesos_200,'pesos_500':caja.pesos_500,'pesos_1000':caja.pesos_1000,'diferencia':caja.diferencia,'real_efectivo':caja.real_efectivo})

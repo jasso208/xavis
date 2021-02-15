@@ -23,7 +23,6 @@ def api_precio_venta_fijo(request):
 	resp = []
 	if request.method == "PUT":
 
-		print(request.data["folio_boleta"])
 
 		id_sucursal = request.data["id_sucursal"]
 		folio_boleta = request.data["folio_boleta"]
@@ -280,10 +279,7 @@ def api_valida_importe_retiro(request):
 		importe_a_retirar = request.GET.get("importe_a_retirar")
 		id_concepto_retiro = request.GET.get("id_concepto_retiro")
 
-		saldo_concepto = Concepto_Retiro.objects.get(id = int(id_concepto_retiro)).fn_saldo_concepto()
-
-
-		print(saldo_concepto)
+		saldo_concepto = Concepto_Retiro.objects.get(id = int(id_concepto_retiro)).fn_saldo_concepto()		
 
 		if int(saldo_concepto) >= int(importe_a_retirar):	
 			respuesta.append({"estatus" : "1"})
@@ -1137,6 +1133,9 @@ def api_consulta_cotizacion(request):
 	id_sucursal = request.GET.get("id_sucursal")
 
 	sucursal = Sucursal.objects.get(id = id_sucursal)
+
+	print("id_usuario")
+	print(request.GET.get("id_usuario"))
 
 	try:
 		avaluo_oro = 0
