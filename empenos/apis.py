@@ -947,9 +947,9 @@ def api_backup(request):
 	respuesta = []
 	estatus = fn_job_backup_basededatos()
 	if estatus:
-		fn_envia_mail("Job respaldo base de datos exitoso","SE ejecuto correctamente","jasso.gallegos@gmail.com")
+		fn_envia_mail(settings.BD + " Exito, respaldo de base de datos","Exito, respaldo de base de datos","jasso.gallegos@gmail.com")
 	else:
-		fn_envia_mail("Job respaldo base de datos incorrecto","ERror al generar el respaldo de base de datos","jasso.gallegos@gmail.com")
+		fn_envia_mail(settings.BD + " Error, respaldo de base de datos","Error, respaldo de base de datos","jasso.gallegos@gmail.com")
 	return Response(respuesta)
 
 @api_view(['GET'])
@@ -957,19 +957,19 @@ def api_job_diario(request):
 	respuesta=[]
 	try:
 		fn_job_diario()
-		fn_envia_mail("JOB Fechas vencimiento se ejecuto correctamente","Job Vencimientos","jasso.gallegos@gmail.com")
+		fn_envia_mail(settings.BD + " Exito: JOB Fechas vencimiento","Exito: JOB Fechas vencimiento","jasso.gallegos@gmail.com")
 	except Exception as e:
-		fn_envia_mail(str(e),"Fallo Job Vencimientos","jasso.gallegos@gmail.com")
+		fn_envia_mail(settings.BD + " Error: JOB Fechas vencimiento; " ,"Error: JOB Fechas vencimiento; " + str(e) ,"jasso.gallegos@gmail.com")
 		
 	try:
 		estatus=fn_job_libera_apartado()
 		if estatus:
-			fn_envia_mail("JOB libera apartados se ejecuto correctamente","Job libera apartados","jasso.gallegos@gmail.com")
+			fn_envia_mail(settings.BD + " Exito: JOB libera apartados"," Exito: JOB libera apartados","jasso.gallegos@gmail.com")
 		else:
-			fn_envia_mail("Error job libera apartados se ejecuto correctamente","Error job libera apartados","jasso.gallegos@gmail.com")
+			fn_envia_mail(settings.BD + " Error: JOB libera apartados"," Error: JOB libera apartados","jasso.gallegos@gmail.com")
 
 	except:
-		fn_envia_mail("Error job libera apartados se ejecuto correctamente","Error job libera apartados","jasso.gallegos@gmail.com")
+		fn_envia_mail(settings.BD + " Error: JOB libera apartados"," Error: JOB libera apartados","jasso.gallegos@gmail.com")
 		
 	return Response(respuesta)
 
@@ -979,12 +979,12 @@ def api_guarda_estatus_cartera(request):
 	try:
 		estatus = fn_guarda_estatus_cartera()
 		if estatus:
-			fn_envia_mail("Exito El guardado de estatus de cartera","Exito Job guarda estatus cartera","jasso.gallegos@gmail.com")
+			fn_envia_mail(settings.BD + " Exito: Guardado de estatus de cartera"," Exito: Guardado de estatus de cartera","jasso.gallegos@gmail.com")
 		else:
-			fn_envia_mail("Fallo el guardado de estatus de cartera","Error Job guarda estatus cartera","jasso.gallegos@gmail.com")
+			fn_envia_mail(settings.BD + " Error: Guardado de estatus de cartera"," Error: Guardado de estatus de cartera","jasso.gallegos@gmail.com")
 
 	except:
-		fn_envia_mail(str(e),"Error Job guarda estatus cartera","jasso.gallegos@gmail.com")
+		fn_envia_mail(settings.BD + " Error: Guardado de estatus de cartera"," Error: Guardado de estatus de cartera","jasso.gallegos@gmail.com")
 
 	return Response(respuesta)
 
