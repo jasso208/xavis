@@ -466,7 +466,8 @@ def rep_cajas_abiertas(obj_reporte,fecha_inicial,fecha_final,request,sucursal):
 		importe_apertura = "{:0,.2f}".format(o.importe)
 		p.drawString(160,row_act+5,"$"+importe_apertura)
 
-		p.drawString(230,row_act+5,o.user_cierra_caja.username)
+		if o.user_cierra_caja != None:
+			p.drawString(230,row_act+5,o.user_cierra_caja.username)
 
 		teorico_efectivo = "{:0,.2f}".format(o.teorico_efectivo)
 		p.drawString(290,row_act+5,"$"+teorico_efectivo)
@@ -479,8 +480,9 @@ def rep_cajas_abiertas(obj_reporte,fecha_inicial,fecha_final,request,sucursal):
 
 		fecha_apertura = datetime.strftime(o.fecha,'%Y-%m-%d %H:%M:%S')
 		p.drawString(500,row_act+5,str(fecha_apertura))
-		fecha_cierre = datetime.strftime(o.fecha_cierre,'%Y-%m-%d %H:%M:%S')
-		p.drawString(615,row_act+5,str(fecha_cierre))
+		if o.fecha_cierre != None:
+			fecha_cierre = datetime.strftime(o.fecha_cierre,'%Y-%m-%d %H:%M:%S')
+			p.drawString(615,row_act+5,str(fecha_cierre))
 
 		row_act = row_act - row_size
 

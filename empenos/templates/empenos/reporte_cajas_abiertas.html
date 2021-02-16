@@ -81,7 +81,7 @@
 											        
 											        <th >Usuario cierre</th>
 											        <th >Importe cierre.</th>	
-											       	<th>Fecha ap</th> 
+											       	<th>Fecha apertura</th> 
 											        <th>Fecha cierre</th>
 										      </tr>
 									    </thead>
@@ -90,11 +90,13 @@
 									    	{% for c in cajas %}
 									    	<tr>
 									    		<td>
+									    			{% ifnotequal c.fecha_cierre None %}
 									    			<a class="btn btn-default btn-sm" onclick='fn_reimprime_comprobante_corte_caja("{{c.id}}")';>
 									    				<span class="glyphicon glyphicon-print">
 									    					 
 									    				</span>
 									    			</a>
+									    			{% endifnotequal %}
 									    		</td>
 									    		<td>{{c.folio}}</td>
 									    		<td>{{c.usuario_real_abre_caja.username}}</td>
@@ -105,7 +107,10 @@
 									    			{{c.fecha}}
 									    		</td>
 									    		<td>
+									    			{% ifnotequal c.fecha_cierre None %}
 									    			{{c.fecha_cierre}}
+									    			{% endifnotequal %}
+									    			
 									    		</td>
 									    	</tr>
 									    	{% endfor %}
