@@ -16,4 +16,4 @@ Xavis/empenos/migrations/
 empenos/migrations/
 Xavis/seguridad/migrations/
 seguridad/migrations/
-job_diario.py
+script_job_diario.py
