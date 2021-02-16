@@ -5,11 +5,12 @@ import math
 from datetime import date, datetime, time,timedelta
 from django.db import transaction
 import os
+from django.conf import settings
 
 @transaction.atomic
 def fn_job_backup_basededatos():
 	try:
-		cmd = "pg_dump --host=pollo146-1458.postgres.pythonanywhere-services.com --port=11458 --username=super --format=c --file=empeno_express`date +%F-%H%M`.dump empeno_express;"
+		cmd = "pg_dump --host=pollo146-1458.postgres.pythonanywhere-services.com --port=11458 --username=super --format=c --file="+ settings.BD +"`date +%F-%H%M`.dump "+ settings.BD +";"
 		os.system(cmd)
 		return True
 	except:
