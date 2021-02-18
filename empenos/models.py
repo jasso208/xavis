@@ -1065,8 +1065,9 @@ class Boleta_Empeno(models.Model):
 		return respuesta
 
 
-	#funcion para simular el refrendo sin afectar la boleta.
-	#regresa una lista.
+	#funcion para calcular el refrendo, en base al nuevo mutuo
+	#se usa para la simulacion
+	#para calcular el mutuo actual, revisar la funcion fn_calcula_refrendo
 	def fn_simula_calcula_refrendo(self,mutuo):
 		p_almacenaje = decimal.Decimal(self.almacenaje)/decimal.Decimal(100)
 		p_interes = decimal.Decimal(self.interes)/decimal.Decimal(100)

@@ -5795,8 +5795,8 @@ def imprime_boleta(request):
 				#calculamos el impuesto
 				#si es oro o plata
 				impuesto=0.00
-				
-				if x.boleta.tipo_producto.id==1 or x.boleta.tipo_producto.id==2: 				
+				 
+				"""if x.boleta.tipo_producto.id==1 or x.boleta.tipo_producto.id==2: 				
 					almacenaje=(y.mutuo*0.05)
 					interes=(y.mutuo*0.063)
 					impuesto=((almacenaje+interes)*0.16)			
@@ -5805,6 +5805,8 @@ def imprime_boleta(request):
 					almacenaje=(y.mutuo*0.072)
 					interes=(y.mutuo*0.1263)
 					impuesto=((almacenaje+interes)*0.16)
+				"""
+				impuesto = x.boleta.fn_calcula_refrendo()[0]["refrendo"]
 
 				impuesto_total=impuesto_total+impuesto
 				
