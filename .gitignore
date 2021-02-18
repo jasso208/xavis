@@ -17,3 +17,4 @@ empenos/migrations/
 Xavis/seguridad/migrations/
 seguridad/migrations/
 script_job_diario.py
+seguridad/static/img/
