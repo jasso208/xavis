@@ -42,8 +42,8 @@ def fn_job_libera_apartado():
 def fn_job_diario_prueba():
 
 
-	hoy=datetime(2021,2,12,0,0)	
-	fecha_fin=datetime(2021,2,13,0,0)
+	hoy=datetime(2021,2,16,0,0)	
+	fecha_fin=datetime(2021,2,16,0,0)
 
 
 

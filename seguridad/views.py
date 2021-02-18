@@ -59,7 +59,7 @@ encabezado_link_consulta_venta_2="""
 def Login(request):
 		#en caso de que ya este logueado, lo redireccionamos a la pantalla de bienvenidos.
 	if request.user.is_authenticated:
-		print("aqui esta la falla")
+		
 		return HttpResponseRedirect("/bienvenidos")
 
 	if request.method=="POST":
@@ -107,35 +107,24 @@ def cerrar_session(request):
 #direccionamos a esta pantalla cuando el usuario no tenga acceso a una opcion.
 def sin_permiso_de_acceso(request):
 	return render(request,'seguridad/sin_permiso_de_acceso.html',locals())
-
+ 
 def bienvenidos(request):
-	if not request.user.is_authenticated:
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2_1 = User_2.fn_is_logueado(request.user)
+	if user_2_1 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
-	
-	print(request.user)
-	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
-		user_2=User_2.objects.get(user=request.user)
-		print(user_2)
-	except Exception as e:		
-		form=Login_Form(request.POST)
-		estatus=0
-		msj="La cuenta del usuario esta incompleta 2."			
-		return render(request,'login.html',locals())
 
-	caja_abierta="0"
+	#obtenemos el usuario virtual de la sucursal.
+	#ya que sobre este usuario se registran los ingresos.
+	user_2 = User_2.objects.get(user = user_2_1.sucursal.usuario_virtual)
 
-	pub_date = date.today()
-	min_pub_date_time = datetime.combine(pub_date, time.min) 
-	max_pub_date_time = datetime.combine(pub_date, time.max)  
+	#validamos si el usuario tiene caja abierta
+	caja = user_2.fn_tiene_caja_abierta()
 
-	try:
-	#validamos si el usuario tiene caja abierta en el dia actual.
-		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+	if caja != None:
 		c=caja.caja
 		caja_abierta="1"#si tiene caja abierta enviamos este estatus para no dejar entrar a la pantalla.
-	except:
-		print("no tiene caja abierta")
+
 
 
 
@@ -145,18 +134,26 @@ def admin_user(request):
 	return render(request,'seguridad/admin_user.html',{})
 
 def admin_administracion(request):
-	#si no esta logueado mandamos al login
-	if not request.user.is_authenticated:
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2_1 = User_2.fn_is_logueado(request.user)
+	if user_2_1 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
-	
-	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
-		user_2=User_2.objects.get(user=request.user)
-	except Exception as e:		
-		form=Login_Form(request.POST)
-		estatus=0
-		msj="La cuenta del usuario esta incompleta."			
-		return render(request,'login.html',locals())
+
+	#obtenemos el usuario virtual de la sucursal.
+	#ya que sobre este usuario se registran los ingresos.
+	user_2 = User_2.objects.get(user = user_2_1.sucursal.usuario_virtual)
+
+	caja_abierta="0"
+	caja=Cajas
+
+	#validamos si el usuario tiene caja abierta
+	caja = user_2.fn_tiene_caja_abierta()
+
+	if caja != None:
+		c=caja.caja
+		caja_abierta="1"#si tiene caja abierta enviamos este estatus para no dejar entrar a la pantalla.
+
+
 	IP_LOCAL = settings.IP_LOCAL
 	id_usuario=user_2.user.id
 
@@ -164,16 +161,7 @@ def admin_administracion(request):
 	min_pub_date_time = datetime.combine(pub_date, time.min) 
 	max_pub_date_time = datetime.combine(pub_date, time.max) 
 
-	try:
-		#validamos si el usuario tiene caja abierta en el dia actual.
-		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
-		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
-		suc=caja.sucursal
-		c=caja.caja
-	except Exception as e:
-		print(e)
-		caja_abierta="0"
-		caja=Cajas
+
 
 	return render(request,'seguridad/admin_administracion.html',locals())	
 
@@ -232,39 +220,23 @@ def admin_ventas(request):
 	return render(request,'seguridad/admin_ventas.html',locals())
 
 def admin_perfil(request):
-	#si no esta logueado mandamos al login
-	if not request.user.is_authenticated:
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2_1 = User_2.fn_is_logueado(request.user)
+	if user_2_1 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
-	
-	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
-		user_2=User_2.objects.get(user=request.user)
-	except Exception as e:		
-		form=Login_Form(request.POST)
-		estatus=0
-		msj="La cuenta del usuario esta incompleta."			
-		return render(request,'login.html',locals())
 
+	#obtenemos el usuario virtual de la sucursal.
+	#ya que sobre este usuario se registran los ingresos.
+	user_2 = User_2.objects.get(user = user_2_1.sucursal.usuario_virtual)
 
+	#validamos si el usuario tiene caja abierta
+	caja = user_2.fn_tiene_caja_abierta()
 
-	IP_LOCAL = settings.IP_LOCAL
-	id_usuario=user_2.user.id
-
-	pub_date = date.today()
-	min_pub_date_time = datetime.combine(pub_date, time.min) 
-	max_pub_date_time = datetime.combine(pub_date, time.max) 
- 
-	c=""
-	try:		
-		#validamos si el usuario tiene caja abierta en el dia actual.
-		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
-		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
-		suc=caja.sucursal		
+	if caja != None:
 		c=caja.caja
-	except Exception as e:		
-		print(e)
-		caja_abierta="0"
-		caja=Cajas	
+		caja_abierta="1"#si tiene caja abierta enviamos este estatus para no dejar entrar a la pantalla.
+
+
 	return render(request,'seguridad/admin_perfil.html',locals())
 
 def admin_cajas(request):
@@ -364,39 +336,30 @@ def permisos(request):
 	return render(request,'seguridad/consulta_permisos.html',locals())
 
 def cambio_psw_usr(request):
-	#si no esta logueado mandamos al login
-	if not request.user.is_authenticated:
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2_1 = User_2.fn_is_logueado(request.user)
+	if user_2_1 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
 
+	#obtenemos el usuario virtual de la sucursal.
+	#ya que sobre este usuario se registran los ingresos.
+	user_2 = User_2.objects.get(user = user_2_1.sucursal.usuario_virtual)
+
+	#validamos si el usuario tiene caja abierta
+	caja = user_2.fn_tiene_caja_abierta()
+
+	if caja != None:
+		c=caja.caja
+		caja_abierta="1"#si tiene caja abierta enviamos este estatus para no dejar entrar a la pantalla.
 
 
-	pub_date = date.today()
-	min_pub_date_time = datetime.combine(pub_date, time.min) 
-	max_pub_date_time = datetime.combine(pub_date, time.max)  
-
-	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
-		user_2=User_2.objects.get(user=request.user)
-	except Exception as e:		
-		form=Login_Form(request.POST)
-		estatus=0
-		msj="La cuenta del usuario esta incompleta."			
-		return render(request,'login.html',locals())
 	IP_LOCAL = settings.IP_LOCAL
 	id_usuario=user_2.user.id
 
-	c=""
 
 
-	msj_error=""	
-	try:
-		#validamos si el usuaario tiene caja abierta para mostrarla en el encabezado.
-		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
-		print(caja.sucursal)
-		c=caja.caja
-	except Exception as e:
-		msj_error="No cuentas con caja abierta."
-		print(e)
+
+	
 
 
 	if request.method=="POST":
@@ -485,19 +448,33 @@ cuando se recibe id
 id_permiso = 2
 """
 def alta_usuario(request,id=None):
-
 	#si regresa none, es porque el usuario no esta logueado.
-	user_2 = User_2.fn_is_logueado(request.user)
-	if user_2 == None:
+	user_2_1 = User_2.fn_is_logueado(request.user)
+	if user_2_1 == None:
 		return HttpResponseRedirect(reverse('seguridad:login'))
+
+	#obtenemos el usuario virtual de la sucursal.
+	#ya que sobre este usuario se registran los ingresos.
+	user_2 = User_2.objects.get(user = user_2_1.sucursal.usuario_virtual)
+
+	caja_abierta="0"
+	caja=Cajas
+	
+	#validamos si el usuario tiene caja abierta
+	caja = user_2.fn_tiene_caja_abierta()
+
+	if caja != None:
+		c=caja.caja
+		caja_abierta="1"#si tiene caja abierta enviamos este estatus para no dejar entrar a la pantalla.
+
 
 	#validamos si tiene acceso a esta opcion.
 	#cuando id es none, es que es alta
 	if id == None:
-		if not user_2.fn_tiene_acceso_a_vista(1):
+		if not user_2_1.fn_tiene_acceso_a_vista(1):
 			return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
 	else:#cuando id no es none, es consulta y edicion.
-		if not user_2.fn_tiene_acceso_a_vista(2):
+		if not user_2_1.fn_tiene_acceso_a_vista(2):
 			return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
 
 	#validamos si el usuario tiene caja abierta
@@ -505,11 +482,7 @@ def alta_usuario(request,id=None):
 
 
 
-	try:
-		c=caja.caja
-	except:
-		c=""
-
+	
 	msj_error = ""
 	#el estatus 1 indica que todo esta ok, 
 	#el estatus 0 indica que se presento un error. el error debe venir acompalñado de una leyenda en la variable msj_error

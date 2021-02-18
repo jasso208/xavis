@@ -34,6 +34,8 @@ ESTATUS_ABONO = (
 
 #al momendo de anunciar un producto para la venta piso, 
 #se le aumenta un % sobre el avaluo, ese porcentaje es configurable en esta tabla.
+#es por negocio
+#solo debe existir un registro.
 class Porcentaje_Sobre_Avaluo(models.Model):
 	porcentaje=models.DecimalField(max_digits = 20,decimal_places = 2)#este es el procentaje para venta
 	porcentaje_apartado=models.DecimalField(max_digits = 20, decimal_places = 2)#es el porcentaje para apartado
@@ -60,6 +62,12 @@ class Perfil(models.Model):
 	def __str__(self):
 		return str(self.id)+' '+self.perfil
 
+#es la informacion general de la empresa.
+#debe haeber sol un registro
+class Empresa (models.Model):
+	rfc = models.CharField(max_length = 13,default = '')
+	nombre_empresa = models.CharField(max_length = 20,default = '')
+
 class Sucursal(models.Model):
 	sucursal=models.CharField(max_length=100,null=False)
 	calle=models.CharField(max_length=50,null=True,default='')
@@ -73,6 +81,7 @@ class Sucursal(models.Model):
 	telefono=models.CharField(max_length=10,null=True,default='')
 	saldo = models.IntegerField(default=0)
 	usuario_virtual = models.ForeignKey(User,on_delete = models.PROTECT,null = True,blank = True)
+	
 
 	def __str__(self):
 		return self.sucursal
@@ -366,6 +375,7 @@ class Sucursal(models.Model):
 
 		return importe_retiros			
 
+#esta configuracion es por sucursal.
 class Porcentaje_Comision_PG(models.Model):	
 	porcentaje = models.DecimalField(max_digits=20,decimal_places=2,default=0.00)
 	usuario = models.ForeignKey(User,on_delete = models.PROTECT,null=True,blank=True) #el usuario que actualiza por ultimavez

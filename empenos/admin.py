@@ -5,7 +5,7 @@ from .models import Boleta_Empeno,Det_Boleto_Empeno,Estatus_Boleta,Imprimir_Bole
 from .models import Abono,Imprime_Abono,Periodo,Tipo_Periodo,Tipo_Kilataje,Venta_Temporal,Venta_Granel,Det_Venta_Granel,Imprime_Venta_Granel
 from .models import Venta_Temporal_Piso,Porcentaje_Sobre_Avaluo,Imprime_Venta_Piso,Venta_Piso,Det_Venta_Piso
 from .models import Estatus_Apartado,Abono_Apartado,Apartado,Imprime_Apartado,Concepto_Retiro,Configuracion_Interes_Empeno
-from .models import Pagos_No_Usados,Pagos_Com_Pg_No_Usados,Historico_Estatus_Cartera
+from .models import Pagos_No_Usados,Pagos_Com_Pg_No_Usados,Historico_Estatus_Cartera,Empresa
 # Register your models here.
 
 
@@ -61,6 +61,8 @@ admin.site.register(Configuracion_Interes_Empeno)
 admin.site.register(Pagos_No_Usados)
 admin.site.register(Pagos_Com_Pg_No_Usados)
 admin.site.register(Historico_Estatus_Cartera)
+admin.site.register(Empresa)
+admin.site.register(Dia_No_Laboral)
 
 
 

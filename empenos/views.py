@@ -4379,7 +4379,7 @@ def refrendo(request,id_boleta):
 
 	#buscamos la boleta a refrendar.
 	boleta=Boleta_Empeno.objects.get(id=int(id_boleta))
-
+ 
 	det_boleta = Det_Boleto_Empeno.objects.filter(boleta_empeno = boleta)
 	#validamos si la boleta acepta refrendos o no.
 	if not boleta.fn_acepta_refrendo():
@@ -4999,11 +4999,11 @@ def imprime_abono(request):
 		reimpresion=""
 	else:				
 		reimpresion="REIMPRESION"
-		p.drawImage(settings.IP_LOCAL+'/static/img/img_reimpresion.jpg', 50, -80,500, 500)
+		p.drawImage(settings.IP_LOCAL+'/static/img/img_reimpresion.jpg', 50, -60,500, 500)
 		p.drawImage(settings.IP_LOCAL+'/static/img/img_reimpresion.jpg', 50, 350,500, 500)
 
-	p.drawImage(settings.IP_LOCAL+'/static/img/logo.jpg', 55, 730,200, 60)
-	p.drawImage(settings.IP_LOCAL+'/static/img/logo.jpg', 55, 330,200, 60)
+	p.drawImage(settings.IP_LOCAL+'/static/img/logo.jpg', 55, 750,200, 60)
+	p.drawImage(settings.IP_LOCAL+'/static/img/logo.jpg', 55, 370,200, 60)
 	cop=0
 	while cop<2:
 		#p.setFont("Helvetica",20)
@@ -5013,11 +5013,11 @@ def imprime_abono(request):
 
 		if cop==1:
 
-			p.setFont("Helvetica",15)
+			p.setFont("Helvetica",7)
 			p.drawString(250,current_row,"Copia de Cliente")
 
 		current_row=current_row-heigth_row
-		current_row=current_row-heigth_row
+		
 
 		p.setFont("Helvetica",10)
 		p.drawString(55,current_row-40,"Folio Abono:- "+str(abono.folio))
@@ -5030,7 +5030,7 @@ def imprime_abono(request):
 		current_row=current_row-heigth_row
 
 		p.setFont("Helvetica",10)
-		p.drawString(350,current_row,"Cajero: " + abono.usuario.first_name + ' ' + abono.usuario.last_name)
+		p.drawString(350,current_row,"Cajero: " + abono.usuario.username)
 
 		current_row=current_row-heigth_row
 		
@@ -5238,9 +5238,9 @@ def imprime_abono(request):
 
 			cont=0
 			if cop==0:
-				linea=502
+				linea=522
 			else:
-				linea=102
+				linea=142
 
 			for x in pa:		
 				cont=cont+1
@@ -5264,9 +5264,9 @@ def imprime_abono(request):
 
 			cont=0
 			if cop==0:
-				linea=502
+				linea=522
 			else:
-				linea=102
+				linea=142
 			#si existen pagos parciales no vencidos sin pagar, los mostramos como fechas proximo pago,
 			#en caso de no existir solo mostramos un proximo pago como si fuera mensual
 			if pa.exists():
@@ -5559,14 +5559,14 @@ def imprime_boleta(request):
 			p.setFont("Helvetica-Bold",7)
 			p.drawString(55,740,"Empresa:")
 			p.setFont("Helvetica",7)
-			p.drawString(55,730,"   Empeños Express $")
+			p.drawString(55,730,"   " + Empresa.objects.get(id = 1).nombre_empresa)
 			p.setFont("Helvetica",7)
 			p.drawString(55,720,"      L-V 9 AM. a 6 PM.  S 10:00 AM a 4:00 PM.")
 
 			p.setFont("Helvetica-Bold",7)
 			p.drawString(55,700,"RFC:")
 			p.setFont("Helvetica",7)
-			p.drawString(75,700,"XOCHITEPEC")
+			p.drawString(75,700,Empresa.objects.get(id = 1).rfc)
 			p.setFont("Helvetica-Bold",7)
 			p.drawString(170,700,"Telefono:")
 			p.setFont("Helvetica",7)
@@ -5912,23 +5912,56 @@ def imprime_boleta(request):
 				linea=linea-15
 
 			#cuadro 6] Firma Cliente
-			p.line(55,245,250,245)	
-			p.line(55,200,250,200)	
-			p.line(55,245,55,200)
-			p.line(250,245,250,200)
+			p.line(55,215,250,215)	
+			p.line(55,185,250,185)	
+			p.line(55,215,55,185)
+			p.line(250,215,250,185)
 
 			p.setFont("Helvetica-Bold",10)
-			p.drawString(135,205,"Cliente")
+			p.drawString(135,190,"Cliente")
 
 			#cuadro 7] Firma Valuador
-			p.line(355,245,550,245)	
-			p.line(355,200,550,200)	
-			p.line(355,245,355,200)
-			p.line(550,245,550,200)
+			p.line(355,215,550,215)	
+			p.line(355,185,550,185)	
+			p.line(355,215,355,185)
+			p.line(550,215,550,185)
 
 			p.setFont("Helvetica-Bold",10)
-			p.drawString(370,205,"Valuador: "+ x.boleta.usuario.first_name + ' ' + x.boleta.usuario.last_name)
+			p.drawString(390,190,"Valuador: "+ x.boleta.usuario.username)
 
+			p.setFont("Helvetica-Bold",7)
+			obj_interes = Configuracion_Interes_Empeno.objects.get(sucursal = x.boleta.sucursal)
+			imp_interes = ""
+			imp_almacenaje = ""
+
+			#La comision del pg es por empresay no importa que tipo de producto sea
+			desemp_ext = "{:0,.2f}".format(Porcentaje_Comision_PG.objects.get(id = 1).porcentaje)
+
+			porcentaje = Porcentaje_Sobre_Avaluo.objects.all().aggregate(Sum("porcentaje"))
+			porce = 0;
+			if porcentaje["porcentaje__sum"]!=None:
+				porce = decimal.Decimal(porcentaje["porcentaje__sum"])
+			comercializacion = "{:0,.2f}".format(porce)
+
+			if x.boleta.tipo_producto.id == 1:#oro
+				imp_interes = "{:0,.2f}".format(obj_interes.interes_oro)
+				imp_almacenaje = "{:0,.2f}".format(obj_interes.almacenaje_oro)
+
+			elif x.boleta.tipo_producto.id ==2:#plata
+				imp_interes = "{:0,.2f}".format(obj_interes.interes_plata)
+				imp_almacenaje = "{:0,.2f}".format(obj_interes.almacenaje_plata)
+			elif x.boleta.tipo_producto.id ==3:#varios
+				imp_interes = "{:0,.2f}".format(obj_interes.interes_prod_varios)
+				imp_almacenaje = "{:0,.2f}".format(obj_interes.almacenaje_prod_varios)
+			
+			p.drawString(55,235,"Intereses: " +  str(imp_interes) + "%")
+			p.drawString(150,235,"Almacenaje: " +  str(imp_almacenaje) + "%")
+			p.drawString(250,235,"Desempeño extemporaneo: " +  str(desemp_ext) + "%")			
+			p.drawString(400,235,"Comercialización: " +  str(comercializacion) + "%")
+			fecha_com = datetime.combine(x.boleta.fecha_vencimiento + timedelta(days = 1),time.min )
+			fecha_com = datetime.strftime(fecha_com,'%Y-%m-%d')
+			p.drawString(55,225,"Fecha de comercialización de la(s) prenda(s): " +  str(fecha_com) )
+			p.drawString(250,225,"Costo Anual Total (CAT): " +  "115.96%" )
 
 			u=0
 			pinta=0
@@ -5941,13 +5974,12 @@ def imprime_boleta(request):
 
 				u=u+10
 
-
 			p.line(55,100,180,100)
 			p.drawString(100,80,"Cliente")
 
 			p.line(420,100,545,100)
 
-			p.drawString(420,80,"Valuador: "+ x.boleta.usuario.first_name + ' ' + x.boleta.usuario.last_name)
+			p.drawString(420,80,"Valuador: "+ x.boleta.usuario.username)
 
 
 			p.line(200,160,400,160)
@@ -5989,7 +6021,6 @@ def imprime_boleta(request):
 			p.drawString(255,70,str(fecha_vencimiento))
 
 
-			p.line(550,245,550,200)
 			rinicial=rinicial+10
 			cont_pag=cont_pag+1			
 			p.showPage()#terminar pagina actual
