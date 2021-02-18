@@ -40,8 +40,6 @@ def imprime_corte_caja(request,id):
 
 	caja = r.json()
 
-	
-
 	p=canvas.Canvas(buffer,pagesize=A4)
 
 	p.drawImage(settings.IP_LOCAL+'/static/img/logo.jpg', 55, 730,200, 60)
@@ -109,9 +107,9 @@ def imprime_corte_caja(request,id):
 	fondo_inicial = "{:0,.2f}".format(obj.importe)
 	p.drawString(210,row_act+5,"$" + fondo_inicial)
 	#########
-	p.drawString(310,row_act+5,"1 Peso")
-	p.drawString(500,row_act+5,str(caja[1]["pesos_1"]))
 
+	p.drawString(310,row_act+5,"10 Centavos")
+	p.drawString(500,row_act+5,str(caja[1]["centavos_10"]))
 	###########################################################################
 	row_act -= row_size
 	p.line(55,row_act,295,row_act)
@@ -126,8 +124,8 @@ def imprime_corte_caja(request,id):
 	otros_ingresos = "{:0,.2f}".format(float(caja[0]["f_otros_ingresos"]))
 	p.drawString(210,row_act+5,"$" + otros_ingresos)
 	#########
-	p.drawString(310,row_act+5,"2 Pesos")
-	p.drawString(500,row_act+5,str(caja[1]["pesos_2"]))
+	p.drawString(310,row_act+5,"50 Centavos")
+	p.drawString(500,row_act+5,str(caja[1]["centavos_50"]))
 	###########################################################################
 	row_act -= row_size
 	p.line(55,row_act,295,row_act)
@@ -142,8 +140,8 @@ def imprime_corte_caja(request,id):
 	otros_ingresos = "{:0,.2f}".format(float(caja[0]["f_importe_refrendo"]))
 	p.drawString(210,row_act+5,"$" + otros_ingresos)
 	#########
-	p.drawString(310,row_act+5,"5 Pesos")
-	p.drawString(500,row_act+5,str(caja[1]["pesos_5"]))
+	p.drawString(310,row_act+5,"1 Peso")
+	p.drawString(500,row_act+5,str(caja[1]["pesos_1"]))
 	###########################################################################
 	row_act -= row_size
 	p.line(55,row_act,295,row_act)
@@ -158,8 +156,8 @@ def imprime_corte_caja(request,id):
 	otros_ingresos = "{:0,.2f}".format(float(caja[0]["f_comisiones_pg"]))
 	p.drawString(210,row_act+5,"$" + otros_ingresos)
 	#########
-	p.drawString(310,row_act+5,"10 Pesos")
-	p.drawString(500,row_act+5,str(caja[1]["pesos_10"]))
+	p.drawString(310,row_act+5,"2 Pesos")
+	p.drawString(500,row_act+5,str(caja[1]["pesos_2"]))
 	###########################################################################
 	row_act -= row_size
 	p.line(55,row_act,295,row_act)
@@ -174,8 +172,8 @@ def imprime_corte_caja(request,id):
 	otros_ingresos = "{:0,.2f}".format(float(caja[0]["f_pago_capital"]))
 	p.drawString(210,row_act+5,"$" + otros_ingresos)
 	#########
-	p.drawString(310,row_act+5,"20 Pesos")
-	p.drawString(500,row_act+5,str(caja[1]["pesos_20"]))
+	p.drawString(310,row_act+5,"5 Pesos")
+	p.drawString(500,row_act+5,str(caja[1]["pesos_5"]))
 	###########################################################################
 	row_act -= row_size
 	p.line(55,row_act,295,row_act)
@@ -190,8 +188,8 @@ def imprime_corte_caja(request,id):
 	otros_ingresos = "{:0,.2f}".format(float(caja[0]["f_importe_desemp"]))
 	p.drawString(210,row_act+5,"$" + otros_ingresos)
 	#########
-	p.drawString(310,row_act+5,"50 Pesos")
-	p.drawString(500,row_act+5,str(caja[1]["pesos_50"]))
+	p.drawString(310,row_act+5,"10 Pesos")
+	p.drawString(500,row_act+5,str(caja[1]["pesos_10"]))
 
 	###########################################################################
 	row_act -= row_size
@@ -207,8 +205,8 @@ def imprime_corte_caja(request,id):
 	otros_ingresos = "{:0,.2f}".format(float(caja[0]["f_importe_rebol"]))
 	p.drawString(210,row_act+5,"$" + otros_ingresos)
 	#########
-	p.drawString(310,row_act+5,"100 Pesos")
-	p.drawString(500,row_act+5,str(caja[1]["pesos_100"]))
+	p.drawString(310,row_act+5,"20 Pesos")
+	p.drawString(500,row_act+5,str(caja[1]["pesos_20"]))
 	###########################################################################
 
 	row_act -= row_size
@@ -224,8 +222,8 @@ def imprime_corte_caja(request,id):
 	otros_ingresos = "{:0,.2f}".format(float(caja[0]["f_importe_ventas"]))
 	p.drawString(210,row_act+5,"$" + otros_ingresos)
 	#########
-	p.drawString(310,row_act+5,"200 Pesos")
-	p.drawString(500,row_act+5,str(caja[1]["pesos_200"]))
+	p.drawString(310,row_act+5,"50 Pesos")
+	p.drawString(500,row_act+5,str(caja[1]["pesos_50"]))
 
 
 	###########################################################################
@@ -242,8 +240,8 @@ def imprime_corte_caja(request,id):
 	otros_ingresos = "{:0,.2f}".format(float(caja[0]["f_importe_apartado"]))
 	p.drawString(210,row_act+5,"$" + otros_ingresos)
 	#########
-	p.drawString(310,row_act+5,"500 Pesos")
-	p.drawString(500,row_act+5,str(caja[1]["pesos_500"]))
+	p.drawString(310,row_act+5,"100 Pesos")
+	p.drawString(500,row_act+5,str(caja[1]["pesos_100"]))
 
 	###########################################################################
 	row_act -= row_size
@@ -258,8 +256,8 @@ def imprime_corte_caja(request,id):
 	p.drawString(60,row_act+5,"Salidas teórico")	
 	p.setFont("Helvetica",10)
 	#########
-	p.drawString(310,row_act+5,"1000 Pesos")
-	p.drawString(500,row_act+5,str(caja[1]["pesos_1000"]))
+	p.drawString(310,row_act+5,"200 Pesos")
+	p.drawString(500,row_act+5,str(caja[1]["pesos_200"]))
 
 	###########################################################################
 	
@@ -276,8 +274,8 @@ def imprime_corte_caja(request,id):
 	otros_ingresos = "{:0,.2f}".format(float(caja[0]["f_retiros"]))
 	p.drawString(210,row_act+5,"$" + otros_ingresos)
 	#########
-	#p.drawString(310,row_act+5,"500 Pesos")
-	#p.drawString(500,row_act+5,str(caja[1]["pesos_500"]))
+	p.drawString(310,row_act+5,"500 Pesos")
+	p.drawString(500,row_act+5,str(caja[1]["pesos_500"]))
 
 
 	###########################################################################
@@ -295,8 +293,8 @@ def imprime_corte_caja(request,id):
 	otros_ingresos = "{:0,.2f}".format(float(caja[0]["f_empenos"]))
 	p.drawString(210,row_act+5,"$" + otros_ingresos)
 	#########
-	#p.drawString(310,row_act+5,"Total")
-	#p.drawString(500,row_act+5,str(caja[1]["pesos_500"]))
+	p.drawString(310,row_act+5,"1000 Pesos")
+	p.drawString(500,row_act+5,str(caja[1]["pesos_1000"]))
 
 
 	###########################################################################
