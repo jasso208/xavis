@@ -175,35 +175,35 @@ def abrir_caja(request):
 @transaction.atomic
 def abona_apartado(request,id_apartado):
 
-	#si no esta logueado mandamos al login
-	if not request.user.is_authenticated:
-		return HttpResponseRedirect(reverse('seguridad:login'))
-	
-	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
-		user_2 = User_2.objects.get(user = request.user)
-	except Exception as e:		
-		print(e)
-		form = Login_Form(request.POST)
-		estatus = 0
-		msj = "La cuenta del usuario esta incompleta."			
-		return render(request,'login.html',locals())
+
 
 	hoy = date.today()
 	hoy_inicial = datetime.combine(hoy, time.min) 
 	hoy_final = datetime.combine(hoy, time.max)  
 
-	try:		
-		#validamos si el usuario tiene caja abierta en el dia actual.
-		caja = Cajas.objects.get(fecha__range = (hoy_inicial,hoy_final),fecha_cierre__isnull = True,usuario=request.user)
+
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2_1 = User_2.fn_is_logueado(request.user)
+	if user_2_1 == None:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+
+	#obtenemos el usuario virtual de la sucursal.
+	#ya que sobre este usuario se registran los ingresos.
+	user_2 = User_2.objects.get(user = user_2_1.sucursal.usuario_virtual)
+
+	#validamos si el usuario tiene caja abierta
+	caja = user_2.fn_tiene_caja_abierta()
+
+	if caja == None:
+		caja_abierta = "0"
+		caja = Cajas
+	else:
 		caja_abierta = "1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
 		suc = caja.sucursal
 		c = caja.caja
 
-	except Exception as e:
-		print(e)
-		caja_abierta = "0"
-		caja = Cajas
+
+
 
 	usuario=request.user
 
@@ -1501,35 +1501,31 @@ def reporte_cajas_abiertas(request):
 #*¨**************************************************************************************************************************************************************
 
 def consulta_apartado(request):
-	#si no esta logueado mandamos al login
-	if not request.user.is_authenticated:
-		return HttpResponseRedirect(reverse('seguridad:login'))
-	
-	#si el usuario y contraseña son correctas pero el perfil no es el correcto, bloquea el acceso.
-	try:
-		user_2=User_2.objects.get(user=request.user)
-	except Exception as e:		
-		print(e)
-		form=Login_Form(request.POST)
-		estatus=0
-		msj="La cuenta del usuario esta incompleta."			
-		return render(request,'login.html',locals())
-
 	pub_date = date.today()
 	min_pub_date_time = datetime.combine(pub_date, time.min) 
 	max_pub_date_time = datetime.combine(pub_date, time.max)  
 
-	try:
-		#validamos si el usuario tiene caja abierta en el dia actual.
-		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2_1 = User_2.fn_is_logueado(request.user)
+	if user_2_1 == None:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+
+	#obtenemos el usuario virtual de la sucursal.
+	#ya que sobre este usuario se registran los ingresos.
+	user_2 = User_2.objects.get(user = user_2_1.sucursal.usuario_virtual)
+
+	#validamos si el usuario tiene caja abierta
+	caja = user_2.fn_tiene_caja_abierta()
+
+	if caja == None:
+		caja_abierta="0"
+		caja=Cajas
+	else:
 		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
 		suc=caja.sucursal
 		c=caja.caja
-	except Exception as e:
-		print(e)
-		caja_abierta="0"
-		caja=Cajas
-	
+
 	permiso="1"	
 
 	if request.method=="POST":
