@@ -1184,6 +1184,7 @@ class Boleta_Empeno(models.Model):
 		else:
 			return 0 
 
+	#este para plazo semanal
 	def fn_simula_proximos_pagos(self,semanas_a_refrendar):
 		min_semanas = self.fn_get_min_y_max_semanas_a_pagar()["min_semanas_a_refrendar"]
 		max_semanas = self.fn_get_min_y_max_semanas_a_pagar()["max_semanas_a_refrendar"]
@@ -1252,16 +1253,12 @@ class Boleta_Empeno(models.Model):
 
 		#en caso de quela boleta tenga inconsistencias entre el numero de dias vencidos y el nuero de comisiones pg no pagadas.
 		if self.fn_get_dias_vencida() != comision_pg.count():
-			
 			resp.append(False)
 			resp.append("La boleta presenta inconcistencias entre los dias vencidos y el importe de comisiones pg.")
 			return resp
 
-		
 		pagos_no_pagados = Pagos.objects.filter(boleta = self,pagado = "N")
-
 		importe_comision_pg = comision_pg.aggregate(Sum("importe"))["importe__sum"]
-
 
 		if importe_comision_pg == None:
 			importe_comision_pg = 0		
@@ -1270,14 +1267,14 @@ class Boleta_Empeno(models.Model):
 			#para aplicar descuento debe tener mas de 0 y 3 o menos dias vencidos			
 			if comision_pg.count() > 3:				
 				resp.append(False)
-				resp.append("No es posible aplicar descuento a la boleta. Tiene mas de tres dias vencida.")
+				resp.append("No es posible aplicar descuento a la boleta. Tiene más de tres dias vencida.")
 				
 				return resp
 
 			#validamos que el descuento cubra todas las comisiones de periodo de gracia.
 			if float(descuento) < float(importe_comision_pg):				
 				resp.append(False)
-				resp.append("El importe a descontar no cubre las comisiones de periodo de gracia.")
+				resp.append("El importe de descuento no cubre las comisiones de periodo de gracia.")
 				return resp
 
 

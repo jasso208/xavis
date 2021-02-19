@@ -57,6 +57,10 @@ class Reporte_Cajas_Form(forms.Form):
 	sucursal = forms.ModelChoiceField(queryset = Sucursal.objects.all())
 	export_pdf = forms.IntegerField()
 
+class Reporte_Boletas_Form(forms.Form):
+	sucursal = forms.ModelChoiceField(queryset = Sucursal.objects.all())
+	estatus = forms.ModelChoiceField(queryset = Estatus_Boleta.objects.all())
+	export_pdf = forms.IntegerField()	
 
 class Apartado_Form(forms.Form):
 	id_cliente=forms.IntegerField()

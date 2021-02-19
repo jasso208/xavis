@@ -50,7 +50,7 @@ urlpatterns=[
 	url(r'^admin_comisionpg/$',admin_comisionpg,name="admin_comisionpg"),
 	url(r'^admin_precio_venta/$',admin_precio_venta,name="admin_precio_venta"),
 	url(r'^reporte_cajas_abiertas/$',reporte_cajas_abiertas,name="reporte_cajas_abiertas"),
-
+	url(r'^reporte_boletas/$',reporte_boletas,name="reporte_boletas"),
 
 	url(r'^imprime_comprobante_retiro/(?P<id>\w+)/$',imprime_comprobante_retiro,name="imprime_comprobante_retiro"),
 	url(r'^imprime_comprobante_ingreso/(?P<id>\w+)/$',imprime_comprobante_ingreso,name="imprime_comprobante_ingreso"),

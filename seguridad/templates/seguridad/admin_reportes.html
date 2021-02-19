@@ -15,7 +15,7 @@
 				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-inbox"></span> Caja: {{c}} </label> 	
 			</div>
 
-
+ 
 {% endblock  %}
 
 {%block content%}
@@ -25,85 +25,109 @@
 	</a>	
 </div>
 <div class="col-xs-12">
-	<div class="row" >
+		<div class="row" >
+				<div class="col-xs-12 cls_encabezado_body_2">
+					<a>
+						Cajas
+					</a>
+					<br>
+				</div>
+				<div class="row cls_row_body"  >
+					<div class="col-xs-2">
+						<div class="cls_boton_body">
+							<a href="{% url 'empenos:rep_flujo_caja' %}">
+								<span class="glyphicon glyphicon-inbox"></span>
+								<br>
+								<br>
+								Reporte de flujo Caja
+								
+							</a>	
+						</div>
+						
+					</div>
+
+					<div class="col-xs-2">
+						<div class="cls_boton_body">
+							<a href="{% url 'empenos:reporte_retiros_efectivo' %}">
+								<span class="glyphicon glyphicon-arrow-right">								
+									
+								</span>
+								<br>
+								<br>
+								Reporte retiro efectivo
+							</a>	
+						</div>
+						
+					</div>
+					<div class="col-xs-2">
+						<div class="cls_boton_body">
+							<a href="{% url 'empenos:reporte_ingresos_efectivo' %}">
+								<span class="glyphicon glyphicon-arrow-left">								
+									
+								</span>
+								<br>
+								<br>
+								Reporte ingreso efectivo
+							</a>	
+						</div>
+						
+					</div>
+
+					<div class="col-xs-2">
+						<div class="cls_boton_body">
+							<a href="{% url 'empenos:reportes_caja' %}">
+								<span class="glyphicon">								
+									<label>.CSV</label>
+								</span>
+								<br>
+								<br>
+								Reportes en formato .CSV
+								
+							</a>	
+						</div>
+						
+					</div>
+
+					
+					<div class="col-xs-2">
+						<div class="cls_boton_body">
+							<a href=" {% url 'empenos:reporte_cajas_abiertas' %} ">
+								<span class="glyphicon glyphicon-inbox"></span>
+								<br>
+								<br>
+								Reporte de cajas abiertas
+							</a>	
+						</div>
+						
+					</div>
+
+
+				</div>
+		</div>
+		<div class="row" >
 			<div class="col-xs-12 cls_encabezado_body_2">
 				<a>
-					Cajas
+					Empeños
 				</a>
 				<br>
 			</div>
 			<div class="row cls_row_body"  >
 				<div class="col-xs-2">
 					<div class="cls_boton_body">
-						<a href="{% url 'empenos:rep_flujo_caja' %}">
-							<span class="glyphicon glyphicon-inbox"></span>
+						<a href="{% url 'empenos:reporte_boletas' %}">
+							<span class="glyphicon glyphicon-tag"></span>
 							<br>
 							<br>
-							Reporte de flujo Caja
-							
+							Reporte boletas de empeño
 						</a>	
 					</div>
 					
 				</div>
-
-				<div class="col-xs-2">
-					<div class="cls_boton_body">
-						<a href="{% url 'empenos:reporte_retiros_efectivo' %}">
-							<span class="glyphicon glyphicon-arrow-right">								
-								
-							</span>
-							<br>
-							<br>
-							Reporte retiro efectivo
-						</a>	
-					</div>
-					
-				</div>
-				<div class="col-xs-2">
-					<div class="cls_boton_body">
-						<a href="{% url 'empenos:reporte_ingresos_efectivo' %}">
-							<span class="glyphicon glyphicon-arrow-left">								
-								
-							</span>
-							<br>
-							<br>
-							Reporte ingreso efectivo
-						</a>	
-					</div>
-					
-				</div>
-
-				<div class="col-xs-2">
-					<div class="cls_boton_body">
-						<a href="{% url 'empenos:reportes_caja' %}">
-							<span class="glyphicon">								
-								<label>.CSV</label>
-							</span>
-							<br>
-							<br>
-							Reportes en formato .CSV
-							
-						</a>	
-					</div>
-					
-				</div>
-
-				
-				<div class="col-xs-2">
-					<div class="cls_boton_body">
-						<a href=" {% url 'empenos:reporte_cajas_abiertas' %} ">
-							<span class="glyphicon glyphicon-inbox"></span>
-							<br>
-							<br>
-							Reporte de cajas abiertas
-						</a>	
-					</div>
-					
-				</div>
-
-
 			</div>
-	</div>
+
+
+		</div>
+
 		<div class="row" >
 			<div class="col-xs-12 cls_encabezado_body_2">
 				<a>
@@ -111,16 +135,18 @@
 				</a>
 				<br>
 			</div>
-			<div class="col-xs-2">
-				<div class="cls_boton_body">
-					<a href="{% url 'empenos:rep_comparativo_estatus_cartera' %}">
-						<span class="glyphicon glyphicon-globe"></span>
-						<br>
-						<br>
-						Comparativo est. cartera
-					</a>	
+			<div class="row cls_row_body"  >
+				<div class="col-xs-2">
+					<div class="cls_boton_body">
+						<a href="{% url 'empenos:rep_comparativo_estatus_cartera' %}">
+							<span class="glyphicon glyphicon-globe"></span>
+							<br>
+							<br>
+							Comparativo est. cartera
+						</a>	
+					</div>
+					
 				</div>
-				
 			</div>
 
 

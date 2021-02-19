@@ -12,6 +12,154 @@ IP_LOCAL = settings.IP_LOCAL
 LOCALHOST=settings.LOCALHOST
 from datetime import datetime,date
 import json
+
+def rep_boleta_empeno(obj_reporte,leyenda,request):
+	hoy = date.today()
+	txt_hoy = hoy.strftime("%Y-%m-%d")
+	# Create the HttpResponse object with the appropriate PDF headers.
+	response = HttpResponse(content_type='application/pdf')
+	response['Content-Disposition'] = f'inline; filename=hello.pdf'
+	buffer=BytesIO()
+
+	p=canvas.Canvas(buffer,pagesize=(landscape(letter)))
+	
+	num_paginas = math.ceil(float(obj_reporte.count())/float(24))
+
+	row_act = 480
+	row_size = 20
+
+	cont_pag = 1
+	cont = 0
+	for o in obj_reporte:
+		
+		if cont == 20 or cont == 0:
+			
+			p.drawImage(settings.IP_LOCAL+'/static/img/logo.jpg', 55, 530,200, 60)
+			p.drawString(630,560,"Pag. "+str(cont_pag) + " de " + str(int(num_paginas)))
+
+			p.setFont("Helvetica-Bold",10)
+			p.drawString(300,560, "Fecha de generación: " + txt_hoy)	
+			p.drawString(300,540, "Usuario: " + request.user.username + ":- " + request.user.first_name + " " + request.user.last_name)
+			#p.drawString(300,520, "Sucursal: " + sucursal)
+			p.drawString(300,520, "Reporte de boletas  " + leyenda)
+
+			row_act = 480
+			row_size = 20
+			p.line(55,row_act,545,row_act)
+			row_act = row_act - row_size
+			p.drawString(60,row_act+5,"Folio")
+			p.drawString(100,row_act+5,"Usuario")
+			p.drawString(160,row_act+5,"Avaluo")
+			p.drawString(230,row_act+5,"Mutuo")
+			p.drawString(290,row_act+5,"Refrendo")
+			p.drawString(360,row_act+5,"Tipo producto")			
+			p.drawString(450,row_act+5,"plazo")
+			p.drawString(500,row_act+5,"Fecha emi.")
+			p.drawString(580,row_act+5,"Fecha venc.")
+			p.drawString(660,row_act+5,"Estatus")
+
+			p.line(55,row_act,55,row_act+20)#folio
+			p.line(95,row_act,95,row_act+20)#usuario
+			p.line(155,row_act,155,row_act+20)#avaluo
+			p.line(225,row_act,225,row_act+20)#mutuo
+
+			p.line(285,row_act,285,row_act+20)#refrendo
+
+			p.line(355,row_act,355,row_act+20)#tipo producto
+
+			p.line(445,row_act,445,row_act+20)#plazo
+			p.line(495,row_act,495,row_act+20)#fecha emision
+			p.line(575,row_act,575,row_act+20)#fecha vencimiento
+			p.line(655,row_act,655,row_act+20)#estatus
+			p.line(725,row_act,725,row_act+20)
+
+			p.line(55,row_act,725,row_act)
+			p.line(55,row_act+20,725,row_act+20)
+
+			cont = 1
+			cont_pag += 1
+			p.line(55,row_act,545,row_act)
+			row_act = row_act - row_size
+
+		cont += 1
+		p.line(55,row_act,55,row_act+20)
+		p.line(95,row_act,95,row_act+20)
+		p.line(155,row_act,155,row_act+20)
+		p.line(225,row_act,225,row_act+20)#usuario cierre
+
+		p.line(285,row_act,285,row_act+20)#teorico cierre
+
+		p.line(355,row_act,355,row_act+20)#real cierre
+
+		p.line(445,row_act,445,row_act+20)#diferencia
+
+		p.line(495,row_act,495,row_act+20)
+		p.line(575,row_act,575,row_act+20)
+		p.line(655,row_act,655,row_act+20)
+		p.line(725,row_act,725,row_act+20)
+
+		p.line(55,row_act,725,row_act)
+
+		p.setFont("Helvetica",7)
+		p.drawString(60,row_act+5,fn_str_clave(o.folio))				#folio
+
+		p.drawString(100,row_act+5,o.usuario.username)				#usuario
+		avaluo = "{:0,.2f}".format(o.avaluo)
+		p.drawString(160,row_act+5,"$"+avaluo)				#avaluo
+
+		mutuo = "{:0,.2f}".format(o.mutuo)
+		p.drawString(230,row_act+5,"$"+mutuo)				#mutuo
+
+		refrendo = "{:0,.2f}".format(o.refrendo)
+		p.drawString(290,row_act+5,"$"+refrendo)				#refrendo
+
+		p.drawString(360,row_act+5,o.tipo_producto.tipo_producto)				#tipo producto
+
+		p.drawString(450,row_act+5,o.plazo.plazo)				#plazo
+
+		p.drawString(500,row_act+5,datetime.strftime(o.fecha,'%Y-%m-%d'))				#fecha emision
+		p.drawString(580,row_act+5,datetime.strftime(o.fecha_vencimiento,'%Y-%m-%d'))				#fecha vencimiento
+		p.drawString(660,row_act+5,o.estatus.estatus)				#estatus
+
+		row_act = row_act - row_size
+		if cont == 20:
+			p.showPage()
+
+	p.setFont("Helvetica-Bold",7)
+	p.drawString(60,row_act+5,"Total")				#folio
+
+	avaluo = "{:0,.2f}".format(obj_reporte.aggregate(Sum("avaluo"))["avaluo__sum"])
+	p.drawString(160,row_act+5,"$"+avaluo)				#avaluo
+
+	mutuo = "{:0,.2f}".format(obj_reporte.aggregate(Sum("mutuo"))["mutuo__sum"])
+	p.drawString(230,row_act+5,"$"+mutuo)				#mutuo
+
+	
+	refrendo = "{:0,.2f}".format(obj_reporte.aggregate(Sum("refrendo"))["refrendo__sum"])
+	p.drawString(290,row_act+5,"$"+refrendo)				#refrendo
+
+	p.drawString(360,row_act+5,"Numero de boletas: " + str(obj_reporte.count()))				#refrendo
+
+
+	p.line(55,row_act,55,row_act+20)
+	
+	p.line(155,row_act,155,row_act+20)
+	p.line(225,row_act,225,row_act+20)#usuario cierre
+
+	p.line(285,row_act,285,row_act+20)#teorico cierre
+
+	p.line(355,row_act,355,row_act+20)#real cierre
+
+
+	p.line(725,row_act,725,row_act+20)
+
+	p.line(55,row_act,725,row_act)
+	p.save()
+	pdf=buffer.getvalue()
+	buffer.close()
+	response.write(pdf)
+	return response
+
 def imprime_corte_caja(request,id):
 	hoy = date.today()
 	txt_hoy = hoy.strftime("%Y-%m-%d")

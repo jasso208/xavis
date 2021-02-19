@@ -1411,6 +1411,48 @@ def reporte_ingresos_efectivo(request):
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
 
+def reporte_boletas(request):
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2_1 = User_2.fn_is_logueado(request.user)
+	if user_2_1 == None:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+		
+	if not user_2_1.fn_tiene_acceso_a_vista(25):
+		return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
+
+	#obtenemos el usuario virtual de la sucursal.
+	#ya que sobre este usuario se registran los ingresos.
+	user_2 = User_2.objects.get(user = user_2_1.sucursal.usuario_virtual)
+
+	caja = user_2.fn_tiene_caja_abierta()
+
+	c = ""
+
+	if caja != None:
+		c = caja.caja
+	
+	if request.method == "POST":
+		id_sucursal = request.POST.get("sucursal")
+		id_estatus = request.POST.get("estatus")
+		if id_estatus == "":
+			boletas = Boleta_Empeno.objects.filter(sucursal__id = int(id_sucursal)).order_by("-folio")	
+		else:
+			boletas = Boleta_Empeno.objects.filter(sucursal__id = int(id_sucursal),estatus__id = int(id_estatus)).order_by("-folio")	
+		leyenda = "de la sucursal " + Sucursal.objects.get(id = int(id_sucursal)).sucursal 
+		if id_estatus == "":
+			leyenda = "de todos los estatus de la sucursal " + Sucursal.objects.get(id = int(id_sucursal)).sucursal  
+		else:
+			leyenda = "del estatus " + Estatus_Boleta.objects.get(id = int(id_estatus)).estatus + " de la sucursal " + Sucursal.objects.get(id = int(id_sucursal)).sucursal 
+
+		if request.POST.get("export_pdf") == "1":
+			return rep_boleta_empeno(boletas,leyenda,request)
+
+	form = Reporte_Boletas_Form()
+
+	return render(request,'empenos/reporte_boletas.html',locals())
+#*******************************************************************************************************************************************************
+#*¨**************************************************************************************************************************************************************
+
 def reporte_cajas_abiertas(request):
 	#si regresa none, es porque el usuario no esta logueado.
 	user_2 = User_2.fn_is_logueado(request.user)
@@ -3534,12 +3576,13 @@ def consulta_abono(request):
 	#validamos si el usuario tiene caja abierta
 	caja = user_2.fn_tiene_caja_abierta()
 
-	if caja == None:
+	if caja == None:			
 		msj_error="No cuentas con caja abierta."
-		print(e)
+	else:		
+		c=caja.caja
+		id_caja=caja.id
+		
 
-	c=caja.caja
-	id_caja=caja.id
 
 
 
