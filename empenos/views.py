@@ -174,13 +174,9 @@ def abrir_caja(request):
 
 @transaction.atomic
 def abona_apartado(request,id_apartado):
-
-
-
 	hoy = date.today()
 	hoy_inicial = datetime.combine(hoy, time.min) 
 	hoy_final = datetime.combine(hoy, time.max)  
-
 
 	#si regresa none, es porque el usuario no esta logueado.
 	user_2_1 = User_2.fn_is_logueado(request.user)
@@ -190,6 +186,10 @@ def abona_apartado(request,id_apartado):
 	#obtenemos el usuario virtual de la sucursal.
 	#ya que sobre este usuario se registran los ingresos.
 	user_2 = User_2.objects.get(user = user_2_1.sucursal.usuario_virtual)
+
+	#buscamos la configuracion del negocio para apartados
+	apartado = Apartado.objects.get(id = id_apartado)	
+
 
 	#validamos si el usuario tiene caja abierta
 	caja = user_2.fn_tiene_caja_abierta()
@@ -202,12 +202,16 @@ def abona_apartado(request,id_apartado):
 		suc = caja.sucursal
 		c = caja.caja
 
-
-
-
 	usuario=request.user
 
 	apartado = Apartado.objects.get(id = id_apartado)	
+
+	no_apartado = "1"
+	if apartado.estatus.id != 1:
+		no_apartado = "0"
+		form=Apartado_Form()		
+		return render(request,'empenos/apartado.html',locals())
+
 	det_boleta=Det_Boleto_Empeno.objects.filter(boleta_empeno=apartado.boleta)
 	error="1"
 
@@ -220,6 +224,17 @@ def abona_apartado(request,id_apartado):
 		msj_error="No se capturado el catalogo Min_Apartado."
 		return render(request,'empenos/apartado.html',locals())
 
+
+	try:
+		a_criterio_cajero = Min_Apartado.objects.get(id = 1).a_criterio_cajero
+	except Exception as e:
+		print(e)
+		error="0"
+		msj_error="No tiene configurado los apartados, contacte al administrador del sistema."
+		form=Apartado_Form()
+		return render(request,'empenos/apartado.html',locals())
+
+
 	if request.method == "POST":
 		try:
 
@@ -231,16 +246,17 @@ def abona_apartado(request,id_apartado):
 			saldo_restante = int(apartado.saldo_restante)-int(abono)
 
 
-			#minimo para darle dos meses.
-			min_apartado_2_mes=math.ceil(decimal.Decimal(apartado.importe_venta)*(decimal.Decimal(ma.porc_min_2_mes)/decimal.Decimal(100)))
+			#si no es a criterio de cajero, calcula en base a configuración.
+			if not a_criterio_cajero:
+				#minimo para darle dos meses.
+				min_apartado_2_mes=math.ceil(decimal.Decimal(apartado.importe_venta)*(decimal.Decimal(ma.porc_min_2_mes)/decimal.Decimal(100)))
 
-			#Si el saldo restante  es mayor al minimo requerido para que diera dos meses
-			#se actualiza la fecha de nacimiento
-
-			total_abonado = decimal.Decimal(apartado.importe_venta) - decimal.Decimal(saldo_restante)
-			if total_abonado >= min_apartado_2_mes:
-				fecha_vencimiento = datetime.combine(fn_add_months(apartado.fecha,2), time.min)
-				apartado.fecha_vencimiento = fecha_vencimiento	
+				#Si el saldo restante  es mayor al minimo requerido para que diera dos meses
+				#se actualiza la fecha de nacimiento
+				total_abonado = decimal.Decimal(apartado.importe_venta) - decimal.Decimal(saldo_restante)
+				if total_abonado >= min_apartado_2_mes:
+					fecha_vencimiento = datetime.combine(fn_add_months(apartado.fecha,2), time.min)
+					apartado.fecha_vencimiento = fecha_vencimiento	
 
 			apartado.saldo_restante = saldo_restante
 
@@ -249,6 +265,7 @@ def abona_apartado(request,id_apartado):
 				apartado.boleta.estatus = vendida
 				apartado.estatus = ap_vendido
 				apartado.boleta.save()
+
 			apartado.save()
 
 			#es la clave para Apartado
@@ -270,7 +287,8 @@ def abona_apartado(request,id_apartado):
 			Imprime_Apartado.objects.filter(usuario = usuario).delete()
 			Imprime_Apartado.objects.create(usuario = usuario,apartado = apartado,abono = ab_ap)
 
-			return HttpResponseRedirect(reverse('empenos:imprime_apartado'))
+			#return HttpResponseRedirect(reverse('empenos:imprime_apartado'))
+			form = Abono_Apartado_Form()
 
 		except Exception as e:
 			print(e)
@@ -473,8 +491,11 @@ def admin_min_apartado(request,id):
 		else:
 			try:
 				form=Min_Apartado_Form(request.POST,instance=query)
+				
 				if form.is_valid():
-					form.save()
+					f = form.save(commit = False)
+					f.usuario_modifica = request.user
+					f.save()
 					estatus="1"#guardo con exito
 				else:
 					estatus="0"#fallo al guardar 
@@ -561,7 +582,7 @@ def apartado(request):
 	min_pub_date_time = datetime.combine(pub_date, time.min) 
 	max_pub_date_time = datetime.combine(pub_date, time.max)  
 
-
+	IP_LOCAL = settings.IP_LOCAL
 
 	#si regresa none, es porque el usuario no esta logueado.
 	user_2_1 = User_2.fn_is_logueado(request.user)
@@ -590,6 +611,18 @@ def apartado(request):
 
 	estatus="0"
 	msj_error=""
+
+	try:
+		a_criterio_cajero = Min_Apartado.objects.get(id = 1).a_criterio_cajero
+	except Exception as e:
+		print(e)
+		estatus="0"
+		msj_error="No tiene configurado los apartados, contacte al administrador del sistema."
+		form=Apartado_Form()
+		return render(request,'empenos/apartado.html',locals())
+
+
+
 	if request.method=="POST":
 		try:
 			id_cliente=request.POST.get("id_cliente")
@@ -600,115 +633,143 @@ def apartado(request):
 			form=Apartado_Form()
 			return render(request,'empenos/apartado.html',locals())
 
-		try:
-			ma=Min_Apartado.objects.get(id=1)
-		except Exception as e:
-			print(e)
-			form=Apartado_Form()
-			estatus="0"
-			msj_error="No se capturado el catalogo Min_Apartado."
-			return render(request,'empenos/apartado.html',locals())
+		
+		ma=Min_Apartado.objects.get(id=1)
 
 		try:
 			usuario=request.user
 			
-			pago_cliente=int(request.POST.get("pago_cliente"))
-
 			#es la clave para Apartado
-			tm=Tipo_Movimiento.objects.get(id=7)
+			tm = Tipo_Movimiento.objects.get(id=7)
 
 			#Generamos el folio para el apartado			
-			folio=fn_folios(tm,suc)
+			folio = fn_folios(tm,suc)
 
-			boleta=Apartado_Temporal.objects.get(usuario=usuario).boleta
+			boleta = Apartado_Temporal.objects.get(usuario=usuario).boleta
 
-			estatus_apartado=Estatus_Apartado.objects.get(id=1)
+			estatus_apartado = Estatus_Apartado.objects.get(id=1)
 
-			importe_venta=math.ceil(boleta.fn_calcula_precio_apartado())
+			importe_venta = math.ceil(boleta.fn_calcula_precio_apartado())
 
-			if int(pago_cliente)>=int(importe_venta):
-				form=Apartado_Form()
-				estatus="0"
-				msj_error="El importe ingresado cubre en su totalidad el costo del producto, realice la operación en la opción de venta piso."
-				return render(request,'empenos/apartado.html',locals())
-
-
-			min_apartado_2_mes=math.ceil(decimal.Decimal(importe_venta)*(decimal.Decimal(ma.porc_min_2_mes)/decimal.Decimal(100)))
 
 			hoy = datetime.combine(pub_date, time.min) 
 
-			#si el pago cliente es mayor al minimo para dos meses, se le da dos meses de apartado,
-			# de lo contrario solo se le da 1
-			if pago_cliente>=min_apartado_2_mes:
-				fecha_vencimiento=datetime.combine(fn_add_months(hoy,2), time.min)
+			if a_criterio_cajero:
+					
+				pago_cliente_2 = int(request.POST.get("pago_cliente_2"))
+				num_meses_apartar = int(request.POST.get("num_meses_apartar"))
+
+				pago_cliente = pago_cliente_2
+				fecha_vencimiento = datetime.combine(fn_add_months(hoy,num_meses_apartar), time.min)
+
+				if int(pago_cliente) >= int(importe_venta):
+					form=Apartado_Form()
+					estatus="0"
+					msj_error="El importe ingresado cubre en su totalidad el costo del producto, realice la operación en la opción de venta piso."
+					return render(request,'empenos/apartado.html',locals())
+
+
 			else:
-				fecha_vencimiento=datetime.combine(fn_add_months(hoy,1), time.min)
-			
+				pago_cliente = int(request.POST.get("pago_cliente"))
+				if int(pago_cliente) >= int(importe_venta):
+					form=Apartado_Form()
+					estatus="0"
+					msj_error="El importe ingresado cubre en su totalidad el costo del producto, realice la operación en la opción de venta piso."
+					return render(request,'empenos/apartado.html',locals())
+
+
+				min_apartado_2_mes=math.ceil(decimal.Decimal(importe_venta)*(decimal.Decimal(ma.porc_min_2_mes)/decimal.Decimal(100)))
+
+				
+
+				#si el pago cliente es mayor al minimo para dos meses, se le da dos meses de apartado,
+				# de lo contrario solo se le da 1
+				if pago_cliente>=min_apartado_2_mes:
+					fecha_vencimiento=datetime.combine(fn_add_months(hoy,2), time.min)
+				else:
+					fecha_vencimiento=datetime.combine(fn_add_months(hoy,1), time.min)
+				
+
+ 
+
 			#para asegurarnos que no se venza en dia de azueto
 			fecha_vencimiento=fn_fecha_vencimiento_valida(fecha_vencimiento)
 
 			valida_boleta=Apartado.objects.filter(boleta=boleta)
+
+			#SILA BOLETA NO HA SIDO APARTADA, VALIDAMOS QUE NO SE HAYA VENDIDO EN VENTA PISO
+			if not valida_boleta.exists():			
+
+				valida_boleta = Det_Venta_Piso.objects.filter(boleta = boleta)			
+
+				#si no ha sido venida en venta piso, validamos que tampoco se ahaya vendido en venta a granel
+				if not valida_boleta.exists():			
+
+					valida_boleta = Det_Venta_Granel.objects.filter(boleta = boleta)
+
 			if valida_boleta.exists():
 				form=Apartado_Form()
 				estatus="0"
-				msj_error="La boleta ya fue apartada."
+				msj_error="La boleta ya no esta disponible para ser apartada."
 				Apartado_Temporal.objects.get(usuario=usuario).delete()
 				return render(request,'empenos/apartado.html',locals())
 
-			ap=Apartado()
-			ap.folio=folio
-			ap.usuario=usuario
-			ap.importe_venta=importe_venta
-			ap.caja=caja
-			ap.cliente=cliente
-			ap.estatus=estatus_apartado
-			ap.boleta=boleta
-			ap.fecha_vencimiento=fecha_vencimiento
-			ap.saldo_restante=math.ceil(decimal.Decimal(importe_venta)-decimal.Decimal(pago_cliente))
-			ap.sucursal=suc
-			ap.save()
-
-
-			#es la clave para Apartado
-			tm=Tipo_Movimiento.objects.get(id=8)
-
-			#Generamos el folio para el apartado			
-			folio=fn_folios(tm,suc)
-			ab_ap=Abono_Apartado()
-			ab_ap.folio=folio
-			ab_ap.usuario=usuario
-			ab_ap.importe=pago_cliente
-			ab_ap.caja=caja
-			ab_ap.apartado=ap
-			ab_ap.save()
-
-			Apartado_Temporal.objects.get(usuario=usuario).delete()
-
-			#estatus apartado para la boleta
-			estatus_boleta=Estatus_Boleta.objects.get(id=7)
-
-			boleta.estatus=estatus_boleta
-			boleta.save()
-
-			Imprime_Apartado.objects.filter(usuario=usuario).delete()
-			Imprime_Apartado.objects.create(usuario=usuario,apartado=ap,abono=ab_ap)
-
-
 			
 
-			estatus="1"
-			return HttpResponseRedirect(reverse('empenos:imprime_apartado'))
+
+
+			with transaction.atomic():
+				ap=Apartado()
+				ap.folio=folio
+				ap.usuario=usuario
+				ap.importe_venta=importe_venta
+				ap.caja=caja
+				ap.cliente=cliente
+				ap.estatus=estatus_apartado
+				ap.boleta=boleta
+				ap.fecha_vencimiento=fecha_vencimiento
+				ap.saldo_restante=math.ceil(decimal.Decimal(importe_venta)-decimal.Decimal(pago_cliente))
+				ap.sucursal=suc
+				ap.save()
+
+				#es la clave para Apartado
+				tm=Tipo_Movimiento.objects.get(id=8)
+
+				#Generamos el folio para el apartado			
+				folio=fn_folios(tm,suc)
+				ab_ap=Abono_Apartado()
+				ab_ap.folio=folio
+				ab_ap.usuario=usuario
+				ab_ap.importe=pago_cliente
+				ab_ap.caja=caja
+				ab_ap.apartado=ap
+				ab_ap.save()
+
+				Apartado_Temporal.objects.get(usuario=usuario).delete()
+
+				#estatus apartado para la boleta
+				estatus_boleta=Estatus_Boleta.objects.get(id=7)
+
+				boleta.estatus=estatus_boleta
+				boleta.save()
+
+				Imprime_Apartado.objects.filter(usuario=usuario).delete()
+				Imprime_Apartado.objects.create(usuario=usuario,apartado=ap,abono=ab_ap)
+				estatus = "1"
+
+			#return HttpResponseRedirect(reverse('empenos:imprime_apartado'))
 		except Exception as e:
 			print(e)
-			estatus="0"
+			estatus="0" 
 			msj_error="Error al apartar el producto."
 			form=Apartado_Form()
+			transaction.set_rollback(True)
 			return render(request,'empenos/apartado.html',locals())
 	else:
 		
 		
 		estatus="2"
-		form=Apartado_Form()
+	form=Apartado_Form()
 	return render(request,'empenos/apartado.html',locals())
 
 
@@ -750,8 +811,8 @@ def imprime_apartado(request):
 	p.setFont("Helvetica-Bold",12)
 	p.drawString(250,770-380,"Copia cliente")
 	p.setFont("Helvetica-Bold",12)
-	p.drawString(470,760,"Folio apartado: "+str(im.apartado.folio))
-	p.drawString(470,360,"Folio apartado: "+str(im.apartado.folio))
+	p.drawString(400,760,"Folio apartado: "+str(im.apartado.folio))
+	p.drawString(400,360,"Folio apartado: "+str(im.apartado.folio))
 
 	p.setFont("Helvetica-Bold",12)
 	p.drawString(250,730,"Apartado Producto")
@@ -761,42 +822,45 @@ def imprime_apartado(request):
 	p.setFont("Helvetica",10)
 
 	current_row=current_row-20
-	p.drawString(35,current_row,"Folio boleta:")
-	p.drawString(100,current_row,str(im.apartado.boleta.folio))
+	p.drawString(55,current_row,"Folio boleta:")
+	p.drawString(130,current_row,str(im.apartado.boleta.folio))
 
-	p.drawString(35,current_row-380,"Folio boleta:")
-	p.drawString(100,current_row-380,str(im.apartado.boleta.folio))
+	p.drawString(55,current_row-380,"Folio boleta:")
+	p.drawString(130,current_row-380,str(im.apartado.boleta.folio))
 
-	current_row=current_row-20
-
-	p.drawString(35,current_row,"Fecha emisión: ")
-	p.drawString(150,current_row,str(im.apartado.fecha.strftime("%Y-%m-%d")))
-
-	p.drawString(35,current_row-380,"Fecha emisión: ")
-	p.drawString(150,current_row-380,str(im.apartado.fecha.strftime("%Y-%m-%d")))
+	p.drawString(360,current_row,"Cajero: " + request.user.username)
+	p.drawString(360,current_row-380,"Cajero: " + request.user.username)
 
 	current_row=current_row-20
-	p.drawString(35,current_row,"Fecha vencimiento: ")
+
+	p.drawString(360,current_row,"Fecha emisión: ")
+	p.drawString(430,current_row,str(im.apartado.fecha.strftime("%Y-%m-%d %H:%m")))
+
+	p.drawString(360,current_row-380,"Fecha emisión: ")
+	p.drawString(430,current_row-380,str(im.apartado.fecha.strftime("%Y-%m-%d %H:%m")))
+
+	
+	p.drawString(55,current_row,"Fecha vencimiento: ")
 	p.drawString(150,current_row,str(im.apartado.fecha_vencimiento.strftime("%Y-%m-%d")))
 
-	p.drawString(35,current_row-380,"Fecha vencimiento: ")
+	p.drawString(55,current_row-380,"Fecha vencimiento: ")
 	p.drawString(150,current_row-380,str(im.apartado.fecha_vencimiento.strftime("%Y-%m-%d")))
 
 	current_row=current_row-20
-	p.drawString(35,current_row,"Sucursal:")
-	p.drawString(100,current_row,im.apartado.caja.sucursal.sucursal)
+	p.drawString(360,current_row,"Sucursal:")
+	p.drawString(430,current_row,im.apartado.caja.sucursal.sucursal)
 
-	p.drawString(35,current_row-380,"Sucursal:")
-	p.drawString(100,current_row-380,im.apartado.caja.sucursal.sucursal)
+	p.drawString(360,current_row-380,"Sucursal:")
+	p.drawString(430,current_row-380,im.apartado.caja.sucursal.sucursal)
 
-	current_row=current_row-20
+	
 	p.setFont("Helvetica",10)
-	p.drawString(35,current_row,"Cliente: ")
+	p.drawString(55,current_row,"Cliente: ")
 	p.setFont("Helvetica",10)
 	p.drawString(100,current_row,im.apartado.cliente.nombre+' '+im.apartado.cliente.apellido_p+' '+im.apartado.cliente.apellido_m)
 	p.setFont("Helvetica",10)
 
-	p.drawString(35,current_row-380,"Cliente: ")
+	p.drawString(55,current_row-380,"Cliente: ")
 	p.setFont("Helvetica",10)
 	p.drawString(100,current_row-380,im.apartado.cliente.nombre+' '+im.apartado.cliente.apellido_p+' '+im.apartado.cliente.apellido_m)
 	p.setFont("Helvetica",10)
@@ -804,10 +868,10 @@ def imprime_apartado(request):
 	current_row=current_row-20
 
 	p.setFont("Helvetica-Bold",10)
-	p.drawString(35,current_row,"Artículo")
+	p.drawString(55,current_row,"Artículo")
 	p.drawString(480,current_row,"Precio")
 
-	p.drawString(35,current_row-380,"Artículo")
+	p.drawString(55,current_row-380,"Artículo")
 	p.drawString(480,current_row-380,"Precio")
 
 	p.setFont("Helvetica",8)
@@ -819,20 +883,18 @@ def imprime_apartado(request):
 
 	importe="$"+"{:0,.2f}".format(math.ceil(im.apartado.importe_venta))
 
-	p.drawString(30,current_row,">")
-	p.drawString(30,current_row-380,">")
 
 	p.drawString(480,current_row,importe)
 	p.drawString(480,current_row-380,importe)
 
 	for db in dbe:
-		p.drawString(35,current_row,db.descripcion)
-		p.drawString(35,current_row-380,db.descripcion)
+		p.drawString(55,current_row,db.descripcion)
+		p.drawString(55,current_row-380,db.descripcion)
 		current_row=current_row-20		
 		
 		if db.observaciones is not None:				
-			p.drawString(35,current_row,db.observaciones)
-			p.drawString(35,current_row-380,db.observaciones)
+			p.drawString(55,current_row,db.observaciones)
+			p.drawString(55,current_row-380,db.observaciones)
 			current_row=current_row-20		
 
 		
@@ -886,11 +948,11 @@ def imprime_apartado(request):
 	current_row=current_row-20
 	current_row = 700
 	p.setFont("Helvetica-Bold",7)
-	p.drawString(30,440,"Nota: ")
-	p.drawString(30,440-380,"Nota: ")
+	p.drawString(55,440,"Nota: ")
+	p.drawString(55,440-380,"Nota: ")
 	p.setFont("Helvetica",7)
-	p.drawString(60,440,"El artículo fue probado en sucursal junto con el cliente  y se aparta funcionando. Por ser un artículo usado no se da ningun tipo de garantia.  ")
-	p.drawString(60,440-380,"El artículo fue probado en sucursal junto con el cliente y se aparta funcionando. Por ser un artículo usado no se da ningun tipo de garantia.  ")
+	p.drawString(75,440,"El artículo fue probado en sucursal junto con el cliente  y se aparta funcionando. Por ser un artículo usado no se da ningun tipo de garantia.  ")
+	p.drawString(75,440-380,"El artículo fue probado en sucursal junto con el cliente y se aparta funcionando. Por ser un artículo usado no se da ningun tipo de garantia.  ")
 	current_row=current_row-10
 	#p.drawString(330,current_row,"y se aparta funcionando.")
 	#p.drawString(330,current_row,"y se aparta funcionando.")
@@ -1546,7 +1608,11 @@ def consulta_apartado(request):
 			apartados = Apartado.objects.filter(fecha__range = (fecha_inicial,fecha_final),sucursal = suc).order_by("-folio")
 		elif request.POST.get("cliente") != "" and request.POST.get("cliente") != None:			
 			
-			apartados = (Apartado.objects.filter(cliente__nombre__icontains = request.POST.get("cliente"),sucursal = suc) | Apartado.objects.filter(cliente__apellido_p__icontains = request.POST.get("cliente"),sucursal = suc) | Apartado.objects.filter(cliente__apellido_m__icontains = request.POST.get("cliente"),sucursal = suc)).order_by("-folio")
+			Cliente.fn_actualiza_nombre_completo()
+			
+			cl = Cliente.objects.filter(nombre_completo__contains = request.POST.get("cliente").upper()) 
+			apartados = Apartado.objects.filter(cliente__in = cl,sucursal = suc) 
+
 		elif folio_apartado != "" or folio_apartado != None :
 			apartados = Apartado.objects.filter(folio = int(request.POST.get("folio_apartado")),sucursal = suc)
 
@@ -3529,14 +3595,17 @@ def alta_cliente(request,id_cliente=None):
 		msj_error="No cuentas con caja abierta."
 		print(e)
 
+	estatus = "2"
 	if request.method=="POST":
 		form=Cliente_Form(request.POST,instance=cliente)
 		if form.is_valid():
 			f=form.save(commit=False)
 			f.usuario=request.user
 			f.save()
-			return HttpResponseRedirect(reverse('seguridad:bienvenidos'))
+			estatus = "1"
+			
 	else:
+		estatus = "0"
 		form=Cliente_Form(instance=cliente)
 	return render(request,'empenos/alta_cliente.html',locals())
 

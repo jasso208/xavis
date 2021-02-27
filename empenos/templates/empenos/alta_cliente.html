@@ -1,6 +1,7 @@
-{% extends 'base.html' %}
+<!--{% extends 'base.html' %}-->
 {% load static %}
 {% load bootstrap3 %}
+<!--
 {% block usuario %}
 
 			<div class="col-xs-6">
@@ -17,12 +18,32 @@
 
 
 {% endblock  %}
+-->
+<!--{% block content %}-->
+<!DOCTYPE html>
+<html>
+<head>
 
-{% block content %}
+	<title>Alta de cliente</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<link href="https://fonts.googleapis.com/css?family=Pathway+Gothic+One" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Noto+Serif+JP" rel="stylesheet">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.2/jspdf.min.js"></script>
+	<link rel="stylesheet" href="{% static 'css/base.css' %}">
+	<link rel="stylesheet" type="text/css" href="{% static 'css/alta_modifica_producto.css'%}">
+	<link rel="stylesheet" type="text/css" href="{% static 'css/busca_producto.css'%}">
+
+</head>
+<body style="width:100%;">
+
+  
 	<div class="col-xs-12 cls_encabezado_body">
 	
 		<a >
-			Alta / Edición de Cliente
+			Alta cliente
 		</a>		
 	
 	</div>
@@ -39,24 +60,24 @@
 						<div class="panel-body">
 							<div class="row">
 
-								<div class="col-xs-4">
+								<div class="col-xs-12 col-sm-4">
 									<label>Nombre</label>
 									{%bootstrap_field form.nombre show_label=False%}
 								</div>
-								<div class="col-xs-4">
+								<div class="col-xs-12 col-sm-4">
 									<label>Apellido Paterno</label>
 									{%bootstrap_field form.apellido_p show_label=False%}
 								</div>
-								<div class="col-xs-4">
+								<div class="col-xs-12 col-sm-4">
 									<label>Apellido Materno</label>
 									{%bootstrap_field form.apellido_m show_label=False%}
 								</div>
-								<div class="col-xs-3">
+								<div class="col-xs-6 col-sm-3">
 									<label>Genero</label>
 									{%bootstrap_field form.genero show_label=False%}
 								</div>
 
-								<div class="col-xs-3">
+								<div class="col-xs-6 col-sm-3">
 									<label>Estado Civil</label>
 									{%bootstrap_field form.estado_civil show_label=False%}
 								</div>
@@ -71,47 +92,47 @@
 								</div>
 							</div>
 							<div class="row">
-								<div class="col-xs-3">
+								<div class="col-xs-6">
 									<label>Codigo Postal</label>
 									{%bootstrap_field form.codigo_postal show_label=False%}
 								</div>
 							</div>
 
 							<div class="row">
-								<div class="col-xs-2">
+								<div class="col-xs-6">
 									<label>Numero Interior</label>
 									{%bootstrap_field form.numero_interior show_label=False%}
 								</div>
-								<div class="col-xs-2">
+								<div class="col-xs-6">
 									<label>Numero Exterior</label>
 									{%bootstrap_field form.numero_exterior show_label=False%}
 								</div>
 							</div>
 							<div class="row">
-								<div class="col-xs-4">
+								<div class="col-xs-12">
 									<label>Colonia</label>
 									{%bootstrap_field form.colonia show_label=False%}
 								</div>
-								<div class="col-xs-4">
+								<div class="col-xs-12">
 									<label>Ciudad</label>
 									{%bootstrap_field form.ciudad show_label=False%}
 								</div>
-								<div class="col-xs-4">
+								<div class="col-xs-12">
 									<label>Estado</label>
 									{%bootstrap_field form.estado show_label=False%}
 								</div>
-								<div class="col-xs-4">
+								<div class="col-xs-12">
 									<label>Pais</label>
 									{%bootstrap_field form.pais show_label=False%}
 								</div>
 
 							</div>
 							<div class="row">
-								<div class="col-xs-4">
+								<div class="col-xs-6">
 									<label>Telefono Fijo</label>
 									{%bootstrap_field form.telefono_fijo show_label=False%}
 								</div>
-								<div class="col-xs-4">
+								<div class="col-xs-6">
 									<label>Telefono Celular</label>
 									{%bootstrap_field form.telefono_celular show_label=False%}
 								</div>
@@ -135,4 +156,30 @@
 			</div>
 		</div>
 	</div>
-{% endblock %}
+
+</body>
+</html>
+
+{% ifequal estatus "1" %}
+		<div class="fondo_mensaje " >
+			
+		</div >
+		<div class="mensaje " style="width: 90%;left: 5%;">	
+				<div class="cls_encabezado_alert" >
+					Aviso
+				</div>
+
+				<div class="panel panel-default">	
+					<label class="page-header" >El cliente se registro correctamente.</label>
+					<br>
+
+					<a class="btn btn-primary btn-sm" href="{% url 'empenos:alta_cliente' %}" ><span class="glyphicon glyphicon-ok"></span> Aceptar</a>		
+
+					<br>
+					<br>		
+
+				</div>
+		</div>
+
+{% endifequal %}
+<!--{% endblock %}-->

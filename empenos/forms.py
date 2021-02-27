@@ -13,8 +13,9 @@ SI_NO=(
 
 class Min_Apartado_Form(forms.ModelForm):
 	class Meta:
+
 		model=Min_Apartado
-		fields=('porc_min_1_mes','porc_min_2_mes',)	
+		fields=('porc_min_1_mes','porc_min_2_mes','a_criterio_cajero','usuario_modifica',)	
 
 class Abre_Caja_Form(forms.ModelForm):
 	class Meta:
@@ -65,6 +66,8 @@ class Reporte_Boletas_Form(forms.Form):
 class Apartado_Form(forms.Form):
 	id_cliente=forms.IntegerField()
 	pago_cliente=forms.IntegerField()
+	pago_cliente_2=forms.IntegerField()
+	num_meses_apartar=forms.IntegerField()
 	
 	def __init__(self, *args, **kwargs):
 		super(self.__class__, self).__init__(*args, **kwargs)

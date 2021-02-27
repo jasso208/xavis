@@ -57,7 +57,7 @@
 										</div>
 
 										<div class="col-xs-3">
-											<label>Folio Boleta</label>
+											<label>Folio apartado</label>
 											
 											<input type="number" name="folio_apartado"  id="id_folio_apartado" class="form-control">
 										</div>
@@ -105,7 +105,7 @@
 									    	{% for v in apartados%}
 										    	<tr>
 											    	<td>
-										    			<a  class='btn btn-default btn-sm' href="/empenos/re_imprimir_apartado/{{v.id}}">
+										    			<a  class='btn btn-default btn-sm'  onclick="window.open('/empenos/re_imprimir_apartado/{{v.id}}','popup','width=500,height=600')">
 										    				<span class='glyphicon glyphicon-print'>
 
 										    				</span>    					
@@ -123,6 +123,8 @@
 											        <td>{{v.folio}}</td>
 											        <td>{{v.cliente.nombre}} {{v.cliente.apellido_p}} {{v.cliente.apellido_m}}</td>											        
 											        
+											        
+
 											        <td>${{v.importe_venta}}</td>
 											        <td>${{v.saldo_restante}}</td>
 											        <td>{{v.fecha | date:"d/m/Y"}}</td>

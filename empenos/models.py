@@ -55,6 +55,8 @@ class Tipo_Movimiento(models.Model):
 class Min_Apartado(models.Model):
 	porc_min_1_mes=models.IntegerField()
 	porc_min_2_mes=models.IntegerField()
+	a_criterio_cajero = models.BooleanField( default = False);
+	usuario_modifica = models.ForeignKey(User,on_delete = models.PROTECT,null = True,blank = True)
 
 class Perfil(models.Model):
 	perfil=models.CharField(max_length=30,null=False)
@@ -981,13 +983,13 @@ class Cliente(models.Model):
 			nombre = ""
 
 			if c.nombre != None:
-				nombre = c.nombre
+				nombre = c.nombre.upper()
 
 			if c.apellido_m != None:
-				apellido_m = c.apellido_m
+				apellido_m = c.apellido_m.upper()
 
 			if c.apellido_p != None:
-				apellido_p = c.apellido_p
+				apellido_p = c.apellido_p.upper()
 
 			c.nombre_completo = nombre + ' ' +apellido_p + ' ' + apellido_m 
 			c.save()

@@ -688,12 +688,12 @@ def api_agrega_prod_apartado(request):
 
 		#si existe es que ya fue agregada la boelta.
 		if vtp.exists():
-			respuesta.append({"estatus":"0","msj":"La boleta ya ha sido agregada."})
+			respuesta.append({"estatus":"0","msj":"La boleta ya fue seleccionada para apartado por otro usuario."})
 			return Response(respuesta)
 
 		try:
 			at=Apartado_Temporal.objects.get(usuario=usuario)
-			respuesta.append({"estatus":"0","msj":"Solo puedes apartar un producto por ticket."})
+			respuesta.append({"estatus":"0","msj":"Solo se puede apartar un producto a la vez"})
 			return Response(respuesta)			
 		except:
 			print("")

@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 {% load bootstrap3 %}
 {% load static%}
+{% block archivos_staticos%}
+<script type="text/javascript" src="{% static 'js/admin_min_apartado.js' %}"></script>
+{% endblock %}
 {% block usuario %}
 
 			<div class="col-xs-6">
@@ -18,35 +21,56 @@
 
 {% endblock  %}
 {% block content %}
+	
 	<div class="col-xs-12 cls_encabezado_body">
 	
-		<a >
-			Porcentajes minimos para apartado.
-		</a>		
-	
+	<div class="col-xs-10">
+			<a >
+				Porcentajes mínimos para apartado.
+			</a>				
+		</div>
+		<div class="col-xs-2">
+			<a id = "btn_ayuda" style="cursor: pointer;" >
+				<span class="glyphicon glyphicon-question-sign"></span>
+				Ayuda
+			</a>
+		</div>
 	</div>
-
 
 	<div class="col-xs-12">
 		<form method="post" action="#" class="cls_form_1">
 			{%csrf_token%}
 			<div class="row cls_form_consulta">
-				<div class="col-xs-6">
+				<div class="col-xs-12">
 					<div class="panel panel-default">						
 						<div class="panel-body">
-							
 
-							<div class="col-xs-12 col-md-6"  >
-								<label for="">Porcentaje minimo para apartar 1 mes</label>
+							<div class="col-xs-12 col-md-12"  >								
+								{% bootstrap_label form.a_criterio_cajero %}
+								
+								<label> Apartar usando criterio del cajero.</label>
+								<br>		
+								<br>		
+
+							</div>							
+
+							<div class="col-xs-12 col-md-3"  >
+								<label for="">Porcentaje mínimo para apartar 1 mes</label>
 								{% bootstrap_field form.porc_min_1_mes show_label=False %}
 							</div>
-							<div class="col-xs-12 col-md-6"  >
-								<label for="">Porcentaje minimo para apartar 2 meses</label>
+							<div class="col-xs-12 col-md-3"  >
+								<label for="">Porcentaje minímo para apartar 2 meses</label>
 								{% bootstrap_field form.porc_min_2_mes show_label=False %}
 							</div>
 
-							<div class="col-xs-12">								
-								<button class="btn btn-primary btn-sm" style="float: right;"   id="guardar">Guardar</button>								
+							<div class="col-xs-6 " >								
+								<br>
+									<br>
+								<button class="btn btn-primary btn-sm"    id="guardar">
+
+									<span class="glyphicon glyphicon-floppy-disk"></span>
+								Guardar
+							</button>								
 							</div>	
 						</div>
 					</div>
@@ -135,7 +159,6 @@
 			</div>
 		</div>
 
-
 	<div id="fondo_preloader">
 		<div class="preloader" id="preloader">
 		
@@ -143,50 +166,43 @@
 	</div>
 
 
-<script type="text/javascript">
-	$(document).ready(
-		function()
-		{
-			fn_inicio();
-			$("#btn_aceptar_error").click(
-					function()
-					{
-						$(".cls_error_form_hover").hide()
-					}
-				);
-			$("#guardar").click(
-					function()
-					{
-								return fn_valida_form();		
-					}
-				);
-		}
-	);
+		<div class="fondo_mensaje cls_ayuda" id="fondo_msj_ayuda"  >
+			
+		</div >
+		
+		<div class="mensaje cls_ayuda" style="max-height: 90%;overflow-y: scroll;top:5%">	
+				<div class="cls_encabezado_alert" >
+					Ayuda
+				</div>
 
-	function fn_valida_form()
-	{
-		var val_1=$("#id_porc_min_1_mes").val();
-		var val_2=$("#id_porc_min_2_mes").val();
+				<div class="panel panel-default">	
+					<p class="page-header" style="text-align: justify;padding-left: 10px;padding-right: 10px;" >
+						Contamos con dos formas de realizar un apartado.
+						<br>
+						<br>
+						Si seleccionamos la casilla "Apartar usando criterio del cajero", en la pantalla de apartados se mostrara un formulario con un cuadro de texto para indicar el número de meses que desea apartar el producto y otro cuadro de texto para indicar el importe que el cliente pagara para hacer el apartado.
+						<br>
+						<br>
+						Si no se selecciona la casilla "Apartar usando criterio del cajero", en esta pantalla se habilitara un formuario con dos cuadro de texto. Como sus descripciones lo indican, el primero cuadro de texto nos permitirá capturar el porcentaje mínimo para apartar  1 mes el producto ( el cliente no podra apartar con menos de este importe ). En el segundo cuadro de texto capturaremos el porcentaje mínimo para apartar el producto dos meses.
+						<br>
+						<br>
+						Si el cliente al apartar abona lo correspondiente a 1 mes y antes de que se venza el apartado abona un importe superior al mínimo requerido para apartar dos meses, se le recalculara la fecha de vencimiento otorgandole el segundo mes.
 
-		//si no ha capturado inforamcion en el formulario
-		if (val_1==""  | val_2=="" | parseInt(val_1)<0  | parseInt(val_2)<0 | parseInt(val_1)>100  | parseInt(val_2)>100)
-		{
-			$(".cls_error_form_hover").show()
-			$("#msj_error").text("Revise la información capturada e intente nuevamente.");
-			return false;
-		}
+						<br>
+						<br>
+						<strong>Importane!! </strong> La configuración de esta pantalla, afecta a todas las sucursales de su negocio.		
 
-		$("#fondo_preloader").show();	
-		return true;
 
-	}
-	function fn_inicio()
-	{
+					</p>
+					<br>
 
-		$("#fondo_preloader").hide();
-		$(".cls_error_form_hover").hide()
-	}
-</script>
-	
+					<a class="btn btn-primary btn-sm" id="btn_aceptar_ayuda" ><span class="glyphicon glyphicon-ok-circle"></span> Aceptar</a>		
+					<br>
+					<br>		
+
+				</div>
+		</div>
+
+
 	
 {% endblock  %}

@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load bootstrap3 %}
+{% block archivos_staticos%}
+<script type="text/javascript" src="{% static 'js/abona_apartado.js' %}"></script>
+{% endblock %}
 {% block usuario %}
 
 			<div class="col-xs-6">
@@ -34,8 +37,6 @@
 						<div class="panel-body">
 							
 							<div class="col-xs-8">
-								
-							
 							<div class="row">														
 								<div class="col-xs-12">
 									<div class="cls_encabezado_alert " >
@@ -67,8 +68,6 @@
 							</div>
 
 							<div class="row">
-								
-								
 								<div class="col-xs-12">
 									<div class="cls_encabezado_alert " >
 										<label>Cliente:</label>
@@ -81,13 +80,13 @@
 										<div class="col-xs-8">
 											<label>Calle:</label>
 											{{apartado.cliente.calle}}
-											
 										</div>
 
 										<div class="col-xs-4">
 											<label>Codigo Postal:</label>
 											{{apartado.cliente.codigo_postal}}											
 										</div>
+
 										<div class="col-xs-4">
 											<label>No. Interior:</label>
 											{{apartado.cliente.numero_interior}}
@@ -116,12 +115,10 @@
 											<label>Pais:</label>
 											{{apartado.cliente.pais}}
 										</div>
-
 										<div class="col-xs-4">
 											<label>Teléfono fijo:</label>
 											{{apartado.cliente.telefono_fijo}}
 										</div>
-
 										<div class="col-xs-8">
 											<label>Teléfono celular:</label>
 											{{apartado.cliente.telefono_celular}}
@@ -142,15 +139,11 @@
 										{%endfor%}
 										&nbsp;
 									</div>
-
 								</div>
-
 							</div>
 							</div>
 							<div class="col-xs-4">
 								<div class="row">
-								
-								
 									<div class="col-xs-12">
 										<div class="cls_encabezado_alert " >
 											<label>Pagar:</label>
@@ -185,29 +178,30 @@
 
 												<div class="row">
 													<div class="col-xs-6">
-													<label>Su pago:</label>		
+													<label>Abono a apartado:</label>		
 													</div>
 													<div class="col-xs-6">
-														<input type="number" id="int_su_pago" value="0" class="form-control">
+														{% bootstrap_field form.abono show_label=False %}
 													</div>													
 												</div>
-												<div class="row">
-													<div class="col-xs-12">
-														{% bootstrap_field form.abono show_label=False %}
-													</div>
-													
-												</div>
+
 
 												<div class="row">
 													<div class="col-xs-6">
-														<label>Abono:</label>
+													<label>Pago con:</label>		
 													</div>
-													<div class="col-xs-6 text-right">
-														
-														<label id="lbl_abono">$0.00</label>
-
-													</div>
+													<div class="col-xs-6">
+														<input type="number" name="int_pago_con" class="form-control" placeholder="Abono" title=""  id="int_pago_con">
+													</div>													
 												</div>
+
+
+												<div class="row">
+													<div class="col-xs-12">
+														<hr>	
+													</div>													
+												</div>
+
 												<div class="row">
 													<div class="col-xs-6">
 														<label>Cambio:</label>
@@ -236,10 +230,6 @@
 									</div>
 								</div>
 							</div>
-
-
-
-
 						</div>
 					</div>
 				</div>
@@ -252,104 +242,94 @@
 		</div>
 	</div>
 
+		<div class="fondo_mensaje  cls_div_error" >
+
+		</div >
+
+		<div class="mensaje  cls_div_error" >
+			<div class="cls_encabezado_alert" >
+				Error!!
+			</div>	
+			<div class="panel panel-default">	
+				<label class="page-header" id="msj_error"></label>
+				<br>				
+				<a class="btn btn-primary btn-sm" id="btn_aceptar_error"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+				<br>
+				<br>
+			</div>
+		</div>
+
+		{% ifequal caja_abierta "0" %}
+
+		<div class="fondo_mensaje  " >
+
+		</div >
+
+		<div class="mensaje  " >
+			<div class="cls_encabezado_alert" >
+				Error!!
+			</div>	
+			<div class="panel panel-default">	
+				<label class="page-header" id="msj_error">No cuenta con caja abierta</label>
+				<br>				
+				<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_cajas' %}"><span class="glyphicon glyphicon-ok"></span> Aceptar
+				</a>
+				<br>
+				<br>
+			</div>
+		</div>
+
+		{% endifequal%}
+
+
+		{% ifequal no_apartado "0" %}
+
+			<div class="fondo_mensaje  " >
+
+			</div >
+
+			<div class="mensaje  " >
+				<div class="cls_encabezado_alert" >
+					Error!!
+				</div>	
+				<div class="panel panel-default">	
+					<label class="page-header" >El apartado ya no esta disponible</label>
+					<br>				
+					<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_cajas' %}"><span class="glyphicon glyphicon-ok"></span> Aceptar
+					</a>
+					<br>
+					<br>
+				</div>
+			</div>
+
+		{% endifequal%}
+		{% ifequal error "1"%}
+		
+			<div class="fondo_mensaje  " >
+			</div >
+
+			<div class="mensaje  " >
+				<div class="cls_encabezado_alert" >
+					Aviso
+				</div>	
+				<div class="panel panel-default">	
+					<label class="page-header" >EL abono se aplico correctamente.</label>
+					<br>				
+					<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_ventas' %}"><span class="glyphicon glyphicon-ok"></span> Aceptar
+					</a>
+					<br>
+					<br>
+				</div>
+			</div>
+
+		{% endifequal %}
+
 <script type="text/javascript">
-	var saldo_restante=0;//no puede abonar menos de esto
-	var importe_venta=0;//si abona mas de esto, se le dara cambio
 	$(document).ready(
 			function()
 			{
-				fn_inicio();
-
-				$("#int_su_pago").change(
-					function()
-					{
-						fn_valida_form();
-					}
-				);
-				$("#btn_guardar").click(
-						function ()
-						{
-							var abono=parseInt($("#id_abono").val());
-							if (abono<=0)
-							{
-								return false;
-							}
-							$("#fondo_preloader").show();
-						}
-					);
-
+				fn_inicio("{{apartado.saldo_restante}}","{{error}}");
 			}
-	);
-	function fn_inicio()
-	{
-		
-		$("#btn_guardar").prop("disabled",true);
-		
-		$("#id_abono").hide();
-
-		$("#id_abono").val("0");
-
-		$("#fondo_preloader").hide();
-
-		saldo_restante=parseInt("{{apartado.saldo_restante}}");
-		importe_venta=parseInt("{{apartado.importe_venta}}");
-	}
-
-	function fn_valida_form()
-	{
-
-		if($("#id_abono").val()=="")
-		{
-			$("#id_abono").val("0");	
-		}
-
-		
-
-		var int_su_pago=parseInt($("#int_su_pago").val());
-
-
-
-		//si el pago es mayor al saldo resante
-		//damos cambio
-		if (int_su_pago>saldo_restante)
-		{
-
-			$("#id_abono").val(saldo_restante);
-			$("#lbl_abono").text("$"+saldo_restante.toString()+".00");
-			$("#lbl_cambio").text("$"+(int_su_pago-saldo_restante).toString()+".00");
-			$("#btn_guardar").prop("disabled",false);
-
-		}
-		//si el pago es menor al saldo restante y meyor a cero
-		//ctodo el pago seira a abono y no habra cambio ni restara nada
-		else if(int_su_pago<=saldo_restante & int_su_pago>0)
-		{
-			$("#id_abono").val(int_su_pago);
-			$("#lbl_abono").text("$"+int_su_pago.toString()+".00");
-			$("#lbl_cambio").text("$0.00");
-			$("#btn_guardar").prop("disabled",false);
-		}
-		//si el pago es menor a cero no hace nada
-		else
-		{
-
-			$("#id_abono").val("0");
-			$("#lbl_abono").text("0");
-			$("#lbl_cambio").text("0");	
-			$("#btn_guardar").prop("disabled",true);
-		}
-
-
-		var abono=parseInt($("#id_abono").val());
-		restante=saldo_restante-abono;
-
-		$("#lbl_restan").text("$"+(restante).toString()+".00");
-
-
-
-
-
-
-	}
+		);
 </script>
 {% endblock %}
