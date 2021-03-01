@@ -1217,8 +1217,6 @@ def imprime_venta_piso(request):
 			p.drawString(335,current_row,"fb:"+str(db.boleta_empeno.folio)+"; "+db.descripcion)
 			current_row=current_row-20
 
-	
-
 	p.setFont("Helvetica-Bold",10)	
 	p.drawString(170,current_row,"Total: ")		
 	p.drawString(470,current_row,"Total: ")		
@@ -5703,9 +5701,9 @@ def imprime_boleta(request):
 			p.drawString(455,790,"Pag: "+str(cont_pag)+' de '+str(no_paginas))
 
 			p.setFont("Helvetica-Bold",15)
-			p.drawString(355,750,"No. Boleta:")
-			p.setFont("Helvetica",20)
-			p.drawString(455,750,str(x.boleta.folio))
+			p.drawString(305,750,"No. Boleta:")
+			p.setFont("Helvetica-Bold",15)
+			p.drawString(455,750,fn_str_clave(x.boleta.folio))
 
 
 

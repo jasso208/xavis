@@ -952,9 +952,9 @@ class Plazo(models.Model):
 		return self.plazo
 
 class Cliente(models.Model):
-	nombre=models.CharField(max_length=20,null=False)
-	apellido_p=models.CharField(max_length=20,null=False)
-	apellido_m=models.CharField(max_length=20,default='',null=True)
+	nombre=models.CharField(max_length = 50,null = False)
+	apellido_p=models.CharField(max_length = 50,null = False)
+	apellido_m=models.CharField(max_length = 50,default = '',null = True)
 	genero=models.CharField(choices=GENERO_CHOICES,max_length=30)
 	estado_civil=models.CharField(choices=ESTADO_CIVIL_CHOICES,max_length=30)
 	codigo_postal=models.CharField(max_length=10,null=True,default='')

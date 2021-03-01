@@ -13,6 +13,174 @@ LOCALHOST=settings.LOCALHOST
 from datetime import datetime,date
 import json
 
+
+def rep_imprime_venta_piso(request,id_venta):
+
+	venta = Venta_Piso.objects.get(id = id_venta)
+	hoy = date.today()
+	txt_hoy = hoy.strftime("%Y-%m-%d")
+	# Create the HttpResponse object with the appropriate PDF headers.
+	response = HttpResponse(content_type='application/pdf')
+	response['Content-Disposition'] = f'inline; filename=hello.pdf'
+	buffer=BytesIO()
+
+	p=canvas.Canvas(buffer,pagesize=(letter))
+
+
+	p.drawImage(settings.IP_LOCAL+'/static/img/logo.jpg', 55, 700,200, 60)
+
+	#cuadro 1] Informaciond de la empresa
+	p.line(50,700,50,615)	
+	p.line(50,700,280,700)
+	p.line(280,700,280,615)	
+	p.line(50,615,280,615)
+
+	p.setFont("Helvetica-Bold",7)
+	p.drawString(55,690,"Empresa:")
+	p.setFont("Helvetica",7)
+	p.drawString(55,680,"   " + Empresa.objects.get(id = 1).nombre_empresa)
+	p.setFont("Helvetica",7)
+	p.drawString(55,670,"      L-V 9 AM. a 6 PM.  S 10:00 AM a 4:00 PM.")
+
+	p.setFont("Helvetica-Bold",7)
+	p.drawString(55,650,"RFC:")
+	p.setFont("Helvetica",7)
+	p.drawString(75,650,Empresa.objects.get(id = 1).rfc)
+	p.setFont("Helvetica-Bold",7)
+	p.drawString(170,650,"Telefono:")
+	p.setFont("Helvetica",7)
+	p.drawString(210,650,venta.sucursal.telefono)
+
+
+	p.setFont("Helvetica-Bold",7)
+	p.drawString(55,640,"Dirección:")
+	p.setFont("Helvetica",7)
+	p.drawString(100,640,venta.sucursal.calle+' No. Int. '+str(venta.sucursal.numero_interior)+' No. ext. '+str(venta.sucursal.numero_exterior))
+	p.setFont("Helvetica",7)
+	p.drawString(55,630,' CP ' + str(venta.sucursal.codigo_postal) + ' ' + venta.sucursal.colonia + ', '+venta.sucursal.ciudad+' '+venta.sucursal.estado+', '+venta.sucursal.pais)
+
+
+
+	#cuadro 2] Informacion general de la boleta
+	p.line(300,730,300,615)	
+	p.line(300,730,550,730)
+	p.line(550,730,550,615)	
+	p.line(300,615,550,615)
+
+	p.setFont("Helvetica-Bold",10)
+
+
+	p.drawString(305,720,"Venta piso")
+
+	#p.drawString(455,790,"Pag: "+str(cont_pag)+' de '+str(no_paginas))
+
+	p.setFont("Helvetica-Bold",15)
+	p.drawString(305,700,"Folio venta piso:")
+	p.setFont("Helvetica-Bold",15)
+	p.drawString(455,700,fn_str_clave(venta.folio))
+
+
+
+	p.setFont("Helvetica-Bold",10)
+	p.drawString(305,680,"Fecha venta:")
+	p.setFont("Helvetica",10)
+	p.drawString(400,680,txt_hoy)
+
+
+	p.setFont("Helvetica-Bold",10)
+	p.drawString(305,665,"Cajero:")
+
+	p.setFont("Helvetica",10)
+	
+	p.drawString(400,665,venta.usuario.username)
+
+	#cuadro 3] Informacion de Cliente
+	p.line(50,610,50,545)	
+	p.line(550,610,550,545)	
+	p.line(50,610,550,610)	
+	p.line(50,545,550,545)	
+
+	p.setFont("Helvetica-Bold",7)
+	p.drawString(55,595,"CLIENTE:")
+	p.setFont("Helvetica",7)
+	p.drawString(105,595,venta.cliente.nombre+' '+venta.cliente.apellido_p+' '+venta.cliente.apellido_m)
+
+	p.setFont("Helvetica-Bold",7)
+	p.drawString(305,595,"COTITULAR:")
+	p.setFont("Helvetica",7)
+	#p.drawString(350,645,venta.cliente.nombre_cotitular+' '+venta.cliente.apellido_p_cotitular+' '+venta.cliente.apellido_m_cotitular)
+
+	p.setFont("Helvetica-Bold",7)
+	p.drawString(55,580,"Dirección:")
+	p.setFont("Helvetica",7)
+	p.drawString(105,580,venta.cliente.calle+' No. Int.: '+str(venta.cliente.numero_interior)+' No. Ext.: '+str(venta.cliente.numero_exterior)+', '+str(venta.cliente.codigo_postal)+', '+venta.cliente.colonia+', '+venta.cliente.ciudad+', '+venta.cliente.estado+', '+venta.cliente.pais)
+
+	p.setFont("Helvetica-Bold",7)
+	p.drawString(55,565,"Telefono Fijo: ")
+
+
+	p.setFont("Helvetica",7)
+	p.drawString(120,565,venta.cliente.telefono_fijo)
+
+	p.setFont("Helvetica-Bold",7)
+	p.drawString(55,550,"Telefono Celular: ")
+
+	p.setFont("Helvetica",7)
+	p.drawString(120,550,venta.cliente.telefono_celular)
+
+	#cuadro 3] Informacion de Cliente
+	p.line(50,540,50,480)	
+	p.line(550,540,550,480)	
+	p.line(50,540,550,540)	
+	p.line(50,480,550,480)
+
+	p.setFont("Helvetica",7)
+	p.drawString(55,530,"Artículos")
+	p.drawString(500,530,"Precio")
+	p.line(50,525,550,525)
+
+	dv = Det_Venta_Piso.objects.filter(venta = venta)
+
+	r=15
+	ract = 525
+
+	for d in dv:
+		ract = ract-r		
+		p.drawString(55,ract+2,"fb:"+str(d.boleta.folio)+"; "+d.boleta.descripcion)
+
+	r=15
+	ract = 525
+	ract = ract-r
+	p.line(50,ract,550,ract)
+	ract = ract-r
+	p.line(50,ract,550,ract)
+	ract = ract-r
+	p.line(50,ract,550,ract)
+
+
+
+	linea_corte=50
+
+	pinta=0
+	while linea_corte<600:
+		if pinta==0:
+			p.line(linea_corte,420,linea_corte-20,420)
+			pinta=1
+		else:
+			
+			pinta=0
+
+		linea_corte=linea_corte+20
+
+	p.save()
+	pdf=buffer.getvalue()
+	buffer.close()
+	response.write(pdf)
+	return response
+
+
+
+
 def rep_boleta_empeno(obj_reporte,leyenda,request):
 	hoy = date.today()
 	txt_hoy = hoy.strftime("%Y-%m-%d")
@@ -1261,3 +1429,20 @@ def reporte_comparativo_carteras(dic,user,fecha_1,fecha_2,txt_sucursal):
 	buffer.close()
 	response.write(pdf)
 	return response
+
+
+def fn_str_clave(id):
+	if len(str(id))==1:
+		return '000000'+str(id)
+	if len(str(id))==2:
+		return '00000'+str(id)
+	if len(str(id))==3:
+		return '0000'+str(id)
+	if len(str(id))==4:
+		return '000'+str(id)
+	if len(str(id))==5:
+		return '00'+str(id)
+	if len(str(id))==6:
+		return '0'+str(id)
+	if len(str(id))==7:
+		return str(id)
