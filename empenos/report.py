@@ -15,7 +15,7 @@ import json
 
 
 def rep_imprime_venta_piso(request,id_venta):
-
+	print("entro")
 	venta = Venta_Piso.objects.get(id = id_venta)
 	hoy = date.today()
 	txt_hoy = hoy.strftime("%Y-%m-%d")
@@ -24,10 +24,15 @@ def rep_imprime_venta_piso(request,id_venta):
 	response['Content-Disposition'] = f'inline; filename=hello.pdf'
 	buffer=BytesIO()
 
+	pos_copia = 380
+
 	p=canvas.Canvas(buffer,pagesize=(letter))
 
 
 	p.drawImage(settings.IP_LOCAL+'/static/img/logo.jpg', 55, 700,200, 60)
+
+	#copia
+	p.drawImage(settings.IP_LOCAL+'/static/img/logo.jpg', 55, 700 - pos_copia,200, 60)
 
 	#cuadro 1] Informaciond de la empresa
 	p.line(50,700,50,615)	
@@ -35,13 +40,23 @@ def rep_imprime_venta_piso(request,id_venta):
 	p.line(280,700,280,615)	
 	p.line(50,615,280,615)
 
+	#copia
+	#cuadro 1] Informaciond de la empresa
+	p.line(50,700 - pos_copia,50,615- pos_copia)	
+	p.line(50,700 - pos_copia,280,700 - pos_copia)
+	p.line(280,700 - pos_copia,280,615- pos_copia)	
+	p.line(50,615 - pos_copia, 280,615- pos_copia)
+
+
+
+	
+
 	p.setFont("Helvetica-Bold",7)
 	p.drawString(55,690,"Empresa:")
 	p.setFont("Helvetica",7)
 	p.drawString(55,680,"   " + Empresa.objects.get(id = 1).nombre_empresa)
 	p.setFont("Helvetica",7)
 	p.drawString(55,670,"      L-V 9 AM. a 6 PM.  S 10:00 AM a 4:00 PM.")
-
 	p.setFont("Helvetica-Bold",7)
 	p.drawString(55,650,"RFC:")
 	p.setFont("Helvetica",7)
@@ -50,7 +65,6 @@ def rep_imprime_venta_piso(request,id_venta):
 	p.drawString(170,650,"Telefono:")
 	p.setFont("Helvetica",7)
 	p.drawString(210,650,venta.sucursal.telefono)
-
 
 	p.setFont("Helvetica-Bold",7)
 	p.drawString(55,640,"Dirección:")
@@ -61,19 +75,54 @@ def rep_imprime_venta_piso(request,id_venta):
 
 
 
+	#copia
+	p.setFont("Helvetica-Bold",7)
+	p.drawString(55,690 - pos_copia,"Empresa:")
+	p.setFont("Helvetica",7)
+	p.drawString(55,680- pos_copia,"   " + Empresa.objects.get(id = 1).nombre_empresa)
+	p.setFont("Helvetica",7)
+	p.drawString(55,670- pos_copia,"      L-V 9 AM. a 6 PM.  S 10:00 AM a 4:00 PM.")
+
+	p.setFont("Helvetica-Bold",7)
+	p.drawString(55,650 - pos_copia,"RFC:")
+	p.setFont("Helvetica",7)
+	p.drawString(75,650 - pos_copia,Empresa.objects.get(id = 1).rfc)
+	p.setFont("Helvetica-Bold",7)
+	p.drawString(170,650 - pos_copia,"Telefono:")
+	p.setFont("Helvetica",7)
+	p.drawString(210,650 - pos_copia,venta.sucursal.telefono)
+
+	p.setFont("Helvetica-Bold",7)
+	p.drawString(55,640 - pos_copia,"Dirección:")
+	p.setFont("Helvetica",7)
+	p.drawString(100,640 - pos_copia,venta.sucursal.calle+' No. Int. '+str(venta.sucursal.numero_interior)+' No. ext. '+str(venta.sucursal.numero_exterior))
+	p.setFont("Helvetica",7)
+	p.drawString(55,630 - pos_copia,' CP ' + str(venta.sucursal.codigo_postal) + ' ' + venta.sucursal.colonia + ', '+venta.sucursal.ciudad+' '+venta.sucursal.estado+', '+venta.sucursal.pais)
+
+
+
+
+
 	#cuadro 2] Informacion general de la boleta
 	p.line(300,730,300,615)	
 	p.line(300,730,550,730)
 	p.line(550,730,550,615)	
 	p.line(300,615,550,615)
 
+	#copia
+	#cuadro 2] Informacion general de la boleta
+	p.line(300,730 - pos_copia,300,615 - pos_copia)	
+	p.line(300,730 - pos_copia,550,730 - pos_copia)
+	p.line(550,730 - pos_copia,550,615 - pos_copia)	
+	p.line(300,615 - pos_copia,550,615 - pos_copia)
 	p.setFont("Helvetica-Bold",10)
 
 
 	p.drawString(305,720,"Venta piso")
+	#copia
+	p.drawString(305,720 - pos_copia,"Venta piso")
 
 	#p.drawString(455,790,"Pag: "+str(cont_pag)+' de '+str(no_paginas))
-
 	p.setFont("Helvetica-Bold",15)
 	p.drawString(305,700,"Folio venta piso:")
 	p.setFont("Helvetica-Bold",15)
@@ -94,6 +143,27 @@ def rep_imprime_venta_piso(request,id_venta):
 	
 	p.drawString(400,665,venta.usuario.username)
 
+	#copia
+	p.setFont("Helvetica-Bold",15)
+	p.drawString(305,700 - pos_copia,"Folio venta piso:")
+	p.setFont("Helvetica-Bold",15)
+	p.drawString(455,700 - pos_copia,fn_str_clave(venta.folio))
+
+
+
+	p.setFont("Helvetica-Bold",10)
+	p.drawString(305,680 - pos_copia,"Fecha venta:")
+	p.setFont("Helvetica",10)
+	p.drawString(400,680 - pos_copia,txt_hoy)
+
+
+	p.setFont("Helvetica-Bold",10)
+	p.drawString(305,665 - pos_copia,"Cajero:")
+
+	p.setFont("Helvetica",10)
+	
+	p.drawString(400,665 - pos_copia,venta.usuario.username)
+
 	#cuadro 3] Informacion de Cliente
 	p.line(50,610,50,545)	
 	p.line(550,610,550,545)	
@@ -105,10 +175,6 @@ def rep_imprime_venta_piso(request,id_venta):
 	p.setFont("Helvetica",7)
 	p.drawString(105,595,venta.cliente.nombre+' '+venta.cliente.apellido_p+' '+venta.cliente.apellido_m)
 
-	p.setFont("Helvetica-Bold",7)
-	p.drawString(305,595,"COTITULAR:")
-	p.setFont("Helvetica",7)
-	#p.drawString(350,645,venta.cliente.nombre_cotitular+' '+venta.cliente.apellido_p_cotitular+' '+venta.cliente.apellido_m_cotitular)
 
 	p.setFont("Helvetica-Bold",7)
 	p.drawString(55,580,"Dirección:")
@@ -128,7 +194,40 @@ def rep_imprime_venta_piso(request,id_venta):
 	p.setFont("Helvetica",7)
 	p.drawString(120,550,venta.cliente.telefono_celular)
 
+
+	#copia
 	#cuadro 3] Informacion de Cliente
+	p.line(50,610 - pos_copia,50,545 - pos_copia)	
+	p.line(550,610 - pos_copia,550,545 - pos_copia)	
+	p.line(50,610 - pos_copia,550,610 - pos_copia)	
+	p.line(50,545 - pos_copia,550,545 - pos_copia)	
+
+	p.setFont("Helvetica-Bold",7)
+	p.drawString(55,595 - pos_copia,"CLIENTE:")
+	p.setFont("Helvetica",7)
+	p.drawString(105,595 - pos_copia,venta.cliente.nombre+' '+venta.cliente.apellido_p+' '+venta.cliente.apellido_m)
+
+
+	p.setFont("Helvetica-Bold",7)
+	p.drawString(55,580 - pos_copia,"Dirección:")
+	p.setFont("Helvetica",7)
+	p.drawString(105,580 - pos_copia,venta.cliente.calle+' No. Int.: '+str(venta.cliente.numero_interior)+' No. Ext.: '+str(venta.cliente.numero_exterior)+', '+str(venta.cliente.codigo_postal)+', '+venta.cliente.colonia+', '+venta.cliente.ciudad+', '+venta.cliente.estado+', '+venta.cliente.pais)
+
+	p.setFont("Helvetica-Bold",7)
+	p.drawString(55,565 - pos_copia,"Telefono Fijo: ")
+
+
+	p.setFont("Helvetica",7)
+	p.drawString(120,565 - pos_copia,venta.cliente.telefono_fijo)
+
+	p.setFont("Helvetica-Bold",7)
+	p.drawString(55,550 - pos_copia,"Telefono Celular: ")
+
+	p.setFont("Helvetica",7)
+	p.drawString(120,550 - pos_copia,venta.cliente.telefono_celular)
+
+
+	#cuadro 4] Productos
 	p.line(50,540,50,480)	
 	p.line(550,540,550,480)	
 	p.line(50,540,550,540)	
@@ -139,14 +238,91 @@ def rep_imprime_venta_piso(request,id_venta):
 	p.drawString(500,530,"Precio")
 	p.line(50,525,550,525)
 
+
+	#cuadro 4] Productos
+	#copia
+	p.line(50,540- pos_copia,50,480- pos_copia)	
+	p.line(550,540- pos_copia,550,480- pos_copia)	
+	p.line(50,540- pos_copia,550,540- pos_copia)	
+	p.line(50,480- pos_copia,550,480- pos_copia)
+
+	p.setFont("Helvetica",7)
+	p.drawString(55,530- pos_copia,"Artículos")
+	p.drawString(500,530- pos_copia,"Precio")
+	p.line(50,525- pos_copia,550,525- pos_copia)
+
 	dv = Det_Venta_Piso.objects.filter(venta = venta)
 
 	r=15
 	ract = 525
 
 	for d in dv:
-		ract = ract-r		
-		p.drawString(55,ract+2,"fb:"+str(d.boleta.folio)+"; "+d.boleta.descripcion)
+
+		ract = ract-r	
+		#articulos varios
+		if d.boleta.tipo_producto.id == 3:
+			db = Det_Boleto_Empeno.objects.get(boleta_empeno = d.boleta)
+				
+			p.drawString(55,ract+2,"fb:"+str(d.boleta.folio)+"; "+db.descripcion)
+
+		#articulos Oro
+		if d.boleta.tipo_producto.id == 1:		
+			
+			p.drawString(55,ract+2,"fb:"+str(d.boleta.folio)+"; Joyería Oro")
+
+		#articulos Plata
+		if d.boleta.tipo_producto.id == 2:		
+			
+			p.drawString(55,ract+2,"fb:"+str(d.boleta.folio)+"; Joyería Plata")
+
+		precio_venta = "{:0,.2f}".format(d.boleta.fn_calcula_precio_venta())
+
+		p.drawString(500,ract+2,"$"+precio_venta)
+		#copia
+		
+		#articulos varios
+		if d.boleta.tipo_producto.id == 3:
+			db = Det_Boleto_Empeno.objects.get(boleta_empeno = d.boleta)
+				
+			p.drawString(55,ract+2- pos_copia,"fb:"+str(d.boleta.folio)+"; "+db.descripcion)
+
+		#articulos Oro
+		if d.boleta.tipo_producto.id == 1:		
+			
+			p.drawString(55,ract+2- pos_copia,"fb:"+str(d.boleta.folio)+"; Joyería Oro")
+
+		#articulos Plata
+		if d.boleta.tipo_producto.id == 2:		
+			
+			p.drawString(55,ract+2- pos_copia,"fb:"+str(d.boleta.folio)+"; Joyería Plata")
+
+		precio_venta = "{:0,.2f}".format(d.boleta.fn_calcula_precio_venta())
+
+		p.drawString(500,ract+2- pos_copia,"$"+precio_venta)
+	
+	
+	if dv.count() == 1:
+		ract = ract-r
+		ract = ract-r
+		ract = ract-r	
+
+	if dv.count() == 2:
+		ract = ract-r
+		ract = ract-r
+
+	if dv.count() == 3:
+		ract = ract-r
+	
+	importe_venta = "{:0,.2f}".format(venta.importe_venta)
+
+	p.setFont("Helvetica-Bold",10)
+	p.drawString(450,ract+2,"Total:")
+	p.drawString(500,ract+2,"$"+importe_venta)
+
+	#copia
+	p.setFont("Helvetica-Bold",10)
+	p.drawString(450,ract+2- pos_copia,"Total:")
+	p.drawString(500,ract+2- pos_copia,"$"+importe_venta)
 
 	r=15
 	ract = 525
@@ -157,14 +333,54 @@ def rep_imprime_venta_piso(request,id_venta):
 	ract = ract-r
 	p.line(50,ract,550,ract)
 
+	ract = ract-r
+	ract = ract-r	
+	ract = ract-r
 
+	p.line(100,ract,200,ract)
+	p.line(400,ract,500,ract)
+
+	ract = ract-10
+	p.setFont("Helvetica-Bold",7)
+	p.drawString(90,ract+2,'Cliente: ' + venta.cliente.nombre+' '+venta.cliente.apellido_p+' '+venta.cliente.apellido_m)
+	p.drawString(400,ract+2,'Cajero: ' + venta.usuario.username)
+	
+	
+	
+	#copia
+
+	
+
+
+	r=15
+	ract = 525
+	ract = ract-r
+	p.line(50,ract- pos_copia,550,ract- pos_copia)
+	ract = ract-r
+	p.line(50,ract- pos_copia,550,ract- pos_copia)
+	ract = ract-r
+	p.line(50,ract- pos_copia,550,ract- pos_copia)
+
+	ract = ract-r
+	ract = ract-r	
+	ract = ract-r
+
+	p.line(100,ract- pos_copia,200,ract- pos_copia)
+	p.line(400,ract- pos_copia,500,ract- pos_copia)
+
+	ract = ract-10
+	p.setFont("Helvetica-Bold",7)
+	p.drawString(90,ract+2- pos_copia,'Cliente: ' + venta.cliente.nombre+' '+venta.cliente.apellido_p+' '+venta.cliente.apellido_m)
+	p.drawString(400,ract+2- pos_copia,'Cajero: ' + venta.usuario.username)
+	
+	
 
 	linea_corte=50
 
 	pinta=0
 	while linea_corte<600:
 		if pinta==0:
-			p.line(linea_corte,420,linea_corte-20,420)
+			p.line(linea_corte,400,linea_corte-20,400)
 			pinta=1
 		else:
 			

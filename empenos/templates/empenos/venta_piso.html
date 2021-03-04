@@ -224,6 +224,26 @@
 		</div>
 {% endifequal  %}
 
+{% ifequal ok '1' %}
+		<div class="fondo_mensaje " >
+			
+		</div >
+		<div class="mensaje" >	
+				<div class="cls_encabezado_alert" >
+					Aviso
+				</div>
+
+				<div class="panel panel-default">	
+					<label class="page-header">La venta se realizo correctamente.</label>
+					<br>
+
+					<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_ventas' %}" ><span class="glyphicon glyphicon-ok"></span> Aceptar</a>		
+					<br>
+					<br>		
+
+				</div>
+		</div>
+{% endifequal  %}
 
 		<div class="fondo_mensaje cls_error_consulta" >
 			
@@ -282,7 +302,23 @@
 				</div>
 		</div>
 
+		<div class="fondo_mensaje cls_msj_error" >
+			
+		</div >
+		<div class="mensaje cls_msj_error" >	
+				<div class="cls_encabezado_alert" >
+					Error!!			
+				</div>
 
+				<div class="panel panel-default">	
+					<label class="page-header" id="msj_error"></label>
+					<br>
+					<a class="btn btn-primary btn-sm" id="btn_aceptar_error" ><span class="glyphicon glyphicon-ok"></span> Aceptar</a>		
+					<br>
+					<br>		
+
+				</div>
+		</div>
 
 		<div class="fondo_mensaje_2 cls_confirma_eliminar" >
 			
@@ -315,7 +351,7 @@
 				</div>
 		</div>
 
-	<div class="fondo_mensaje cls_seleccionar_cliente">
+	<div class="fondo_mensaje cls_seleccionar_cliente" id="div_fondo_seleccionar">
 		
 	</div>
 
@@ -341,7 +377,7 @@
 
 			<div class="col-xs-3" style="text-align: center;">
 				<label for="">&nbsp;</label>
-				<a class="btn btn-default form-control" id="btn_nuevo_cliente" href="{% url 'empenos:alta_cliente' %}" target="_blank" onclick="window.open(this.href, this.target, 'width=700,height=700'); return false;">><span class="glyphicon glyphicon-user"></span> Cl Nvo</a>
+				<a class="btn btn-default form-control" id="btn_nuevo_cliente" href="{% url 'empenos:alta_cliente' %}" target="_blank" onclick="window.open(this.href, this.target, 'width=400,height=600'); return false;">><span class="glyphicon glyphicon-user"></span> Cl Nvo</a>
 
 				
 
@@ -392,6 +428,18 @@
 			function()
 			{
 				fn_inicio();
+				$("#btn_aceptar_error").click(
+						function()
+						{
+							$(".cls_msj_error").hide();
+						}
+					);
+				$("#div_fondo_seleccionar").click(
+						function()
+						{
+							$(".cls_seleccionar_cliente").hide();
+						}
+					);
 				$("#btn_agregar").click(
 						function()
 						{
@@ -436,6 +484,12 @@
 				$("#btn_confirmar_venta").click(
 						function()				
 						{
+							if($("#id_id_cliente").val() == "" || $("#id_id_cliente").val() == "0")
+							{
+								$("#msj_error").text("Debe seleccionar el cliente.");
+								$(".cls_msj_error").show();
+								return false;
+							}
 							$("#fondo_preloader").show();
 						}
 					);
@@ -492,7 +546,12 @@
 
 	function fn_inicio()
 	{
-		
+		if("{{ok}}" == "1")
+		{
+			window.open('/empenos/re_imprimir_venta_piso/{{id_venta}}','popup', 'width=400px,height=600px');
+		}
+
+		$(".cls_msj_error").hide();
 		$("#fondo_preloader").hide();
 		$(".cls_error_consulta").hide();
 		$(".cls_error_agregar").hide();

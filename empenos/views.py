@@ -1041,6 +1041,7 @@ def venta_piso(request):
 	est_Vendida=Estatus_Boleta.objects.get(id=6)
 
 	error="0"
+	ok = "0"
 	if request.method=="POST":
 		try:
 		
@@ -1098,7 +1099,9 @@ def venta_piso(request):
 
 			Imprime_Venta_Piso.objects.create(usuario=request.user,venta_piso=vp)
 
-			return HttpResponseRedirect(reverse('empenos:imprime_venta_piso'))
+			ok = "1"
+			id_venta = vp.id
+			return render(request,'empenos/venta_piso.html',locals())
 		except Exception as e:
 			print(e)
 			form=Venta_Piso_Form()
@@ -1640,7 +1643,7 @@ def consulta_venta(request):
 	if caja == None:
 		caja_abierta="0"
 		caja=Cajas
-		return render(request,'empenos/venta_granel.html',locals())
+		return render(request,'empenos/consulta_venta.html',locals())
 
 	
 	suc=caja.sucursal

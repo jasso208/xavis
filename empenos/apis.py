@@ -763,6 +763,11 @@ def api_agrega_prod_venta_piso(request):
 			respuesta.append({"estatus":"0","msj":"La boleta ya ha sido agregada."})
 			return Response(respuesta)
 
+		cont = Venta_Temporal_Piso.objects.filter(usuario=usuario).count()
+		if cont == 3:
+			respuesta.append({"estatus":"0","msj":"Solo pueden ser incluidos 3 productos por ticket."})
+			return Response(respuesta)			
+
 		Venta_Temporal_Piso.objects.create(usuario=usuario,boleta=boleta)
 
 		respuesta.append({"estatus":"1"})

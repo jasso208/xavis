@@ -55,8 +55,10 @@
 											
 										</div>
 										<div class="col-xs-3">
-											<br>
-											<button class="btn btn-primary">
+											<br >
+
+											<button class="btn btn-primary btn-sm">
+												<span class="glyphicon glyphicon-search"></span>
 												Consultar
 											</button>
 										</div>
@@ -88,7 +90,10 @@
 									    	{% for v in vg%}
 										    	<tr>
 											    	<td>
-										    			<a  class='btn btn-default btn-sm' href="/empenos/re_imprimir_venta/{{v.id}}">
+										    			<a  class='btn btn-default btn-sm' 
+
+															href="javascript:window.open('/empenos/re_imprimir_venta/{{v.id}}','popup','width=400,height=600')">
+										    			
 										    				<span class='glyphicon glyphicon-print'>
 
 										    				</span>    					
@@ -114,7 +119,10 @@
 									    	{% for v in vp%}
 										    	<tr>
 											    	<td>
-										    			<a  class='btn btn-default btn-sm' href="/empenos/re_imprimir_venta_piso/{{v.id}}">
+										    			<a  class='btn btn-default btn-sm' 
+
+
+										    			href="javascript:window.open('/empenos/re_imprimir_venta_piso/{{v.id}}','popup','width=400,height=600')">
 										    				<span class='glyphicon glyphicon-print'>
 
 										    				</span>    					
