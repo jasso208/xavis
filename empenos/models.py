@@ -384,18 +384,19 @@ class Porcentaje_Comision_PG(models.Model):
 
 class Concepto_Retiro(models.Model):
 	concepto = models.CharField(max_length = 40,null = False)
-	sucursal = models.ForeignKey(Sucursal,on_delete = models.PROTECT,blank=True,null=True)
+	sucursal = models.ForeignKey(Sucursal,on_delete = models.PROTECT,blank=True,null=True,related_name = "sucursal_origen")
 	importe_maximo_retiro = models.PositiveIntegerField()	
 	fecha_alta = models.DateTimeField(default = timezone.now)
 	fecha_modificacion = models.DateTimeField(default = timezone.now)
 	usuario_ultima_mod = models.ForeignKey(User,on_delete = models.PROTECT)
 	activo = models.CharField(choices=SI_NO,max_length=2,default="SI")
-	
+	sucursal_destino = models.ForeignKey(Sucursal,on_delete = models.PROTECT,null = True,blank = True,related_name = "sucursal_destino")#en caso de que sea un concepto para traspaso, esta es la sucursal a la que va dirigido
 
 	def __str__(self):
 		return str(self.id)+' '+self.concepto+' '+str(self.importe_maximo_retiro)
 
-	def fn_nuevo_concepto(id_sucursal,id_usuario,importe,concepto):	
+	def fn_nuevo_concepto(id_sucursal,id_usuario,importe,concepto,id_sucursal_destino):	
+
 		try:
 			if concepto == "":
 				return False
@@ -404,11 +405,15 @@ class Concepto_Retiro(models.Model):
 				return False
 
 			sucursal = Sucursal.objects.get(id = int(id_sucursal))
+			sucursal_destino = None
+			if Sucursal.objects.filter(id = int(id_sucursal_destino)).exists():
+				sucursal_destino = Sucursal.objects.get(id = int(id_sucursal_destino))	
+
 			usuario = User.objects.get(id = int(id_usuario))
-			Concepto_Retiro.objects.create(activo = 1, concepto = concepto.upper(),sucursal = sucursal,importe_maximo_retiro = importe,usuario_ultima_mod = usuario)
+			Concepto_Retiro.objects.create(activo = 1, concepto = concepto.upper(),sucursal = sucursal,importe_maximo_retiro = importe,usuario_ultima_mod = usuario,sucursal_destino = sucursal_destino)
 			return True
 		except Exception as e:
-			
+			print(e)
 			return False
 
 	def fn_get_conceptos(id_sucursal):
@@ -843,6 +848,14 @@ class Retiro_Efectivo(models.Model):
 			return True
 		except:
 			return False
+
+
+#tabla de traspasos
+class Traspaso_Entre_Sucursales(models.Model):
+	retiro = models.ForeignKey(Retiro_Efectivo,on_delete = models.PROTECT)
+	ingreso = models.ForeignKey(Otros_Ingresos,on_delete = models.PROTECT)
+	visto = models.BooleanField(default=True)#Cuando se hace un traspaso, le lleva la notificacion a la sucursal destino, para notificarle que ha recibido dineros
+
 
 class Token(models.Model):
 	tipo_movimiento=models.ForeignKey(Tipo_Movimiento,on_delete=models.PROTECT)

@@ -358,6 +358,26 @@
 			</div>
 	</div>
 	{% endif %}
+
+	{% if error_caja_destino == '1' %}
+		<div class="fondo_mensaje" >
+			
+		</div >
+		<div class="mensaje" >
+				<div class="cls_encabezado_alert" >
+					Error!!
+				</div>	
+				<div class="panel panel-default">	
+					<label class="page-header">La sucursal destino no ha aperturado caja, no puede hacer la transferencia.</label>
+					<br>
+					<a class="btn btn-primary btn-sm" href="{% url 'seguridad:admin_cajas' %}"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+					<br>
+					<br>
+				</div>
+		</div>
+	{% endif %}
+
+
 	<div class="fondo_mensaje cls_notificacion" >
 		
 	</div >

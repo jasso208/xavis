@@ -547,21 +547,20 @@ def concepto_retiro(request):
 	if not user_2.fn_tiene_acceso_a_vista(12):
 		return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
 
-	pub_date = date.today()
-	min_pub_date_time = datetime.combine(pub_date, time.min) 
-	max_pub_date_time = datetime.combine(pub_date, time.max)  
+	user_2_1 = User_2.objects.get(user = user_2.sucursal.usuario_virtual)
 
-	try:		
-		#validamos si el usuario tiene caja abierta en el dia actual.
-		caja=Cajas.objects.get(fecha__range=(min_pub_date_time,max_pub_date_time),fecha_cierre__isnull=True,usuario=request.user)
+	#validamos si el usuario tiene caja abierta
+	caja = user_2_1.fn_tiene_caja_abierta()
+
+	if caja == None:
+		caja_abierta="0"
+		caja=Cajas
+	else:
 		caja_abierta="1"#si tiene caja abierta enviamos este estatus para  dejar entrar a la pantalla.
 		suc=caja.sucursal
 		c=caja.caja
 
-	except Exception as e:
-		print(e)
-		caja_abierta="0"
-		caja=Cajas
+
 
 
 	#solo el gerente regional tiene permiso para acceder a esta opción	
@@ -569,7 +568,9 @@ def concepto_retiro(request):
 
 	form = Alta_Concepto_Retiro_Form()	
 	id_usuario = user_2.user.id
-	
+
+	sucursales = Sucursal.objects.filter().exclude(id = user_2.sucursal.id)
+
 	return render(request,'empenos/concepto_retiro.html',locals())
 
 
@@ -3086,16 +3087,8 @@ def retiro_efectivo(request):
 	#es la clave para retiros de caja.
 	tm=Tipo_Movimiento.objects.get(id=3)
 
-
-
 	error_no_fondos='0'
 	read_only="0"
-
-
-
-
-
-
 
 	fondo_inicial="{:0,.2f}".format(fondo_inicial)
 	otros_ingresos="{:0,.2f}".format(otros_ingresos)
@@ -3112,21 +3105,20 @@ def retiro_efectivo(request):
 
 	empenos="{:0,.2f}".format(empenos)
 
-	
 	#total_efectivo="{:0,.2f}".format(total_efectivo)
 
 	conceptos = Concepto_Retiro.objects.filter(sucursal = caja.sucursal, activo = 1)
 	
 	id_concepto = ""
 
-
+	#0 para indicar que todo esta oc
+	#1 para indicar que no tiene caja abierta
+	error_caja_destino = "0"
 	if request.method=="POST":
 		read_only="1"
 
 		form=Retiro_Efectivo_Form(request.POST)				
 
-
-		
 		folio=fn_folios(tm,suc)
 		str_folio=fn_str_clave(folio)
 
@@ -3138,11 +3130,18 @@ def retiro_efectivo(request):
 			concepto =Concepto_Retiro.objects.get(id = q_token.aux_1) 
 		except:
 			print("no hay token")
-	
-		
+
+		#validamos si es traspaso
+		#si tiene registrada una sucursal destino es que es traspaso
+		if concepto.sucursal_destino != None:
+			#obtenemos la caja de la sucursal destino
+			caja_destino = concepto.sucursal_destino.fn_get_caja_abierta()
+			if caja_destino == None:
+				error_caja_destino = "1"
+				return render(request,'empenos/retiro_efectivo.html',locals())
+
 		saldo_concepto = concepto.fn_saldo_concepto()		
 
-		
 		error_saldo_concepto = "0"
 		if int(saldo_concepto) >= int(request.POST["importe"]):	
 			pass#
@@ -3151,42 +3150,65 @@ def retiro_efectivo(request):
 			error_saldo_concepto = "1"
 			
 			return render(request,'empenos/retiro_efectivo.html',locals())
-
-		if form.is_valid():
-			#with transaction.atomic():
-			f=form.save(commit=False)
-			error_token='0'
-			id_concepto = f.concepto.id
-			try:
-				#validamos el token de seguridad
-				
-				
-				if f.token!=token:
+		with transaction.atomic():
+			if form.is_valid():
+				#with transaction.atomic():
+				f=form.save(commit=False)
+				error_token='0'
+				id_concepto = f.concepto.id
+				try:
+					#validamos el token de seguridad
+					
+					
+					if f.token!=token:
+						error_token='1'
+						return render(request,'empenos/retiro_efectivo.html',locals())
+				except Exception as e:
+					print(e)
 					error_token='1'
+					#transaction.set_rollback(True)
 					return render(request,'empenos/retiro_efectivo.html',locals())
-			except Exception as e:
-				print(e)
-				error_token='1'
-				#transaction.set_rollback(True)
-				return render(request,'empenos/retiro_efectivo.html',locals())
+					
+
+				#validamos que la caja tenga fondos suficiente para realizar el retiro.
+				if total_efectivo<f.importe:
+					error_no_fondos='1'
+					#transaction.set_rollback(True)
+					return render(request,'empenos/retiro_efectivo.html',locals())
+
+				f.folio=str_folio
+				f.sucursal=suc
+				f.caja=c
+				f.usuario=request.user
+				f.concepto = concepto
+				f.ocaja = caja
+				f.save()
+
+				id_retiro = f.id
 				
+				retiro = Retiro_Efectivo.objects.get(id =int(id_retiro))
 
-			#validamos que la caja tenga fondos suficiente para realizar el retiro.
-			if total_efectivo<f.importe:
-				error_no_fondos='1'
-				#transaction.set_rollback(True)
-				return render(request,'empenos/retiro_efectivo.html',locals())
+				#es la clave para otros ingresos.
+				tm=Tipo_Movimiento.objects.get(id=2)
+				folio=fn_folios(tm,concepto.sucursal_destino)
+				str_folio=fn_str_clave(folio)
 
-			f.folio=str_folio
-			f.sucursal=suc
-			f.caja=c
-			f.usuario=request.user
-			f.concepto = concepto
-			f.ocaja = caja
-			f.save()
+				#damos de alta el ingreso en la sucursal destino
+				oi = Otros_Ingresos()			
+				oi.folio = str_folio
+				oi.tipo_movimiento = tm
+				oi.sucursal = concepto.sucursal_destino
+				oi.usuario = request.user
+				oi.importe = retiro.importe
+				oi.comentario = retiro.comentario
+				oi.caja = "A"
+				oi.ocaja = caja_destino
+				oi.save()
 
-			id_retiro = f.id
-			#return HttpResponseRedirect(reverse('seguridad:admin_cajas'))
+				tes = Traspaso_Entre_Sucursales()
+				tes.retiro = retiro
+				tes.ingreso = oi
+				tes.save()
 	else:
 
 		try:

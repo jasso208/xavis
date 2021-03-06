@@ -305,9 +305,11 @@ def api_concepto_retiro(request):
 			id_usuario = request.data["id_usuario"]
 			importe = request.data["importe"]
 			id_sucursal = request.data["id_sucursal"]
+			id_sucursal_destino = request.data["id_sucursal_destino"]
 
 
-			resp = Concepto_Retiro.fn_nuevo_concepto(id_sucursal,id_usuario,importe,concepto)
+			resp = Concepto_Retiro.fn_nuevo_concepto(id_sucursal,id_usuario,importe,concepto,id_sucursal_destino)
+
 			if resp:				
 				respuesta.append({"estatus":"1"})
 			else:
@@ -321,10 +323,15 @@ def api_concepto_retiro(request):
 			lista = []
 			id_sucursal = request.GET.get("id_sucursal")
 			resp = Concepto_Retiro.fn_get_conceptos(id_sucursal)
-		
+			
 			for r in resp:
 				importe_maximo_retiro = "{:0,.2f}".format(r.importe_maximo_retiro)
-				lista.append({"id_concepto" : r.id,"concepto" : r.concepto,"importe_maximo" : importe_maximo_retiro})
+				
+				
+				sucursal_destino = ""
+				if r.sucursal_destino != None:
+					sucursal_destino = r.sucursal_destino.sucursal
+				lista.append({"id_concepto" : r.id,"concepto" : r.concepto,"importe_maximo" : importe_maximo_retiro,"sucursal_destino":sucursal_destino})
 
 			respuesta.append({"estatus" : "1"})
 			respuesta.append({"lista" : lista})
