@@ -3188,27 +3188,30 @@ def retiro_efectivo(request):
 				
 				retiro = Retiro_Efectivo.objects.get(id =int(id_retiro))
 
-				#es la clave para otros ingresos.
-				tm=Tipo_Movimiento.objects.get(id=2)
-				folio=fn_folios(tm,concepto.sucursal_destino)
-				str_folio=fn_str_clave(folio)
+				#validamos si es traspaso
+				#Si es traspaso generamos el ingreso en la sucursal destino
+				if concepto.sucursal_destino != None:
+					#es la clave para otros ingresos.
+					tm=Tipo_Movimiento.objects.get(id=2)
+					folio=fn_folios(tm,concepto.sucursal_destino)
+					str_folio=fn_str_clave(folio)
 
-				#damos de alta el ingreso en la sucursal destino
-				oi = Otros_Ingresos()			
-				oi.folio = str_folio
-				oi.tipo_movimiento = tm
-				oi.sucursal = concepto.sucursal_destino
-				oi.usuario = request.user
-				oi.importe = retiro.importe
-				oi.comentario = retiro.comentario
-				oi.caja = "A"
-				oi.ocaja = caja_destino
-				oi.save()
+					#damos de alta el ingreso en la sucursal destino
+					oi = Otros_Ingresos()			
+					oi.folio = str_folio
+					oi.tipo_movimiento = tm
+					oi.sucursal = concepto.sucursal_destino
+					oi.usuario = request.user
+					oi.importe = retiro.importe
+					oi.comentario = retiro.comentario
+					oi.caja = "A"
+					oi.ocaja = caja_destino
+					oi.save()
 
-				tes = Traspaso_Entre_Sucursales()
-				tes.retiro = retiro
-				tes.ingreso = oi
-				tes.save()
+					tes = Traspaso_Entre_Sucursales()
+					tes.retiro = retiro
+					tes.ingreso = oi
+					tes.save()
 	else:
 
 		try:
