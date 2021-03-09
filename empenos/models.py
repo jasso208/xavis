@@ -69,6 +69,7 @@ class Perfil(models.Model):
 class Empresa (models.Model):
 	rfc = models.CharField(max_length = 13,default = '')
 	nombre_empresa = models.CharField(max_length = 20,default = '')
+	horario = models.CharField(max_length = 50,default = '')
 
 class Sucursal(models.Model):
 	sucursal=models.CharField(max_length=100,null=False)

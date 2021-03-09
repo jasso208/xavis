@@ -5694,7 +5694,7 @@ def imprime_boleta(request):
 			p.setFont("Helvetica",7)
 			p.drawString(55,730,"   " + Empresa.objects.get(id = 1).nombre_empresa)
 			p.setFont("Helvetica",7)
-			p.drawString(55,720,"      L-V 9 AM. a 6 PM.  S 10:00 AM a 4:00 PM.")
+			p.drawString(55,720,"      "+Empresa.objects.get(id = 1).horario)
 
 			p.setFont("Helvetica-Bold",7)
 			p.drawString(55,700,"RFC:")

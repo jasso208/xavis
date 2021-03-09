@@ -56,7 +56,7 @@ def rep_imprime_venta_piso(request,id_venta):
 	p.setFont("Helvetica",7)
 	p.drawString(55,680,"   " + Empresa.objects.get(id = 1).nombre_empresa)
 	p.setFont("Helvetica",7)
-	p.drawString(55,670,"      L-V 9 AM. a 6 PM.  S 10:00 AM a 4:00 PM.")
+	p.drawString(55,670,"      "+Empresa.objects.get(id = 1).horario)
 	p.setFont("Helvetica-Bold",7)
 	p.drawString(55,650,"RFC:")
 	p.setFont("Helvetica",7)
