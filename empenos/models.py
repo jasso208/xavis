@@ -949,6 +949,31 @@ class Empenos_Temporal(models.Model):
 	mutuo=models.IntegerField()
 	observaciones=models.TextField(null=True,blank=True)
 
+	def get_mutuo_temporal(usuario):
+		et_oro = Empenos_Temporal.objects.filter(usuario = usuario,tipo_producto__id = 1)		
+		et_plata = Empenos_Temporal.objects.filter(usuario = usuario,tipo_producto__id = 2)		
+		et_varios = Empenos_Temporal.objects.filter(usuario = usuario,tipo_producto__id = 3)		
+
+		lista = []
+		mutuo_oro = 0.00
+		if et_oro.exists():
+			mutuo_oro = et_oro.aggregate(Sum("mutuo"))["mutuo__sum"]
+
+		mutuo_plata = 0.00
+		if et_plata.exists():
+			mutuo_plata = et_plata.aggregate(Sum("mutuo"))["mutuo__sum"]
+
+		mutuo_varios = 0.00
+		if et_varios.exists():
+			mutuo_varios = et_varios.aggregate(Sum("mutuo"))["mutuo__sum"]
+
+
+		lista.append({"mutuo_oro":mutuo_oro,"mutuo_plata":mutuo_plata,"mutuo_varios":mutuo_varios})
+
+		return lista
+
+
+
 	
 class Joyeria_Empenos_Temporal(models.Model):
 	empeno_temporal=models.ForeignKey(Empenos_Temporal,on_delete=models.PROTECT)
@@ -1101,6 +1126,41 @@ class Boleta_Empeno(models.Model):
 		refrendo = round(almacenaje + interes + iva)
 		respuesta.append({"estatus":"1","almacenaje":almacenaje,"interes":interes,"iva":iva,"refrendo":refrendo})		
 		return respuesta
+
+	def fn_simula_calcula_refrendo_2(mutuo,sucursal,id_tipo_producto):
+
+		#cie = Configuracion_Interes_Empeno.objects.get(sucursal = sucursal)
+
+		if id_tipo_producto == 1:
+			p_almacenaje = decimal.Decimal(sucursal.fn_get_almacenaje(1))/decimal.Decimal(100)
+			p_interes = decimal.Decimal(sucursal.fn_get_interes(1))/decimal.Decimal(100)
+			p_iva = decimal.Decimal(sucursal.fn_get_iva(1))/decimal.Decimal(100)
+		if id_tipo_producto == 2:
+			p_almacenaje = decimal.Decimal(sucursal.fn_get_almacenaje(2))/decimal.Decimal(100)
+			p_interes = decimal.Decimal(sucursal.fn_get_interes(2))/decimal.Decimal(100)
+			p_iva = decimal.Decimal(sucursal.fn_get_iva(3))/decimal.Decimal(100)
+
+		if id_tipo_producto == 3:
+			p_almacenaje = decimal.Decimal(sucursal.fn_get_almacenaje(3))/decimal.Decimal(100)
+			p_interes = decimal.Decimal(sucursal.fn_get_interes(3))/decimal.Decimal(100)
+			p_iva = decimal.Decimal(sucursal.fn_get_iva(3))/decimal.Decimal(100)
+
+
+		almacenaje = 0.00
+		interes = 0.00
+		iva=0.00
+		refrendo = 0.00
+
+		respuesta = []
+
+		almacenaje = (decimal.Decimal(mutuo) * p_almacenaje)
+		interes = (decimal.Decimal(mutuo) * p_interes)
+		iva = ((almacenaje+interes) * p_iva)
+		refrendo = round(almacenaje + interes + iva)
+		respuesta.append({"estatus":"1","almacenaje":almacenaje,"interes":interes,"iva":iva,"refrendo":refrendo})		
+		return respuesta
+
+
 
 
 	#funcion que regresa un diccionario con los valores "min_semanas" y "max_semanas"

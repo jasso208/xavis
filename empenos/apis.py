@@ -1146,8 +1146,8 @@ def api_consulta_cotizacion(request):
 
 	sucursal = Sucursal.objects.get(id = id_sucursal)
 
-	print("id_usuario")
-	print(request.GET.get("id_usuario"))
+
+
 
 	try:
 		avaluo_oro = 0
@@ -1159,6 +1159,8 @@ def api_consulta_cotizacion(request):
 
 		respuesta.append({"estatus":"1"})
 		usuario = User.objects.get(id = id_usuario)
+
+		t_mutuo = Empenos_Temporal.get_mutuo_temporal(usuario)
 
 
 		cotizacion = Empenos_Temporal.objects.filter(usuario = usuario)
@@ -1197,6 +1199,42 @@ def api_consulta_cotizacion(request):
 
 		respuesta.append({"avaluo_oro":avaluo_oro,"avaluo_plata":avaluo_plata,"avaluo_varios":avaluo_varios,"mutuo_oro":mutuo_oro,"mutuo_plata":mutuo_plata,"mutuo_varios":mutuo_varios,"refrendo_oro":math.ceil(ref_aux_oro[0]["refrendo"]),"refrendo_plata":math.ceil(ref_aux_plata[0]["refrendo"]),"refrendo_varios":math.ceil(ref_aux_varios[0]["refrendo"])})
 		respuesta.append({"cont_movs":str(cont_movs)})
+
+		respuesta.append({"t_mutuo_oro":t_mutuo[0]["mutuo_oro"],"t_mutuo_plata":t_mutuo[0]["mutuo_plata"],"t_mutuo_varios":t_mutuo[0]["mutuo_varios"]})
+
+		hoy = datetime.now()#fecha actual
+		hoy = datetime.combine(hoy,time.min)
+
+		fecha_vencimiento_1_mes = fn_add_months(hoy,1)
+		#buscamos que la fecha no caiga e dia de asueto
+		fecha_vencimiento_1_mes=fn_fecha_vencimiento_valida(fecha_vencimiento_1_mes)
+		#damos formato a la fecha
+		fecha_vencimiento_1_mes  = datetime.strftime(fecha_vencimiento_1_mes,'%Y-%m-%d')
+
+		refrendo_mensual_oro = Boleta_Empeno.fn_simula_calcula_refrendo_2(t_mutuo[0]["mutuo_oro"],sucursal,1)[0]["refrendo"]
+		refrendo_mensual_plata = Boleta_Empeno.fn_simula_calcula_refrendo_2(t_mutuo[0]["mutuo_plata"],sucursal,2)[0]["refrendo"]
+		refrendo_mensual_varios = Boleta_Empeno.fn_simula_calcula_refrendo_2(t_mutuo[0]["mutuo_varios"],sucursal,3)[0]["refrendo"]
+
+		fec_semana_1 = datetime.combine(hoy + timedelta(days = 7),time.min)
+		fec_semana_1 = datetime.strftime(fec_semana_1,'%Y-%m-%d')
+
+
+		fec_semana_2 = datetime.combine(hoy + timedelta(days = 14),time.min)
+		fec_semana_2 = datetime.strftime(fec_semana_2,'%Y-%m-%d')
+
+		fec_semana_3 = datetime.combine(hoy + timedelta(days = 21),time.min)
+		fec_semana_3 = datetime.strftime(fec_semana_3,'%Y-%m-%d')
+
+		fec_semana_4 = datetime.combine(hoy + timedelta(days = 28),time.min)
+		fec_semana_4 = datetime.strftime(fec_semana_4,'%Y-%m-%d')
+
+		imp_semana_1_oro = round(decimal.Decimal(refrendo_mensual_oro) / decimal.Decimal(4))
+		imp_semana_1_plata = round(decimal.Decimal(refrendo_mensual_plata) / decimal.Decimal(4))
+		imp_semana_1_varios = round(decimal.Decimal(refrendo_mensual_varios) / decimal.Decimal(4))
+
+
+		respuesta.append({"fecha_vencimiento_1_mes":fecha_vencimiento_1_mes,"refrendo_mensual_oro":refrendo_mensual_oro,"fec_semana_1":fec_semana_1,"imp_semana_1_oro":imp_semana_1_oro,"fec_semana_2":fec_semana_2,"fec_semana_3":fec_semana_3,"fec_semana_4":fec_semana_4,"imp_semana_1_plata":imp_semana_1_plata,"refrendo_mensual_plata":refrendo_mensual_plata,"imp_semana_1_varios":imp_semana_1_varios,"refrendo_mensual_varios":refrendo_mensual_varios})
+
 	except Exception as e:
 		print(e)
 		respuesta=[]
