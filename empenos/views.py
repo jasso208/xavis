@@ -1048,8 +1048,7 @@ def venta_piso(request):
 		
 			
 			usuario=request.user
-			id_cliente=request.POST.get("id_cliente")
-			cliente=Cliente.objects.get(id=id_cliente)
+			
 			#obtenemos todos los productos de la cotizacion del usuario
 			vtp=Venta_Temporal_Piso.objects.filter(usuario=usuario)
 
@@ -1077,7 +1076,8 @@ def venta_piso(request):
 			vp.sucursal=suc
 			vp.importe_venta=int(importe_total)
 			vp.caja=caja
-			vp.cliente=cliente
+			vp.nombre_cliente = request.POST.get("nombre_cliente")
+			vp.telefono = request.POST.get("telefono")
 			vp.save()
 
 			vtp=Venta_Temporal_Piso.objects.filter(usuario=usuario)
