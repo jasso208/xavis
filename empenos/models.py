@@ -1755,6 +1755,9 @@ class Venta_Piso(models.Model):
 	importe_venta=models.DecimalField(max_digits=20,decimal_places=2,default=0.00)#es elimporte real de la venta, en cuanto realmente se vendio el granel
 	caja=models.ForeignKey(Cajas,on_delete=models.PROTECT,blank=True,null=True)#es la caja que se tenia aberta cuando se ingreso el dinero.
 	cliente=models.ForeignKey(Cliente,on_delete=models.PROTECT,blank=True,null=True)
+	nombre_cliente = models.CharField(max_length = 100,default = '')
+	telefono = models.CharField(max_length = 10,default = '')
+
 
 class Det_Venta_Piso(models.Model):
 	venta=models.ForeignKey(Venta_Piso,on_delete=models.PROTECT)

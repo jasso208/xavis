@@ -75,12 +75,14 @@ class Apartado_Form(forms.Form):
 		self.fields['id_cliente'].required = False
 
 class Venta_Piso_Form(forms.Form):
-	id_cliente=forms.IntegerField()
+	nombre_cliente=forms.CharField(max_length = 100)
+	telefono = forms.CharField(max_length=10)
 
 	def __init__(self, *args, **kwargs):
 		super(self.__class__, self).__init__(*args, **kwargs)
 		# asi vuelves tus campos no requeridos
-		self.fields['id_cliente'].required = False
+		self.fields['nombre_cliente'].required = False
+		self.fields['telefono'].required = False
 
 class Abono_Apartado_Form(forms.Form):
 	abono=forms.IntegerField()
