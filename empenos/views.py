@@ -5388,7 +5388,8 @@ def imprime_abono(request):
 				p.drawString(344,linea,"$"+str(iva))
 				#refrendo=iva+interes+almacenaje
 				p.drawString(415,linea,"$"+str(x.importe*cont))
-				p.drawString(486,linea,"$"+str(math.ceil((x.importe*cont)+x.boleta.mutuo)))
+				imp_desempeno = "{:0,.2f}".format(math.ceil((x.importe*cont)+x.boleta.mutuo))
+				p.drawString(486,linea,"$" + imp_desempeno)
 				linea=linea-20
 
 		#plazo mensual

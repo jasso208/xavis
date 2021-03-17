@@ -71,6 +71,10 @@ class Empresa (models.Model):
 	nombre_empresa = models.CharField(max_length = 20,default = '')
 	horario = models.CharField(max_length = 50,default = '')
 
+#Solo puede haber un registro 
+class Configuracion_Contenido_Impresion(models.Model):
+	leyenda_final_venta = models.CharField(max_length = 200,default = '')
+
 class Sucursal(models.Model):
 	sucursal=models.CharField(max_length=100,null=False)
 	calle=models.CharField(max_length=50,null=True,default='')

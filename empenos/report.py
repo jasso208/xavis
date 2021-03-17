@@ -350,7 +350,12 @@ def rep_imprime_venta_piso(request,id_venta):
 	p.drawString(90,ract+2- pos_copia,'Cliente: ' + venta.nombre_cliente)
 	p.drawString(400,ract+2- pos_copia,'Cajero: ' + venta.usuario.username)
 	
-	
+	ract = ract-r
+	cci = Configuracion_Contenido_Impresion.objects.get(id = 1)
+
+	p.setFont("Helvetica",6)
+	p.drawString(50,ract+2,cci.leyenda_final_venta)
+	p.drawString(50,ract+2- pos_copia,cci.leyenda_final_venta)
 
 	linea_corte=50
 
