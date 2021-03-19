@@ -303,6 +303,7 @@ def abona_apartado(request,id_apartado):
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
 
+
 """
 idpermiso = 14
 """
@@ -1291,6 +1292,44 @@ def imprime_venta_piso(request):
 
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
+
+def cancela_boleta(request):
+	#si regresa none, es porque el usuario no esta logueado.
+	user_2 = User_2.fn_is_logueado(request.user)
+	if user_2 == None:
+		return HttpResponseRedirect(reverse('seguridad:login'))
+		
+	if not user_2.fn_tiene_acceso_a_vista(15):
+		return HttpResponseRedirect(reverse('seguridad:sin_permiso_de_acceso'))
+		
+	user_2_virtual = User_2.objects.get(user = user_2.sucursal.usuario_virtual)
+
+	caja = user_2_virtual.fn_tiene_caja_abierta()
+
+
+	if caja == None:
+		caja_abierta = "0"
+		caja = Cajas()
+
+	hoy = date.today()
+
+	fecha_inicial = datetime.combine(hoy,time.min)
+	fecha_final = datetime.combine(hoy,time.max)
+
+	boletas = None
+	if request.method == "POST":
+		id_sucursal = request.POST.get("sucursal")
+
+		sucursal = Sucursal.objects.get(id = int(id_sucursal))
+
+		boletas = Boleta_Empeno.objects.filter(sucursal = sucursal,fecha__range = (fecha_inicial,fecha_final))
+
+	form = Cancela_Boleta_Form()
+	return render(request,'empenos/cancela_boleta.html',locals())
+
+#*******************************************************************************************************************************************************
+#*¨**************************************************************************************************************************************************************
+
 """
 idpermiso  =16
 """
@@ -2364,7 +2403,7 @@ def rep_flujo_caja(request):
 
 			#calculamos los empeños
 			importe_empenos=Boleta_Empeno.objects.filter(sucursal=sucursal,fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("mutuo_original"))
-			cont_empenos=Boleta_Empeno.objects.filter(sucursal=sucursal,fecha__range=(fecha_inicial,fecha_final)).count()
+			cont_empenos=Boleta_Empeno.objects.filter(sucursal=sucursal,fecha__range=(fecha_inicial,fecha_final)).exclude(estatus__id = 2).count()
 
 			if importe_empenos["mutuo_original__sum"]==None:
 				importe_empenos=0.00
@@ -2604,7 +2643,7 @@ def rep_flujo_caja(request):
 
 			#calculamos los empeños
 			importe_empenos=Boleta_Empeno.objects.filter(fecha__range=(fecha_inicial,fecha_final)).aggregate(Sum("mutuo_original"))
-			cont_empenos=Boleta_Empeno.objects.filter(fecha__range=(fecha_inicial,fecha_final)).count()
+			cont_empenos=Boleta_Empeno.objects.filter(fecha__range=(fecha_inicial,fecha_final)).exclude(estatus__id = 2).count()
 
 			if importe_empenos["mutuo_original__sum"]==None:
 				importe_empenos=0.00
@@ -2946,7 +2985,7 @@ def retiro_efectivo(request):
 	try:
 		emp=Boleta_Empeno.objects.filter(caja=caja).aggregate(Sum("mutuo_original"))
 
-		cont_empenos=Boleta_Empeno.objects.filter(caja=caja).count()
+		cont_empenos=Boleta_Empeno.objects.filter(caja=caja).exclude(estatus__id = 2).count()
 		total_movs=total_movs+cont_empenos
 		if emp["mutuo_original__sum"]!=None:
 			empenos=emp["mutuo_original__sum"]
@@ -6373,7 +6412,7 @@ def api_consulta_corte_caja(request):
 
 	try:
 		emp=Boleta_Empeno.objects.filter(caja=caja).aggregate(Sum("mutuo_original"))
-		cont_empenos=Boleta_Empeno.objects.filter(caja=caja).count()
+		cont_empenos=Boleta_Empeno.objects.filter(caja=caja).exclude(estatus__id = 2).count()
 		total_movs=total_movs+cont_empenos
 		if emp["mutuo_original__sum"]!=None:
 			empenos=emp["mutuo_original__sum"]

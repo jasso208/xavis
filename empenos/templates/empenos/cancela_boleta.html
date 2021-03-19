@@ -1,0 +1,257 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% block archivos_staticos%}
+<script type="text/javascript" src="{% static 'js/cancela_boleta.js' %}"></script>
+{% endblock %}
+{% block usuario %}
+
+			<div class="col-xs-6">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{request.user.username}}: {{request.user.first_name}} {{request.user.last_name}}</label> 
+				
+			</div>
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-home"></span> Sucursal: {{user_2.sucursal}}</label> 	
+			</div>
+
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-inbox"></span> Caja: {{caja.caja}} </label> 	
+			</div>
+{% endblock  %}
+{% block content %}
+	<div class="col-xs-12 cls_encabezado_body">	
+		
+		<div class="col-xs-10">
+			<a >
+				Cancelar boleta
+			</a>				
+		</div>
+		<div class="col-xs-2">
+			<a id = "btn_ayuda" style="cursor: pointer;" >
+				<span class="glyphicon glyphicon-question-sign"></span>
+				Ayuda
+			</a>
+		</div>
+
+	</div>
+	<div class="col-xs-12">
+		<form method="post" action="#" class="cls_form_1">
+			{%csrf_token%}
+			<div class="row cls_form_consulta">
+				<div class="col-xs-12">
+					<div class="panel panel-default">						
+						<div class="panel-body">
+							<div class="col-xs-12">
+								<div class="panel panel-default">						
+									<div class="panel-body">
+										<div class="col-xs-3">
+											<label>Sucursal</label>
+											{% bootstrap_field form.sucursal show_label=False%}
+										</div>
+										<div class="col-xs-2">
+											<br>
+											<button class="btn btn-primary btn-sm" style="margin-top: 5px">
+
+
+												<span class="glyphicon glyphicon-search">
+													
+												</span>
+												 Consultar
+											</button>
+											
+										</div>
+
+									</div>
+								</div>
+							</div>
+
+
+
+
+								<div class="col-xs-12">
+								<div class="cls_encabezado_alert " >
+									<label> Reporte de boletas {{leyenda}}</label>
+								</div>
+
+									<table id="tabla_conceptos_retiro" class="table table-bordered">
+									    <thead>
+										      <tr>
+											      	<th ></th>
+											        <th >Folio</th>	
+											        <th >Usuario</th>								        
+											        <th >Avaluo</th>	
+											        <th >Mutuo</th>		
+											        <th >Refrendo</th>	
+											        <th >Tipo producto</th>	
+											       	<th>Fecha emisión</th> 
+											        <th>Fecha vencimiento</th>
+											        <th>Plazo</th>
+											        <th>Estatus</th>
+										      </tr>
+									    </thead>
+
+									    <tbody>
+									    	{% for b in boletas %}
+									    	<tr>
+									    		<td>
+									    			
+									    			{% ifnotequal b.estatus.id 2 %}
+									    			<a class="btn btn-default btn-sm" onclick='fn_confirma_cancela_boleta("{{b.id}}")';>
+									    				<span class="glyphicon glyphicon-remove">
+									    					 
+									    				</span>
+									    			</a>
+									    			{%endifnotequal%}
+									    			
+									    		</td>
+									    		<td style="text-align:right;">{{b.folio}}</td>
+									    		<td>{{b.usuario.username}}</td>
+									    		<td style="text-align: right;">${{b.avaluo | floatformat:"2" }}</td>
+									    		<td style="text-align: right;">${{b.mutuo | floatformat:"2" }}</td>
+									    		<td style="text-align: right;">${{b.refrendo | floatformat:"2" }}</td>
+									    		<td>{{b.tipo_producto}}</td>
+									    		<td>
+									    			{{b.fecha|date:'Y-m-d'}}
+									    		</td>
+									    		<td>
+									    			{{b.fecha_vencimiento|date:'Y-m-d'}}
+									    			
+									    		</td>
+									    		<td>{{b.plazo}}</td>
+									    		<td>{{b.estatus.estatus}}</td>
+									    	</tr>
+									    	{% endfor %}
+
+									    </tbody>
+									</table>
+								</div>
+
+
+
+
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+
+		<div class="fondo_mensaje cls_error"  >
+			
+		</div >
+		
+		<div class="mensaje cls_error" >	
+				<div class="cls_encabezado_alert" >
+					Error!!
+				</div>
+
+				<div class="panel panel-default">	
+					<label class="page-header" id="msj_error"></label>
+					<br>
+
+					<a class="btn btn-primary btn-sm" id="btn_aceptar_error" ><span class="glyphicon glyphicon-ok"></span> Aceptar</a>		
+					<br>
+					<br>		
+
+				</div>
+		</div>
+
+		<div class="fondo_mensaje cls_exito"  >
+			
+		</div >
+		
+		<div class="mensaje cls_exito" >	
+				<div class="cls_encabezado_alert" >
+					Aviso
+				</div>
+
+				<div class="panel panel-default">	
+					<label class="page-header" id="msj_aviso"></label>
+					<br>
+
+					<a class="btn btn-primary btn-sm" id="btn_aceptar_aviso" ><span class="glyphicon glyphicon-ok"></span> Aceptar</a>		
+					<br>
+					<br>		
+
+				</div>
+		</div>
+
+
+		<div class="fondo_mensaje cls_confirmacion_baja" id="fondo_confirmacion_baja" >
+			
+		</div >
+		<div class="mensaje cls_confirmacion_baja" id="confirmacion_baja">
+				<div class="cls_encabezado_alert" >
+					Aviso
+				</div>	
+				<div class="panel panel-default">	
+
+					<label class="page-header">¿Desea continuar con la cancelación de la boleta?</label>
+					<br>
+
+					<a id="btn_no_cancelar" class="btn btn-default btn-sm" style="margin-top: 5px;"> <span class="glyphicon glyphicon-remove"></span> Cancelar</a>
+
+					<a class="btn btn-primary btn-sm" id="btn_continuar_cancelacion"> <span class="glyphicon glyphicon-ok"></span> 
+						Continuar
+					</a>
+
+					<br>
+					<br>
+
+				</div>
+		</div>
+
+
+
+	<div id="fondo_preloader">
+		<div class="preloader" id="preloader">
+		
+		</div>
+	</div>
+
+
+
+
+			<div class="fondo_mensaje cls_ayuda"  >
+			
+		</div >
+		
+		<div class="mensaje cls_ayuda" >	
+				<div class="cls_encabezado_alert" >
+					Ayuda
+				</div>
+
+				<div class="panel panel-default">	
+					<p class="page-header" style="text-align: justify;padding-left: 10px;padding-right: 10px;" >
+						En esta opción podremos realizar la cancelación de boletas.
+						<br>
+						<br>
+						Lo primero que debemos hacer es seleccionar una sucursal. En automatico se mostrarán todas las boletas que la sucursal seleccionada haya realizado durante el día.
+						<br>
+						<br>
+						En el listado de boletas que se muestren, en el lado derecho aparecera un bóton. Al precionar este bóton nos aparecera un mensaje para que confirmemos que en realidad queremos cancelar la boleta. En caso de confirmar la boleta seguira activa.
+						<br>
+						<br>
+
+
+					</p>
+					<br>
+
+					<a class="btn btn-primary btn-sm" id="btn_aceptar_ayuda" ><span class="glyphicon glyphicon-ok"></span> Aceptar</a>		
+					<br>
+					<br>		
+
+				</div>
+		</div>
+
+
+		<script type="text/javascript">
+			$(document).ready(
+				function()
+				{
+						fn_inicio("{{csrf_token}}","{{request.user.username}}","{{IP_LOCAL}}");
+				}
+			);
+		</script>
+{% endblock %}

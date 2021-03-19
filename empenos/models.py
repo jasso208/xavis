@@ -1078,6 +1078,7 @@ class Boleta_Empeno(models.Model):
 	precio_venta_fijo = models.DecimalField(max_digits = 20,decimal_places = 2,default = 0 ) #Cuando el precio de venta que se calcula en base a la configuracion de la tabla Porcentaje_Sobre_Avaluo
 	#																					     no es el correcto, se establece un precio fijo.		
 	usuario_establece_precio_fijo = models.ForeignKey(User,on_delete = models.PROTECT,null=True,blank = True,related_name = "usuario_establece_precio_fijo")																							 	
+	usuario_cancela = models.ForeignKey(User,on_delete = models.PROTECT,null = True,blank = True)
 
 	@classmethod
 	def nuevo_empeno(self,sucursal,tp,caja,usuario,avaluo,mutuo,fecha_vencimiento,cliente,nombre_cotitular,apellido_paterno,apellido_materno,plazo,fecha_vencimiento_real,estatus,folio,tm):

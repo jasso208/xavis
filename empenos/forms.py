@@ -136,6 +136,9 @@ class Buscar_Apartados_Form(forms.Form):
 class Costo_Extra_Form(forms.Form):
 	sucursal=forms.ModelChoiceField(queryset=Sucursal.objects.all())
 
+class Cancela_Boleta_Form(forms.Form):
+	sucursal=forms.ModelChoiceField(queryset=Sucursal.objects.all())
+
 class Porcenaje_Comisionpg_Form(forms.Form):
 	porcentaje = forms.DecimalField(max_digits = 20,decimal_places = 2)
 	

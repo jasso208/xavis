@@ -17,6 +17,38 @@ from django.db.models import Sum
 import json
 from django.db import transaction
 
+@api_view(['DELETE'])
+def api_boleta_empeno(request):
+	if request.method == "DELETE":#cancelamos boleta
+		resp = []
+		try:
+			username = request.data["username"]
+			id_boleta = request.data["id_boleta"]
+			
+			usuario = User.objects.get(username = username)
+			boleta = Boleta_Empeno.objects.get(id = int(id_boleta))
+
+			#borramos el detalle de  la boleta
+			Det_Boleto_Empeno.objects.filter(boleta_empeno = boleta).delete()
+			Periodo.objects.filter(boleta = boleta).delete()
+			Pagos.objects.filter(boleta = boleta).delete()
+
+			boleta.avaluo = 0
+			boleta.mutuo = 0
+			boleta.refrendo = 0
+			boleta.mutuo_original = 0
+			boleta.estatus = Estatus_Boleta.objects.get(id = 2)
+			boleta.usuario_cancela = usuario
+			boleta.save()
+
+			resp.append({"estatus":"1"})
+
+		except Exception as e:
+			print(e)
+			resp.append({"estatus":"0"})
+			resp.append({"msj":"Error al cancelar la boleta."})
+	return Response(json.dumps(resp))
+
 #api para establecer el precio de venta y apartado fijo
 @api_view(["PUT","GET"])
 def api_precio_venta_fijo(request):

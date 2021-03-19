@@ -45,6 +45,8 @@ urlpatterns=[
 	url(r'^administracion_interes_empeno/$',administracion_interes_empeno,name="administracion_interes_empeno"),
 	url(r'^administracion_porcentaje_mutuo/$',administracion_porcentaje_mutuo,name="administracion_porcentaje_mutuo"),
 	url(r'^cancela_abono/$',cancela_abono,name="cancela_abono"),
+	url(r'^cancela_boleta/$',cancela_boleta,name="cancela_boleta"),
+	
 	url(r'^rep_comparativo_estatus_cartera/$',rep_comparativo_estatus_cartera,name="rep_comparativo_estatus_cartera"),
 	url(r'^reporte_retiros_efectivo/$',reporte_retiros_efectivo,name="reporte_retiros_efectivo"),
 	url(r'^reporte_ingresos_efectivo/$',reporte_ingresos_efectivo,name="reporte_ingresos_efectivo"),
@@ -109,6 +111,7 @@ urlpatterns=[
 	url(r'^api_cancela_abono/$',api_cancela_abono,name="api_cancela_abono"),
 	url(r'^api_kiltajes/$',api_kiltajes,name="api_kiltajes"),
 	url(r'^api_precio_venta_fijo/$',api_precio_venta_fijo,name="api_precio_venta_fijo"),
+	url(r'^api_boleta_empeno/$',api_boleta_empeno,name="api_boleta_empeno"),
 
 
 
