@@ -64,15 +64,17 @@ class Reporte_Boletas_Form(forms.Form):
 	export_pdf = forms.IntegerField()	
 
 class Apartado_Form(forms.Form):
-	id_cliente=forms.IntegerField()
 	pago_cliente=forms.IntegerField()
 	pago_cliente_2=forms.IntegerField()
 	num_meses_apartar=forms.IntegerField()
+	nombre_cliente = forms.CharField(max_length = 100)
+	telefono = forms.CharField(max_length = 10)
 	
 	def __init__(self, *args, **kwargs):
 		super(self.__class__, self).__init__(*args, **kwargs)
 		# asi vuelves tus campos no requeridos
-		self.fields['id_cliente'].required = False
+		self.fields['nombre_cliente'].required = False
+		self.fields['telefono'].required = False
 
 class Venta_Piso_Form(forms.Form):
 	nombre_cliente=forms.CharField(max_length = 100)

@@ -9,7 +9,7 @@
 
 			<div class="col-xs-6">
 				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{request.user.username}}: {{request.user.first_name}} {{request.user.last_name}}</label> 
-				
+	 			
 			</div>
 			<div class="col-xs-3">
 				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-home"></span> Sucursal: {{user_2.sucursal}}</label> 	
@@ -53,23 +53,32 @@
 										<hr>
 									</div>
 									<div class="col-xs-12">
-										<div class="col-xs-1">
+										<div class="col-xs-2">
 											<label style="margin-top: 7px;">Cliente:</label>
 											
 										</div>
 										<div class="col-xs-7">
 											
-												<label id="txt_cliente" style="margin-top: 7px;"></label>																		
+											{% bootstrap_field form.nombre_cliente show_label=False %}																		
 											
 										</div>
-										<div class="col-xs-4">
-											<a class="btn btn-default btn-sm" id="btn_agregar_cliente"><span class ="glyphicon glyphicon-plus"></span> Seleccionar Cliente</a>
+										<div class="col-xs-3">
+											
 										</div>
-
-										<div class="col-xs-12">
-											{% bootstrap_field form.id_cliente show_label=False %}
+									</div>
+									<div class="col-xs-12">
+										<div class="col-xs-2">
+											<label style="margin-top: 7px;">Teléfono:</label>
+											
 										</div>
-										
+										<div class="col-xs-3">
+											
+											{% bootstrap_field form.telefono show_label=False %}																		
+											
+										</div>
+										<div class="col-xs-7">
+											
+										</div>
 									</div>
 
 									<div class="col-xs-12">

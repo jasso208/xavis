@@ -54,7 +54,7 @@ var id_vt=0;
 				$("#btn_confirmar_venta").click(
 						function()				
 						{
-							if($("#id_id_cliente").val() == "")
+							if($("#id_nombre_cliente").val() == "")
 							{
 								$(".cls_error_general").show();
 								$("#msj_error_general").text("Debe seleccionar un cliente.");

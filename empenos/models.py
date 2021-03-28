@@ -1734,7 +1734,8 @@ class Apartado(models.Model):
 	boleta=models.OneToOneField(Boleta_Empeno,on_delete=models.PROTECT,null=True,blank=True)#como solo una boleta puede estar apartada a la vez, no necesitamos el detalle.
 	fecha_vencimiento=models.DateTimeField(null=True,blank=True)
 	sucursal=models.ForeignKey(Sucursal,on_delete=models.PROTECT,blank=True,null=True)	
-
+	nombre_cliente = models.CharField(max_length = 100,default = '')
+	telefono = models.CharField(max_length = 10,default = '')
 
 class Abono_Apartado(models.Model):
 	folio=models.CharField(max_length=7,null=True)

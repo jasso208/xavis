@@ -623,19 +623,15 @@ def apartado(request):
 		form=Apartado_Form()
 		return render(request,'empenos/apartado.html',locals())
 
-
-
 	if request.method=="POST":
-		try:
-			id_cliente=request.POST.get("id_cliente")
-			cliente=Cliente.objects.get(id=id_cliente)
-		except Exception as e:		
+
+		if request.POST.get("nombre_cliente") == "":
 			estatus="0"
 			msj_error="Debe seleccionar el cliente."
 			form=Apartado_Form()
 			return render(request,'empenos/apartado.html',locals())
 
-		
+
 		ma=Min_Apartado.objects.get(id=1)
 
 		try:
@@ -726,7 +722,9 @@ def apartado(request):
 				ap.usuario=usuario
 				ap.importe_venta=importe_venta
 				ap.caja=caja
-				ap.cliente=cliente
+				ap.cliente = None
+				ap.nombre_cliente = request.POST.get("nombre_cliente")
+				ap.telefono = request.POST.get("telefono")
 				ap.estatus=estatus_apartado
 				ap.boleta=boleta
 				ap.fecha_vencimiento=fecha_vencimiento
@@ -783,7 +781,8 @@ def re_imprimir_apartado(request,id_apartado):
 	apartado=Apartado.objects.get(id=id_apartado)
 	Imprime_Apartado.objects.filter(usuario=request.user).delete()
 	Imprime_Apartado.objects.create(usuario=request.user,apartado=apartado)
-	return imprime_apartado(request)
+	return rep_imprime_apartado(request)
+	#return imprime_apartado(request)
 
 
 #*******************************************************************************************************************************************************
@@ -795,8 +794,6 @@ def imprime_apartado(request):
 	response['Content-Disposition'] = f'inline; filename=hello.pdf'
 
 	im=Imprime_Apartado.objects.get(usuario=request.user)
-
-
 
 	#obtenemos el abono a imprimir.
 	#abono=Imprime_Abono.objects.get(usuario=request.user).abono
@@ -859,12 +856,12 @@ def imprime_apartado(request):
 	p.setFont("Helvetica",10)
 	p.drawString(55,current_row,"Cliente: ")
 	p.setFont("Helvetica",10)
-	p.drawString(100,current_row,im.apartado.cliente.nombre+' '+im.apartado.cliente.apellido_p+' '+im.apartado.cliente.apellido_m)
+	p.drawString(100,current_row,im.apartado.nombre_cliente)
 	p.setFont("Helvetica",10)
 
 	p.drawString(55,current_row-380,"Cliente: ")
 	p.setFont("Helvetica",10)
-	p.drawString(100,current_row-380,im.apartado.cliente.nombre+' '+im.apartado.cliente.apellido_p+' '+im.apartado.cliente.apellido_m)
+	p.drawString(100,current_row-380,im.apartado.nombre_cliente)
 	p.setFont("Helvetica",10)
 	current_row=current_row-20
 	current_row=current_row-20
@@ -1649,10 +1646,10 @@ def consulta_apartado(request):
 			apartados = Apartado.objects.filter(fecha__range = (fecha_inicial,fecha_final),sucursal = suc).order_by("-folio")
 		elif request.POST.get("cliente") != "" and request.POST.get("cliente") != None:			
 			
-			Cliente.fn_actualiza_nombre_completo()
-			
+			#Cliente.fn_actualiza_nombre_completo()
+			print(request.POST.get("cliente"))
 			cl = Cliente.objects.filter(nombre_completo__contains = request.POST.get("cliente").upper()) 
-			apartados = Apartado.objects.filter(cliente__in = cl,sucursal = suc) 
+			apartados = (Apartado.objects.filter(cliente__in = cl,sucursal = suc) | Apartado.objects.filter(nombre_cliente__in = request.POST.get("cliente").upper(),sucursal = suc) )
 
 		elif folio_apartado != "" or folio_apartado != None :
 			apartados = Apartado.objects.filter(folio = int(request.POST.get("folio_apartado")),sucursal = suc)
