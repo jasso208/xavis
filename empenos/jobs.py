@@ -402,6 +402,12 @@ def fn_pagos_vencidos(hoy):
 #se ejecuta a diario para generar los pagos diario de tipo Comision Pg
 @transaction.atomic
 def fn_comision_pg(hoy):
+	cpg_v = 0
+	try:
+		cpg_v = Porcentaje_Comision_PG.objects.get(id = 1).porcentaje
+	except:
+		pass
+
 	#el estatus almoneda (boleta vencida)
 	estatus_almoneda=Estatus_Boleta.objects.get(id=3)
 	estatus_remate=Estatus_Boleta.objects.get(id=5)
@@ -446,8 +452,12 @@ def fn_comision_pg(hoy):
 			p.interes=0
 			p.iva=compg/1.16
 			p.importe=math.ceil(compg)
+
 			p.vencido="N"
-			p.pagado="N"
+			if math.ceil(compg) == 0.00:
+				p.pagado = "S"
+			else:
+				p.pagado="N"
 			p.fecha_vencimiento_real=fecha_vencimiento
 			p.save()
 
