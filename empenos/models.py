@@ -278,8 +278,6 @@ class Sucursal(models.Model):
 			p_iva  = cie.iva_oro/100
 
 		elif tipo_producto == 2:#plata
-
-
 			p_almacenaje = cie.almacenaje_plata/100
 			p_interes = cie.interes_plata/100
 			p_iva  = cie.iva_plata/100
@@ -293,7 +291,7 @@ class Sucursal(models.Model):
 		almacenaje = (mutuo * p_almacenaje)
 		interes = (mutuo * p_interes)
 		iva = ((almacenaje+interes) * p_iva)
-		refrendo = (almacenaje+interes+iva)
+		refrendo = round(almacenaje+interes+iva)
 		respuesta.append({"estatus":"1","almacenaje":almacenaje,"interes":interes,"iva":iva,"refrendo":refrendo})
 		
 		return respuesta
@@ -1333,10 +1331,10 @@ class Boleta_Empeno(models.Model):
 		comision_pg = Pagos.objects.filter(boleta = self,tipo_pago__id = 2,pagado = "N")
 
 		#en caso de quela boleta tenga inconsistencias entre el numero de dias vencidos y el nuero de comisiones pg no pagadas.
-		if self.fn_get_dias_vencida() != comision_pg.count():
-			resp.append(False)
-			resp.append("La boleta presenta inconcistencias entre los dias vencidos y el importe de comisiones pg.")
-			return resp
+		#if self.fn_get_dias_vencida() != comision_pg.count():
+		#	resp.append(False)
+		#	resp.append("La boleta presenta inconcistencias entre los dias vencidos y el importe de comisiones pg.")
+		#	return resp
 
 		pagos_no_pagados = Pagos.objects.filter(boleta = self,pagado = "N")
 		importe_comision_pg = comision_pg.aggregate(Sum("importe"))["importe__sum"]

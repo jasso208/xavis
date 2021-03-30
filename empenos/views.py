@@ -4104,7 +4104,7 @@ def nvo_empeno(request):
 					almacenaje_semanal=ref[0]["almacenaje"]/4
 					interes_semanal=(ref[0]["interes"])/4
 					iva_semanal=ref[0]["iva"]/4
-					importe_semanal=(almacenaje_semanal+interes_semanal+iva_semanal)
+					importe_semanal=ref[0]["refrendo"]/4#(almacenaje_semanal+interes_semanal+iva_semanal)
 
 					if round(importe_semanal)==0:
 						importe_semanal=1
@@ -4249,7 +4249,7 @@ def nvo_empeno(request):
 					almacenaje_semanal=ref[0]["almacenaje"]/4
 					interes_semanal=(ref[0]["interes"])/4
 					iva_semanal=ref[0]["iva"]/4
-					importe_semanal=(almacenaje_semanal+interes_semanal+iva_semanal)
+					importe_semanal=ref[0]["refrendo"]/4#(almacenaje_semanal+interes_semanal+iva_semanal)
 
 
 					if round(importe_semanal)==0:
@@ -4378,7 +4378,7 @@ def nvo_empeno(request):
 						almacenaje_semanal=ref[0]["almacenaje"]/4
 						interes_semanal=(ref[0]["interes"])/4
 						iva_semanal=ref[0]["iva"]/4
-						importe_semanal=(almacenaje_semanal+interes_semanal+iva_semanal)
+						importe_semanal=ref[0]["refrendo"]/4#(almacenaje_semanal+interes_semanal+iva_semanal)
 
 						if round(importe_semanal)==0:
 							importe_semanal=1
@@ -5877,8 +5877,6 @@ def imprime_boleta(request):
 			p.setFont("Helvetica",7)
 			p.drawString(130,545,x.boleta.caja.sucursal.sucursal)
 
-
-
 			p.setFont("Helvetica-Bold",7)
 			p.drawString(315,545,"Plazo: ")
 
@@ -5944,8 +5942,6 @@ def imprime_boleta(request):
 				inicio=0
 			else:
 				inicio=rinicial-1
-
-
 
 			db=Det_Boleto_Empeno.objects.filter(boleta_empeno=x.boleta)[inicio:rinicial+size]
 
