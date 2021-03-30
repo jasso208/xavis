@@ -1547,9 +1547,7 @@ class Boleta_Empeno(models.Model):
 
 			#despues de haber aplicado el abono, validamos que la boleta este correcta.
 			#validamos las fechas de vencimiento y vencimiento real de la boleta
-			print(self.fecha_vencimiento)
-			print(self.fecha_vencimiento_real)
-			if (self.fecha_vencimiento-self.fecha_vencimiento_real).days !=0 and (self.fecha_vencimiento-self.fecha_vencimiento_real).days != 1:
+			if (self.fecha_vencimiento-self.fecha_vencimiento_real).days !=0 and (self.fecha_vencimiento-self.fecha_vencimiento_real).days != 1 and (self.fecha_vencimiento-self.fecha_vencimiento_real).days != 2:
 				resp.append(False)
 				resp.append("Error al pagar las semanas indicadas. No se pudo calcular la fecha de vencimiento de la boleta.")
 				return resp
