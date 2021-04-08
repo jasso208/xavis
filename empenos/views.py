@@ -5429,7 +5429,8 @@ def imprime_abono(request):
 				linea=linea-20
 
 		#plazo mensual
-		if abono.boleta.plazo.id==3:
+		if abono.boleta.plazo.id == 3:
+
 			pa=Periodo.objects.filter(boleta=abono.boleta,pagado="N",vencido="N")
 
 			cont=0
@@ -5437,47 +5438,48 @@ def imprime_abono(request):
 				linea=522
 			else:
 				linea=142
+
+			resp = abono.boleta.fn_calcula_refrendo()
+
 			#si existen pagos parciales no vencidos sin pagar, los mostramos como fechas proximo pago,
 			#en caso de no existir solo mostramos un proximo pago como si fuera mensual
 			if pa.exists():
+
 				for x in pa:		
 					cont=cont+1
 					p.setFont("Helvetica",7)
 					p.drawString(60,linea,str(cont))
 					p.drawString(131,linea,str(x.fecha_vencimiento.strftime('%d/%m/%Y')))
-					almacenaje=""
+					almacenaje = "{:0,.2f}".format((resp[0]["almacenaje"]/4)*cont)
 					p.drawString(202,linea,"$"+str(almacenaje))
-					interes=""
+					interes = "{:0,.2f}".format((resp[0]["interes"]/4)*cont)
 					p.drawString(273,linea,"$"+str(interes))
-					iva=""
+					iva = "{:0,.2f}".format((resp[0]["iva"]/4)*cont)
 					p.drawString(344,linea,"$"+str(iva))
-					#refrendo=iva+interes+almacenaje
-					p.drawString(415,linea,"$"+str(x.importe*cont))
-
+					refrendo = "{:0,.2f}".format((resp[0]["refrendo"]/4)*cont)
+					p.drawString(415,linea,"$"+refrendo)
 					p.drawString(486,linea,"$"+str(math.ceil((x.importe*cont)+x.boleta.mutuo)))
 					linea=linea-20
+
 			else:
+				
 				cont=cont+1
 				p.setFont("Helvetica",7)
 				p.drawString(60,linea,str(cont))
 				p.drawString(131,linea,str(abono.boleta.fecha_vencimiento.strftime('%d/%m/%Y')))
-				almacenaje=""
+				almacenaje = "{:0,.2f}".format(resp[0]["almacenaje"])
 				p.drawString(202,linea,"$"+str(almacenaje))
-				interes=""
+				interes = "{:0,.2f}".format(resp[0]["interes"])
 				p.drawString(273,linea,"$"+str(interes))
-				iva=""
+				iva = "{:0,.2f}".format(resp[0]["iva"])
 				p.drawString(344,linea,"$"+str(iva))
-				#refrendo=iva+interes+almacenaje
-				p.drawString(415,linea,"$"+str(abono.boleta.refrendo))
+				refrendo = "{:0,.2f}".format(resp[0]["refrendo"])
+				p.drawString(415,linea,"$"+refrendo)
 
 				p.drawString(486,linea,"$"+str(math.ceil((abono.boleta.refrendo)+abono.boleta.mutuo)))
 				linea=linea-20
 
-
 		current_row=current_row-heigth_row	
-
-
-
 
 		u=0
 		pinta=0
@@ -5492,8 +5494,6 @@ def imprime_abono(request):
 		current_row=current_row-heigth_row	
 		
 		cop=cop+1
-
-	
 
 	try:
 		rac=Rel_Abono_Capital.objects.get(abono=abono)		
