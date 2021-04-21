@@ -84,7 +84,7 @@
 
 							<div class="col-xs-12">
 								<div class="cls_encabezado_alert text-center" >
-									<label>Ventas</label>
+									<label>Apartados</label>
 								</div>
 
 									<table id="tabla_cotizacion" class="table table-bordered">
@@ -121,7 +121,12 @@
 
 											    	</td>
 											        <td>{{v.folio}}</td>
-											        <td>{{v.cliente.nombre}} {{v.cliente.apellido_p}} {{v.cliente.apellido_m}}</td>											        
+													{% ifnotequal v.cliente None%}
+											        	<td>{{v.cliente.nombre}} {{v.cliente.apellido_p}} {{v.cliente.apellido_m}}</td>											        
+													{% endifnotequal%}
+													{% ifequal v.cliente None %}
+														<td>{{v.nombre_cliente}}</td>											        
+													{% endifequal %}
 											        
 											        
 

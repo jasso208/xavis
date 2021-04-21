@@ -75,7 +75,13 @@
 									<div class="panel panel-default">
 										<div class="col-xs-12">
 											<label>Nombre:</label>
-											{{apartado.cliente.nombre}} {{apartado.cliente.apellido_p}} {{apartado.cliente.apellido_m}}
+											{% ifnotequal apartado.cliente None%}
+											
+												{{apartado.cliente.nombre}} {{apartado.cliente.apellido_p}} {{apartado.cliente.apellido_m}}
+											{% endifnotequal%}
+											{% ifequal apartado.cliente None %}
+												{{apartado.nombre_cliente}}
+											{%endifequal%}
 										</div>
 										<div class="col-xs-8">
 											<label>Calle:</label>
@@ -117,7 +123,14 @@
 										</div>
 										<div class="col-xs-4">
 											<label>Teléfono fijo:</label>
-											{{apartado.cliente.telefono_fijo}}
+											
+
+											{% ifnotequal apartado.cliente None%}											
+												{{apartado.cliente.telefono_fijo}}	
+											{% endifnotequal%}
+											{% ifequal apartado.cliente None %}
+												{{apartado.telefono}}
+											{%endifequal%}
 										</div>
 										<div class="col-xs-8">
 											<label>Teléfono celular:</label>
