@@ -2532,12 +2532,12 @@ def rep_flujo_caja(request):
 	
 
 	cont_t_entradas = 1 + cont_otros + cont_com_pg + cont_refrendos + cont_capital + cont_desempenos + cont_ventas + cont_ab_apartado + cont_reimpresion_boleta
-	importe_t_entradas  = float(saldo_inicial) + float(importe_desempenos) + float(importe_capital) + float(importe_refrendo) + float(importe_com_pg) + float(importe_otros) + float(importe_reimpresion_boleta) + float(importe_ventas) + float(importe_ab_apartado) 
+	importe_t_entradas  = math.ceil(float(saldo_inicial) + float(importe_desempenos) + float(importe_capital) + float(importe_refrendo) + float(importe_com_pg) + float(importe_otros) + float(importe_reimpresion_boleta) + float(importe_ventas) + float(importe_ab_apartado) )
 
 
 
 	cont_t_salidas = cont_retiros + cont_empenos
-	importe_t_salidas = float(importe_empenos) + float(importe_retiros)
+	importe_t_salidas = math.ceil( float(importe_empenos) + float(importe_retiros))
 	
 
 	importe_refrendo=round(importe_refrendo)
