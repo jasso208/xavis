@@ -1215,6 +1215,7 @@ def imprime_venta_piso(request):
 		p.drawString(530,current_row,importe)
 
 		for db in dbe:
+			print("entro")
 			p.drawString(35,current_row,"fb:"+str(db.boleta_empeno.folio)+"; "+db.descripcion)
 			p.drawString(335,current_row,"fb:"+str(db.boleta_empeno.folio)+"; "+db.descripcion)
 			current_row=current_row-20

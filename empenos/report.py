@@ -580,21 +580,31 @@ def rep_imprime_venta_piso(request,id_venta):
 	for d in dv:
 
 		ract = ract-r	
+		
 		#articulos varios
 		if d.boleta.tipo_producto.id == 3:
-			db = Det_Boleto_Empeno.objects.get(boleta_empeno = d.boleta)
-				
+			db = Det_Boleto_Empeno.objects.get(boleta_empeno = d.boleta)			
 			p.drawString(55,ract+2,"fb:"+str(d.boleta.folio)+"; "+db.descripcion)
 
+		db = Det_Boleto_Empeno.objects.filter(boleta_empeno = d.boleta)
 		#articulos Oro
 		if d.boleta.tipo_producto.id == 1:		
 			
-			p.drawString(55,ract+2,"fb:"+str(d.boleta.folio)+"; Joyería Oro")
-
+			if db.count() == 1:
+				p.drawString(55,ract+2,"fb:"+str(d.boleta.folio)+"; "+db[0].descripcion)
+			else:
+				p.drawString(55,ract+2,"fb:"+str(d.boleta.folio)+"; Joyería Oro")
+				
 		#articulos Plata
 		if d.boleta.tipo_producto.id == 2:		
 			
-			p.drawString(55,ract+2,"fb:"+str(d.boleta.folio)+"; Joyería Plata")
+			if db.count() == 1:
+				p.drawString(55,ract+2,"fb:"+str(d.boleta.folio)+"; "+db[0].descripcion)
+			else:
+				p.drawString(55,ract+2,"fb:"+str(d.boleta.folio)+"; Joyería Plata")
+				
+			
+			
 
 		precio_venta = "{:0,.2f}".format(d.boleta.fn_calcula_precio_venta())
 
