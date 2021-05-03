@@ -62,8 +62,19 @@
 											<input type="number" name="folio_apartado"  id="id_folio_apartado" class="form-control">
 										</div>
 										<div class="col-xs-3">
-											<label>Cliente</label>
-											<input type="text" name="cliente"  id="id_cliente" class="form-control">
+											<div class="col-xs-12">
+												<label>Estatus apartado</label>
+												<select name="estatus_apartado" id="id_estatus_apartado" class="form-control">
+													<option value="" selected="">---------</option>
+													<option value="1">APARTADO</option>
+													<option value="2">LIBERADO</option>
+													<option value="3">VENDIDO</option>
+												  </select>
+											</div>
+											<div class="col-xs-12">
+												<label>Cliente</label>
+												<input type="text" name="cliente"  id="id_cliente" class="form-control">
+											</div>
 										</div>
 
 										
@@ -222,6 +233,7 @@
 						{
 							$("#id_folio_apartado").val("");
 							$("#id_cliente").val("");		
+							$("#id_estatus_apartado").val("");
 											
 							
 						}
@@ -231,20 +243,31 @@
 						{
 							$("#id_fecha_inicial,#id_fecha_final").val("");
 							$("#id_folio_apartado").val("");
-							$("#id_cliente").val("");
+							$("#id_cliente").val("");					
 							
 						}
 					);
+				$("#id_estatus_apartado").focusin(
+						function()
+						{
+							$("#id_fecha_inicial,#id_fecha_final").val("");
+							$("#id_folio_apartado").val("");
+							$("#id_estatus_apartado").val("");		
+							
+						}
+					);
+
 				$("#id_folio_apartado").focusin(
 						function()
 						{
 							$("#id_fecha_inicial,#id_fecha_final").val("");
 							$("#id_cliente").val("");
 							$("#id_folio_apartado").val("");
+							$("#id_estatus_apartado").val("");
 							
 						}
 					);
-				$("#id_fecha_inicial,#id_fecha_final,#id_cliente,#id_folio_apartado").focusout(
+				$("#id_fecha_inicial,#id_fecha_final,#id_cliente,#id_folio_apartado,#id_estatus_apartado").focusout(
 					function()
 					{
 						fn_habilita_busqueda();
@@ -292,57 +315,6 @@
 
 		}
 
-		function fn_agrega_importe(id)
-		{
-			id_venta=id;
-
-			$(".cls_agregar_importe_venta").show();
-			$("#encabezado_error").text("Importe real de venta de folio "+id_venta.toString());
-
-		}
-
-		function fn_agrega_importe_real_venta()
-		{			
-			
-			$("#fondo_preloader").show();
-			$.ajax({
-				type: "GET",
-		        url: "{{IP_LOCAL}}/empenos/api_agrega_importe_real_venta/",
-		        data: {
-
-					"id_venta":id_venta,"importe":$("#txt_importe").val(),'id_caja':"{{caja.id}}","id_usuario":"{{request.user.id}}"
-
-		        },
-		        contentType: "application/json; charset=utf-8",
-		        dataType: "json",
-		        success: function (r) {
-		        	
-		        	//fallo
-		        	if (r[0].estatus=="0")
-		        	{
-		        		$("#id_error_importe").show();
-
-		        	}
-		        	else//todo correcto
-		        	{
-
-		        		location.reload();
-
-		        	}
-
-		        	$("#fondo_preloader").hide();
-		        },
-		        error: function (r) {		        		
-						$("#id_error_importe").show();
-						$("#fondo_preloader").hide();
-		        },
-		        failure: function (r) {		        		
-						$("#id_error_importe").show();
-						$("#fondo_preloader").hide();
-		        }
-			});
-
-		}
-
+	
 	</script>
 {%endblock%}

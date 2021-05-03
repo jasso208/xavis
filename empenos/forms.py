@@ -134,6 +134,7 @@ class Buscar_Apartados_Form(forms.Form):
 	fecha_final=forms.DateTimeField(initial=timezone.now())
 	folio_apartado=forms.IntegerField()
 	cliente=forms.CharField()
+	estatus_apartado = forms.ModelChoiceField(queryset = Estatus_Apartado.objects.all()) 
 
 class Costo_Extra_Form(forms.Form):
 	sucursal=forms.ModelChoiceField(queryset=Sucursal.objects.all())

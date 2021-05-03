@@ -1629,6 +1629,7 @@ def consulta_apartado(request):
 
 	permiso="1"	
 
+	estatus_apartado = Estatus_Apartado.objects.all()
 	if request.method=="POST":
 
 		folio_apartado = request.POST.get("folio_apartado")
@@ -1647,10 +1648,13 @@ def consulta_apartado(request):
 			apartados = Apartado.objects.filter(fecha__range = (fecha_inicial,fecha_final),sucursal = suc).order_by("-folio")
 		elif request.POST.get("cliente") != "" and request.POST.get("cliente") != None:			
 			
-			#Cliente.fn_actualiza_nombre_completo()
-			print(request.POST.get("cliente"))
 			cl = Cliente.objects.filter(nombre_completo__contains = request.POST.get("cliente").upper()) 
-			apartados = (Apartado.objects.filter(cliente__in = cl,sucursal = suc) | Apartado.objects.filter(nombre_cliente__in = request.POST.get("cliente").upper(),sucursal = suc) )
+
+			if request.POST.get("estatus_apartado") != None and request.POST.get("estatus_apartado") != "":
+				estatus = Estatus_Apartado.objects.get(id = int(request.POST.get("estatus_apartado")))	
+				apartados = (Apartado.objects.filter(cliente__in = cl,sucursal = suc,estatus = estatus) | Apartado.objects.filter(nombre_cliente__icontains = request.POST.get("cliente").upper(),sucursal = suc,estatus = estatus) )
+			else:
+				apartados = (Apartado.objects.filter(cliente__in = cl,sucursal = suc) | Apartado.objects.filter(nombre_cliente__icontains = request.POST.get("cliente").upper(),sucursal = suc) )
 
 		elif folio_apartado != "" or folio_apartado != None :
 			apartados = Apartado.objects.filter(folio = int(request.POST.get("folio_apartado")),sucursal = suc)
@@ -1659,7 +1663,6 @@ def consulta_apartado(request):
 	else:
 		form=Buscar_Apartados_Form()
 
-	
 	return render(request,'empenos/consulta_apartado.html',locals())
 
 #*******************************************************************************************************************************************************
@@ -3824,8 +3827,6 @@ def consulta_boleta(request):
 			if cliente!="":
 				
 				Cliente.fn_actualiza_nombre_completo()
-
-
 
 				#cl = Cliente.objects.filter(nombre__contains=cliente) | Cliente.objects.filter(apellido_p__contains=cliente) | Cliente.objects.filter(apellido_m__contains=cliente)
 				cl = Cliente.objects.filter(nombre_completo__contains = cliente) 
