@@ -1,3 +1,5 @@
+from Xavis.settings import IDENTIFICADOR_TIENDA
+from re import I, S
 from django.shortcuts import render
 from empenos.models import *
 from seguridad.forms import Login_Form
@@ -29,6 +31,7 @@ import email.message
 
 IP_LOCAL = settings.IP_LOCAL
 LOCALHOST=settings.LOCALHOST
+IDENTIFICADOR_TIENDA = settings.IDENTIFICADOR_TIENDA
 
 @transaction.atomic
 def abrir_caja(request):
@@ -5770,7 +5773,7 @@ def imprime_boleta(request):
 			p.setFont("Helvetica-Bold",15)
 			p.drawString(305,750,"No. Boleta:")
 			p.setFont("Helvetica-Bold",15)
-			p.drawString(455,750,fn_str_clave(x.boleta.folio))
+			p.drawString(455,750, str(IDENTIFICADOR_TIENDA) + "-" + fn_str_clave(x.boleta.folio))
 
 
 
