@@ -304,6 +304,7 @@
 							
 							<p><strong>Estatus Boleta: </strong><span id="span_estatus"></span> </p>
 						</div>
+
 					</div>
 				</div>
 			</div>
@@ -413,11 +414,14 @@
 			<div class="col-xs-12">
 				<div class="cls_encabezado_alert " >
 					<div class="row">
-						<div class ="col-xs-12">
+						<div class ="col-xs-6">
 							<label>
 								Resumen de pagos
 							</label>	
-						</div>											
+						</div>				
+						<div class="col-xs-6">
+							<p><strong>Número abonos: </strong><span id="numero_abonos"></span> </p>
+						</div>							
 					</div>																			
 				</div>
 				
@@ -719,6 +723,7 @@
 	        		$("#span_fecha_vencimiento").text(r[2].fecha_vencimiento);
 	        		$("#span_cotitular").text(r[2].cotitular);
 	        		$("#span_estatus").text(r[2].estatus);
+	        		$("#numero_abonos").text(r[2].numero_abonos);
 
 	        		if (parseInt(r[1].id_plazo)==1 || parseInt(r[1].id_estatus_boleta)==4 || parseInt(r[1].id_estatus_boleta)==2 || parseInt(r[1].id_estatus_boleta)==6 || parseInt(r[1].id_estatus_boleta)==7)
 	        		{

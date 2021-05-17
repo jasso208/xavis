@@ -1164,7 +1164,9 @@ class Boleta_Empeno(models.Model):
 		respuesta.append({"estatus":"1","almacenaje":almacenaje,"interes":interes,"iva":iva,"refrendo":refrendo})		
 		return respuesta
 
-
+	def fn_get_numero_abonos(self):
+		numero_abonos = Abono.objects.filter(boleta = self).count()
+		return int(numero_abonos)
 
 
 	#funcion que regresa un diccionario con los valores "min_semanas" y "max_semanas"
@@ -2106,8 +2108,6 @@ class Pagos_No_Usados(models.Model):
 	fecha_vencimiento_real=models.DateTimeField(null=True,blank=True)#cuando la fecha de vencimiento cai en dia de asueto, la fecha de vencimienot se recorre un dia, esta fecha nos indica cual es la fecha de vencimiento real para calcular el las futuras fechas de vencimiento.
 	abono = models.ForeignKey(Abono,on_delete = models.PROTECT,related_name = "abono_genero",null = True, blank = True )#nos indica el abono que lo genero
 	abono_respaldo = models.ForeignKey(Abono,on_delete = models.PROTECT,related_name = "abono_respaldo",null = True,blank = True)#el abono que genero el respaldo
-
-
 
 class Imprime_Abono(models.Model):
 	usuario=models.ForeignKey(User,on_delete=models.PROTECT)

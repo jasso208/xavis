@@ -95,7 +95,7 @@ def api_cancela_abono(request):
 
 	usuario = User.objects.get(id = int(id_usuario))
 	user_2 = User_2.objects.get (user = usuario)
-
+	respuesta = []
 	if user_2.perfil.id != 3:
 		respuesta.append({"estatus":"0","msj" : "El usuario no tiene permiso para cancelar el abono."})
 		return Response(json.dumps(respuesta))
@@ -104,7 +104,7 @@ def api_cancela_abono(request):
 
 	resp = abono.fn_cancela_abono(usuario)
 
-	respuesta = []
+	
 	if len(resp) == 0:
 		respuesta.append({"estatus":"1"})#se cancelo correctamente
 	else:
@@ -1349,7 +1349,7 @@ def api_consulta_boleta(request):
 		#informacion de cliente
 		respuesta.append({"id_plazo":boleta.plazo.id,"id_estatus_boleta":boleta.estatus.id,"cliente":boleta.cliente.nombre+' '+boleta.cliente.apellido_p+' '+boleta.cliente.apellido_m,"sucursal":boleta.sucursal.sucursal,"no_boleta":boleta.folio,"calle":boleta.cliente.calle,"CP":boleta.cliente.codigo_postal,"no_int":boleta.cliente.numero_interior,"no_ext":boleta.cliente.numero_exterior,"colonia":boleta.cliente.colonia,"ciudad":boleta.cliente.ciudad,"estado":boleta.cliente.estado,"pais":boleta.cliente.pais,"telefono_fijo":boleta.cliente.telefono_fijo,"telefono_celular":boleta.cliente.telefono_celular})
 		#informacion de boleta
-		respuesta.append({"tipo_producto":boleta.tipo_producto.tipo_producto,"avaluo":boleta.avaluo,"mutuo":boleta.mutuo,"refrendo":boleta.refrendo,"fecha_emision":str(boleta.fecha.strftime('%d/%m/%Y')),"fecha_vencimiento":str(boleta.fecha_vencimiento.strftime('%d/%m/%Y')),"cotitular":boleta.nombre_cotitular+' '+boleta.apellido_p_cotitular+' '+boleta.apellido_m_cotitular,"estatus":boleta.estatus.estatus})
+		respuesta.append({"tipo_producto":boleta.tipo_producto.tipo_producto,"avaluo":boleta.avaluo,"mutuo":boleta.mutuo,"refrendo":boleta.refrendo,"fecha_emision":str(boleta.fecha.strftime('%d/%m/%Y')),"fecha_vencimiento":str(boleta.fecha_vencimiento.strftime('%d/%m/%Y')),"cotitular":boleta.nombre_cotitular+' '+boleta.apellido_p_cotitular+' '+boleta.apellido_m_cotitular,"estatus":boleta.estatus.estatus,"numero_abonos":str(boleta.fn_get_numero_abonos())})
 
 		#buscamos los pagos de la boleta
 		pagos=Pagos.objects.filter(boleta=boleta).order_by("-fecha_vencimiento")
@@ -1388,7 +1388,7 @@ def api_consulta_boleta(request):
 			else:
 				kilataje = x.costo_kilataje.kilataje
 			lista_2.append({"descripcion":x.descripcion,"avaluo":x.avaluo,"mutuo":x.mutuo,"peso":x.peso,"kilataje":kilataje,"mutuo":x.mutuo})
-
+		
 		respuesta.append({"lista_2":lista_2})
 		
 
