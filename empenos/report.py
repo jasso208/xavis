@@ -586,6 +586,10 @@ def rep_imprime_venta_piso(request,id_venta):
 			db = Det_Boleto_Empeno.objects.get(boleta_empeno = d.boleta)			
 			p.drawString(55,ract+2,"fb:"+str(d.boleta.folio)+"; "+db.descripcion)
 
+			ract = ract-r	
+			p.drawString(55,ract+2,"Observaciones: "+db.observaciones)
+			ract = ract+r	
+
 		db = Det_Boleto_Empeno.objects.filter(boleta_empeno = d.boleta)
 		#articulos Oro
 		if d.boleta.tipo_producto.id == 1:		
@@ -616,6 +620,9 @@ def rep_imprime_venta_piso(request,id_venta):
 			db = Det_Boleto_Empeno.objects.get(boleta_empeno = d.boleta)
 				
 			p.drawString(55,ract+2- pos_copia,"fb:"+str(d.boleta.folio)+"; "+db.descripcion)
+			ract = ract-r	
+			p.drawString(55,ract+2- pos_copia,"Observaciones: "+db.observaciones)
+			ract = ract+r	
 
 		#articulos Oro
 		if d.boleta.tipo_producto.id == 1:		

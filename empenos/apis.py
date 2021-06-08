@@ -803,8 +803,8 @@ def api_agrega_prod_venta_piso(request):
 			return Response(respuesta)
 
 		cont = Venta_Temporal_Piso.objects.filter(usuario=usuario).count()
-		if cont == 3:
-			respuesta.append({"estatus":"0","msj":"Solo pueden ser incluidos 3 productos por ticket."})
+		if cont == 1:
+			respuesta.append({"estatus":"0","msj":"Solo puede ser incluido 1 producto por ticket."})
 			return Response(respuesta)			
 
 		Venta_Temporal_Piso.objects.create(usuario=usuario,boleta=boleta)

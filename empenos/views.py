@@ -1218,9 +1218,15 @@ def imprime_venta_piso(request):
 		p.drawString(530,current_row,importe)
 
 		for db in dbe:
-			print("entro")
 			p.drawString(35,current_row,"fb:"+str(db.boleta_empeno.folio)+"; "+db.descripcion)
 			p.drawString(335,current_row,"fb:"+str(db.boleta_empeno.folio)+"; "+db.descripcion)
+
+			current_row=current_row-20
+			print("observaciones")
+			print(db.observaciones)
+			p.drawString(35,current_row,"Observaciones:"+db.observaciones)
+			p.drawString(335,current_row,"Observaciones:"+db.observaciones)
+			
 			current_row=current_row-20
 
 	p.setFont("Helvetica-Bold",10)	

@@ -41,11 +41,12 @@ def fn_job_libera_apartado():
 @transaction.atomic
 def fn_job_diario_prueba():
 
+	#aqui voy para la casa de empeño deblanca y mia
+	#hoy=datetime(2021,5,28,0,0)	
+	#fecha_fin=datetime(2021,6,7,0,0)
 
-	hoy=datetime(2021,4,6,0,0)	
-	fecha_fin=datetime(2021,4,6,0,0)
-
-
+	hoy=datetime(2021,5,28,0,0)	
+	fecha_fin=datetime(2021,6,7,0,0)
 
 	while hoy<=fecha_fin:
 		print("fecha ejecucion")
