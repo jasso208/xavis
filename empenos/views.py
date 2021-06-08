@@ -1548,6 +1548,7 @@ def reporte_boletas(request):
 		else:
 			boletas = Boleta_Empeno.objects.filter(sucursal__id = int(id_sucursal),estatus__id = int(id_estatus)).order_by("-folio")	
 		leyenda = "de la sucursal " + Sucursal.objects.get(id = int(id_sucursal)).sucursal 
+
 		if id_estatus == "":
 			leyenda = "de todos los estatus de la sucursal " + Sucursal.objects.get(id = int(id_sucursal)).sucursal  
 		else:
@@ -1556,9 +1557,58 @@ def reporte_boletas(request):
 		if request.POST.get("export_pdf") == "1":
 			return rep_boleta_empeno(boletas,leyenda,request)
 
+		if request.POST.get("export_pdf") == "3":
+			try:
+				estatus = Estatus_Boleta.objects.get(id=id_estatus)
+				return reporte_boletas_excel(boletas,estatus.estatus)
+			except:
+				return reporte_boletas_excel(boletas,"Todos")
+
+			
+
 	form = Reporte_Boletas_Form()
 
 	return render(request,'empenos/reporte_boletas.html',locals())
+
+def reporte_boletas_excel(boletas,estatus):
+
+
+			try:
+				if estatus == "Todos":
+					nom_archivo='Rep_Boletas.csv'
+				else:
+					nom_archivo='Rep_Boletas_en_' + estatus + '.csv'
+
+				response = HttpResponse(content_type='text/csv')
+				response['Content-Disposition'] = 'attachment; filename="'+nom_archivo+'"'
+
+				writer = csv.writer(response)
+				writer.writerow(['Folio','Sucursal','Fecha Emision','Nombre Usuario','Usuario','Cliente','Avaluo','Mutuo','Estatus','Fecha Vencimiento','Tipo Producto','Descripción Producto (s)'])
+
+				for b in boletas:
+					d_boleta = Det_Boleto_Empeno.objects.filter(boleta_empeno = b)					
+					descripcion = ""
+					for db in d_boleta:
+						descripcion = descripcion + 'Descripción ' +  db.descripcion 
+
+						if db.costo_kilataje != None:
+							descripcion = descripcion  + ', Kilataje: ' + db.costo_kilataje.kilataje
+							descripcion = descripcion  + ', Peso: ' + str(db.peso)
+						
+						descripcion = descripcion + '; '
+
+					writer.writerow([b.folio,b.sucursal.sucursal,b.fecha.strftime('%Y-%m-%d'),b.usuario.username,b.usuario.first_name+' '+b.usuario.last_name,b.cliente.nombre+' '+b.cliente.apellido_p+' '+b.cliente.apellido_m,b.avaluo,b.mutuo,b.estatus.estatus,b.fecha_vencimiento.strftime('%Y-%m-%d'),b.tipo_producto.tipo_producto,descripcion])
+				
+			except:
+				response = HttpResponse(content_type='text/csv')
+				response['Content-Disposition'] = 'attachment; filename="'+nom_archivo+'"'
+
+				writer = csv.writer(response)
+				writer.writerow(['Folio','Sucursal','Fecha Emision','Nombre Usuario','Usuario','Cliente','Avaluo','Mutuo','Estatus','Fecha Vencimiento','Tipo Producto','Descripción Producto (s)'])
+			return response
+
+
+				
 #*******************************************************************************************************************************************************
 #*¨**************************************************************************************************************************************************************
 
