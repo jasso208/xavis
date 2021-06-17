@@ -45,8 +45,8 @@ def fn_job_diario_prueba():
 	#hoy=datetime(2021,5,28,0,0)	
 	#fecha_fin=datetime(2021,6,7,0,0)
 
-	hoy=datetime(2021,6,15,0,0)	
-	fecha_fin=datetime(2021,6,15,0,0)
+	hoy=datetime(2021,6,16,0,0)	
+	fecha_fin=datetime(2021,6,16,0,0)
 
 	while hoy<=fecha_fin:
 		print("fecha ejecucion")

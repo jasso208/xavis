@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% block archivos_staticos%}
+<script type="text/javascript" src="{% static 'js/forzar_desempeno.js' %}"></script>
+{% endblock %}
+{% block usuario %}
+
+			<div class="col-xs-6">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-user"></span> Usuario: {{request.user.username}}: {{request.user.first_name}} {{request.user.last_name}}</label> 
+				
+			</div>
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-home"></span> Sucursal: {{user_2.sucursal}}</label> 	
+			</div>
+
+			<div class="col-xs-3">
+				<label class="cls_icono no-btn"><span class="glyphicon glyphicon-inbox"></span> Caja: {{caja.caja}} </label> 	
+			</div>
+{% endblock  %}
+{% block content %}
+	<div class="col-xs-12 cls_encabezado_body">	
+		
+		<div class="col-xs-10">
+			<a >
+				Forzar desempeño
+			</a>				
+		</div>
+		<div class="col-xs-2">
+			<a id = "btn_ayuda" style="cursor: pointer;" >
+				<span class="glyphicon glyphicon-question-sign"></span>
+				Ayuda
+			</a>
+		</div>
+
+	</div>
+    <div class="col-xs-12">
+		<form method="post" action="#" class="cls_form_1" id="form_principal">
+			{%csrf_token%}  
+			<div class="row cls_form_consulta">
+
+				<div class="col-xs-12">
+					<div class="panel panel-default" id="panel_principal" >						 
+						<div class="panel-body">
+
+							<div class="col-xs-12">
+								<div class="panel panel-default">						
+									<div class="panel-body">
+
+										<div class="col-xs-3"  >
+											<label for="">Sucursal</label>
+											{% bootstrap_field form.sucursal show_label=False %}
+										</div>
+										<div class="col-xs-3"  >
+											<label for="">Folio Boleta</label>
+											{% bootstrap_field form.folio show_label=False %}
+										</div>
+										<div class="col-xs-3"  >
+											<label for="">Importe desempeño</label>
+											{% bootstrap_field form.precio_desempeno show_label=False %}
+										</div>
+
+										<div class="col-xs-3">						
+
+											
+											<a class="btn btn-primary btn-sm" style="margin-top: 25px;" id="btn_guardar">
+												<span class="glyphicon glyphicon-plus">
+													
+												</span>
+												Guardar
+											</a>
+																		
+										</div>	
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+
+
+	<div class="fondo_mensaje cls_ayuda"  >
+			
+	</div >
+	
+	<div class="mensaje cls_ayuda" >	
+			<div class="cls_encabezado_alert" >
+				Ayuda
+			</div>
+
+			<div class="panel panel-default">	
+				<p class="page-header" style="text-align: justify;padding-left: 10px;padding-right: 10px;" >
+					Hay ocaciones en que se requiere desempeñar a un importe menor al que el sistema indica.
+					<br>
+					<br>
+					Esta opción nos permite forzar el desempeño de una boleta a un importe a criterio del cajero.
+					<br><br>
+					Es importante que solo se realice este movimiento cuando se esta seguro de que se va a desempeñar la boleta en el momento. Ya de lo contrario podria generar inestabilidad en la boleta.
+					<br><br>
+					
+				</p>
+				<br>
+
+				<a class="btn btn-primary btn-sm" id="btn_aceptar_ayuda" ><span class="glyphicon glyphicon-ok"></span> Aceptar</a>		
+				<br>
+				<br>		
+
+			</div>
+	</div>
+    {% endblock %}

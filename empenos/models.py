@@ -1085,8 +1085,33 @@ class Boleta_Empeno(models.Model):
 				
 		return boleta	
 			
+	def forzar_desempeno(self,importe_desempeno):
+		# validacion 1: Validamos que la boleta este en estatus almoneda, remate o abierta
+		if self.estatus_boleta__id != 1 and self.estatus_boleta__id != 3 and self.estatus_boleta__id != 5:
+			return False
+
+		try:
+			with transaction.atomic():
+				# Si cuenta con comisiones de PG sin pagar, las ponemos en cero
+				pagos = Pagos.objects.filter(boleta = self,tipo_pago__id = 2,pagado = "N")
+				for p in pagos:
+					p.importe = 0
+					p.save()
+
+				# dividimo el nuevo importe para desempeno entre el numero de pagos pendientes
+				pagos = Pagos.objects.filter(boleta = self,pagado = "N").exclude(importe = 0)
+				nvo_importe = importe_desempeno/pagos.count()
+				for p in pagos:
+					p.importe = nvo_importe
+					p.save()
+				return True
+		except:
+			transaction.set_rollback(True)
+			return False
+
+
 	#funcion que calcula el refrendo de los proximos pagos de una boleta consderando el mutuo actual y los porcentajes de interes
-	#que se tenian al momento de hacer el empeño.
+	#que se tenian al momento de hacer el empeño.	
 	def fn_calcula_refrendo(self):
 		
 		p_almacenaje = decimal.Decimal(self.almacenaje)/decimal.Decimal(100)
