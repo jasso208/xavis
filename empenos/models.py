@@ -1087,7 +1087,7 @@ class Boleta_Empeno(models.Model):
 			
 	def forzar_desempeno(self,importe_desempeno):
 		# validacion 1: Validamos que la boleta este en estatus almoneda, remate o abierta
-		if self.estatus__id != 1 and self.estatus__id != 3 and self.estatus__id != 5:
+		if self.estatus.id != 1 and self.estatus.id != 3 and self.estatus.id != 5:
 			return False
 
 		try:
