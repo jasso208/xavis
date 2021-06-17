@@ -1583,7 +1583,7 @@ def reporte_boletas_excel(boletas,estatus):
 				response['Content-Disposition'] = 'attachment; filename="'+nom_archivo+'"'
 
 				writer = csv.writer(response)
-				writer.writerow(['Folio','Sucursal','Fecha Emision','Nombre Usuario','Usuario','Cliente','Avaluo','Mutuo','Estatus','Fecha Vencimiento','Tipo Producto','Descripción Producto (s)'])
+				writer.writerow(['Folio','Sucursal','Fecha Emision','Nombre Usuario','Usuario','Cliente','Teléfono fijo','Teléono celular','Avaluo','Mutuo','Estatus','Fecha Vencimiento','Tipo Producto','Descripción Producto (s)'])
 
 				for b in boletas:
 					d_boleta = Det_Boleto_Empeno.objects.filter(boleta_empeno = b)					
@@ -1597,7 +1597,7 @@ def reporte_boletas_excel(boletas,estatus):
 						
 						descripcion = descripcion + '; '
 
-					writer.writerow([b.folio,b.sucursal.sucursal,b.fecha.strftime('%Y-%m-%d'),b.usuario.username,b.usuario.first_name+' '+b.usuario.last_name,b.cliente.nombre+' '+b.cliente.apellido_p+' '+b.cliente.apellido_m,b.avaluo,b.mutuo,b.estatus.estatus,b.fecha_vencimiento.strftime('%Y-%m-%d'),b.tipo_producto.tipo_producto,descripcion])
+					writer.writerow([b.folio,b.sucursal.sucursal,b.fecha.strftime('%Y-%m-%d'),b.usuario.username,b.usuario.first_name+' '+b.usuario.last_name,b.cliente.nombre+' '+b.cliente.apellido_p+' '+b.cliente.apellido_m,b.cliente.telefono_fijo,b.cliente.telefono_celular,b.avaluo,b.mutuo,b.estatus.estatus,b.fecha_vencimiento.strftime('%Y-%m-%d'),b.tipo_producto.tipo_producto,descripcion])
 				
 			except:
 				response = HttpResponse(content_type='text/csv')
