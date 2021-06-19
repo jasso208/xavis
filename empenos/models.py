@@ -1094,7 +1094,7 @@ class Boleta_Empeno(models.Model):
 		if  self.estatus.id != 3 and self.estatus.id != 5:
 			return [False,"La boleta debe estar en estatus Almoneda o Remate"]
 
-		if self.plazo.id == 2:
+		if self.plazo.id != 2:
 			return [False,"Esta opciones solo esta disponible para boletas de plazo semanal"]
 
 		try:
