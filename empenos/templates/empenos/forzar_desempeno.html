@@ -97,10 +97,15 @@
 					<br>
 					<br>
 					Esta opción nos permite forzar el desempeño de una boleta a un importe a criterio del cajero.
-					<br><br>
-					Es importante que solo se realice este movimiento cuando se esta seguro de que se va a desempeñar la boleta en el momento. Ya de lo contrario podria generar inestabilidad en la boleta.
-					<br><br>
-					
+					<br>
+					<br>
+					Es importante que solo se realice este movimiento cuando se esta seguro de que se va a desempeñar la boleta en el momento. Ya de lo contrario podria generar incongruencias en la boleta.
+					<br>
+					<br>
+					Solo puede usarse para boletas en almoneda o remate.
+					<br>
+					<br>
+					Debido a que no se manejan centavos, pueda haber diferencias entre el importe que se ingresa y lo que realmente aparece al cobrar el desempeño.
 				</p>
 				<br>
 
@@ -110,4 +115,24 @@
 
 			</div>
 	</div>
+
+
+	<!--**********************************************************************************-->
+	<div class="fondo_mensaje cls_msj_aviso" >
+			
+	</div >
+	<div class="mensaje cls_msj_aviso" >
+			<div class="cls_encabezado_alert " >
+				<span id="encabezado_aviso"></span>			
+			</div>
+			<div class="panel panel-default">	
+				<label class="page-header" id="msj_aviso"></label>
+				<br>
+				<a class="btn btn-primary btn-sm" id="btn_aceptar_aviso"><span class="glyphicon glyphicon-ok"></span> Aceptar</a>
+				<br>
+				<br>
+
+			</div>
+	</div>
+	<!--**********************************************************************************-->
     {% endblock %}

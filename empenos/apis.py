@@ -17,6 +17,24 @@ from django.db.models import Sum
 import json
 from django.db import transaction
 
+@api_view(["POST"])
+def api_forzar_desempeno(request):
+	if request.method == "POST":
+		folio_boleta = request.data["folio_boleta"]
+		id_sucursal = request.data["id_sucursal"]
+		nvo_importe = request.data["nvo_importe"]
+
+		boleta = Boleta_Empeno.objects.get(folio = folio_boleta,sucursa__id = id_sucursal)
+
+		resp = boleta.forzar_desempeno(nvo_importe)
+
+		if resp[0]:
+			return Response(json.dumps({"estatus":"1"}))
+		else:
+			return Response(json.dumps({"estatus":"0","msj":resp[1]}))
+
+
+
 @api_view(['DELETE'])
 def api_boleta_empeno(request):
 	if request.method == "DELETE":#cancelamos boleta

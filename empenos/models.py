@@ -1086,9 +1086,16 @@ class Boleta_Empeno(models.Model):
 		return boleta	
 			
 	def forzar_desempeno(self,importe_desempeno):
-		# validacion 1: Validamos que la boleta este en estatus almoneda, remate o abierta
-		if self.estatus.id != 1 and self.estatus.id != 3 and self.estatus.id != 5:
-			return False
+
+		if int(importe_desempeno) < 0:
+			return [False,"El importe debe ser mayor a cero."]
+
+		# validacion 1: Validamos que la boleta este en estatus almoneda o remate
+		if  self.estatus.id != 3 and self.estatus.id != 5:
+			return [False,"La boleta debe estar en estatus Almoneda o Remate"]
+
+		if self.plazo.id == 2:
+			return [False,"Esta opciones solo esta disponible para boletas de plazo semanal"]
 
 		try:
 			with transaction.atomic():
@@ -1100,14 +1107,17 @@ class Boleta_Empeno(models.Model):
 
 				# dividimo el nuevo importe para desempeno entre el numero de pagos pendientes
 				pagos = Pagos.objects.filter(boleta = self,pagado = "N").exclude(importe = 0)
-				nvo_importe = importe_desempeno/pagos.count()
+				nvo_importe = int(importe_desempeno/pagos.count())
+				if nvo_importe == 0:	
+					nvo_importe = 1
+
 				for p in pagos:
 					p.importe = nvo_importe
 					p.save()
-				return True
+				return [True,""]
 		except:
 			transaction.set_rollback(True)
-			return False
+			return [False,"Error al actualizar la información."]
 
 
 	#funcion que calcula el refrendo de los proximos pagos de una boleta consderando el mutuo actual y los porcentajes de interes

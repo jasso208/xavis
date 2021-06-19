@@ -46,7 +46,7 @@ class Establece_Precio_Venta_Form(forms.Form):
 class Establece_Costo_Desempeno(forms.Form):
 	sucursal = forms.ModelChoiceField(queryset = Sucursal.objects.all())
 	folio = forms.CharField()
-	precio_desempeno = forms.CharField()
+	precio_desempeno = forms.IntegerField()
 
 class Reporte_Retiros_Form(forms.Form):
 	fecha_inicial=forms.DateTimeField(initial=timezone.now())

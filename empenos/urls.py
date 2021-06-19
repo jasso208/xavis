@@ -114,6 +114,8 @@ urlpatterns=[
 	url(r'^api_precio_venta_fijo/$',api_precio_venta_fijo,name="api_precio_venta_fijo"),
 	url(r'^api_boleta_empeno/$',api_boleta_empeno,name="api_boleta_empeno"),
 
+	url(r'^api_forzar_desempeno/$',api_forzar_desempeno,name="api_forzar_desempeno"),
+
 
 
 
